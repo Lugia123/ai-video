@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 3 方案 B 舞台化（95.40–105.96 s，低分辨率样片）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeC3OptB, C3B } from './shots/c3-optB.js';   // #1060 方案 B：fresh/v4-rest/c3/BRIEF-options-night.md
+
+const half = true;     // 渲染器不传查询串，所以低分辨率单独一页（c3-v4-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = await makeC3OptB(mv);
+mv.mount(shots, { offset: C3B.t0, duration: C3B.end - C3B.t0 });
+</script>
+</body>
+</html>

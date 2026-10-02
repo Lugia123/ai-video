@@ -1,0 +1,265 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>v401 A「那条线」animatic</title>
+<style>html,body{margin:0;background:#000}canvas{display:block;width:100vw;height:56.25vw;max-height:100vh}</style>
+</head><body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// 方案 A「那条线」粗 animatic，0–8 s。画面是 t 的纯函数；时间点取自 data/lyrics.json、data/audio.json。
+const W = 1920, H = 1080, FPS = 30, DUR = 8.0;
+const cv = document.getElementById('c'), g = cv.getContext('2d');
+const KIT = '../kits/face2d/';
+const DIRS = ['h_p0_pu', 'n10', 'z0', 'p10'];
+const LAYERS = ['00-back', '01-face', '02-brows', 'eyes/open', 'eyes/half', 'eyes/closed',
+  'mouth/a', 'mouth/e', 'mouth/i', 'mouth/o', 'mouth/u', 'mouth/rest', 'mouth/smileup', '03-front'];
+const IMG = {}, RIG = {};
+
+// ---- 歌词口型（lyrics.json 里的逐词时间 → 元音）----
+const WORDS = [
+  [1.407, 2.35, 'a'], [2.35, 2.739, 'i'], [2.739, 3.46, 'a'], [3.46, 3.677, 'o'],
+  [3.677, 4.06, 'e'], [4.06, 4.355, 'i'], [4.355, 4.704, 'a'], [4.809, 5.0, 'i'],
+  [5.0, 5.263, 'o'], [5.263, 5.88, 'a'],
+  [5.88, 5.991, 'o'], [5.991, 6.56, 'u'], [6.56, 6.82, 'e'], [6.82, 7.04, 'i'], [7.04, 7.72, 'u'],
+  [7.72, 8.092, 'a'], [8.092, 8.496, 'o'],
+];
+function mouthAt(t) {
+  for (const [a, b, v] of WORDS) if (t >= a && t < b) return (t - a) < 0.75 * (b - a) ? v : 'rest';
+  return 'rest';
+}
+
+// ---- 小工具 ----
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const ease = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const outExpo = k => k >= 1 ? 1 : 1 - Math.pow(2, -10 * k);
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+function background(tilt = 0, warp = null) {
+  const gr = g.createLinearGradient(0, -tilt, 0, H - tilt + 400);
+  gr.addColorStop(0, '#4a1d4f'); gr.addColorStop(0.45, '#c2407e'); gr.addColorStop(1, '#f4a988');
+  g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  // 坐标纸网格，可被 warp(x,y) 轻微弯折
+  g.save(); g.strokeStyle = 'rgba(255,235,245,0.10)'; g.lineWidth = 1.5;
+  const step = 80, off = ((tilt % step) + step) % step;
+  for (let x = 0; x <= W; x += step) {
+    g.beginPath();
+    for (let y = -step; y <= H + step; y += 20) { const p = warp ? warp(x, y + off) : [x, y + off]; y === -step ? g.moveTo(...p) : g.lineTo(...p); }
+    g.stroke();
+  }
+  for (let y = -step; y <= H + step; y += step) {
+    g.beginPath();
+    for (let x = 0; x <= W; x += 20) { const p = warp ? warp(x, y + off) : [x, y + off]; x === 0 ? g.moveTo(...p) : g.lineTo(...p); }
+    g.stroke();
+  }
+  g.restore();
+}
+
+// 那条线：三层发光 + 白芯
+function glowLine(pts, width = 1) {
+  if (pts.length < 2) return;
+  const path = () => { g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (const p of pts) g.lineTo(p[0], p[1]); };
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  path(); g.strokeStyle = 'rgba(255,240,120,0.18)'; g.lineWidth = 46 * width; g.stroke();
+  path(); g.strokeStyle = 'rgba(255,240,120,0.35)'; g.lineWidth = 22 * width; g.stroke();
+  path(); g.strokeStyle = 'rgba(120,255,210,0.95)'; g.lineWidth = 9 * width; g.stroke();
+  path(); g.strokeStyle = '#ffffff'; g.lineWidth = 3 * width; g.stroke();
+  g.restore();
+}
+function glowDot(x, y, r, a = 1) {
+  const gr = g.createRadialGradient(x, y, 0, x, y, r);
+  gr.addColorStop(0, `rgba(255,255,255,${a})`); gr.addColorStop(0.25, `rgba(160,255,220,${0.8 * a})`);
+  gr.addColorStop(1, 'rgba(255,240,120,0)');
+  g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+}
+function sparks(x, y, age, seed, n = 14, reach = 120) {
+  if (age < 0 || age > 0.6) return;
+  const r = rng(seed), k = age / 0.6;
+  g.save(); g.lineCap = 'round';
+  for (let i = 0; i < n; i++) {
+    const a = r() * Math.PI * 2, sp = 0.5 + r();
+    const d0 = reach * sp * outExpo(k) * 0.6, d1 = reach * sp * outExpo(k);
+    g.strokeStyle = i % 2 ? `rgba(255,245,150,${1 - k})` : `rgba(160,255,220,${1 - k})`;
+    g.lineWidth = 4 * (1 - k) + 1;
+    g.beginPath(); g.moveTo(x + Math.cos(a) * d0, y + Math.sin(a) * d0); g.lineTo(x + Math.cos(a) * d1, y + Math.sin(a) * d1); g.stroke();
+  }
+  glowDot(x, y, 60 * (1 - k), 1 - k);
+  g.restore();
+}
+
+// 头部包：anchor = 图内一点 (ax, ay) 放到屏幕 (x, y)
+function face(dir, x, y, s, { eyes = 'open', mouth = 'rest', alpha = 1, ax = 420, ay = 470, rot = 0 } = {}) {
+  g.save(); g.globalAlpha = alpha; g.translate(x, y); g.rotate(rot); g.scale(s, s); g.translate(-ax, -ay);
+  for (const L of ['00-back', '01-face', '02-brows', 'eyes/' + eyes, 'mouth/' + mouth, '03-front']) if (IMG[dir + '/' + L]) g.drawImage(IMG[dir + '/' + L], 0, 0);
+  g.restore();
+}
+const toScreen = (p, x, y, s, ax = 420, ay = 470) => [x + (p[0] - ax) * s, y + (p[1] - ay) * s];
+function blush(dir, x, y, s, a) {
+  if (a <= 0) return;
+  const R = RIG[dir];
+  for (const p of R.pupils) {
+    const q = toScreen([p[0], p[1] + 85], x, y, s);
+    const gr = g.createRadialGradient(q[0], q[1], 0, q[0], q[1], 55 * s);
+    gr.addColorStop(0, `rgba(255,90,130,${0.45 * a})`); gr.addColorStop(1, 'rgba(255,90,130,0)');
+    g.fillStyle = gr; g.beginPath(); g.ellipse(q[0], q[1], 60 * s, 34 * s, 0, 0, 7); g.fill();
+  }
+}
+
+// ---- 镜头 ----
+function shotHook(t) {
+  // 0–1.41：闪前。曲线从底部按指数冲上去，镜头跟着上摇；1.15 起倒带缩回成一个点。
+  const up = ease(clamp((t - 0.238) / 0.8));            // 冲的进度
+  const rew = clamp((t - 1.147) / 0.26);                // 倒带进度
+  const prog = up * (1 - ease(rew));
+  const tilt = 520 * prog;
+  background(tilt);
+  // 她：仰视，被下方的光照亮
+  const shake = rew > 0 && rew < 1 ? Math.sin(t * 190) * 14 * (1 - rew) : 0;
+  const fy = 600 + tilt * 0.35 + shake;
+  face('h_p0_pu', 700 + shake, fy, 1.55, { eyes: 'open', mouth: t > 0.35 ? 'o' : 'rest', ax: 422, ay: 470 });
+  // 指数曲线 y = e^x：从左下起，右侧冲出画面顶
+  const pts = [], N = 90, x0 = 1060, x1 = 1560;
+  for (let i = 0; i <= N; i++) {
+    const u = i / N; if (u > 0.08 + 0.92 * prog) break;
+    const X = lerp(x0, x1, u);
+    const Y = H + 60 - (Math.exp(5.2 * u) - 1) / (Math.exp(5.2) - 1) * (H + 1500) + tilt;
+    pts.push([X, Y]);
+  }
+  glowLine(pts, 1.8);
+  for (let i = 4; i < pts.length; i += 7) glowDot(pts[i][0] + 40 * Math.sin(i * 1.7 + t * 9), pts[i][1], 34, 0.5 * prog);
+  const tip = pts[pts.length - 1];
+  if (tip) glowDot(tip[0], tip[1], 110 + 80 * prog);
+  // 整幅被照成柠黄
+  g.fillStyle = `rgba(255,236,140,${0.35 * prog})`; g.fillRect(0, 0, W, H);
+  // 倒带：水平扫描线条纹
+  if (rew > 0 && rew < 1) {
+    const r = rng(Math.floor(t * 30));
+    for (let i = 0; i < 6; i++) { g.fillStyle = 'rgba(255,255,255,0.18)'; g.fillRect(0, r() * H, W, 6 + r() * 20); }
+  }
+}
+
+function shotEyes(t) {
+  // 1.41–3.62：她看着「你」，倒带缩成的亮点飞进瞳孔；sparks 在 2.74 炸开
+  const k = ease(clamp((t - 1.41) / 2.2));
+  const s = lerp(1.05, 1.42, k), x = 960, y = 560 + lerp(0, 40, k);
+  background(0);
+  const blink = t > 3.2 && t < 3.3;
+  face('n10', x, y, s, { eyes: blink ? 'closed' : 'open', mouth: mouthAt(t) });
+  const P = RIG['n10'].pupils.map(p => toScreen(p, x, y, s));
+  // 亮点从屏幕中上方飞进右眼
+  const fly = clamp((t - 1.41) / 0.45);
+  if (fly < 1) { const q = [lerp(1500, P[1][0], ease(fly)), lerp(-60, P[1][1], ease(fly))]; glowDot(q[0], q[1], 70); }
+  for (const p of P) glowDot(p[0] - 10, p[1] - 12, 16, 0.9);   // 眼中高光
+  sparks(P[0][0], P[0][1], t - 2.74, 11, 12, 150);
+  sparks(P[1][0], P[1][1], t - 2.74, 12, 12, 150);
+  sparks(P[1][0], P[1][1], t - 3.2, 13, 8, 90);
+}
+
+function shotRose(t) {
+  // 3.62–4.8：反打，线画出两只玫瑰线眼睛；A-G-I 每个音节升一档 k
+  const ks = t < 4.06 ? 3 : t < 4.355 ? 5 : 7;
+  const since = t - (t < 4.06 ? 3.677 : t < 4.355 ? 4.06 : 4.355);
+  const pulse = 1 + 0.18 * Math.exp(-since * 9);
+  const bulge = (x, y) => {
+    let dx = 0, dy = 0;
+    for (const cx of [700, 1220]) { const ddx = x - cx, ddy = y - 520, d = Math.hypot(ddx, ddy) + 1, f = 60 * Math.exp(-d / 260); dx += ddx / d * f; dy += ddy / d * f; }
+    return [x + dx, y + dy];
+  };
+  background(0, bulge);
+  const draw = clamp((t - 3.62) / 0.3);
+  for (const [i, cx] of [[0, 700], [1, 1220]]) {
+    const pts = [], M = 720;
+    for (let j = 0; j <= M * draw; j++) {
+      const th = j / M * Math.PI * 2 * (ks % 2 ? 1 : 2);
+      const r = 210 * pulse * Math.cos(ks * th + (i ? 0.2 : -0.2));
+      pts.push([cx + r * Math.cos(th), 520 + r * Math.sin(th) * 0.85]);
+    }
+    glowLine(pts, 0.55);
+    glowDot(cx, 520, 40 * pulse);
+    sparks(cx, 520, since, 30 + ks + i, 10, 260);
+  }
+}
+
+function shotTurn(t) {
+  // 4.8–5.88：回到她，头从 -15° 转到 +15°，笑，脸红，eyes 上眨眼
+  const k = ease(clamp((t - 4.8) / 0.75));
+  const x = 960 - lerp(-40, 40, k), y = 560, s = 1.3;
+  background(0);
+  const blink = t > 5.26 && t < 5.36;
+  const mouth = t > 5.62 ? 'smileup' : mouthAt(t);
+  const eyes = blink ? 'closed' : 'open';
+  // 三个角度交叉淡化（animatic 用；正片用 face2d 的网格变形转头）
+  const w = [clamp(1 - k * 2), 1 - Math.abs(k * 2 - 1), clamp(k * 2 - 1)];
+  face(k < 0.33 ? 'n10' : k < 0.66 ? 'z0' : 'p10', x, y, s, { eyes, mouth });  // animatic 按角度硬切；正片用网格变形连续转头
+  blush('p10', x, y, s, clamp((t - 5.3) / 0.4));
+  // 线在画面右上缓缓游动（她看的方向）
+  const pts = [];
+  for (let i = 0; i <= 80; i++) { const u = i / 80; pts.push([1500 + u * 480, 200 + 60 * Math.sin(u * 7 + t * 3)]); }
+  glowLine(pts, 0.6);
+}
+
+function shotNervous(t) {
+  // 5.88–7.72：线贴着她的轮廓游走；nervous 上在她颈边变成心电图尖峰（跟底鼓）
+  const x = 760, y = 520, s = 1.25;
+  const hit = [7.056, 7.51].reduce((m, b) => Math.max(m, Math.exp(-Math.max(0, t - b) * 12) * (t >= b ? 1 : 0)), 0);
+  const sx = hit * Math.sin(t * 200) * 10;
+  background(0);
+  face('p10', x + sx, y, s, { eyes: t > 6.2 ? 'half' : 'open', mouth: mouthAt(t) });
+  blush('p10', x + sx, y, s, 0.7);
+  // 轮廓路径（屏幕坐标，绕开脸）：右侧入画 → 耳侧 → 下巴下方 → 颈部横线
+  const path = [[2000, 240], [1600, 280], [1420, 420], [1360, 640], [1200, 840], [1000, 930], [760, 930], [520, 910], [300, 900], [-60, 900]];
+  const total = clamp((t - 5.88) / 1.1);
+  const pts = [];
+  const seg = path.length - 1;
+  for (let i = 0; i <= 300; i++) {
+    const u = i / 300 * total * seg, a = Math.min(seg - 1, Math.floor(u)), f = u - a;
+    const p0 = path[Math.max(0, a - 1)], p1 = path[a], p2 = path[a + 1], p3 = path[Math.min(seg, a + 2)];
+    const cr = (q0, q1, q2, q3) => 0.5 * (2 * q1 + (-q0 + q2) * f + (2 * q0 - 5 * q1 + 4 * q2 - q3) * f * f + (-q0 + 3 * q1 - 3 * q2 + q3) * f * f * f);
+    let px = cr(p0[0], p1[0], p2[0], p3[0]), py = cr(p0[1], p1[1], p2[1], p3[1]);
+    // 颈部那段（x < 1050）做心电图：每个底鼓一对尖峰
+    if (px < 1050 && t > 7.0) {
+      for (const [b, cx] of [[7.056, 700], [7.51, 420]]) {
+        if (t < b) continue;
+        const d = (px - cx) / 26, amp = 210 * Math.min(1, (t - b) * 10);
+        py -= amp * Math.exp(-d * d) - 0.45 * amp * Math.exp(-(d - 1.6) * (d - 1.6));
+      }
+    }
+    // circuits：5.99–6.4 线短暂变成直角折线，马上变回圆滑
+    const q = clamp(1 - Math.abs(t - 6.2) / 0.22);
+    if (q > 0) { px = lerp(px, Math.round(px / 60) * 60, q); py = lerp(py, Math.round(py / 60) * 60, q); }
+    pts.push([px, py]);
+  }
+  glowLine(pts, 0.8 + 0.4 * hit);
+  const tip = pts[pts.length - 1]; if (total < 1) glowDot(tip[0], tip[1], 70);
+}
+
+function shotShrug(t) {
+  // 7.72–：看镜头，半睁眼，「这不废话吗」
+  const bob = Math.exp(-Math.max(0, t - 7.72) * 6) * Math.sin((t - 7.72) * 18) * 12;
+  background(0);
+  face('z0', 960, 540 + bob, 1.28, { eyes: 'half', mouth: mouthAt(t) });
+  const pts = [];
+  for (let i = 0; i <= 60; i++) { const a = Math.PI * (1.1 + 0.8 * i / 60 * clamp((t - 7.72) / 0.3)); pts.push([960 + 360 * Math.cos(a), 330 + 150 * Math.sin(a)]); }
+  glowLine(pts, 0.55);
+}
+
+function draw(t) {
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
+  if (t < 1.41) shotHook(t);
+  else if (t < 3.62) shotEyes(t);
+  else if (t < 4.8) shotRose(t);
+  else if (t < 5.88) shotTurn(t);
+  else if (t < 7.72) shotNervous(t);
+  else shotShrug(t);
+}
+
+// ---- 载入 + 播放协议 ----
+const load = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error(src)); im.src = src; });
+const ready = Promise.all([
+  ...DIRS.flatMap(d => LAYERS.map(L => load(KIT + d + '/' + L + '.png').then(im => { IMG[d + '/' + L] = im; }, () => {}))),
+  ...DIRS.map(d => fetch(KIT + d + '/rig.json').then(r => r.json()).then(j => { RIG[d] = j; })),
+]);
+window.__video = { width: W, height: H, fps: FPS, duration: DUR, ready, music: '../music.mp3', musicOffset: 0, seek: t => draw(t) };
+if (!/render=1/.test(location.search)) ready.then(() => {
+  const au = new Audio('../music.mp3'); au.play().catch(() => {});
+  const loop = () => { const t = au.currentTime % DUR; draw(t); if (au.currentTime >= DUR) au.currentTime = 0; requestAnimationFrame(loop); };
+  loop();
+});
+</script></body></html>

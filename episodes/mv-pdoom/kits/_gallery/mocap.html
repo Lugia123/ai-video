@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>动捕验片：70 个 Mixamo 动作</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; top: 22px; font: 30px 'STM', monospace; color: #F2EDE4; letter-spacing: 0.04em; white-space: pre; }
+  #tag b { color: #F4E04D; font-weight: normal; }
+  #tag i { color: #FF2E88; font-style: normal; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  逐个播 anim/mixamo/ 里的全部动作（含验片没通过的），每个 8 拍（132 BPM ≈ 3.64 s）：前 4 拍全身机位，后 4 拍半身机位。toon 皮肤。
+  舞蹈按 index.json 的 beats 伸缩对拍（源第 k 拍 ↔ 音乐第 k 拍），跑酷 / 叙事动作按原速。左上角：序号 · 名字 · 源时长 / 拍数 / 伸缩 · 问题标记。
+  ?name=dance__shuffle 只循环看一个；window.__analyze() = 自动体检（量源节拍、脚滑、穿地、穿模、手穿头、循环接缝），验片脚本用它写 index.json。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims, loadAnimIndex, getAnim } from '../girl.js';
+
+const mv = await loadMV();
+const { music } = mv;
+const q = new URLSearchParams(location.search);
+const idx = await loadAnimIndex();
+// index.json 还没有时，按文件清单（mixamo 目录的 _files.json，由验片脚本生成）
+let names = idx.clips.map(c => c.name);
+if (!names.length) names = await (await fetch('../../../cast-cyber-girl/3d/anim/mixamo/_files.json')).json();
+if (q.get('name')) names = [q.get('name')];
+const [girl] = await Promise.all([createGirl(mv, { points: 2000 }), loadAnims(names, { includeBad: true })]);
+const meta = Object.fromEntries(idx.clips.map(c => [c.name, c]));
+
+const BEATS = 8, P = music.period;
+const T0 = music.barTime(0);
+const slotOf = T => Math.max(0, Math.min(names.length - 1, Math.floor((T - T0) / (BEATS * P))));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.05, 100);
+scene.add(girl.root, createGirlLights());
+const grid = new THREE.GridHelper(10, 40, new THREE.Color(PALETTE.pink).multiplyScalar(0.5), new THREE.Color('#26263a'));
+scene.add(grid);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(0.8, 64), new THREE.MeshBasicMaterial({ color: new THREE.Color(PALETTE.mint).multiplyScalar(0.25), transparent: true, opacity: 0.6, depthWrite: false }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = 0.002; scene.add(floor);
+const tag = document.getElementById('tag');
+const seqs = names.map((n, k) => [{ beat: Math.round(girl.beatOf(T0 + k * BEATS * P)), anim: n }]);
+
+function draw(T) {
+  const k = slotOf(T), name = names[k], m = getAnim(name), inSlot = (T - T0) / P - k * BEATS;
+  girl.root.position.set(0, 0, 0);
+  girl.play(seqs[k], T);
+  girl.setSkin('toon', T);
+  const md = meta[name] || {};
+  const issues = (md.issues || []).join(' / ');
+  tag.innerHTML = `${String(k + 1).padStart(2, '0')}/${names.length}  <b>${name}</b>\n${m.duration.toFixed(2)}s  ${m.meta.bpm ? '原速' : `${m.meta.beats} 拍 ×${(m.duration / m.meta.beats / P).toFixed(2)}`}  ${md.ok === false ? '<i>✗ 不用</i>' : ''} <i>${issues}</i>`;
+  // 机位：前 4 拍全身（缓慢环绕），后 4 拍半身（胸像偏上）
+  const a = -0.5 + 0.12 * inSlot;
+  const head = girl.headPosition(new THREE.Vector3());
+  if (inSlot < 4) { camera.position.set(Math.sin(a) * 3.3, 0.8, Math.cos(a) * 3.3); camera.lookAt(0, 0.5, 0); }
+  else { camera.position.set(Math.sin(a) * 1.35 + head.x, head.y - 0.05, Math.cos(a) * 1.35 + head.z); camera.lookAt(head.x, head.y - 0.2, head.z); }
+  mv.stage.render(scene, camera, { bloom: { strength: 0.5, threshold: 1.5 }, grade: { vignette: 0.3 } });
+}
+mv.mount(draw, { offset: T0, duration: names.length * BEATS * P });
+
+// 定格自检：每个舞蹈按音乐拍放 16 拍，任意 1 拍窗口里手 / 脚 / 头位移都 < minMove 的累计时长（秒）
+window.__still = (minMove = 0.08) => names.filter(n => n.startsWith('dance__')).map(n => {
+  const b0 = Math.round(girl.beatOf(T0)), seq = [{ beat: b0, anim: n }];
+  const w = girl.stillness(T => girl.play(seq, T), T0, T0 + 16 * P, { minMove });
+  return { name: n, still: +w.reduce((a, x) => a + x.to - x.from, 0).toFixed(2), longest: +Math.max(0, ...w.map(x => x.to - x.from)).toFixed(2) };
+});
+// ---------------------------------------------------------------- 自动体检
+const KEYS = ['LeftHand', 'RightHand', 'LeftFoot', 'RightFoot', 'Head', 'Hips', 'LeftToeBase', 'RightToeBase', 'LeftLeg', 'RightLeg', 'LeftForeArm', 'RightForeArm'];
+const INTENT_SLIDE = /moonwalk|slide|skate|back-slide|sprint|run|walk|swagger|land-run|wall-run/;
+window.__analyze = (only = null) => {
+  const out = [];
+  const I = girl.dancer.S.info, v = new THREE.Vector3();
+  // 姿态角要看原始动捕：体检时关掉头颈限幅；静止姿态的骨骼世界朝向当基准
+  const limit0 = girl.dancer.headLimit; girl.dancer.headLimit = null;
+  girl.root.position.set(0, 0, 0); girl.root.rotation.set(0, 0, 0); girl.dancer.rest(); girl.root.updateMatrixWorld(true);
+  const restQ = k => I[k].bone.getWorldQuaternion(new THREE.Quaternion()).invert();
+  const R0 = { Spine2: restQ('Spine2'), Head: restQ('Head'), Neck: restQ('Neck') };
+  const E = new THREE.Euler(), D = 180 / Math.PI;
+  for (const name of only || names) {
+    const m = getAnim(name), dur = m.duration, fps = 30, n = Math.max(2, Math.floor(dur * fps));
+    const frames = [];
+    let overlap = 0, handHead = 0, reverse = 0;
+    let headDown = 0, headUp = 0, headRoll = 0, torsoSum = 0, torsoMax = 0, down20 = 0, neckDown = 0;
+    const pairs = {}, pairN = {};
+    for (let f = 0; f < n; f++) {
+      const ct = f / fps;
+      girl.root.position.set(0, 0, 0); girl.root.updateMatrixWorld(true);
+      girl.dancer.apply(m.solve(ct / m.srcPeriod, girl.dancer));
+      const P3 = {}; for (const k of KEYS) P3[k] = I[k].bone.getWorldPosition(v).clone();
+      // 躯干前倾 = Spine2 相对静止的俯仰；头颈 = Head 相对 Spine2 的俯仰 / 侧倾；低头 = Head 相对直立的俯仰
+      const qS = I.Spine2.bone.getWorldQuaternion(new THREE.Quaternion()).multiply(R0.Spine2);
+      const qH = I.Head.bone.getWorldQuaternion(new THREE.Quaternion()).multiply(R0.Head);
+      const qN = I.Neck.bone.getWorldQuaternion(new THREE.Quaternion()).multiply(R0.Neck);
+      E.setFromQuaternion(qS, 'YXZ'); const tp = E.x * D; torsoSum += tp; torsoMax = Math.max(torsoMax, tp);
+      E.setFromQuaternion(qS.clone().invert().multiply(qH), 'YXZ'); headDown = Math.max(headDown, E.x * D); headUp = Math.max(headUp, -E.x * D); headRoll = Math.max(headRoll, Math.abs(E.z * D));
+      E.setFromQuaternion(qS.clone().invert().multiply(qN), 'YXZ'); neckDown = Math.max(neckDown, Math.abs(E.x * D));
+      E.setFromQuaternion(qH, 'YXZ'); if (E.x * D > 20) down20++;
+      frames.push(P3);
+      const iss = girl.check();
+      for (const x of iss) { const key = `${x.kind}:${x.a}/${x.b ?? ''}`; pairs[key] = Math.max(pairs[key] || 0, x.depth || 0); pairN[key] = (pairN[key] || 0) + 1; }
+      if (iss.some(x => x.kind === 'overlap')) overlap++;
+      if (iss.some(x => x.kind === 'overlap' && /head/i.test(x.a + x.b) && /arm|hand/i.test(x.a + x.b))) handHead++;
+      if (iss.some(x => x.kind !== 'overlap')) reverse++;
+    }
+    // 动作能量信号（关键点速度和）→ 自相关找周期
+    const e = [];
+    for (let f = 1; f < n; f++) { let s = 0; for (const k of ['LeftHand', 'RightHand', 'LeftFoot', 'RightFoot', 'Head']) s += frames[f][k].distanceTo(frames[f - 1][k]); e.push(s * fps); }
+    const hy = frames.map(F => F.Hips.y);
+    const ac = sig => { const mu = sig.reduce((a, b) => a + b, 0) / sig.length, x = sig.map(z => z - mu); const r = []; for (let L = 0; L < Math.min(x.length - 1, fps * 2); L++) { let s = 0; for (let i = 0; i + L < x.length; i++) s += x[i] * x[i + L]; r.push(s / (x.length - L)); } return r; };
+    const r1 = ac(e), r2 = ac(hy);
+    let best = null;
+    for (let L = Math.round(0.28 * fps); L < Math.min(r1.length - 1, Math.round(1.4 * fps)); L++) {
+      const sc = (r1[L] / (r1[0] || 1)) + 0.6 * (r2[L] / (r2[0] || 1));
+      if (r1[L] >= r1[L - 1] && r1[L] >= r1[L + 1] && (!best || sc > best.sc)) best = { L, sc };
+    }
+    let period = best ? best.L / fps : P;
+    while (period > 0.7) period /= 2;
+    while (period < 0.34) period *= 2;
+    let beats = Math.max(1, Math.round(dur / period));
+    const stretch = dur / beats / P;
+    // 支撑脚（较低那只）的水平速度 = 脚滑
+    let slide = [], minY = 0;
+    for (let f = 1; f < n; f++) {
+      const L = frames[f].LeftToeBase.y < frames[f].RightToeBase.y ? 'Left' : 'Right';
+      const a = frames[f][L + 'Foot'], b = frames[f - 1][L + 'Foot'];
+      if (Math.min(a.y, b.y) < 0.09) slide.push(Math.hypot(a.x - b.x, a.z - b.z) * fps);
+      for (const k of ['LeftHand', 'RightHand', 'Head', 'LeftLeg', 'RightLeg', 'LeftForeArm', 'RightForeArm']) minY = Math.min(minY, frames[f][k].y);
+    }
+    slide.sort((a, b) => a - b);
+    const slideMed = slide.length ? slide[Math.floor(slide.length * 0.5)] : 0;
+    // 循环接缝：首尾两帧关键点平均距离
+    let seam = 0; for (const k of KEYS) seam += frames[0][k].distanceTo(frames[n - 1][k]); seam /= KEYS.length;
+    out.push({ name, duration: +dur.toFixed(3), period: +period.toFixed(3), beats, stretch: +stretch.toFixed(3), slide: +slideMed.toFixed(3), intentSlide: INTENT_SLIDE.test(name),
+      minY: +minY.toFixed(3), overlap: +(overlap / n).toFixed(3), handHead: +(handHead / n).toFixed(3), reverse: +(reverse / n).toFixed(3), seam: +seam.toFixed(3),
+      torsoMean: +(torsoSum / n).toFixed(1), torsoMax: +torsoMax.toFixed(1), headDown: +headDown.toFixed(1), headUp: +headUp.toFixed(1), headRoll: +headRoll.toFixed(1), neckMax: +neckDown.toFixed(1), down20: +(down20 / n).toFixed(2),
+      pairs: Object.entries(pairN).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, c]) => `${k} ${(c / n * 100).toFixed(0)}% d${pairs[k]}`) });
+  }
+  girl.dancer.headLimit = limit0;
+  return out;
+};
+</script>
+</body>
+</html>

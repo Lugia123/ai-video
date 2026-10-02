@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>mv-pdoom · 主歌 2 + 预副歌 2</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!-- 第 2 期：主歌 2 + 预副歌 2，歌曲时间 38.4–58.4 s。镜头在 shots/v2.js；普通打开点击 / 空格带音乐播放，?render=1 只等 seek。
+     window.__cuts = 切点表；window.__still() = 她的定格自检（任意 1 拍窗口里手 / 脚 / 头位移 < 0.08 的时段）。 -->
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { createGirl } from './kits/girl.js';
+import { createHolo } from './kits/hologram.js';
+import { makeV2 } from './shots/v2.js';
+
+const mv = await loadMV();
+const [, girl, holo] = await Promise.all([initType3D(), createGirl(mv), createHolo(mv, { height: 1.25 })]);
+const { shots, cuts, girlAt } = makeV2(mv, { girl, holo });
+window.__cuts = cuts;
+window.__shots = shots.map(s => ({ id: s.id, t0: +s.t0.toFixed(3), t1: +s.t1.toFixed(3), tr: s.transitionIn?.kind }));
+window.__still = (minMove = 0.08) => girl.stillness(girlAt, 38.4, 58.4, { minMove });
+mv.mount(shots, { offset: 38.4, duration: 20.0 });
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>face-live：边跳边唱</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; bottom: 22px; font: 26px 'STM', monospace; color: #F2EDE4; white-space: pre; opacity: 0.85; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  4K 模型 + 实时 2D 脸：她跳 raise-roof（Mixamo 动捕），同时唱副歌 1 的 22.8–29.9 s（6 句里的前 4 句），口型按 lyrics.json 词级时间换 a/e/i/o/u，自动眨眼。
+  镜头按小节切：中景（脸占画高 20%）→ 近景（26%，3/4）→ 全身 → 近景（另一侧）→ 中景。略仰拍（raise-roof 的手常在头边），偏航都在 FACE_YAW.full（45°）以内。
+  左下角：歌曲时间 · 正在唱的词 · 口型 / 眼睛（对时用，画廊里才有）。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims } from '../girl.js';
+const mv = await loadMV();
+const { music, lyrics } = mv;
+const T0 = 22.3, T1 = 30.3;
+const SEQ = [{ bar: 11, anim: 'dance__raise-roof' }];
+const [girl] = await Promise.all([createGirl(mv), loadAnims(SEQ.map(e => e.anim))]);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(PALETTE.ink);
+scene.add(girl.root, createGirlLights());
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: '#0d0d14', roughness: 0.85 }));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+const grid = new THREE.GridHelper(12, 48, new THREE.Color(PALETTE.pink).multiplyScalar(0.5), new THREE.Color('#22223a')); grid.position.y = 0.002; scene.add(grid);
+const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.05, 100);
+const tag = document.getElementById('tag');
+const B = music.barTime.bind(music);
+// 镜头：[开始, 景别(脸占画高，0 = 全身), 偏航°]；切点在小节头
+const SHOTS = [[T0, 0.2, 12], [B(13), 0.26, -22], [B(14), 0, 25], [B(15), 0.26, 16], [B(16), 0.2, -30]];   // raise-roof 的手常在头边：以中景为主、略仰拍，偏航挑没被手挡的一侧
+const shotAt = T => { let s = SHOTS[0]; for (const x of SHOTS) if (T >= x[0]) s = x; return s; };
+function draw(T) {
+  girl.root.position.set(0, 0, 0);
+  girl.play(SEQ, T); girl.setSkin('toon', T);
+  const [t0, f, yaw] = shotAt(T), u = (T - t0) / (music.period * 4);
+  const h = girl.headPosition(new THREE.Vector3()), y = (yaw + 6 * Math.sin(u * 1.5)) * Math.PI / 180;
+  if (f > 0) {
+    const d = 0.115 / f / (2 * Math.tan(14 * Math.PI / 180)) * (1 - 0.05 * u);
+    camera.position.set(h.x + Math.sin(y) * d, h.y - 0.06, h.z + Math.cos(y) * d); camera.lookAt(h.x, h.y - 0.01 - (f < 0.25 ? 0.05 : 0), h.z);
+  } else { camera.position.set(Math.sin(y) * 3.2, 0.85, Math.cos(y) * 3.2); camera.lookAt(0, 0.55, 0); }
+  camera.updateMatrixWorld();
+  const st = girl.face.update(T, { expression: 'neutral', blink: 'auto', camera });
+  const w = lyrics.wordsAt(T)[0];
+  tag.textContent = `${T.toFixed(2)}s  word: ${w ? w.w : '-'}  mouth: ${st.mouth}  eyes: ${st.eyes}  2D脸: ${st.faceOn.toFixed(2)}`;
+  mv.stage.render(scene, camera, { bloom: { strength: 0.5, threshold: 1.4 }, grade: { vignette: 0.3 } });
+}
+mv.mount(draw, { offset: T0, duration: T1 - T0 });
+window.__lip = (fps = 30) => { const out = []; for (let f = Math.ceil(22.8 * fps); f <= Math.floor(29.9 * fps); f++) { const T = f / fps, w = lyrics.wordsAt(T)[0]; out.push({ T: +T.toFixed(3), word: w ? w.w : null, mouth: girl.face.lipsFor(null)(T) }); } return out; };
+</script>
+</body>
+</html>

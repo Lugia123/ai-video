@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 3 尾 + 桥段 v5（105.96–123.87 s，低分辨率样片）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeBRV5, BR5 } from './shots/br-v5.js';
+import { makeBRV5Rest } from './shots/br-v5-rest.js';   // #1056 v3：fresh/v4-rest/br/plan-v3-用户.md
+
+const half = true;     // 渲染器不传查询串，所以低分辨率单独一页（br-v5-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = [...await makeBRV5(mv), ...await makeBRV5Rest(mv)];
+mv.mount(shots, { offset: BR5.t0, duration: BR5.end - BR5.t0 });
+</script>
+</body>
+</html>

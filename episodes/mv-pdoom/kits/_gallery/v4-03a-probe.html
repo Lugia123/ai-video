@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>v4-03a 动作探针</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!-- W3 #939 用：量新下的跑酷片段。window.__probe(names) → 每个片段
+       duration、srcBeats（原速占几拍）、root：带位移版 FBX 的髋部水平总位移 / 最大抬高（身高 = 1）、
+       air：离地窗口（两脚最低点都 > 0.06 身高的时间段，片段本地秒）、hipsMin/hipsMax（原地版髋高）。 -->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { createGirl, loadAnims, getAnim, ANIM_DIR } from '../girl.js';
+import { FBXLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/FBXLoader.js';
+
+const mv = await loadMV();
+const girl = await createGirl(mv, { points: 500 });
+window.__probe = async names => {
+  await loadAnims(names, { includeBad: true });
+  const I = girl.dancer.S.info, v = new THREE.Vector3(), out = [];
+  girl.root.position.set(0, 0, 0); girl.root.rotation.set(0, 0, 0); girl.root.scale.setScalar(1);
+  girl.dancer.rest(); girl.root.updateMatrixWorld(true);
+  const H = I.Head.bone.getWorldPosition(new THREE.Vector3()).y + 0.08;   // 她的身高（模型单位）
+  const loader = new FBXLoader();
+  for (const name of names) {
+    const m = getAnim(name), dur = m.duration, fps = 30, n = Math.max(2, Math.floor(dur * fps));
+    const feet = [], hips = [];
+    for (let f = 0; f < n; f++) {
+      girl.root.position.set(0, 0, 0); girl.root.updateMatrixWorld(true);
+      girl.dancer.apply(m.solve((f / fps) / m.srcPeriod, girl.dancer));
+      const lf = Math.min(I.LeftFoot.bone.getWorldPosition(v).y, I.LeftToeBase.bone.getWorldPosition(v).y);
+      const rf = Math.min(I.RightFoot.bone.getWorldPosition(v).y, I.RightToeBase.bone.getWorldPosition(v).y);
+      feet.push(Math.min(lf, rf) / H); hips.push(I.Hips.bone.getWorldPosition(v).y / H);
+    }
+    const base = Math.min(...feet);
+    const air = []; let a0 = null;
+    feet.forEach((y, f) => { const up = y - base > 0.06; if (up && a0 == null) a0 = f; if (!up && a0 != null) { if (f - a0 >= 3) air.push([+(a0 / fps).toFixed(2), +(f / fps).toFixed(2)]); a0 = null; } });
+    if (a0 != null && n - a0 >= 3) air.push([+(a0 / fps).toFixed(2), +(n / fps).toFixed(2)]);
+    // 带位移版（同名不带 __inplace 的 fbx）：髋部轨迹
+    let root = null;
+    try {
+      const src = await loader.loadAsync(new URL(`${name.replace(/__inplace$/, '')}.fbx`, ANIM_DIR).href);
+      const tr = src.animations[0].tracks.find(t => /Hips\.position$/.test(t.name));
+      if (tr) {
+        const V = tr.values, k = V.length / 3;
+        const hip0 = V[1];                                  // 首帧髋高（源单位）≈ 0.53 身高
+        const unit = 0.53 / hip0;
+        let maxUp = 0; for (let i = 0; i < k; i++) maxUp = Math.max(maxUp, (V[i * 3 + 1] - hip0) * unit);
+        root = { dx: +((V[(k - 1) * 3] - V[0]) * unit).toFixed(2), dz: +((V[(k - 1) * 3 + 2] - V[2]) * unit).toFixed(2), maxUp: +maxUp.toFixed(2), speed: +(Math.hypot(V[(k - 1) * 3] - V[0], V[(k - 1) * 3 + 2] - V[2]) * unit / dur).toFixed(2) };
+      }
+    } catch (e) { root = { error: e.message }; }
+    out.push({ name, duration: +dur.toFixed(3), srcBeats: +(dur / 0.4545).toFixed(2), air, hipsMin: +Math.min(...hips).toFixed(2), hipsMax: +Math.max(...hips).toFixed(2), root });
+  }
+  return out;
+};
+window.__ready = true;
+</script>
+</body>
+</html>

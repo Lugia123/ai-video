@@ -1,0 +1,245 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>v401 漫画版 animatic（14.8–22.8）</title>
+<style>html,body{margin:0;background:#000}canvas{display:block;width:100vw;height:56.25vw;max-height:100vh}</style>
+</head><body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// v401-comic-plan.md 第 5–6 页的粗 animatic：servant/boss 尾 → 预副歌「页面合拢成嘴」→ 22.055 破页冲进副歌。
+// 页面时间 t=0 对应歌曲 14.8 s（musicOffset）。下文一律用歌曲时间 T = t + OFF。
+// 关键画只用整张图（不叠五官分层），新关键画未生成前用已有图占位，见 plan 的关键画清单。
+const W = 1920, H = 1080, FPS = 30, OFF = 14.8, DUR = 8.0;
+const cv = document.getElementById('c'), g = cv.getContext('2d');
+const INK = '#0A0A10', PINK = '#FF2E88', MINT = '#5FE3C0', LEMON = '#F4E04D', PAPER = '#F2EDE4', NAVY = '#1b1740';
+const CAST = '../../cast-cyber-girl/closeup/';
+const SRC = {
+  feed: CAST + 'v401b/layers/key-f-feed.png',   // servant：跪着献上发光文件
+  strain: CAST + 'sydney/raw/02-strain.png',    // 占位 → 新图 N5「撑住合拢的上下颚」
+  resolve: CAST + 'sydney/raw/03-resolve.png',  // 占位 → 新图 N6「拉下护目镜的决绝」
+  leap: CAST + 'sydney/layers/key-leap.png',    // 占位 → 新图 N1「向上破页狂喜」
+};
+const IMG = {};
+
+// 歌词时刻（data/lyrics.json 第 4、5 行）
+const SERVANT = 13.719, BOSS = 15.66, SYL = [16.6, 17.24, 17.92, 18.36], PLEASE = 19.082, DONT = 19.76, EAT = 20.27, ME = 20.84, ALIVE = 21.35, DROP = 22.055;
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOut = k => 1 - Math.pow(1 - clamp(k), 3);
+const slam = k => { k = clamp(k); return k < 0.6 ? eOut(k / 0.6) * 1.08 : lerp(1.08, 1, (k - 0.6) / 0.4); }; // 冲过头再回
+function rng(seed) { let s = (seed * 2654435761) >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const since = (T, a) => T - a;
+const pulse = (T, a, d = 0.14) => T >= a ? Math.exp(-(T - a) / d) : 0;
+
+// ---------------- 漫画画布工具 ----------------
+function halftone(x0, y0, w, h, color, step = 16, fn = () => 0.35) {
+  g.fillStyle = color;
+  for (let y = y0; y < y0 + h; y += step) for (let x = x0 + ((y / step) % 2) * step / 2; x < x0 + w; x += step) {
+    const r = step * 0.5 * fn(x, y); if (r > 0.3) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+  }
+}
+function focusLines(cx, cy, T, { n = 110, inner = 260, color = INK, seed = 3, alpha = 1 } = {}) {
+  const r = rng(seed + Math.floor(T * 12));
+  g.save(); g.globalAlpha = alpha; g.fillStyle = color;
+  for (let i = 0; i < n; i++) {
+    const a = r() * Math.PI * 2, w = 0.004 + r() * 0.012, ri = inner * (0.8 + r() * 0.6);
+    g.beginPath(); g.moveTo(cx + Math.cos(a - w) * 2400, cy + Math.sin(a - w) * 2400);
+    g.lineTo(cx + Math.cos(a) * ri, cy + Math.sin(a) * ri); g.lineTo(cx + Math.cos(a + w) * 2400, cy + Math.sin(a + w) * 2400); g.fill();
+  }
+  g.restore();
+}
+function sfx(text, x, y, { size = 150, fill = PINK, angle = -0.12, k = 1, font = 'Bungee' } = {}) {
+  if (k <= 0) return;
+  g.save(); g.translate(x, y); g.rotate(angle); const s = slam(k); g.scale(s, s);
+  g.font = `${size}px ${font}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+  g.fillStyle = INK; g.fillText(text, size * 0.07, size * 0.07);
+  g.strokeStyle = INK; g.lineWidth = size * 0.16; g.strokeText(text, 0, 0);
+  g.fillStyle = fill; g.fillText(text, 0, 0);
+  g.restore();
+}
+// 伪 3D 立体字：往 (dx,dy) 方向叠出厚度
+function text3d(text, x, y, { size = 200, depth = 26, dx = 0.35, dy = 0.6, face = LEMON, side = '#b0402a', angle = 0, scale = 1, alpha = 1 } = {}) {
+  g.save(); g.globalAlpha = alpha; g.translate(x, y); g.rotate(angle); g.scale(scale, scale);
+  g.font = `${size}px Bungee`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+  for (let i = depth; i > 0; i--) { g.fillStyle = i === depth ? INK : side; g.strokeStyle = INK; g.lineWidth = i === depth ? 14 : 0; if (i === depth) g.strokeText(text, i * dx, i * dy); g.fillText(text, i * dx, i * dy); }
+  g.strokeStyle = INK; g.lineWidth = 12; g.strokeText(text, 0, 0); g.fillStyle = face; g.fillText(text, 0, 0);
+  g.restore();
+}
+function captionBox(text, x, y, angle = -0.04) {
+  g.save(); g.translate(x, y); g.rotate(angle); g.font = '64px Bungee'; const w = g.measureText(text).width + 60;
+  g.fillStyle = INK; g.fillRect(8, 8, w, 100); g.fillStyle = LEMON; g.fillRect(0, 0, w, 100);
+  g.strokeStyle = INK; g.lineWidth = 7; g.strokeRect(0, 0, w, 100);
+  g.fillStyle = INK; g.textBaseline = 'middle'; g.fillText(text, 30, 54); g.restore();
+}
+// 关键画：图内一点 (ax,ay) 放到屏幕 (x,y)，缩放 s
+function key(im, x, y, s, ax, ay) { g.drawImage(im, x - ax * s, y - ay * s, im.width * s, im.height * s); }
+function silhouette(im, color) {
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d');
+  x.drawImage(im, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = color; x.fillRect(0, 0, c.width, c.height); return c;
+}
+
+// 巨眼（AI 的唯一形象）：墨线杏仁眼 + 薄荷虹膜 + 竖瞳；open 0..1 控制眼睑
+function bigEye(cx, cy, w, open, T, glow = 0) {
+  const h = w * 0.36 * open;
+  g.save();
+  g.beginPath(); g.moveTo(cx - w / 2, cy);
+  g.quadraticCurveTo(cx, cy - h * 1.35, cx + w / 2, cy); g.quadraticCurveTo(cx, cy + h * 1.35, cx - w / 2, cy); g.closePath();
+  g.fillStyle = '#f7f3ea'; g.fill(); g.save(); g.clip();
+  const R = w * 0.2;
+  const gr = g.createRadialGradient(cx, cy, 0, cx, cy, R);
+  gr.addColorStop(0, '#e9fff7'); gr.addColorStop(0.35, MINT); gr.addColorStop(1, '#16655a');
+  g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.fill();
+  g.strokeStyle = INK; g.lineWidth = 10; g.stroke();
+  for (let i = 0; i < 28; i++) { const a = i / 28 * 7; g.strokeStyle = 'rgba(10,10,16,0.35)'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx + Math.cos(a) * R * 0.35, cy + Math.sin(a) * R * 0.35); g.lineTo(cx + Math.cos(a) * R * 0.95, cy + Math.sin(a) * R * 0.95); g.stroke(); }
+  g.fillStyle = INK; g.beginPath(); g.ellipse(cx, cy, R * (0.12 - 0.05 * glow), R * 0.78, 0, 0, 7); g.fill();
+  g.fillStyle = '#fff'; g.beginPath(); g.ellipse(cx - R * 0.4, cy - R * 0.42, R * 0.16, R * 0.1, -0.5, 0, 7); g.fill();
+  halftone(cx - w / 2, cy - h * 1.4, w, h * 2.8, 'rgba(10,10,16,0.25)', 14, (x, y) => clamp(Math.abs(y - cy) / (h * 1.2)) * 0.8);
+  g.restore();
+  g.lineWidth = 16; g.strokeStyle = INK; g.stroke();
+  // 上睫毛
+  g.lineWidth = 9;
+  for (let i = 1; i < 9; i++) { const u = i / 9, px = cx - w / 2 + w * u, py = cy - h * 1.35 * 4 * u * (1 - u) * 0.5 * 2 * 0.5; g.beginPath(); g.moveTo(px, py); g.lineTo(px + (u - 0.5) * 60, py - 50 - 20 * Math.sin(u * 3)); g.stroke(); }
+  g.restore();
+  if (glow > 0) { const gl = g.createRadialGradient(cx, cy, 0, cx, cy, w * 0.6); gl.addColorStop(0, `rgba(95,227,192,${0.35 * glow})`); gl.addColorStop(1, 'rgba(95,227,192,0)'); g.fillStyle = gl; g.fillRect(cx - w, cy - w, 2 * w, 2 * w); }
+}
+
+// 页面合拢成嘴：上下两片「墨 + 锯齿纸牙」从画面边缘往里咬，cover = 每片占画面高度的比例
+function jaws(cover, T, shake) {
+  const hTop = H * cover, teeth = 11, tw = W / teeth, th = Math.min(90, (H - 2 * hTop) * 0.16);
+  for (const side of [-1, 1]) {
+    g.save();
+    const edge = side < 0 ? hTop : H - hTop;
+    // 颚体
+    g.beginPath();
+    if (side < 0) { g.moveTo(-40, -40); g.lineTo(W + 40, -40); g.lineTo(W + 40, edge); g.lineTo(-40, edge); }
+    else { g.moveTo(-40, H + 40); g.lineTo(W + 40, H + 40); g.lineTo(W + 40, edge); g.lineTo(-40, edge); }
+    g.closePath(); g.fillStyle = INK; g.fill();
+    g.save(); g.clip(); halftone(-40, side < 0 ? -40 : edge, W + 80, hTop + 40, 'rgba(255,46,136,0.55)', 18, (x, y) => 0.25 + 0.5 * clamp(1 - Math.abs(y - edge) / 300)); g.restore();
+    // 纸牙：交错，上排往下、下排往上
+    for (let i = 0; i < teeth; i++) {
+      const x0 = i * tw + (side < 0 ? 0 : tw / 2) - (side < 0 ? 0 : tw / 2 * 0), tip = edge - side * th * (0.85 + 0.3 * ((i * 7) % 3) / 2);
+      g.beginPath(); g.moveTo(x0 + 6, edge); g.lineTo(x0 + tw / 2, tip); g.lineTo(x0 + tw - 6, edge); g.closePath();
+      g.fillStyle = PAPER; g.fill(); g.strokeStyle = INK; g.lineWidth = 8; g.stroke();
+    }
+    // 颚边墨线
+    g.strokeStyle = PINK; g.lineWidth = 6; g.beginPath(); g.moveTo(-40, edge + side * 14); g.lineTo(W + 40, edge + side * 14); g.stroke();
+    g.restore();
+  }
+}
+
+// ---------------- 分镜 ----------------
+function pageBoss(T) {
+  // 13.16–16.6（本片从 14.8 起）：一个竖长大格。上面是巨眼俯视，下面是跪着献上文件的她。镜头从她缓缓上摇到眼。
+  g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
+  const k = clamp((T - 14.8) / 1.6), camY = lerp(-120, 60, k * k * (3 - 2 * k));
+  const shake = pulse(T, BOSS, 0.12) * Math.sin(T * 170) * 18;
+  g.save(); g.translate(shake, camY);
+  // 格：比页面略小，墨框
+  const P = [50, 40 - 100, W - 100, H + 120];
+  g.save(); g.beginPath(); g.rect(...P); g.clip();
+  const bg = g.createLinearGradient(0, P[1], 0, P[1] + P[3]); bg.addColorStop(0, '#0e0b18'); bg.addColorStop(1, '#2a1d4a');
+  g.fillStyle = bg; g.fillRect(...P);
+  halftone(P[0], P[1], P[2], P[3], 'rgba(95,227,192,0.18)', 20, (x, y) => clamp(1 - Math.hypot(x - 960, y - 250) / 900) * 0.9);
+  // 巨眼（纸片视差：比人物动得慢）
+  const narrow = T >= BOSS ? lerp(1, 0.42, eOut((T - BOSS) / 0.18)) : 1;
+  bigEye(960, 250 - camY * 0.4, 1400, narrow, T, T >= BOSS ? 1 : 0.4);
+  // 她：跪着把发光文件举向巨眼
+  key(IMG.feed, 640, 1030 + camY * 0.15, 0.78, 420, 1100);
+  g.restore();
+  g.lineWidth = 14; g.strokeStyle = INK; g.strokeRect(...P);
+  g.restore();
+  // boss：一枚橡皮章从天而降盖在页面右下
+  if (T >= BOSS - 0.12) {
+    const d = clamp((T - (BOSS - 0.12)) / 0.12), y = lerp(-300, 760, d * d);
+    text3d('BOSS', 1500, y, { size: 190, depth: 22, face: PINK, side: '#6d1540', angle: -0.08 });
+    if (d >= 1) { const r = (T - BOSS) * 900; g.strokeStyle = `rgba(10,10,16,${clamp(1 - (T - BOSS) / 0.4)})`; g.lineWidth = 10; g.beginPath(); g.ellipse(1500, 830, r, r * 0.25, 0, 0, 7); g.stroke(); }
+  }
+}
+
+function pageJaws(T) {
+  // 16.6–22.055：这一页本身就是 AI 的嘴。Chat-G-P-T 每个音节 = 一记底鼓 = 上下颚往里咬一截。
+  const steps = [[SYL[0], 0.10], [SYL[1], 0.17], [SYL[2], 0.24], [SYL[3], 0.30], [PLEASE, 0.31], [DONT, 0.325], [EAT, 0.345], [ME, 0.355]];
+  let cover = 0.02;
+  for (const [t0, c] of steps) if (T >= t0) { const prev = cover; cover = lerp(prev, c, slam((T - t0) / 0.1)); }
+  const hit = Math.max(...steps.map(([t0], i) => pulse(T, t0, i === 6 ? 0.2 : 0.1) * (i === 6 ? 1.6 : 1)));
+  const sx = Math.sin(T * 190) * 22 * hit, sy = Math.cos(T * 160) * 14 * hit;
+
+  g.save(); g.translate(sx, sy);
+  // 格内：她。先是撑住上颚的全身近景，please 起推到脸，alive 换成决绝的眼
+  g.fillStyle = '#fff'; g.fillRect(-60, -60, W + 120, H + 120);
+  halftone(-60, -60, W + 120, H + 120, 'rgba(255,46,136,0.35)', 22, (x, y) => clamp(Math.abs(x - 960) / 900) * 0.9);
+  const push = eOut((T - PLEASE) / 1.6), s = lerp(1.25, 2.35, T >= PLEASE ? push : 0);
+  // 两张整图都按脸中心 (408,468) 对齐，脸落在上下颚的缝中央
+  const eyeY = lerp(560, 540, T >= PLEASE ? push : 0);
+  if (T < ALIVE) key(IMG.strain, 960, eyeY + (T < PLEASE ? 60 : 0) * (1 - push), s, 408, 405);  // 两张图的眼睛都在 y≈405
+  else {
+    const s2 = lerp(2.35, 2.6, eOut((T - ALIVE) / 0.7));
+    key(IMG.resolve, 960, 540, s2, 408, 405);
+    // 决心：护目镜位置闪一道柠黄光（正片由新图 N6 的镜片反光承担）
+    focusLines(960, 540, T, { n: 90, inner: 420, color: '#fff', seed: 9, alpha: 0.8 * clamp((T - ALIVE) / 0.2) });
+  }
+  jaws(cover, T, hit);
+  g.restore();
+
+  // 歌词：只用一个旁白框，跟 03b 的「SYDNEY,」同一种语法；贴在上颚上跟着它走
+  if (T < PLEASE) captionBox('ChatGPT,', 90 + sx, Math.max(14, H * cover / 2 - 60) + sy);
+  // 拟声字：每咬一次一个 CHOMP，越来越大；eat 那一口是 CRUNCH!!
+  const chomp = [[SYL[0], 'CHOMP', 1500, 1, 80], [SYL[1], 'CHOMP', 420, 1, 110], [SYL[2], 'CHOMP!', 1480, -1, 140], [SYL[3], 'CHOMP!!', 1450, 1, 170]];
+  for (const [t0, s, x, side, sz] of chomp) if (T >= t0 && T < t0 + 0.55) { const jh = H * cover; sfx(s, x, side < 0 ? jh / 2 - 10 : H - jh / 2 - 10, { size: Math.min(sz, jh * 0.62), k: (T - t0) / 0.12, angle: x > 960 ? -0.06 : 0.06 }); }
+  if (T >= EAT && T < EAT + 0.6) sfx('CRUNCH!!', 960, H * cover / 2 - 10, { size: 170, k: (T - EAT) / 0.1, fill: LEMON, angle: -0.05 });
+  if (T >= PLEASE && T < EAT) {
+    g.save(); g.font = '76px Kalam'; g.fillStyle = INK; g.textAlign = 'center';
+    const j = Math.sin(T * 90) * 3; g.fillStyle = '#fff'; g.fillText('please…', 1560 + j, H - H * cover / 2 + 20 + j); g.restore();
+  }
+  // eat 那一口：冲击帧 2 帧（反色）
+  if (T >= EAT && T < EAT + 2 / FPS) { g.globalCompositeOperation = 'difference'; g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over'; }
+}
+
+function burst(T) {
+  // 22.055：破页。冲击帧（白底黑剪影 → 黑底白剪影）→ 粉色集中线 + 碎纸 + 她向上冲 + 3D「P(DOOM)」
+  const d = T - DROP;
+  if (d < 2 / FPS) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); key(IMG.leapK, 960, 560, 1.05, 420, 620); return; }
+  if (d < 4 / FPS) { g.fillStyle = INK; g.fillRect(0, 0, W, H); key(IMG.leapW, 960, 560, 1.1, 420, 620); return; }
+  g.fillStyle = PINK; g.fillRect(0, 0, W, H);
+  focusLines(960, 520, T, { n: 140, inner: 300, color: '#fff', seed: 4, alpha: 0.9 });
+  // 碎纸 / 碎颚片往外飞
+  const r = rng(77);
+  for (let i = 0; i < 26; i++) {
+    const a = r() * 7, sp = 900 + r() * 1500, x = 960 + Math.cos(a) * sp * d, y = 540 + Math.sin(a) * sp * d + 600 * d * d, sz = 60 + r() * 140;
+    g.save(); g.translate(x, y); g.rotate(a + d * (r() * 8 - 4));
+    g.fillStyle = i % 3 ? PAPER : INK; g.strokeStyle = INK; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(-sz / 2, -sz / 3); g.lineTo(sz / 2, -sz / 2); g.lineTo(sz / 3, sz / 2); g.closePath(); g.fill(); g.stroke(); g.restore();
+  }
+  // 3D 字从纸面炸出、往上飞
+  const letters = ['P', '(', 'D', 'O', 'O', 'M', ')'];
+  letters.forEach((c, i) => {
+    const k = eOut((d - 0.02 * i) / 0.35), x = 660 + (i - 3) * 150 * lerp(0.4, 1, k), y = lerp(900, 230, k) - (i % 2) * 30 - d * 120;
+    text3d(c, x, y, { size: 180, depth: 20, scale: lerp(0.3, 1, k), angle: (i - 3) * 0.04, face: LEMON });
+  });
+  // 她：从下方冲上来（占位 = sydney key-leap）
+  const k = eOut(d / 0.4);
+  key(IMG.leap, lerp(1300, 1420, k), lerp(1500, 680, k), lerp(0.9, 1.1, k), 420, 620);
+}
+
+function draw(t) {
+  const T = t + OFF;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  if (T < SYL[0]) pageBoss(T);
+  else if (T < DROP) pageJaws(T);
+  else burst(T);
+  // 进页的冲击帧：16.6 反色 2 帧
+  if (T >= SYL[0] && T < SYL[0] + 2 / FPS) { g.globalCompositeOperation = 'difference'; g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over'; }
+}
+
+// ---------------- 载入 + 播放协议 ----------------
+const load = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error(src)); im.src = src; });
+const font = (name, file) => new FontFace(name, `url(../../../assets/fonts/${file})`).load().then(f => document.fonts.add(f));
+const ready = Promise.all([
+  ...Object.entries(SRC).map(([k, s]) => load(s).then(im => { IMG[k] = im; })),
+  font('Bungee', 'bungee/Bungee-Regular.ttf'), font('Kalam', 'kalam/Kalam-Bold.ttf'),
+]).then(() => { IMG.leapK = silhouette(IMG.leap, INK); IMG.leapW = silhouette(IMG.leap, '#fff'); });
+window.__video = { width: W, height: H, fps: FPS, duration: DUR, ready, music: '../music.mp3', musicOffset: OFF, seek: t => draw(t) };
+if (!/render=1/.test(location.search)) ready.then(() => {
+  const au = new Audio('../music.mp3'); au.currentTime = OFF; au.play().catch(() => {});
+  const loop = () => { if (au.currentTime >= OFF + DUR) au.currentTime = OFF; draw(au.currentTime - OFF); requestAnimationFrame(loop); };
+  loop();
+});
+</script></body></html>

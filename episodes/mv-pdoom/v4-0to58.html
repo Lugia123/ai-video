@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) v4：0–58.4 s 连看（v4-01 + 副歌 1 + v4-03，960×540）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// #1025：0–22.1 v4-01-final ｜ 22.1–38.4 副歌 1（shots/c1-v4.js，#1024；还没有时用黑场 + 霓虹招牌占位）｜ 38.4–58.4 v4-03a + v4-03b
+import * as THREE from 'three';
+import { loadMV, PALETTE as PAL } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { makeV401Final } from './shots/v4-01-final.js';
+import { makeV403a } from './shots/v4-03a.js';
+import { makeV403b } from './shots/v4-03b.js';
+
+const mv = await loadMV({ width: 960, height: 540 });      // 低分辨率连看；渲染器不传查询串，全分辨率另开一页
+await initType3D();
+const T_C1 = 22.1, T_V3 = 38.4;
+
+// 副歌 1：有 shots/c1-v4.js 就挂它（导出 makeC1V4(mv) → 镜头数组或 { shots }）；没有就用占位
+async function chorus1() {
+  let mod = null;
+  try { mod = await import('./shots/c1-v4.js'); } catch (e) { console.info('副歌 1 用占位：', e.message); }
+  if (mod) { const r = await (mod.makeC1V4 ?? mod.makeC1 ?? mod.default)(mv); return Array.isArray(r) ? r : r.shots; }
+  return [placeholder()];
+}
+// 占位：黑场，每句歌词一排霓虹招牌，唱到的词亮。从 22.5 起（22.1–22.5 留给 v4-01 结尾「盒子合严、只剩四只眼」那一下）
+function placeholder() {
+  const scene = new THREE.Scene(); scene.background = new THREE.Color('#05050b');
+  const cam = new THREE.OrthographicCamera(-960, 960, 540, -540, 0, 10); cam.position.z = 5;
+  const FONT = '"UIAnton", "Anton", Impact, sans-serif';
+  const lines = mv.lyrics.lines.filter(l => l.start >= T_C1 && l.start < T_V3).map((l, n) => {
+    const plates = l.words.map(w => {
+      const text = w.w.replace(/[,.]/g, '').toUpperCase(), c = document.createElement('canvas'), g0 = c.getContext('2d'); g0.font = `170px ${FONT}`;
+      c.width = Math.ceil(g0.measureText(text).width) + 110; c.height = 270; const g = c.getContext('2d');
+      g.fillStyle = '#0d0c14'; g.fillRect(0, 0, c.width, c.height); g.strokeStyle = n % 2 ? PAL.mint : PAL.pink; g.lineWidth = 16; g.strokeRect(8, 8, c.width - 16, c.height - 16);
+      g.fillStyle = '#F2EDE4'; g.font = `170px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, c.width / 2, 143);
+      const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+      const h = 170, wpx = h * c.width / c.height, mat = new THREE.MeshBasicMaterial({ map: tex }), m = new THREE.Mesh(new THREE.PlaneGeometry(wpx, h), mat); scene.add(m);
+      return { m, mat, wpx, at: w.start };
+    });
+    const total = plates.reduce((s, p) => s + p.wpx + 16, -16); let x = -total / 2;
+    for (const p of plates) { p.m.position.set(x + p.wpx / 2, 0, 0); x += p.wpx + 16; }
+    return { plates, t0: l.start - 0.3 };
+  });
+  const tag = (() => { const c = document.createElement('canvas'); c.width = 1400; c.height = 90; const g = c.getContext('2d'); g.fillStyle = 'rgba(242,237,228,.45)'; g.font = `60px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('CHORUS 1 PLACEHOLDER  22.1–38.4  (#1024)', 700, 48);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(1400, 90), new THREE.MeshBasicMaterial({ map: tex, transparent: true })); m.position.y = -440; scene.add(m); return m; })();
+  return { id: 'c1-placeholder', t0: T_C1 + 0.4, t1: T_V3, transitionIn: { kind: 'cut' }, build: () => ({}),
+    update(_, T) {
+      const cur = lines.reduce((a, l, i) => (l.t0 <= T ? i : a), -1);
+      lines.forEach((l, i) => l.plates.forEach(p => { p.m.visible = i === cur; const a = T - p.at; p.mat.color.setScalar(a >= 0 ? 1.1 + 0.7 * Math.exp(-a / 0.25) : 0.3); }));
+      return { scene, camera: cam, post: { bloom: { strength: 0.6, threshold: 1.0 } } };
+    } };
+}
+
+const shots = [...await makeV401Final(mv), ...await chorus1(), ...await makeV403a(mv), ...await makeV403b(mv)];
+mv.mount(shots, { offset: 0, duration: 58.4 });
+</script>
+</body>
+</html>

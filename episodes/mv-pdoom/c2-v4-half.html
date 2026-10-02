@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 2 v4（58.42–74.78 s）· 960×540 低分辨率</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeC2V4, C2 } from './shots/c2-v4.js';   // #1048 分镜：fresh/v4-rest/c2/plan.md
+
+const half = true;     // 渲染器不传查询串，所以低分辨率单独一页（c2-v4-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = await makeC2V4(mv);
+mv.mount(shots, { offset: C2.t0, duration: C2.end - C2.t0 });
+</script>
+</body>
+</html>

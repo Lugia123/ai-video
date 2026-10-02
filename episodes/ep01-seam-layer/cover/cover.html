@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ep01 封面</title>
+<style>
+  html, body { margin: 0; background: #EFE7D6; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+/*
+ * ep01 封面：兑现开场画面——左边纸代码山「23,669 行」，右边一张薄纸「20 行」，方块小人扛着纸刀一脸问号。
+ *   ?ratio=4x3  → 1440×1080（横版）
+ *   ?ratio=9x16 → 1080×1920（竖版，单独排版：上标题、中间纸山对薄纸、下小人）
+ *   ?ratio=16x9 → 1920×1080（宽版，左右分栏：左边标题 + 薄纸和小人，右边纸山从底堆到顶）
+ * 导出：node tools/cover/cover.mjs episodes/ep01-seam-layer
+ * 页面画完后置 window.__coverReady = true。
+ */
+import { createKit, C, F, RAD, clamp, lerp, hash, mulberry32 } from '../../../assets/lib/paper-kit.js';
+import { createBuddy } from '../../../assets/lib/paper-girl.js';   // 纸片女孩（原方块小人版封面见 _boxbuddy/）
+
+const RATIO = new URLSearchParams(location.search).get('ratio') ?? '4x3';
+const V = RATIO === '9x16', WIDE = RATIO === '16x9';
+const W = V ? 1080 : WIDE ? 1920 : 1440, H = V ? 1920 : 1080;
+const cv = document.getElementById('c');
+cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d');
+const K = createKit(ctx, { W, H, bgSeed: 2366, creases: V ? [[-10, 1180, 1090, 1230]] : WIDE ? [[-10, 610, 1930, 650]] : [[-10, 610, 1450, 650]] });
+const { rr, paper, text } = K;
+const ZH = F.zh;
+
+/* ---------- 版式 ---------- */
+const L = V ? {
+  title: [{ x: 540, y: 250, align: 'center' }, { x: 540, y: 440, align: 'center' }], tSize: 150,
+  sub: { x: 540, y: 575, size: 58 },
+  mount: { apx: 300, apy: 830, base: 1330, slope: 0.44, n: 110, s: 0.78 },
+  count: { x: 300, y: 752, s: 0.82, rot: -4 },
+  slip: { x: 820, y: 1320, label: 1215, size: 130 },
+  buddy: { x: 540, y: 1745, s: 2.0, knifeAt: [760, 1320] },
+  tape: { x: 30, y: 44, rot: -4 },
+} : WIDE ? {
+  title: [{ x: 70, y: 215, align: 'left' }, { x: 70, y: 400, align: 'left' }], tSize: 150,
+  sub: { x: 375, y: 545, size: 54 },
+  mount: { apx: 1440, apy: 250, base: 940, slope: 0.55, n: 190, s: 0.78 },
+  count: { x: 1440, y: 280, s: 0.82, rot: -4 },
+  slip: { x: 260, y: 925, label: 830, size: 110 },
+  buddy: { x: 860, y: 935, s: 2.0, knifeAt: [1080, 520] },
+  tape: { x: 1570, y: 36, rot: 5 },
+} : {
+  title: [{ x: 70, y: 200, align: 'left' }, { x: 1370, y: 370, align: 'right' }], tSize: 150,
+  sub: { x: 990, y: 1012, size: 54 },
+  mount: { apx: 300, apy: 470, base: 925, slope: 0.62, n: 120, s: 0.72 },
+  count: { x: 300, y: 500, s: 0.78, rot: -4 },
+  slip: { x: 1215, y: 915, label: 820, size: 104 },
+  buddy: { x: 760, y: 925, s: 2.0, knifeAt: [980, 520] },
+  tape: { x: 1090, y: 36, rot: 5 },
+};
+
+/* ---------- 纸代码山（与视频开场同一种 .zig 纸片） ---------- */
+function fileCard(c, s) {
+  ctx.save();
+  ctx.translate(c.x, c.y); ctx.rotate(c.rot * RAD); ctx.scale(s, s);
+  ctx.fillStyle = 'rgba(70,48,25,0.18)'; ctx.fillRect(-62, -78, 136, 170);
+  ctx.fillStyle = c.tint; ctx.fillRect(-70, -88, 136, 170);
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 3; ctx.strokeRect(-70, -88, 136, 170);
+  ctx.fillStyle = C.faint;
+  for (let i = 0; i < c.lines; i++) ctx.fillRect(-52, -60 + i * 24, 60 + 40 * ((i * 37 + c.seed) % 3) / 2, 9);
+  ctx.fillStyle = C.mute; ctx.font = `600 22px ${F.code}`; ctx.textAlign = 'left'; ctx.fillText('.zig', -52, 66);
+  ctx.restore();
+}
+function drawMount(m) {
+  const r = mulberry32(2366), a = [];
+  while (a.length < m.n) {
+    const y = m.apy + 30 + r() * (m.base - m.apy - 30);
+    const hw = (y - m.apy) * m.slope, x = m.apx + (r() * 2 - 1) * hw;
+    a.push({ x, y, rot: (r() * 2 - 1) * 24, seed: 900 + a.length, tint: r() < 0.13 ? C.sky : r() < 0.13 ? C.pink : C.card, lines: 3 + Math.floor(r() * 4) });
+  }
+  a.sort((p, q) => q.y - p.y).forEach(c => fileCard(c, m.s));
+}
+function countTag(o) {
+  ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.rot * RAD); ctx.scale(o.s, o.s);
+  paper(rr(-260, -86, 520, 150, 18, 131), [-260, -86, 520, 150], { fill: C.mustard, lift: 1.6, seed: 131 });
+  text('23,669', -30, 30, 118, { align: 'center', font: F.big, weight: 800 });
+  text('行', 190, 22, 60, { align: 'center', font: ZH, weight: 600 });
+  ctx.restore();
+}
+function slip(o) {
+  ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(-1.5 * RAD);
+  paper(rr(-170, -10, 340, 20, 4, 132), [-170, -10, 340, 20], { fill: C.mint, lift: 1.2, seed: 132, inkW: 2.4 });
+  ctx.restore();
+  text('20 行', o.x, o.label, o.size, { align: 'center', font: F.big, weight: 800, color: C.green });
+}
+
+/* ---------- 主标题：纸剪字——白纸描边 + 投影 + 错位色版；数字用红/绿强调 ---------- */
+const TITLE = [
+  [{ s: '重写 ' }, { s: '2', num: true, col: C.red }, { s: ' 万行', col: C.red }],
+  [{ s: 'vs ', num: true, col: C.mute }, { s: '只改 ' }, { s: '20', num: true, col: C.green }, { s: ' 行', col: C.green }],
+];
+const fontOf = (p, size) => p.num ? `800 ${size * 1.12}px ${F.big}` : `600 ${size}px ${ZH}`;
+function paperType(parts, x, y, size, align) {
+  const widths = parts.map(p => { ctx.font = fontOf(p, size); return ctx.measureText(p.s).width; });
+  const total = widths.reduce((a, b) => a + b, 0);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const x0 = cx;
+  ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+  // 1. 整行白纸底（带投影），2. 错位色版，3. 墨色字
+  for (const pass of [0, 1, 2]) {
+    cx = x0;
+    parts.forEach((p, i) => {
+      ctx.font = fontOf(p, size);
+      if (pass === 0) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(70,48,25,0.38)'; ctx.shadowBlur = 14; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 10;
+        ctx.strokeStyle = C.card; ctx.lineWidth = size * 0.2; ctx.strokeText(p.s, cx, y);
+        ctx.restore();
+      } else if (pass === 1) {
+        ctx.fillStyle = p.col && p.col !== C.mute ? C.ink : C.mustard;
+        ctx.fillText(p.s, cx + size * 0.04, y + size * 0.04);
+      } else {
+        ctx.fillStyle = p.col ?? C.ink; ctx.fillText(p.s, cx, y);
+      }
+      cx += widths[i];
+    });
+  }
+  ctx.restore();
+  return { x0, x1: x0 + total };
+}
+
+/* ---------- 系列标签：斜贴的纸胶带 ---------- */
+function tape(o) {
+  const label = '移植不是翻译 · 01';
+  ctx.font = `600 34px ${ZH}`;
+  const w = ctx.measureText(label).width + 70, h = 64;
+  ctx.save(); ctx.translate(o.x + w / 2, o.y + h / 2); ctx.rotate(o.rot * RAD);
+  // 胶带两端锯齿
+  const p = new Path2D(), r = mulberry32(77);
+  p.moveTo(-w / 2, -h / 2);
+  p.lineTo(w / 2, -h / 2);
+  for (let k = 0; k <= 8; k++) p.lineTo(w / 2 + (k % 2 ? -7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.lineTo(-w / 2, h / 2);
+  for (let k = 8; k >= 0; k--) p.lineTo(-w / 2 + (k % 2 ? 7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.closePath();
+  paper(p, [-w / 2, -h / 2, w, h], { fill: 'rgba(240,180,60,0.88)', lift: 0.5, seed: 141, ink: false });
+  text(label, 0, 2, 34, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+/* ---------- 纸片女孩：拿着纸刀、一脸疑惑（s=2.0，和视频同大小） ---------- */
+const buddy = createBuddy(ctx, {
+  path: [[0, L.buddy.x, L.buddy.y, L.buddy.s]],
+  acts: [
+    { type: 'knife', t0: 0, t1: 99, at: L.buddy.knifeAt },
+  ],
+});
+
+await document.fonts.load(`600 150px ${ZH}`, '重写万行只改差别第一刀切在哪移植不是翻译');
+await document.fonts.load(`800 150px ${F.big}`, '0123456789,vs');
+K.setTime(0);
+K.drawBG();
+tape(L.tape);
+drawMount(L.mount);
+countTag(L.count);
+slip(L.slip);
+// 拿纸刀的身体 + 疑问脸（人放大到 s=2 后头顶问号会压标题，去掉；疑惑交给表情）
+buddy.draw(3.3, { force: { body: 'knife', face: 'question', mirror: false } });
+TITLE.forEach((parts, i) => paperType(parts, L.title[i].x, L.title[i].y, L.tSize, L.title[i].align));
+// 副标题：一条纸条
+{
+  const s = L.sub;
+  ctx.font = `600 ${s.size}px ${ZH}`;
+  const w = ctx.measureText('差别只在第一刀切在哪').width + s.size * 1.2, h = s.size * 1.6;
+  ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(-1 * RAD);
+  paper(rr(-w / 2, -h / 2, w, h, 12, 151), [-w / 2, -h / 2, w, h], { fill: C.card, lift: 1.2, seed: 151 });
+  text('差别只在第一刀切在哪', 0, 3, s.size, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+ctx.font = `600 ${L.tSize}px ${ZH}`;
+const m = ctx.measureText('重写万行只改');
+window.__coverInfo = { W, H, titleInkH: Math.round(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent), minH: Math.round(H * (V ? 0.06 : 0.09)) };
+window.__coverReady = true;
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+{
+ "src": "../../tpose.png",
+ "note": "#1009 手型变体 point：只取前臂，由 _work/variants.py 并进主 puppet.json",
+ "plates": {
+  "point": {
+   "prompt": "把这个女孩的两只手都改成指东西的手势：食指伸直、沿着手臂方向指向身体外侧，其余手指握拢，手的大小不变。头发、刘海、护目镜、耳环、脸型、身体、衣服、手臂、T字姿势、位置大小、画风、描边、白色纸边、白色背景全部保持完全不变。",
+   "seed": 31,
+   "align_rows": [
+    [
+     0,
+     390
+    ],
+    [
+     470,
+     832
+    ]
+   ]
+  }
+ },
+ "joints": {
+  "neck": [
+   638,
+   372
+  ],
+  "waist": [
+   638,
+   517
+  ],
+  "shoulder_l": [
+   575,
+   428
+  ],
+  "elbow_l": [
+   505,
+   428
+  ],
+  "wrist_l": [
+   430,
+   428
+  ],
+  "hand_l": [
+   352,
+   428
+  ],
+  "shoulder_r": [
+   701,
+   428
+  ],
+  "elbow_r": [
+   771,
+   428
+  ],
+  "wrist_r": [
+   846,
+   428
+  ],
+  "hand_r": [
+   926,
+   428
+  ],
+  "hip_l": [
+   596,
+   630
+  ],
+  "foot_l": [
+   556,
+   795
+  ],
+  "hip_r": [
+   680,
+   630
+  ],
+  "foot_r": [
+   722,
+   795
+  ]
+ },
+ "parts": [
+  {
+   "name": "arm_lo_l",
+   "parent": "arm_up_l",
+   "pivot": "elbow_l",
+   "z": 5,
+   "bone": [
+    "elbow_l",
+    "hand_l"
+   ],
+   "r": 44,
+   "end": true,
+   "disc": 28,
+   "rule": "(y<461) | (x<432) | (x>844)",
+   "source": "point",
+   "box": [
+    320,
+    330,
+    430,
+    490
+   ]
+  },
+  {
+   "name": "arm_lo_r",
+   "parent": "arm_up_r",
+   "pivot": "elbow_r",
+   "z": 5,
+   "bone": [
+    "elbow_r",
+    "hand_r"
+   ],
+   "r": 44,
+   "end": true,
+   "disc": 28,
+   "rule": "(y<461) | (x<432) | (x>844)",
+   "source": "point",
+   "box": [
+    852,
+    330,
+    960,
+    490
+   ]
+  },
+  {
+   "name": "arm_up_l",
+   "parent": "torso",
+   "pivot": "shoulder_l",
+   "z": 6,
+   "bone": [
+    "shoulder_l",
+    "elbow_l"
+   ],
+   "r": 40,
+   "disc": 30,
+   "rule": "(y<461) | (x<432) | (x>844)",
+   "source": "point"
+  },
+  {
+   "name": "arm_up_r",
+   "parent": "torso",
+   "pivot": "shoulder_r",
+   "z": 6,
+   "bone": [
+    "shoulder_r",
+    "elbow_r"
+   ],
+   "r": 40,
+   "disc": 30,
+   "rule": "(y<461) | (x<432) | (x>844)",
+   "source": "point"
+  }
+ ]
+}

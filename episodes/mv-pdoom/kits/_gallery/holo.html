@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>hologram.js 画廊：全息屏唱副歌 1</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; bottom: 22px; font: 22px 'STM', monospace; color: #F2EDE4; letter-spacing: 0.06em; opacity: 0.85; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  歌曲 22.8–37.3 s（副歌 1 的 6 句），全息屏立在舞台上唱，口型按 lyrics.json 逐词时间换 a/e/i/o/u，会眨眼。
+  相机慢慢绕着屏幕走，看得到侧面的菲涅尔边光；33.4 起「shinigami eyes」表情换成 surprised（不唱时）。
+  左下角：时间 · 正在唱的词 · 口型（只在画廊里有，给对口型用）。window.__lipTrack(fps) 逐帧导出口型 / 词对照。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createHolo } from '../hologram.js';
+
+const mv = await loadMV();
+const T0 = 22.3, T1 = 37.7;
+
+const holo = await createHolo(mv, { height: 1.7 });
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 16 / 9, 0.05, 100);
+scene.add(holo.mesh);
+const grid = new THREE.GridHelper(14, 56, new THREE.Color(PALETTE.mint).multiplyScalar(0.35), new THREE.Color('#1c1c2a'));
+scene.add(grid);
+
+const tag = document.getElementById('tag');
+function draw(T) {
+  const u = (T - T0) / (T1 - T0);
+  const a = -0.5 + 0.9 * u;
+  const R = 4.9 - 0.6 * Math.sin(u * Math.PI);
+  camera.position.set(Math.sin(a) * R, 1.05 + 0.12 * Math.sin(u * 5), Math.cos(a) * R);
+  camera.lookAt(0, 0.92, 0);
+  const expression = T > 33.4 ? 'surprised' : T < 24.3 ? 'smile' : 'neutral';
+  const opacity = Math.min(1, (T - T0) / 0.3);
+  const st = holo.update(T, { expression, opacity });
+  tag.textContent = `${T.toFixed(2)}s   word: ${st.word ?? '-'}   mouth: ${st.mouth}   eyes: ${st.eyes}`;
+  const kick = mv.music.pulse('kick', T, { decay: 0.12 });
+  mv.stage.render(scene, camera, { bloom: { strength: 0.9, threshold: 1.1 }, chroma: 0.2 + 0.4 * kick, grade: { vignette: 0.4, saturation: 1.05 } });
+}
+
+mv.mount(draw, { offset: T0, duration: T1 - T0 });
+
+// 自检：逐帧导出 { t, word, mouth }，对照「张嘴 ⇔ 在唱词」
+window.__lipTrack = (fps = 30) => {
+  const out = [];
+  for (let f = Math.ceil(22.8 * fps); f <= Math.floor(37.3 * fps); f++) {
+    const T = f / fps, lips = holo.lipsFor(null)(T), w = mv.lyrics.wordsAt(T)[0];
+    out.push({ f, T: +T.toFixed(3), word: w ? w.w : null, mouth: lips });
+  }
+  return out;
+};
+</script>
+</body>
+</html>

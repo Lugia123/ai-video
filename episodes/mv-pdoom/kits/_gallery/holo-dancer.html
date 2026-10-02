@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>holo-dancer.js 小样：演唱会舞台 · C 位 + 镭射全息伴舞 + LED 大屏</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; bottom: 22px; font: 22px 'STM', monospace; color: #F2EDE4; letter-spacing: 0.06em; opacity: 0.85; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  表演镜头的小样（#1033）。歌曲 74.78 起 3 小节（5.45 s，主歌 3 开头「Forward MLP, backward, repeat / Now von Neumann's…」）：
+    舞台 = 一层平放的节点平面（机器里的 MLP 层），后面一块 LED 大屏放她的 2D 唱歌特写（逐词对口型 + 下沿歌词条）；
+    C 位：3D 的她（卡通皮肤）做唱歌动作；两侧 4 个镭射全息复制体跳舞，内侧一对踩拍、外侧一对晚半拍，左右镜像。
+    机位每小节切一次：大全景 → C 位中景 → 推近大屏（推到铺满时 LED 像素格淡掉，变成干净的 2D 特写）。
+  渲染：node tools/render/render.mjs episodes/mv-pdoom/kits/_gallery --page holo-dancer.html --gpu
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims } from '../girl.js';
+import { createHoloDancers, createLedScreen } from '../holo-dancer.js';
+
+const mv = await loadMV();
+const { music } = mv;
+const Q = new URLSearchParams(location.search);
+const T0 = 74.78, BAR = music.period * 4, DUR = BAR * 3;
+const bar0 = Math.round((T0 - music.barTime(0)) / BAR);
+const LEAD = [{ bar: bar0 - 1, anim: Q.get('lead') ?? 'dance__body-wave' }];
+const CREW = [{ bar: bar0 - 1, anim: 'dance__kick-step' }, { bar: bar0 + 2, anim: 'dance__raise-roof' }];
+const [girl] = await Promise.all([createGirl(mv), loadAnims([...LEAD, ...CREW].map(e => e.anim))]);
+const crew = await createHoloDancers(mv, girl, { slots: [
+  { x: -1.25, z: -0.55, delay: 0 }, { x: 1.25, z: -0.55, delay: 0, mirror: true },
+  { x: -2.45, z: -1.05, delay: 0.5 }, { x: 2.45, z: -1.05, delay: 0.5, mirror: true },
+] });
+const led = await createLedScreen(mv, { width: 6.6 });
+const LED_Y = 3.0;                       // 屏幕中心高度：下沿 1.14，比她的头顶高，字幕条不被人挡
+
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#05040c');
+scene.fog = new THREE.Fog('#05040c', 9, 22);
+scene.add(createGirlLights({ key: 2.2, rim: 2.6, fill: 0.9 }), crew.group, led.mesh);
+led.mesh.position.set(0, LED_Y, -3.3);
+
+// 舞台：一层平放的节点平面（6 × 4 个柠黄同心圆节点 + 连线），前沿一条霓虹灯带
+const stage = new THREE.Group(); scene.add(stage);
+{
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(9, 6), new THREE.MeshStandardMaterial({ color: '#0e0d1a', roughness: 1, metalness: 0 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.z = -1; stage.add(floor);
+  const ringGeo = new THREE.RingGeometry(0.16, 0.2, 40), dotGeo = new THREE.CircleGeometry(0.07, 24);
+  const node = new THREE.MeshBasicMaterial({ color: new THREE.Color(PALETTE.lemon).multiplyScalar(0.9), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  const pts = [];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
+    const x = (c - 2.5) * 1.5, z = -3.2 + r * 1.35;
+    pts.push([x, z]);
+    for (const g of [ringGeo, dotGeo]) { const m = new THREE.Mesh(g, node); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.004, z); stage.add(m); }
+  }
+  const seg = [];
+  for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) { const d = Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]); if (d < 1.6) seg.push(pts[i][0], 0.003, pts[i][1], pts[j][0], 0.003, pts[j][1]); }
+  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(seg, 3));
+  stage.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: new THREE.Color(PALETTE.mint).multiplyScalar(0.35), transparent: true, blending: THREE.AdditiveBlending })));
+  const tube = (col, w, x, y, z, ry = 0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.05, 0.05), new THREE.MeshBasicMaterial({ color: new THREE.Color(col).multiplyScalar(2.6), toneMapped: false })); m.position.set(x, y, z); m.rotation.y = ry; stage.add(m); return m; };
+  tube(PALETTE.mint, 9, 0, 0.03, 2);                           // 舞台前沿
+  tube(PALETTE.pink, 6, -4.5, 0.03, -1, Math.PI / 2); tube(PALETTE.pink, 6, 4.5, 0.03, -1, Math.PI / 2);
+  tube(PALETTE.lemon, 8.4, 0, 5.2, -3.0);                     // 屏上方的灯架
+}
+// 光束：从灯架打下来的几道锥光（加法），C 位一束主光
+const beams = [];
+{
+  const mat = col => new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    uniforms: { c: { value: new THREE.Color(col) }, k: { value: 0.2 } },
+    vertexShader: 'varying float h; void main(){ h = position.y / 5.2 + 0.5; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',   // h：1 = 灯架那头，0 = 落地那头（淡到没有，不留一圈亮边）
+    fragmentShader: 'uniform vec3 c; uniform float k; varying float h; void main(){ gl_FragColor = vec4(c * k * pow(clamp(h, 0.0, 1.0), 1.6), 1.0); }' });
+  for (const [x, col, tilt] of [[-3.4, PALETTE.pink, 0.42], [-1.7, PALETTE.mint, 0.2], [0, '#fff4d6', 0], [1.7, PALETTE.mint, -0.2], [3.4, PALETTE.pink, -0.42]]) {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.06, x === 0 ? 0.75 : 0.5, 5.2, 24, 1, true), mat(col));
+    const piv = new THREE.Group(); piv.position.set(x, 5.15, x === 0 ? -0.2 : -2.4); m.position.y = -2.6; piv.add(m); piv.rotation.z = tilt; piv.userData = { tilt, x };
+    scene.add(piv); beams.push(piv);
+  }
+}
+
+const camera = new THREE.PerspectiveCamera(32, 16 / 9, 0.05, 200);
+const tag = document.getElementById('tag');
+const smooth = p => { p = Math.min(1, Math.max(0, p)); return p * p * (3 - 2 * p); };
+
+function draw(T) {
+  girl.root.position.set(0, 0, 0.15); girl.root.rotation.set(0, 0, 0); scene.add(girl.root);
+  girl.play(LEAD, T); girl.setSkin('toon', T);
+  crew.update(T, { seq: CREW, jitter: 0.25 });
+  const b = Math.min(2, Math.floor((T - T0) / BAR)), u = (T - T0) / BAR - b;
+  const kick = music.pulse('kick', T, { decay: 0.14 });
+  let ledMix = 1;
+  camera.fov = 32;
+  if (b === 0) {                 // 大全景：舞台 + 大屏 + 伴舞，慢推
+    camera.position.set(0.5 - 0.4 * u, 1.05, 7.0 - 0.6 * u); camera.lookAt(0, 2.05, -1.6);
+  } else if (b === 1) {          // C 位中景：略仰，带到两侧内圈伴舞
+    camera.position.set(-0.35 + 0.3 * u, 0.6, 3.5); camera.lookAt(0, 1.12, -0.6);
+  } else {                       // 推近大屏：从舞台上空越过她，屏幕铺满画面时像素格淡掉
+    const p = smooth(u / 0.8), fill = (led.height / 2) / Math.tan(camera.fov * Math.PI / 360);
+    camera.position.set(0, 1.9 + (LED_Y - 1.9) * p, 5.6 + (led.mesh.position.z + fill - 5.6) * p); camera.lookAt(0, LED_Y, -3.3);
+    ledMix = 1 - smooth((p - 0.55) / 0.4);
+  }
+  camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+  // 头在画面外时不传 camera（girl.js 的五官层在头出画时读回遮罩会报 RangeError；不传 camera = 退回网格投影五官）
+  const hp = girl.headPosition(new THREE.Vector3()).project(camera), headIn = Math.abs(hp.x) < 0.92 && Math.abs(hp.y) < 0.92 && hp.z < 1;
+  girl.face?.update(T, headIn ? { blink: 'auto', camera } : { blink: 'auto' });
+  led.update(T, { led: ledMix, bright: 1.05 + 0.25 * kick });
+  beams.forEach((p, i) => { p.rotation.z = p.userData.tilt + (p.userData.x ? 0.1 * Math.sin(T * 1.6 + i) : 0); p.children[0].material.uniforms.k.value = (p.userData.x ? 0.1 : 0.2) + 0.1 * kick; });
+  tag.textContent = `bar ${b + 1}/3 · ${['大全景', 'C 位中景', '推近大屏'][b]}   T=${T.toFixed(2)}`;
+  mv.stage.render(scene, camera, { bloom: { strength: 0.75, threshold: 1.2 }, chroma: 0.12 + 0.2 * kick, grade: { vignette: 0.3 } });
+}
+mv.mount(draw, { offset: T0, duration: DUR });
+</script>
+</body>
+</html>

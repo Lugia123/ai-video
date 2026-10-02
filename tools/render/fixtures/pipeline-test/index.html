@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pipeline-test</title>
+<style>
+  :root {
+    --bg: #f3efe6;
+    --ink: #1f1d1a;
+    --muted: #7a746a;
+    --accent: #c8553d;
+  }
+  html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
+  #stage {
+    position: absolute; left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    transform-origin: 0 0;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Noto Sans CJK SC", sans-serif;
+  }
+  #stage * { box-sizing: border-box; }
+
+  /* ---- 本集画面元素 ---- */
+  .shape { position: absolute; }
+  #square { left: 0; top: 330px; width: 260px; height: 260px; background: var(--ink); }
+  #circle { left: 1110px; top: 330px; width: 260px; height: 260px; border-radius: 50%; background: var(--accent); }
+  #triangle { left: 1470px; top: 330px; width: 300px; height: 260px; }
+  #dots { position: absolute; left: 360px; right: 360px; top: 690px; height: 80px; display: flex; align-items: flex-end; gap: 12px; }
+  #dots i { flex: 1; background: var(--muted); }
+  #timecode { position: absolute; left: 0; right: 0; top: 140px; text-align: center;
+    font: 500 40px/1 ui-monospace, Menlo, monospace; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* ---- 字幕 ---- */
+  #subtitle {
+    position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%);
+    width: max-content; max-width: 1500px; padding: 0 24px;
+    text-align: center; font-size: 44px; line-height: 1.45; color: var(--ink);
+  }
+
+  /* ---- 预览控制条（?render=1 时不显示）---- */
+  #hud {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 36px;
+    display: flex; align-items: center; gap: 12px; padding: 0 12px;
+    background: rgba(0,0,0,.6); color: #ddd; font: 13px/1 ui-monospace, Menlo, monospace;
+  }
+  #hud[hidden] { display: none; }
+  #hud .bar { flex: 1; height: 6px; background: #444; position: relative; cursor: pointer; }
+  #hud .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #ddd; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="timecode"></div>
+  <div class="shape" id="square"></div>
+  <div class="shape" id="circle"></div>
+  <svg class="shape" id="triangle" viewBox="0 0 300 260"><polygon points="150,0 300,260 0,260" fill="#3d6c8c"/></svg>
+  <div id="dots"></div>
+  <div id="subtitle"></div>
+</div>
+<div id="hud" hidden><span id="hud-play">▶ 空格播放</span><div class="bar" id="hud-bar"><i></i></div><span id="hud-time"></span></div>
+
+<script>
+/* ============================================================
+ * 约定（见 CLAUDE.md）：
+ *   window.__video = { width, height, fps, duration, seek(t) }
+ *   render(t) 必须是 t 的纯函数：不读时钟、不用 Math.random、不用 CSS 动画/过渡。
+ *   时间轴只从 narration/timings.json 取，用 seg('s01').start 之类，不手写秒数。
+ * ============================================================ */
+
+const W = 1920, H = 1080, FPS = 30;
+const RENDER = new URLSearchParams(location.search).get('render') === '1';
+const SHOW_SUBTITLES = true;
+
+/* ---------- 工具函数 ---------- */
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+/** t 在 [a, b] 里的进度，0..1 */
+const prog = (t, a, b) => (b <= a ? (t >= b ? 1 : 0) : clamp((t - a) / (b - a)));
+const ease = {
+  linear: p => p,
+  inOut: p => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2),
+  out: p => 1 - Math.pow(1 - p, 3),
+  in: p => p * p * p,
+};
+/** 带种子的 PRNG（mulberry32）：同一 seed 永远给出同一串数。在模块顶层生成好再用，不要在 render 里每帧新造随机数。 */
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ---------- 时间轴（由旁白驱动） ---------- */
+let TL = { segments: [], duration: 10 };
+const seg = id => {
+  const s = TL.segments.find(s => s.id === id);
+  if (!s) throw new Error(`timings.json 里没有段落 ${id}`);
+  return s;
+};
+async function loadTimings() {
+  try {
+    const r = await fetch('narration/timings.json', { cache: 'no-store' });
+    if (r.ok) return await r.json();
+  } catch (e) { /* 还没生成旁白时用默认时长 */ }
+  console.warn('没有 narration/timings.json，使用默认 10 秒时间轴');
+  return TL;
+}
+
+/* ---------- 画面（纯技术测试：几何图形 + 时间码） ---------- */
+const $ = id => document.getElementById(id);
+const el = { square: $('square'), circle: $('circle'), triangle: $('triangle'), dots: $('dots'),
+             timecode: $('timecode'), subtitle: $('subtitle') };
+
+// 用带种子的 PRNG 预生成柱高：每次打开页面都一样
+const rand = mulberry32(42);
+const DOTS = Array.from({ length: 24 }, () => ({ h: 0.2 + 0.8 * rand(), phase: rand() * Math.PI * 2 }));
+el.dots.innerHTML = DOTS.map(() => '<i></i>').join('');
+const bars = [...el.dots.children];
+
+function render(t) {
+  const s1 = seg('s01'), s2 = seg('s02'), s3 = seg('s03');
+  const end = 1 - prog(t, TL.duration - 0.5, TL.duration);  // 结尾整体淡出
+
+  // s01：方块从左滑到中间
+  const pSlide = ease.inOut(prog(t, s1.start + 0.3, s1.start + 2.5));
+  // s02：方块匀速旋转（40°/s，避免 1fps 抽帧时和 90° 对称性混叠看起来不动）
+  const rot = 40 * Math.max(0, t - s2.start);
+  el.square.style.transform = `translateX(${lerp(-300, 830, pSlide)}px) rotate(${rot}deg)`;
+  el.square.style.opacity = end;
+
+  // s02：圆形淡入
+  const pCircle = ease.out(prog(t, s2.start, s2.start + 0.8));
+  el.circle.style.opacity = pCircle * end;
+  el.circle.style.transform = `scale(${lerp(0.6, 1, pCircle)})`;
+
+  // s03：三角形从下方升起
+  const pTri = ease.out(prog(t, s3.start, s3.start + 1.0));
+  el.triangle.style.opacity = pTri * end;
+  el.triangle.style.transform = `translateY(${lerp(240, 0, pTri)}px)`;
+
+  // 柱子：高度由种子数 + t 决定
+  bars.forEach((b, i) => {
+    const d = DOTS[i];
+    b.style.height = `${(d.h * (0.6 + 0.4 * Math.sin(t * 2 + d.phase))) * 100}%`;
+  });
+  el.dots.style.opacity = end;
+
+  const frame = Math.round(t * FPS);
+  el.timecode.textContent = `t = ${t.toFixed(3)}s   frame ${String(frame).padStart(4, '0')}`;
+
+  renderSubtitle(t);
+}
+
+function renderSubtitle(t) {
+  if (!SHOW_SUBTITLES) { el.subtitle.textContent = ''; return; }
+  const s = TL.segments.find(s => t >= s.start && t < s.end + 0.2);
+  const text = s ? s.text : '';
+  if (el.subtitle.textContent !== text) el.subtitle.textContent = text;
+  el.subtitle.style.opacity = s ? prog(t, s.start, s.start + 0.15) * (1 - prog(t, s.end, s.end + 0.2)) : 0;
+}
+
+/* ---------- 缩放以适应窗口（渲染时视口就是 W×H，缩放为 1） ---------- */
+function fit() {
+  const k = Math.min(innerWidth / W, innerHeight / H);
+  const stage = $('stage');
+  stage.style.transform = `scale(${k})`;
+  stage.style.left = `${(innerWidth - W * k) / 2}px`;
+  stage.style.top = `${(innerHeight - H * k) / 2}px`;
+}
+
+/* ---------- 预览播放器：有旁白就跟着音频走，没有就用 rAF 时钟 ---------- */
+function startPreview() {
+  const hud = $('hud'); hud.hidden = false;
+  const audio = new Audio('narration/narration.mp3');
+  let hasAudio = false;
+  audio.addEventListener('loadedmetadata', () => { hasAudio = true; });
+  let playing = false, t = 0, last = 0;
+
+  const setT = x => { t = clamp(x, 0, TL.duration); if (hasAudio) audio.currentTime = t; };
+  const toggle = () => {
+    playing = !playing;
+    if (playing) { if (t >= TL.duration) setT(0); if (hasAudio) audio.play(); last = performance.now(); }
+    else if (hasAudio) audio.pause();
+  };
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    if (e.code === 'ArrowLeft') setT(t - 2);
+    if (e.code === 'ArrowRight') setT(t + 2);
+  });
+  $('stage').addEventListener('click', toggle);
+  $('hud-bar').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setT((e.clientX - r.left) / r.width * TL.duration);
+  });
+
+  (function loop(now) {
+    if (playing) {
+      if (hasAudio && !audio.paused) t = audio.currentTime;
+      else t += (now - last) / 1000;
+      if (t >= TL.duration) { t = TL.duration; playing = false; audio.pause(); }
+    }
+    last = now;
+    render(t);
+    $('hud-play').textContent = playing ? '❚❚' : '▶ 空格播放';
+    $('hud-time').textContent = `${t.toFixed(2)} / ${TL.duration.toFixed(2)}s`;
+    hud.querySelector('.bar i').style.width = `${t / TL.duration * 100}%`;
+    requestAnimationFrame(loop);
+  })(performance.now());
+}
+
+/* ---------- 启动 ---------- */
+(async () => {
+  TL = await loadTimings();
+  fit(); addEventListener('resize', fit);
+  await document.fonts.ready;
+  render(0);
+  // __video 出现即表示就绪：渲染器等到它存在才开始 seek
+  window.__video = { width: W, height: H, fps: FPS, duration: TL.duration, seek: render };
+  if (!RENDER) startPreview();
+})();
+</script>
+</body>
+</html>

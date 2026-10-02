@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 2 v4（58.40–74.80 s，对齐 final 帧格）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeC2V4, C2 } from './shots/c2-v4.js';   // #1048 分镜：fresh/v4-rest/c2/plan.md
+
+const half = false;     // 渲染器不传查询串，所以低分辨率单独一页（c2-v4-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = await makeC2V4(mv);
+// #1068 合 final 用：起点对到 final 的帧格——58.4 = 第 1752 帧，渲 492 帧到第 2243 帧（74.767），下一段从第 2244 帧（74.8）接。58.40–58.42 这半帧导演仍取第一个镜头
+mv.mount(shots, { offset: 58.4, duration: 492 / 30 });
+</script>
+</body>
+</html>

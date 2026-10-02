@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) v4-01 定稿：镜筒 + 关盒子（0–22.6 s）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeV401Final } from './shots/v4-01-final.js';   // #998 定稿；原版 shots/v4-01-2001.js 保留不挂
+
+const half = new URLSearchParams(location.search).get('half') === '1';     // ?half=1：960×540 低分辨率样片
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = await makeV401Final(mv);
+mv.mount(shots, { offset: 0, duration: 22.6 });
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>vfx.js 画廊</title>
+<style> html, body { margin: 0; background: #0A0A10; overflow: hidden; } canvas { display: block; } </style>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { mountGallery } from './world-gallery.js';
+import { createParticles, sampleMesh, sampleText, sampleShape, createFluid, createShatter, createShockwave, createDroste, createKaleido, loadFont } from '../vfx.js';
+import { createCity, createVoxelGround, chromeMatcap, PAL } from '../world.js';
+
+const INK = new THREE.Color(PAL.ink);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const cam = (fov = 40) => new THREE.PerspectiveCamera(fov, 16 / 9, 0.1, 400);
+function scn(...objs) { const s = new THREE.Scene(); s.background = INK; objs.forEach(o => s.add(o)); return s; }
+// 正对 16×9 平面的相机
+function flatCam() { const c = cam(40); c.position.set(0, 0, 4.5 / Math.tan(THREE.MathUtils.degToRad(20))); return c; }
+const rtOf = () => new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType, samples: 4 });
+function renderRT(mv, rt, scene, camera) { const r = mv.stage.renderer; r.setRenderTarget(rt); r.setClearColor(INK, 1); r.clear(); r.render(scene, camera); r.setRenderTarget(null); }
+
+// 数字贴图（碎裂用）：粉底黑字「0.81」
+async function numberTexture(text) {
+  await loadFont('Anton');
+  const cv = document.createElement('canvas'); cv.width = 1600; cv.height = 900;
+  const g = cv.getContext('2d');
+  g.fillStyle = PAL.lemon; g.fillRect(0, 0, 1600, 900);
+  g.fillStyle = PAL.ink; g.font = '640px "Anton"'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, 800, 480);
+  g.font = '64px "Anton"'; g.fillText('P(DOOM)', 800, 90);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+}
+
+// 给德罗斯特 / 万花筒当内容的小场景
+function chromeScene() {
+  const mc = chromeMatcap();
+  const s = scn();
+  const bg = createFluid({ width: 40, height: 22.5 }); bg.mesh.position.z = -8; s.add(bg.mesh);
+  const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(1.1, 0.34, 220, 24), new THREE.MeshMatcapMaterial({ matcap: mc }));
+  s.add(knot);
+  const cubes = [];
+  [PAL.pink, PAL.mint, PAL.lemon, PAL.pink, PAL.mint, PAL.lemon].forEach((c, i) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(1.4) }));
+    s.add(m); cubes.push(m);
+  });
+  const c = cam(40); c.position.set(0, 0.6, 7); c.lookAt(0, 0, 0);
+  return { s, c, update(t) {
+    knot.rotation.set(t * 0.5, t * 0.7, 0); bg.update(t, { speed: 0.8, bands: 3, mix: 0.35 });
+    cubes.forEach((m, i) => { const a = t * 0.6 + i * Math.PI / 3; m.position.set(Math.cos(a) * 2.6, Math.sin(a * 1.3) * 0.9, Math.sin(a) * 2.6); m.rotation.set(t + i, t * 1.3, 0); });
+  } };
+}
+
+const segments = [
+  { name: 'particles · 网格采样 → 汇聚成字 → 爆散', dur: 8,
+    async build() {
+      const P = createParticles({ count: 18000, seed: 4, size: 1.6 });
+      const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(1.4, 0.42, 200, 24));
+      P.setShape('knot', sampleMesh(knot, 18000, 1));
+      P.setShape('foom', await sampleText('FOOM', 18000, { height: 2.4, depth: 0.25 }));
+      const c = cam(40); c.position.set(0, 0, 9);
+      return { P, scene: scn(P.points), camera: c };
+    },
+    update(s, lt, u) {
+      // 0–1.6 网格上的粒子；1.6–4.4 汇聚成 FOOM；4.4–5.6 停；5.6 起爆散
+      const inKnot = lt < 1.6;
+      s.P.update(lt, inKnot ? { from: 'knot', p: 0, swirl: lt * 0.4 } : { from: 'knot', to: 'foom', p: clamp((lt - 1.6) / 2.8), swirl: 0.64 * (1 - smooth((lt - 1.6) / 2.8)), burst: Math.max(0, lt - 5.6) ** 0.8 * 1.8 });
+      s.camera.position.set(Math.sin(lt * 0.2) * 1.2, 0, 9 - u * 0.8); s.camera.lookAt(0, 0, 0);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.8, threshold: 0.8 } } };
+    } },
+  { name: 'fluid · 粉/薄荷迷幻流体', dur: 5,
+    build() { const f = createFluid({ width: 16, height: 9 }); return { f, scene: scn(f.mesh), camera: flatCam() }; },
+    update(s, lt, u) { s.f.update(lt + 3, { speed: 1.2, bands: 4 }); return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.4, threshold: 1.0 } } }; } },
+  { name: 'shatter · 沃罗诺伊碎裂', dur: 6,
+    async build() {
+      const tex = await numberTexture('0.81');
+      const sh = createShatter({ width: 8, height: 4.5, cells: 56, texture: tex, impact: [1.1, 0.3] });
+      const c = cam(40); c.position.set(0, 0, 11);
+      return { sh, scene: scn(sh.group), camera: c };
+    },
+    update(s, lt, u) {
+      s.sh.update(lt, { crack: smooth((lt - 0.5) / 1.8), shatter: Math.max(0, lt - 3.2) });
+      s.camera.position.set(Math.sin(lt * 0.3) * 0.6, 0, 11 - u * 1.5); s.camera.lookAt(0, 0, 0);
+      const hit = Math.max(0, 1 - Math.abs(lt - 3.2) / 0.12);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.7, threshold: 0.85 }, flash: hit * 0.5 } };
+    } },
+  { name: 'shockwave · 冲击波环', dur: 6,
+    build() {
+      const v = createVoxelGround({ n: 48 });
+      const rings = [0.5, 2.3, 4.0].map((t0, i) => ({ t0, w: createShockwave({ radius: 22, accent: [PAL.pink, PAL.mint, PAL.lemon][i] }) }));
+      const s = scn(v.mesh); rings.forEach(r => { r.w.mesh.rotation.x = -Math.PI / 2; r.w.mesh.position.y = 0.6; s.add(r.w.mesh); });
+      return { v, rings, scene: s, camera: cam(42) };
+    },
+    update(s, lt, u) {
+      s.v.update(lt, { amp: 0.15, pulses: s.rings.map(r => ({ t0: r.t0, amp: 2.2, speed: 16 })) });
+      s.rings.forEach(r => r.w.update(lt, { t0: r.t0, dur: 1.5 }));
+      const a = 0.8 + u * 0.3; s.camera.position.set(Math.cos(a) * 30, 17, Math.sin(a) * 30); s.camera.lookAt(0, -2, 0);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 1.0, threshold: 0.8 } } };
+    } },
+  { name: 'droste · 递归画中画', dur: 6,
+    build(mv) {
+      const city = createCity({ seed: 21, n: 13 });
+      const src = { s: scn(city.group), c: cam(38) };
+      const rt = rtOf();
+      const d = createDroste({ texture: rt.texture, scale: 0.56 });
+      return { city, src, rt, d, scene: scn(d.mesh), camera: flatCam(), mv };
+    },
+    update(s, lt, u) {
+      s.city.update(lt, { draw: 1, extrude: 1, light: 1 });
+      const a = -0.6 + lt * 0.12; s.src.c.position.set(Math.cos(a) * 13, 6, Math.sin(a) * 13); s.src.c.lookAt(0, 1.2, 0);
+      renderRT(s.mv, s.rt, s.src.s, s.src.c);
+      s.d.update(lt, { zoom: lt * 0.45, spin: 0.12 });
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.8, threshold: 0.9 } } };
+    } },
+  { name: 'kaleido · 万花筒镜像', dur: 6,
+    build(mv) {
+      const src = chromeScene(), rt = rtOf();
+      const k = createKaleido({ texture: rt.texture, segments: 8 });
+      return { src, rt, k, scene: scn(k.mesh), camera: flatCam(), mv };
+    },
+    update(s, lt, u) {
+      s.src.update(lt);
+      renderRT(s.mv, s.rt, s.src.s, s.src.c);
+      s.k.update(lt, { rotate: lt * 0.25, zoom: 1.1 + 0.3 * Math.sin(lt * 0.5), offset: [0.12, 0.05], segments: 8 });
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.7, threshold: 0.9 } } };
+    } },
+];
+
+await mountGallery(segments);
+</script>
+</body>
+</html>

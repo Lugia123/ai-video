@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 3 方案 A「灌满的办公室」（94.78–105.96 s，低分辨率样片）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeC3OptA, C3A } from "./shots/c3-optA.js";   // #1059
+
+const half = true;     // 渲染器不传查询串，所以低分辨率单独一页（c3-v4-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const draw = await makeC3OptA(mv);
+mv.mount(draw, { offset: C3A.t0, duration: C3A.end - C3A.t0 });
+</script>
+</body>
+</html>

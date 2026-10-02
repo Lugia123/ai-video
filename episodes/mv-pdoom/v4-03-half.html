@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) v4-03（38.4–58.4 s，低分辨率样片 960×540）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { makeV403a } from './shots/v4-03a-v2.js';   // #1030 返工版（旧版 shots/v4-03a.js 保留）
+import { makeV403b } from './shots/v4-03b.js';
+
+const mv = await loadMV({ width: 960, height: 540 });   // 渲染器不传查询串，所以低分辨率单独一页
+await initType3D();
+const b = await makeV403b(mv);
+const shots = [...await makeV403a(mv, { next: b[0] }), ...b];
+mv.mount(shots, { offset: 38.4, duration: 20 });
+</script>
+</body>
+</html>

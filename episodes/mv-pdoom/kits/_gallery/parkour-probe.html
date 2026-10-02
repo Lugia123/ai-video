@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>跑酷片段根运动探针</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<!-- #930 用：每个跑酷片段按原速（非原地）逐帧量胯位移、两脚高度 / 前后，window.__probe 给 JSON。只做测量，不出画面。 -->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { createGirl, loadAnims } from '../girl.js';
+import { mixamoMove } from '../../../../assets/lib/dance3d.js';
+const NAMES = (new URLSearchParams(location.search).get('names') || 'move__sprint,move__sprint__inplace,move__run-jump,move__run-jump__inplace,move__vault,move__wall-run,move__run-slide,move__front-flip,move__sprint-roll,move__sprint-roll__inplace,move__land-run,move__sprint-jump,move__fall-air,move__jump-down,act__swagger-walk,dance__slide-walk').split(',');
+const mv = await loadMV({ base: '../..' });
+const girl = await createGirl(mv, { points: 100 });
+const moves = await loadAnims(NAMES, { includeBad: true });
+const dancer = girl.dancer, I2 = dancer.S.info;
+const out = {};
+for (const m of moves) {
+  const free = mixamoMove(m.srcRoot, m.clip, { bpm: 132, loop: false, inPlace: false, ground: false, name: m.name });
+  const fr = [];
+  for (let ct = 0; ct < free.duration; ct += 1 / 30) {
+    const p = free.solve(ct / free.srcPeriod, dancer);
+    const { X } = dancer.solver.fk(p.d, p.hips);
+    const r = v => [+v.x.toFixed(3), +v.y.toFixed(3), +v.z.toFixed(3)];
+    fr.push({ t: +ct.toFixed(3), hips: r(p.hips), lf: r(X.LeftFoot), rf: r(X.RightFoot), lt: X.LeftToeBase ? r(X.LeftToeBase) : null, rt: X.RightToeBase ? r(X.RightToeBase) : null, head: r(X.Head), lh: r(X.LeftHand), rh: r(X.RightHand) });
+  }
+  out[m.name] = { dur: free.duration, ankle0: +I2.LeftFoot.P.y.toFixed(3), hips0: r0(I2.Hips.P), fr };
+}
+function r0(v) { return [+v.x.toFixed(3), +v.y.toFixed(3), +v.z.toFixed(3)]; }
+window.__probe = out;
+</script>
+</body>
+</html>

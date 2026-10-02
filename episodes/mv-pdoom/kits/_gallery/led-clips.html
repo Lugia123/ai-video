@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>LED 大屏轮播小样：动作片段和逐词口型特写交替（#1055）</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; top: 20px; font: 22px 'STM', monospace; color: #F2EDE4; letter-spacing: 0.06em; opacity: 0.85; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  大屏素材库（episodes/cast-cyber-girl/closeup/screen-clips/）的轮播小样：歌曲 78.42 起 8 小节（14.5 s，主歌 3 舞台段）。
+  只有一块 LED 大屏（没有舞台和 C 位），每小节强拍换一次内容：动作片段和逐词对口型的 2D 特写交替；下沿歌词条照常。
+  ?pattern=a,b,rig,…  可以换播放表（片段名见 screen-clips/clips.json，rig = 对口型特写）；?t0= 换起点；?led=0 关像素格。
+  渲染：node tools/render/render.mjs episodes/mv-pdoom/kits/_gallery --page led-clips.html --gpu
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { createLedScreen, barSchedule } from '../holo-dancer.js';
+
+const Q = new URLSearchParams(location.search);
+const mv = await loadMV(Q.has('half') ? { width: 960, height: 540 } : {});
+const { music } = mv;
+const T0 = +(Q.get('t0') ?? 78.42), BAR = music.period * 4;
+const PATTERN = (Q.get('pattern') ?? 'mic-full,rig,hairflip,face,point,mic-half,eyes-blink,turnback').split(',');
+const DUR = BAR * PATTERN.length;
+const schedule = barSchedule(mv, { t0: T0, pattern: PATTERN });
+const led = await createLedScreen(mv, { width: 6.6, schedule, clipsBase: Q.get('base') ?? undefined });   // ?base=<目录>/ 换片段目录（抠图版对比用）
+
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#05040c');
+scene.add(led.mesh);
+const camera = new THREE.PerspectiveCamera(32, 16 / 9, 0.05, 200);
+const tag = document.getElementById('tag');
+const LED = Q.has('led') ? +Q.get('led') : 1;
+
+function draw(T) {
+  const u = (T - T0) / DUR, kick = music.pulse('kick', T, { decay: 0.14 });
+  camera.position.set(-0.5 + 1.0 * u, -0.1, 8.4 - 0.5 * u); camera.lookAt(0, 0, 0);
+  led.update(T, { led: LED, bright: 1.05 + 0.2 * kick });
+  tag.textContent = `bar ${Math.floor((T - T0) / BAR) + 1}/${PATTERN.length} · ${led.clipAt(T) ?? 'rig（对口型特写）'}`;
+  mv.stage.render(scene, camera, { bloom: { strength: 0.6, threshold: 1.2 }, chroma: 0.1 + 0.15 * kick, grade: { vignette: 0.25 }, dither: 1.2 });
+}
+mv.mount(draw, { offset: T0, duration: DUR });
+</script>
+</body>
+</html>

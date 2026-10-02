@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>kits/paperclip-phys.js 小样：楼化成回形针坍塌 + 回形针真碰撞堆起来</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// #1073 小样。0–6.5 s：俯拍一栋回形针拼成的楼自上而下松开、坍塌、散落；6.5–15.2 s：低机位看 3200 枚倒下来堆成一堆；15.2–17.2 s：堆稳后的近景。远处是起伏的堆体。
+// ?half=1 → 960×540；?t=秒 直接看某一刻（预览用）。渲染器不传查询串，成片是 1920×1080。
+import * as THREE from 'three';
+import { loadMV } from './engine/index.js';
+import { loadClipBake, createClipPlayback, createClipDunes, createClipEnv, clipTileTexture, CLIP_TILE } from './kits/paperclip-phys.js';
+
+const Q = new URLSearchParams(location.search);
+const mv = await loadMV(Q.get('half') ? { width: 960, height: 540 } : {});
+const R = mv.stage.renderer; R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+const env = createClipEnv(R);
+const scene = new THREE.Scene(); scene.fog = new THREE.Fog('#0a0b14', 320, 900);
+const SUN = [-0.5, 0.6, 0.4];
+scene.add(new THREE.HemisphereLight('#aab4ff', '#0a0a14', 1.1));
+const sun = new THREE.DirectionalLight('#ffffff', 4.5); sun.position.set(SUN[0] * 160, SUN[1] * 160, SUN[2] * 160); sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -75, right: 75, top: 75, bottom: -75, near: 10, far: 400 }); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.05; scene.add(sun, sun.target);
+const gmap = clipTileTexture({ seed: 9 }); gmap.repeat.set(280 / CLIP_TILE, 280 / CLIP_TILE);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(140, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#565864', roughness: 0.7, metalness: 0.2, map: gmap }));      // 地面也铺回形针贴图，接真回形针的影子 ground.receiveShadow = true; scene.add(ground);
+
+const t0 = performance.now();
+const [bTower, bPile] = await Promise.all([loadClipBake('tower'), loadClipBake('pile')]);
+// 楼面：松开之前按位置画一格格的窗（暗墙 + 少数亮窗），松开那一下变回金属
+const win = new THREE.Color('#ffd58a'), wall = new THREE.Color('#3a3f58');
+const tower = createClipPlayback(bTower, { envMap: env, shadows: true, core: true, facade: (p, i, c) => { const side = Math.abs(p.x) > Math.abs(p.z) ? p.z : p.x, h = Math.sin(Math.floor(p.y / 6.6) * 12.9898 + Math.floor(side / 3.7) * 78.233 + (Math.abs(p.x) > Math.abs(p.z) ? 3 : 0)) * 43758.5453, edge = Math.max(Math.abs(p.x), Math.abs(p.z)) > 13.5;
+  c.copy(edge && p.y < 65.5 && (h - Math.floor(h)) > 0.62 && (p.y % 6.6) > 1.6 ? win : wall); } });
+const pile = createClipPlayback(bPile, { envMap: env, shadows: true });
+const dunes = createClipDunes({ size: 1100, count: 70000, unit: 1, amp: 34, wavelength: 230, flat: { x: 0, z: 0, r: 60 }, sun: SUN, envMap: env });
+const nearField = createClipDunes({ size: 190, count: 11000, unit: 1, amp: 0, base: false, seed: 8, sun: SUN, envMap: env, shadows: true });      // 近处地上散着的一层真回形针（不是贴图）
+scene.add(tower.group, pile.group, dunes.group, nearField.group);
+const loadMs = performance.now() - t0;
+
+const cam = new THREE.PerspectiveCamera(38, 16 / 9, 0.5, 2000), perf = { loadMs, updateMs: [] };
+window.__clipPerf = perf;
+const CUT = 6.5, CUT2 = 15.2, DUR = 17.2, T0 = 95.4, sm = p => { p = Math.min(1, Math.max(0, p)); return p * p * (3 - 2 * p); };
+mv.mount([{ id: 'clip-test', t0: T0, t1: T0 + DUR, transitionIn: { kind: 'cut' }, build: () => ({}), update(_, T) {
+  const k = T - T0, a = performance.now();
+  if (k < CUT) { tower.group.visible = true; pile.group.visible = false; tower.update(k);
+    const u = sm(k / CUT), ang = 0.7 + 0.5 * u; cam.fov = 38; cam.position.set(Math.cos(ang) * 62, 150 - 92 * u, Math.sin(ang) * 62); cam.lookAt(0, 40 - 34 * u, 0);        // 高空俯拍，慢慢降下来
+  } else if (k < CUT2) { const j = k - CUT; tower.group.visible = false; pile.group.visible = true; pile.update(j + 0.25);
+    const u = sm(j / (CUT2 - CUT)); cam.fov = 44; cam.position.set(31 - 9 * u, 2.6 + 2.2 * u, 20 - 4 * u); cam.lookAt(0, 7 - 2.5 * u, 0);                               // 低机位，贴着地看它堆起来
+  } else { const j = k - CUT2; tower.group.visible = false; pile.group.visible = true; pile.update(9); cam.fov = 34; cam.position.set(19 - 1.5 * j, 10.5, 15); cam.lookAt(1.5, 5.6, 0); }                                     // 堆稳之后的近景：一枚一枚叠着
+  cam.updateProjectionMatrix(); cam.updateMatrixWorld(true); perf.updateMs.push(performance.now() - a);
+  return { scene, camera: cam, post: { bloom: { strength: 0.35, threshold: 1.0, radius: 0.6 }, grade: { vignette: 0.35 } } };
+} }], { offset: T0, duration: DUR });
+</script>
+</body>
+</html>

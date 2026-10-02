@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 桥段 v4（109.32–123.87 s，低分辨率样片）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeBRV4, BR } from './shots/br-v4.js';   // #1056 分镜：fresh/v4-rest/br/plan.md
+
+const half = true;     // 渲染器不传查询串，所以低分辨率单独一页（br-v4-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = await makeBRV4(mv);
+mv.mount(shots, { offset: BR.t0, duration: BR.end - BR.t0 });
+</script>
+</body>
+</html>

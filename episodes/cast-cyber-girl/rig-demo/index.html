@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rig-demo</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
+  #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; }
+  #stage canvas { display: block; }
+  #hud {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 36px;
+    display: flex; align-items: center; gap: 12px; padding: 0 12px;
+    background: rgba(0,0,0,.6); color: #ddd; font: 13px/1 ui-monospace, Menlo, monospace;
+  }
+  #hud[hidden] { display: none; }
+  #hud .bar { flex: 1; height: 6px; background: #444; position: relative; cursor: pointer; }
+  #hud .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #ddd; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<div id="hud" hidden><span id="hud-play">▶ 空格播放</span><div class="bar" id="hud-bar"><i></i></div><span id="hud-time"></span></div>
+
+<script type="module">
+/* 主角近景 rig 演示：口型同步、两次眨眼、一次 smile、轻微摆头 + 头发滞后、呼吸。
+ * 约定见 CLAUDE.md：window.__video.seek(t) 同步画出第 t 秒；画面是 t 的纯函数。 */
+import { createKit, C, F, clamp } from '../../../assets/lib/paper-kit.js';
+import { loadRig, lipsync, analyzeVoice, blinks, keys, spans, wobble } from '../../../assets/lib/layer-rig.js';
+
+const W = 1920, H = 1080, FPS = 30, DURATION = 10;
+const RENDER = new URLSearchParams(location.search).get('render') === '1';
+const ctx = document.getElementById('c').getContext('2d');
+const K = createKit(ctx);
+
+const TL = await (await fetch('narration/timings.json', { cache: 'no-store' })).json();
+const [sen1, sen2] = TL.segments[0].sentences;
+const voiced = await analyzeVoice('narration/narration.mp3');
+const rig = await loadRig('../closeup/layers/');
+
+// ---- 表演：时间点都挂在旁白句子上 ----
+const talkEnd = sen2.end;
+const lips = lipsync(TL, { voiced });
+// 两次眨眼：第一句说话中一次、第二句中一次（吸附到帧格）
+const blink = blinks({ at: [sen1.start + 1.17, sen2.start + 1.29] });
+// 说完后笑一下，约 2 秒
+const face = spans([[talkEnd + 0.45, talkEnd + 2.45, { eyes: 'smile', mouth: 'smile' }]], { eyes: 'open', mouth: 'rest' });
+
+const roll = keys([
+  [0, 0], [sen1.start + 0.1, -2.5],                // 嗨：往左歪
+  [sen1.start + 1.0, -1], [sen1.start + 2.1, 2],   // 主讲：回正再往右
+  [sen2.start - 0.1, 2.5], [sen2.start + 0.6, -2], // 接下来：一次明显的摆头（头发滞后最明显的地方）
+  [sen2.start + 1.6, 1], [talkEnd, 0],
+  [talkEnd + 0.6, 3.5], [talkEnd + 2.1, 3.5], [talkEnd + 2.9, 0.5],  // 笑的时候歪头，再回来
+]);
+const nod = keys([
+  [sen1.start + 1.8, 0], [sen1.start + 2.15, 5], [sen1.start + 2.5, 0],  // "主讲" 点一下头
+  [sen2.end - 0.6, 0], [sen2.end - 0.3, 4], [sen2.end, 0],             // "看看"
+]);
+const drift = wobble(11, 2.5);
+const pose = t => ({ roll: roll(t), nod: nod(t), dx: drift(t) });
+
+function wrap(text, maxW) {
+  const lines = []; let cur = '';
+  for (const ch of text) {
+    if (ctx.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ''; }
+    cur += ch;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  K.setTime(t);
+  K.drawBG();
+
+  // 人物：右侧 1/3，半身入画（图层画布底边出画）
+  const st = rig.draw(ctx, t, { x: 1244, y: 38, scale: 0.86, pose, face, lips, blink });
+
+  // 左侧字幕：当前句
+  const s = [sen1, sen2].find(s => t >= s.start - 0.1 && t < s.end + 0.5);
+  if (s) {
+    const a = clamp((t - s.start + 0.1) / 0.2) * (1 - clamp((t - s.end - 0.3) / 0.2));
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = C.ink;
+    ctx.font = `600 64px ${F.zh}`;
+    ctx.textBaseline = 'top';
+    const lines = wrap(s.text, 860);
+    lines.forEach((ln, i) => ctx.fillText(ln, 170, 470 - lines.length * 44 + i * 88));
+    ctx.restore();
+  }
+  return st;   // 眼/嘴状态、头部矩阵、发梢位置，自检用
+}
+
+function fit() {
+  const k = Math.min(innerWidth / W, innerHeight / H);
+  const st = document.getElementById('stage');
+  st.style.transform = `scale(${k})`;
+  st.style.left = `${(innerWidth - W * k) / 2}px`;
+  st.style.top = `${(innerHeight - H * k) / 2}px`;
+}
+
+function startPreview() {
+  const hud = document.getElementById('hud'); hud.hidden = false;
+  const audio = new Audio('narration/narration.mp3');
+  let playing = false, t = 0, last = 0;
+  const setT = x => { t = clamp(x, 0, DURATION); if (t < TL.duration) audio.currentTime = t; };
+  const toggle = () => {
+    playing = !playing;
+    if (playing) { if (t >= DURATION) setT(0); audio.currentTime = t; if (t < TL.duration) audio.play(); last = performance.now(); }
+    else audio.pause();
+  };
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    if (e.code === 'ArrowLeft') setT(t - 1);
+    if (e.code === 'ArrowRight') setT(t + 1);
+  });
+  document.getElementById('stage').addEventListener('click', toggle);
+  document.getElementById('hud-bar').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setT((e.clientX - r.left) / r.width * DURATION);
+  });
+  (function loop(now) {
+    if (playing) {
+      t += (now - last) / 1000;
+      if (!audio.paused && Math.abs(audio.currentTime - t) > 0.08) t = audio.currentTime;
+      if (t >= DURATION) { t = DURATION; playing = false; audio.pause(); }
+    }
+    last = now;
+    render(t);
+    document.getElementById('hud-play').textContent = playing ? '❚❚' : '▶ 空格播放';
+    document.getElementById('hud-time').textContent = `${t.toFixed(2)} / ${DURATION.toFixed(2)}s`;
+    hud.querySelector('.bar i').style.width = `${t / DURATION * 100}%`;
+    requestAnimationFrame(loop);
+  })(performance.now());
+}
+
+fit(); addEventListener('resize', fit);
+await document.fonts.ready;
+render(0);
+window.__video = { width: W, height: H, fps: FPS, duration: DURATION, seek: render };
+if (!RENDER) startPreview();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>mv-pdoom · 主歌 3 + 预副歌 3</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!-- 歌曲时间 74.8–94.8 s。镜头在 shots/v3.js；普通打开点击 / 空格带音乐播放，?render=1 只等 seek。 -->
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { createGirl } from './kits/girl.js';
+import { makeV3 } from './shots/v3.js';
+
+const mv = await loadMV();
+const [, girl] = await Promise.all([initType3D(), createGirl(mv)]);
+const { shots, cuts } = makeV3(mv, { girl });
+window.__cuts = cuts;
+mv.mount(shots, { offset: 74.8, duration: 20.0 });
+</script>
+</body>
+</html>

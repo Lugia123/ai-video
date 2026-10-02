@@ -1,0 +1,10 @@
+{
+ "about": "#936 多角度五官组（tools/face-bake/decals_yaw.py 生成）；girl.js 的 style:\"Y\" 按 yaw 在这些组 + 正面化 B 套（0°）之间交叉淡化。各组实测 yaw 见各自 decals.json（fit_pose 拟合）；有组在 ±5° 内时角度轴不放 B 套（B 只补缺的状态）",
+ "groups": [
+  "m10",
+  "n10",
+  "z0",
+  "p20",
+  "p10"
+ ]
+}

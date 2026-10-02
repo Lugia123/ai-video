@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>face-sing3：正面唱 · 小嘴</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!--
+  #935 第二轮：正面唱（嘴整体缩小 30%），镜头 yaw 只在 −15° ~ +15° 之间慢慢摆（看脸镜头上限 20°）：歌曲 21.9–29.9 s（副歌 1 头四句），正面近景（脸占画高约 28%），口型按 lyrics 词级时间。
+  镜头：yaw = 15°·sin(2π·(T − 21.9)/8)，8 秒一个来回。表情：开头「笑」（上一句 alive 的长音：先张嘴笑着唱，尾音收成嘴角上扬的闭口笑）→ 唱 → FOOM 时「惊讶」→ 唱。自动眨眼（半闭 1 帧 + 全闭 2 帧 + 半闭 1 帧）。
+  头只做轻微的随拍点头 / 摆动（不跳舞，先把脸做对）。bloom 用脸部安全值（阈值 1.4，不晕开白眼球 / 高光），不加色差。
+  window.__faceLog(fps) → 每帧 { T, eyes, mouth, yaw }，自检用。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights } from '../girl.js';
+const mv = await loadMV();
+const { music } = mv;
+const T0 = 21.9, T1 = 29.9;
+const girl = await createGirl(mv, { points: 100 });
+const scene = new THREE.Scene(); scene.background = new THREE.Color(PALETTE.ink);
+scene.add(girl.root, createGirlLights());
+// 背景：纯墨色 + 暗角（先把脸做对，背景不抢）
+scene.background = new THREE.Color('#15121c');
+const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.02, 50);
+const hb = girl.dancer.S.info.Head.bone, sk = girl.mesh.skeleton, hbi = sk.boneInverses[sk.bones.indexOf(hb)];
+const faceCenter = () => new THREE.Vector3(0, 0.89, 0.05).applyMatrix4(hbi).applyMatrix4(hb.matrixWorld).applyMatrix4(girl.mesh.bindMatrix);
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const FACE = 0.28;
+const yawAt = T => 15 * Math.sin(2 * Math.PI * (T - T0) / 8);
+const exprAt = T => (T < 22.62 ? 'smile' : T >= 25.55 && T < 26.35 ? 'surprised' : 'neutral');
+// 开头是上一句「alive」的长音（21.35–22.76 连唱，没有空当）：前段张嘴笑着唱（grin 口型 = 嘴角上扬的开口笑），结尾 v 音收成闭口上扬笑
+const mouthAt = T => (T < 22.25 ? 'smile' : T < 22.62 ? 'smileup' : null);
+function draw(T) {
+  const b = music.beatAt(T), ph = b.phase * Math.PI * 2;
+  girl.root.position.set(0, 0, 0);
+  // 轻微随拍：点头 3°、摆 4°、身体随呼吸
+  const nod = 3 * Math.sin(ph) * smooth(22.6, 23.0, T), sway = 4 * Math.sin(ph / 2 + b.i * Math.PI / 2 * 0), tilt = 3 * Math.sin((T - T0) * 1.3);
+  girl.pose(() => ({ spine: [1.5 * Math.sin(ph), 0, 0], neck: [nod * 0.4, sway * 0.3, tilt * 0.3], head: [nod * 0.6, sway * 0.7, tilt * 0.7] }));
+  girl.setSkin('toon', T);
+  girl.root.updateMatrixWorld(true);
+  const h = faceCenter(), dist = 0.066 / FACE / (2 * Math.tan(14 * Math.PI / 180)), y = yawAt(T) * Math.PI / 180;
+  camera.position.set(h.x + Math.sin(y) * dist, h.y + 0.004, h.z + Math.cos(y) * dist); camera.lookAt(h.x, h.y - 0.006, h.z);
+  camera.updateMatrixWorld();
+  const st = girl.face.update(T, { expression: exprAt(T), blink: 'auto', camera, mouth: mouthAt(T) });
+  window.__last = { T: +T.toFixed(3), eyes: st.eyes, mouth: st.mouth, yaw: +yawAt(T).toFixed(1), headYaw: st.yaw, m: st.mouthAt, msc: st.msc, ov: st.overlay };
+  mv.stage.render(scene, camera, { bloom: { strength: 0.5, threshold: 1.4 }, grade: { vignette: 0.35 } });
+}
+mv.mount(draw, { offset: T0, duration: T1 - T0 });
+window.__faceLog = (fps = 30) => { const out = []; for (let f = 0; f < (T1 - T0) * fps; f++) { window.__video.seek(f / fps); out.push(window.__last); } return out; };
+</script>
+</body>
+</html>

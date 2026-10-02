@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ui2d 画廊：扁平界面 + 2D 女主</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// 歌曲 1.4–16.6（主歌 1，整段连续，所以实时预览能带音乐对上）：
+//   A 1.4  聊天界面：对方「…」→ 第一条气泡「AGI」；左边 2D 她唱这句
+//   B 5.88 电路纹爬满屏；她在输入框里逐词打字，发出去的气泡边打边删
+//   C 9.52 损失曲线在「drop」上陡降；点赞 / 点踩按拍乱点；系统弹窗
+//   D 13.16 3D：手机（邮件自动回复）+ 笔记本（模型结构框图，方块逃出去）
+import * as THREE from 'three';
+import { loadMV, PALETTE as PAL } from '../../engine/index.js';
+import { initType3D } from '../type3d.js';
+import { createUI2D } from '../ui2d.js';
+
+const mv = await loadMV();
+await initType3D();
+const ui = await createUI2D(mv);
+const L = i => mv.lyrics.lines[i];
+const beats = mv.audio.beats;
+
+const S = ui.surface(1920, 1080);
+const flat = ui.stage2D(S);
+const D = ui.draw;
+const T0 = 1.4, T1 = 16.6;
+const cuts = [1.4, 5.88, 9.52, 13.16, 16.6];
+
+// ---- 3D 设备（D 段）
+const phoneS = ui.surface(720, 1280), lapS = ui.surface(1600, 1000);
+const scene3 = new THREE.Scene(); scene3.background = new THREE.Color(PAL.ink);
+scene3.add(new THREE.HemisphereLight('#ffffff', '#303040', 1.2), new THREE.DirectionalLight('#ffffff', 1.5));
+const phone = ui.device('phone', phoneS, { width: 1.4 });
+phone.group.position.set(-1.2, 1.3, 0.6); scene3.add(phone.group);
+const lap = ui.device('laptop', lapS, { width: 3.2 });
+lap.group.position.set(1.1, 0, -0.6); lap.group.rotation.y = -0.35; scene3.add(lap.group);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: '#1a1622', roughness: 0.6 }));
+floor.rotation.x = -Math.PI / 2; scene3.add(floor);
+const cam3 = new THREE.PerspectiveCamera(34, 16 / 9, 0.05, 100);
+
+const agi = L(0).words.find(w => /AGI/.test(w.w));
+const clicks = beats.filter(b => b > 9.6 && b < 13.1).flatMap((b, i) => [{ at: b, which: i % 3 === 2 ? 1 : 0 }, { at: b + 0.22, which: i % 2 }]);
+
+function frame(T) {
+  if (T < cuts[3]) {
+    S.clear(PAL.paper);
+    const ctx = S.ctx;
+    if (T < cuts[1]) {
+      // A：左 2D 她（暖粉底，屏幕光打脸 —— 《她》），右聊天
+      ctx.fillStyle = '#ffd6e6'; ctx.fillRect(0, 0, 980, 1080);
+      D.girl(ctx, { x: 40, y: 60, w: 900, h: 1020 }, T, { line: 0, expression: T > agi.start ? 'surprised' : 'neutral' });
+      ui.card(ctx, 1040, 40, 840, 1000, 28, PAL.paper, { lw: 6, shadow: 12 });
+      D.chatHeader(ctx, { x: 1046, y: 46, w: 828, h: 110 }, T, { name: 'Assistant', typing: T >= 2.2 && T < agi.start });
+      D.thread(ctx, { x: 1060, y: 170, w: 800, h: 700 }, T, { msgs: [{ from: 'them', text: 'AGI', at: agi.start, typingFrom: 2.2 }, { from: 'them', words: L(0).words.slice(5), typingFrom: agi.end }], size: 64 });
+      D.inputBox(ctx, { x: 1070, y: 900, w: 780, h: 100 }, T, { text: '', size: 50 });
+    } else if (T < cuts[2]) {
+      // B：电路纹爬满；她在输入框打字，发出去的气泡边打边删
+      ctx.fillStyle = PAL.ink; ctx.fillRect(0, 0, 1920, 1080);
+      D.circuits(ctx, { x: 0, y: 0, w: 1920, h: 1080 }, T, { progress: (T - cuts[1]) / 3.2, n: 60, width: 6 });
+      D.girl(ctx, { x: 60, y: 120, w: 760, h: 960 }, T, { line: T < 7.72 ? 1 : 2, expression: T > 8.5 ? 'smile' : 'neutral' });
+      ui.card(ctx, 900, 60, 960, 960, 28, PAL.paper, { lw: 6, shadow: 12 });
+      D.chatHeader(ctx, { x: 906, y: 66, w: 948, h: 110 }, T, { name: 'Assistant' });
+      const w1 = L(1).words, w2 = L(2).words;
+      D.thread(ctx, { x: 920, y: 190, w: 920, h: 650 }, T, { size: 54, msgs: [
+        { from: 'them', text: 'AGI', at: 3.677 },
+        { from: 'me', words: w1, edits: [{ at: 7.75, text: 'Your circuits make me' }, { at: 8.4, text: 'Your circuits make me nervous,' }] },
+        { from: 'me', words: w2 },
+      ] });
+      D.inputBox(ctx, { x: 930, y: 880, w: 900, h: 100 }, T, { text: '', size: 50 });
+    } else {
+      // C：损失曲线陡降 + 点赞点踩 + 弹窗
+      ctx.fillStyle = PAL.mint; ctx.fillRect(0, 0, 1920, 1080);
+      const w3 = L(3).words, drop = w3.find(w => w.w === 'drop');
+      const p = T < drop.start ? lerp(0.1, 0.55, (T - cuts[2]) / (drop.start - cuts[2])) : Math.min(1, 0.55 + (T - drop.start) * 0.45);
+      D.lossChart(ctx, { x: 60, y: 60, w: 1120, h: 700 }, T, { progress: p, drop: 0.56, size: 36, pulse: mv.music.pulse('kick', T, { decay: 0.1 }) });
+      D.likeButtons(ctx, { x: 1240, y: 110, w: 620, h: 260 }, T, { clicks, tilt: 0.26 * Math.max(0, Math.min(1, (T - 11.5) / 1.5)) });
+      D.popup(ctx, { x: 1240, y: 430, w: 640, h: 340 }, T, { at: 11.34, title: 'LOSS DROPPED', body: 'the model has learned something you did not teach it', icon: '!', size: 32, shake: 1, press: { at: 12.4, which: 0 } });
+      D.inputBox(ctx, { x: 60, y: 830, w: 1120, h: 130 }, T, { words: w3, size: 56, eaten: [{ at: 12.2, from: 20, to: 24 }] });
+    }
+    S.commit();
+    return { scene: flat.scene, camera: flat.camera };
+  }
+  // D：3D 设备
+  phoneS.clear(PAL.paper);
+  D.chatHeader(phoneS.ctx, { x: 0, y: 0, w: 720, h: 120 }, T, { name: 'Mail', avatar: 'face', color: PAL.lemon });
+  D.mail(phoneS.ctx, { x: 20, y: 150, w: 680, h: 1100 }, T, { at: 13.5, subject: 'Out of office', body: L(4).words, stampAt: 15.66, size: 26, inbox: [{ from: 'boss@lab.ai', subject: 'you are my', at: 0 }] });
+  phoneS.commit();
+  lapS.clear(PAL.paper);
+  D.archDiagram(lapS.ctx, { x: 40, y: 40, w: 760, h: 920 }, T, { layers: 4, size: 30, escape: Math.max(0, Math.min(1, (T - 15.2) / 1.2)) });
+  D.popup(lapS.ctx, { x: 850, y: 300, w: 700, h: 360 }, T, { at: 14.1, title: 'SERVANT MODE', body: 'now I am your servant', icon: '?', color: PAL.mint, size: 32 });
+  lapS.commit();
+  const k = (T - cuts[3]) / (cuts[4] - cuts[3]);
+  cam3.position.set(lerp(-1.2, 0.8, k), 2.0, lerp(7.6, 6.8, k)); cam3.lookAt(0, 1.3, 0);
+  phone.group.rotation.y = 0.35 - 0.2 * k;
+  return { scene: scene3, camera: cam3 };
+}
+function lerp(a, b, p) { return a + (b - a) * p; }
+
+mv.mount(T => {
+  const { scene, camera } = frame(T);
+  mv.stage.render(scene, camera, { bloom: 0.12, grade: { vignette: 0.12 } });
+}, { offset: T0, duration: T1 - T0 });
+const names = ['A chat + girl sings', 'B circuits + typing/deleting', 'C loss chart + likes + popup', 'D 3D phone mail + laptop diagram'];
+window.__video.chapters = cuts.slice(0, 4).map((c, i) => {
+  const e = cuts[i + 1], d = e - c;
+  return { id: 'ui2d-' + 'ABCD'[i], t0: c - T0, t1: e - T0, caption: `${names[i]} · ${c}–${e}s`, sheet: [0.25, 0.6, 0.92].map(f => +(c - T0 + d * f).toFixed(3)) };
+});
+</script>
+</body>
+</html>

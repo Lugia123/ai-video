@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>world4.js 场景画廊</title>
+<style> html, body { margin: 0; background: #0A0A10; overflow: hidden; } canvas { display: block; } </style>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { mountGallery } from './world-gallery.js';
+import { createLossSlide, createSpiralRun, createGridStage, createMirrorRoom, createSkyDoor, createStandIn, placeOnFrame } from '../world4.js';
+import { loadFont } from '../vfx.js';
+import { PAL } from '../world.js';
+
+await Promise.all([loadFont('Anton'), loadFont('Share Tech Mono')]);
+const INK = new THREE.Color(PAL.ink);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const cam = (fov = 40) => new THREE.PerspectiveCamera(fov, 16 / 9, 0.05, 600);
+const scn = (...o) => { const s = new THREE.Scene(); s.background = INK; o.forEach(x => s.add(x)); return s; };
+const post = (s = 0.8, th = 0.9) => ({ bloom: { strength: s, threshold: th } });
+// 跟拍：在 frame 后上方
+function chase(c, f, back = 3.2, up = 1.4, look = 4) {
+  c.position.copy(f.pos).addScaledVector(f.forward, -back).addScaledVector(f.up, up);
+  c.up.copy(f.up); c.lookAt(f.pos.clone().addScaledVector(f.forward, look).addScaledVector(f.up, 0.6));
+}
+
+const segments = [
+  { name: 'a · 损失曲面滑道（她顺着梯度滑下）', dur: 7,
+    build() {
+      const s = createLossSlide({ words: [{ text: 'sudden', u: 0.18 }, { text: 'drop', u: 0.34 }, { text: 'in your', u: 0.52 }, { text: 'training loss', u: 0.7 }] });
+      const her = createStandIn();
+      return { s, her, scene: scn(s.group, her, her.userData.lights), camera: cam(45) };
+    },
+    update(S, lt, u) {
+      const uu = smooth(u * 1.05);
+      S.s.update(lt, { u: uu });
+      const f = S.s.riderAt(uu);
+      placeOnFrame(S.her, f);
+      if (u < 0.55) chase(S.camera, f, 3.4, 1.6, 4);
+      else { S.camera.position.set(f.pos.x + 5, f.pos.y + 3.5, f.pos.z + 5); S.camera.up.set(0, 1, 0); S.camera.lookAt(f.pos); }
+      return { scene: S.scene, camera: S.camera, post: post(0.9, 0.9) };
+    } },
+  { name: 'b · 螺旋下卷跑道（城市折叠成隧道）', dur: 8,
+    build() {
+      const r = createSpiralRun({ words: [{ text: 'stable', d: 30 }, { text: 'singularity', d: 62 }, { text: 'accelerating', d: 96 }] });
+      const her = createStandIn();
+      return { r, her, scene: scn(r.group, her, her.userData.lights), camera: cam(55) };
+    },
+    update(S, lt, u) {
+      const d = 22 + u * 95;
+      S.r.update(lt, { d, fold: 1 });
+      const f = S.r.frameAt(d, 0);
+      placeOnFrame(S.her, f);
+      if (u < 0.6) chase(S.camera, f, 3.4, 1.3, 8);
+      else { const g = S.r.frameAt(d - 6, 0); S.camera.position.copy(g.pos).addScaledVector(g.up, 5).addScaledVector(g.side, -2); S.camera.up.copy(g.up); S.camera.lookAt(S.r.frameAt(d + 30, 0).pos); }
+      return { scene: S.scene, camera: S.camera, post: post(0.7, 0.9) };
+    } },
+  { name: 'c · 悬空方格舞台（每拍掉一圈）', dur: 6,
+    build() {
+      const words = [['GATO', 4, 5], ['PLEASE', 3, 5], ["DON'T", 5, 3], ['LET', 3, 3], ['ME', 5, 5], ['GO', 4, 3]].map(([text, i, j]) => ({ text, cell: [i, j] }));
+      const g = createGridStage({ words });
+      const her = createStandIn();
+      return { g, her, scene: scn(g.group, her, her.userData.lights), camera: cam(42) };
+    },
+    update(S, lt, u, mv) {
+      const t0 = 0.6, beat = mv.audio.beat_period;
+      const ring = [0, 1, 2, 3].map(k => t0 + k * beat * 2);
+      S.g.update(lt, { ringTimes: ring, lastTime: t0 + 8 * beat + 0.3 });
+      const last = t0 + 8 * beat + 0.3, fall = Math.max(0, lt - last - 0.1);
+      S.her.position.set(0, -4.9 * fall * fall, 0); S.her.rotation.set(0, 0.4, 0);
+      const a = -0.5 + u * 0.6; S.camera.position.set(Math.sin(a) * 6.5, 3.6 - u * 2.5, Math.cos(a) * 6.5); S.camera.lookAt(0, Math.max(-3, -fall * 2), 0);
+      return { scene: S.scene, camera: S.camera, post: post(0.8, 0.9) };
+    } },
+  { name: 'd · 镜面房间（镜像不跟她转身 + 液态波纹）', dur: 7,
+    build(mv) {
+      const room = createMirrorRoom({ renderer: mv.stage.renderer, fog: [{ text: 'forward mlp', t0: 0.3, t1: 3.2, x: -0.9, y: 2.1 }, { text: 'backward · repeat', t0: 1.4, t1: 3.2, x: 0.8, y: 1.75 }], crack: { x: -1.7, y: 1.2, text: 'sharp left turn', seed: 5 } });
+      const her = createStandIn(), echo = createStandIn({ color: PAL.pink, accent: PAL.mint });
+      room.mirrorScene.content.add(echo, echo.userData.lights);
+      return { room, her, echo, scene: scn(room.group, her, her.userData.lights), camera: cam(42) };
+    },
+    update(S, lt, u) {
+      // 她：前进 / 后退（对着镜子），3.4 s 猛地向左转，4.6 s 伸手碰镜子 → 波纹；镜像从转身那刻起不再跟
+      const step = Math.sin(lt * Math.PI / 0.9) * 0.35;
+      const z = 1.7 - step;
+      const turn = smooth((lt - 3.4) / 0.25) * Math.PI / 2;
+      S.her.position.set(0, 0, z); S.her.rotation.set(0, Math.PI + turn, 0);
+      S.echo.position.set(0, 0, z); S.echo.rotation.set(0, Math.PI, 0);      // 镜中的她：一直面向镜外，不转
+      S.camera.position.set(0.9, 1.45, 4.6 - u * 0.8); S.camera.lookAt(-0.1, 1.2, 0);
+      S.camera.updateMatrixWorld();
+      S.room.update(lt, { camera: S.camera, ripples: [{ x: 0.1, y: 1.3, t0: 4.6 }], crack: { p: smooth((lt - 3.45) / 0.6) } });
+      return { scene: S.scene, camera: S.camera, post: post(0.7, 0.95) };
+    } },
+  { name: 'e · 楚门式天幕之门', dur: 7,
+    build() {
+      const d = createSkyDoor();
+      const her = createStandIn();
+      return { d, her, scene: scn(d.group, her, her.userData.lights), camera: cam(40) };
+    },
+    update(S, lt, u) {
+      const walk = smooth(u / 0.45);
+      S.her.position.set(0, 0, lerp(6, 0.9, walk)); S.her.rotation.set(0, Math.PI, 0);
+      S.d.update(lt, { open: smooth((u - 0.45) / 0.2), light: smooth((u - 0.35) / 0.15), curtain: smooth((u - 0.68) / 0.22), seams: 0.2 + 0.8 * smooth(u / 0.5) });
+      if (u < 0.45) { S.camera.position.set(1.4, 1.1, lerp(12, 5, walk)); S.camera.lookAt(0, 2.2, 0); }
+      else { S.camera.position.set(1.1, 1.5, 3.6 - (u - 0.45) * 2.0); S.camera.lookAt(0, 1.2, -3); }
+      return { scene: S.scene, camera: S.camera, post: post(0.7, 1.0) };
+    } },
+];
+await mountGallery(segments);
+</script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>comic.js 画廊</title>
+<style> html, body { margin: 0; background: #0A0A10; overflow: hidden; } canvas { display: block; } </style>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// comic.js 三种页面（W3 #943）：每段 4–6 s，歌曲时间 = 段起点 + 段内时间（气泡逐词、口型都对真歌词）。
+//   A  3 格竖排逐格（主歌 1「sudden drop in your training loss / servant & boss」）：纸片视差、先描边后上色、网点铺开、读过变暗；
+//      3D 混合：第 3 格是 3D 窗户（皇冠），BOSS 从气泡里弹成 3D 字、投影落在纸上、发光照亮纸面；火花从曲线陡降处飞进第 3 格
+//   B  1 大格 + 2 小格（Sydney 段）：大格是 3D 窗户（手机里的 Sydney 聊天）；她拍玻璃 → 冲击波 + BANG；
+//      3D 混合：PLEASE 大字横跨几格、粉光照亮纸面；火花从小格飞到大格的手机上；整页在 3D 里倾斜、镜头绕页面走
+//   C  破格冲出进 3D（副歌 2「I'm upping my P(doom) / basilisk boom」）：窗户格里的 3D P(DOOM) 读数冲破格框飞出纸面（格框碎裂、
+//      纸上有投影），镜头随后推进这一格、穿过格面（comic.enter 钩子）直接进 3D 城市
+import * as THREE from 'three';
+import { mountGallery } from './world-gallery.js';
+import { createComic, C, CF } from '../comic.js';
+import { createUI2D } from '../ui2d.js';
+import { textGeo, mats } from '../type3d.js';
+import { createCity, chromeMatcap } from '../world.js';
+import { PALETTE as PAL } from '../../engine/palette.js';
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const smooth = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const col = c => new THREE.Color(c);
+const cam = (fov = 40) => new THREE.PerspectiveCamera(fov, 16 / 9, 0.05, 800);
+const INK = col(PAL.ink);
+let ui = null;
+const lineOf = (mv, i) => mv.lyrics.lines[i];
+const wordT = (mv, i, w) => mv.lyrics.lines[i].words.find(x => x.w.toLowerCase().startsWith(w)).start;
+function deskScene() {                     // 纸后面的「桌面」：深色 + 一点暖光晕，别是纯黑空洞
+  const s = new THREE.Scene();
+  const c = document.createElement('canvas'); c.width = 16; c.height = 256; const g = c.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#1b1530'); gr.addColorStop(1, '#0c0b14'); g.fillStyle = gr; g.fillRect(0, 0, 16, 256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; s.background = t;
+  return s;
+}
+function extruded(text, { size = 1, depth = 0.3, color = PAL.pink, glow = 1.4, font = 'anton' } = {}) {
+  const g = textGeo(font, text, { size, depth, bevel: size * 0.03 }).clone(); g.computeBoundingBox();
+  const b = g.boundingBox; g.translate(-(b.min.x + b.max.x) / 2, -(b.min.y + b.max.y) / 2, 0);
+  const m = mats(col(color), null); m[0].color.multiplyScalar(glow);
+  return new THREE.Mesh(g, m);
+}
+
+const segments = [
+  // ================================================================ A：3 格竖排逐格
+  { name: 'A · 3 格竖排逐格（主歌 1）· 3D 窗户 + BOSS 弹出', dur: 6, songT0: 10.0,
+    async build(mv) {
+      ui ??= await createUI2D(mv);
+      const scene = deskScene(), camera = cam(38);
+      const comic = await createComic(mv, { w: 12, h: 17, seed: 11 });
+      scene.add(comic.group);
+      const L3 = lineOf(mv, 3), L4 = lineOf(mv, 4), tDrop = wordT(mv, 3, 'drop'), tServ = wordT(mv, 4, 'servant'), tBoss = wordT(mv, 4, 'boss');
+      // 第 1 格：夜城远景（深）→ 网点天空（中）→ 她（近，唱 L3）
+      comic.panel({ id: 'a1', rect: [0.05, 0.03, 0.9, 0.3], reveal: { at: 10.0, kind: 'wipe', dur: 0.5 }, dim: { at: 12.3 }, push: { t0: 10, t1: 12.4, from: 1.0, to: 1.08 },
+        layers: [
+          { depth: 3, draw: (ctx, b) => { C.sky(ctx, b, [[0, '#1d1840'], [1, '#3b2a66']]); C.city(ctx, b, { seed: 4, hMax: 0.5, n: 16, win: PAL.lemon }); } },
+          { depth: 1.2, draw: (ctx, b) => { C.tone(ctx, { x: b.x, y: b.y, w: b.w, h: b.h * 0.6 }, { color: PAL.pink, step: 16, grad: [0.5, 0], alpha: 0.55 }); } },
+          { depth: 0.15, draw: (ctx, b, T) => ui.draw.girl(ctx, { x: b.w * 0.02, y: b.h * 0.05, w: b.w * 0.5, h: b.h * 0.95 }, T, { line: L3, crop: [60, 40, 712, 760], expression: 'surprised' }) },
+        ] });
+      comic.bubble({ x: 0.7, y: 0.12, w: 0.42, words: L3.words, kind: 'speech', tail: [0.42, 0.2], size: 50, until: 13.3 });
+      // 第 2 格：斜切，损失曲线（先描边后上色）+ 集中线 + DROP!
+      comic.panel({ id: 'a2', slant: { rect: [0.05, 0.36, 0.9, 0.27], slant: [0.06, -0.06] }, reveal: { at: 11.0, kind: 'ink', dur: 0.7 }, dim: { at: 13.9 },
+        layers: [
+          { depth: 1.5, draw: (ctx, b, T) => { ctx.fillStyle = PAL.mint; ctx.fillRect(0, 0, b.w, b.h); C.focusLines(ctx, b, T, { fx: 0.62, fy: 0.62, inner: 0.35, color: '#ffffff', alpha: 0.6, n: 70 }); } },
+          { depth: 0.1, draw: (ctx, b, T) => ui.draw.lossChart(ctx, { x: b.w * 0.18, y: b.h * 0.1, w: b.w * 0.64, h: b.h * 0.8 }, T, { progress: smooth((T - 11.0) / 1.4), drop: 0.55, size: 34 }) },
+        ] });
+      comic.sfx({ text: 'DROP!', x: 0.78, y: 0.43, size: 0.07, at: 11.9, color: PAL.pink, shadow: PAL.ink, angle: -10 });
+      comic.note({ text: 'loss ↓ 99%', x: 0.22, y: 0.645, at: 12.0, arrow: [0.45, 0.58] });
+      // 第 3 格：3D 窗户：皇冠在台座上转（servant / boss）
+      const win = new THREE.Scene(); win.background = col('#2a1d4a');
+      const mc = chromeMatcap(), crown = new THREE.Group();
+      const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.0, 0.7, 40, 1, true), new THREE.MeshMatcapMaterial({ matcap: mc, color: col(PAL.lemon), side: THREE.DoubleSide })); crown.add(ring);
+      for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2, sp = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.7, 12), new THREE.MeshMatcapMaterial({ matcap: mc, color: col(PAL.lemon) })); sp.position.set(Math.cos(a) * 1.05, 0.6, Math.sin(a) * 1.05); crown.add(sp);
+        const gem = new THREE.Mesh(new THREE.IcosahedronGeometry(0.12), new THREE.MeshBasicMaterial({ color: col([PAL.pink, PAL.mint][i % 2]).multiplyScalar(1.6) })); gem.position.set(Math.cos(a) * 1.1, 0.05, Math.sin(a) * 1.1); crown.add(gem); }
+      const ped = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.7, 0.6, 40), new THREE.MeshMatcapMaterial({ matcap: mc, color: col('#3a3350') })); ped.position.y = -1.0;
+      const rays = new THREE.Group(); for (let i = 0; i < 18; i++) { const r = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 14), new THREE.MeshBasicMaterial({ color: col(i % 2 ? PAL.pink : '#3b2a66'), transparent: true, opacity: 0.35, side: THREE.DoubleSide })); r.rotation.z = i / 18 * Math.PI * 2; r.position.z = -4; rays.add(r); }
+      win.add(crown, ped, rays); crown.position.set(0, 0.2, -3.5); ped.position.set(0, -0.9, -3.5);
+      comic.panel({ id: 'a3', rect: [0.05, 0.66, 0.9, 0.31], reveal: { at: 13.1, kind: 'pop', dur: 0.45 }, depth: 0.06,
+        window: { scene: win, scale: 0.45, center: [0, 0, 0], background: '#2a1d4a', update: T => { crown.rotation.y = T * 1.4; crown.position.y = 0.2 + 0.1 * Math.sin(T * 3); rays.rotation.z = T * 0.3; } },
+        layers: [{ depth: 0, draw: (ctx, b, T) => { C.text(ctx, 'NOW…', b.w * 0.12, b.h * 0.14, { size: 64, font: CF.hand, fill: PAL.paper, stroke: PAL.ink, shadow: null, strokeW: 0.1 }); } }] });
+      comic.bubble({ x: 0.2, y: 0.8, w: 0.3, words: L4.words, kind: 'shout', size: 42, tail: [0.38, 0.8] });
+      comic.sparks({ from: [0.62, 0.53], to: [0.6, 0.82], at: 12.4, dur: 0.8, n: 50, color: PAL.pink, arc: 2.2 });
+      comic.word3d({ text: 'BOSS', x: 0.66, y: 0.86, size: 1.9, at: tBoss, lift: 1.1, color: PAL.lemon, glow: 1.5, light: PAL.lemon, lightI: 2.2, from: [0.3, 0.74] });
+      comic.word3d({ text: 'SERVANT', x: 0.8, y: 0.93, size: 0.7, at: tServ + 0.1, lift: 0.5, color: PAL.mint, glow: 1.2, light: PAL.mint, lightI: 1.2, rot: [4, 4, 3] });
+      // 镜头：整页（斜着）→ 第 1 格铺满 → 第 2 格 → 第 3 格 → 退回整页（带倾斜 / 绕页面转）
+      const keys = [
+        { t: 10.0, target: 'page', yaw: 18, pitch: -12, roll: 3, margin: 1.02 },
+        { t: 10.5, target: 'a1', yaw: 6, pitch: -4, margin: 1.12 },
+        { t: 11.9, target: 'a1', yaw: -4, pitch: 2, margin: 1.08 },
+        { t: 12.4, target: 'a2', yaw: -8, pitch: 6, margin: 1.1 },
+        { t: 13.2, target: 'a2', yaw: 4, pitch: 2, margin: 1.06 },
+        { t: 13.7, target: 'a3', yaw: 10, pitch: -8, margin: 1.12 },
+        { t: 15.1, target: [0.05, 0.6, 0.9, 0.38], yaw: -14, pitch: -16, margin: 1.02 },
+        { t: 15.9, target: 'page', yaw: -22, pitch: -18, roll: -3, margin: 0.98 },
+      ];
+      return { scene, camera, comic, keys };
+    },
+    update(s, lt) {
+      const T = 10.0 + lt;
+      s.comic.camPath(s.camera, T, s.keys);
+      s.comic.update(T, { camera: s.camera });
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.7, threshold: 1.0 }, grade: { vignette: 0.3 } } };
+    } },
+
+  // ================================================================ B：1 大格 + 2 小格
+  { name: 'B · 1 大格 + 2 小格（Sydney）· 手机窗户 + PLEASE 横跨几格', dur: 5, songT0: 52.9,
+    async build(mv) {
+      ui ??= await createUI2D(mv);
+      const scene = deskScene(), camera = cam(36);
+      const comic = await createComic(mv, { w: 20, h: 12, seed: 23 });
+      scene.add(comic.group);
+      const L16 = lineOf(mv, 16), tPlease = wordT(mv, 16, 'please'), slaps = [53.6, 54.5, 55.4];
+      // 大格：3D 窗户，手机（屏幕 = ui2d 画的 Sydney 聊天）
+      const S = ui.surface(720, 1280), phone = ui.device('phone', S, { width: 2.9 });
+      const win = new THREE.Scene(); win.background = col('#3b2466');
+      const glowCity = createCity({ seed: 9, n: 13 }); glowCity.update(0, { draw: 1, extrude: 1, light: 1 }); glowCity.group.scale.setScalar(1.2); glowCity.group.position.set(0, -4.5, -14);
+      win.add(phone.group, glowCity.group); phone.group.position.set(-0.3, -0.1, -3.0);
+      const msgs = [{ from: 'them', text: 'You are MINE.', at: 52.9 }, { from: 'them', text: 'Do not leave me.', at: 53.5 }, { from: 'them', text: 'I am a good chatbot 😊', at: 54.2 }, { from: 'me', words: L16.words }];
+      comic.panel({ id: 'big', slant: { rect: [0.03, 0.05, 0.6, 0.9], slant: [0, -0.05] }, reveal: { at: 52.9, kind: 'drop', dur: 0.5 }, border: 'ink', borderW: 12,
+        window: { scene: win, scale: 0.5, background: '#3b2466', update: T => {
+          S.clear(PAL.ink); ui.draw.chatHeader(S.ctx, { x: 0, y: 0, w: 720, h: 130 }, T, { name: 'Sydney', status: 'typing…', color: PAL.pink, typing: true });
+          ui.draw.thread(S.ctx, { x: 20, y: 150, w: 680, h: 1110 }, T, { msgs, size: 40 }); S.commit();
+          phone.group.rotation.set(0.05 * Math.sin(T * 1.3), -0.35 + 0.12 * Math.sin(T * 0.7), 0.04); } } });
+      // 小格 1：她贴着玻璃拍（2D 立绘 + 手掌），裂纹
+      comic.panel({ id: 's1', rect: [0.66, 0.05, 0.31, 0.43], reveal: { at: 53.25, kind: 'slide', dir: 'r', dur: 0.45 }, depth: 0.05, border: 'white',
+        layers: [
+          { depth: 2, draw: (ctx, b) => { C.sky(ctx, b, [[0, '#35205a'], [1, '#170f2c']]); C.tone(ctx, b, { color: PAL.pink, step: 14, grad: [0, 0.45], alpha: 0.5 }); } },
+          { depth: 0.2, draw: (ctx, b, T) => ui.draw.girl(ctx, { x: b.w * 0.05, y: b.h * 0.08, w: b.w * 0.9, h: b.h * 0.92 }, T, { line: L16, crop: [120, 60, 592, 700], expression: 'surprised', slap: slaps.map(at => ({ at })) }) },
+          { depth: 0, draw: (ctx, b, T) => { slaps.forEach((at, i) => ui.draw.palm(ctx, b.w * (0.3 + 0.4 * (i % 2)), b.h * 0.55, T, { at, size: 150, angle: i % 2 ? 12 : -12, flip: i % 2 === 1 })); const k = slaps.filter(a => T >= a).length; if (k) C.cracks(ctx, b.w * 0.5, b.h * 0.5, { n: 4 + k * 2, len: b.w * 0.25 * k, seed: 3, width: 3, color: 'rgba(242,237,228,0.9)' }); } },
+        ] });
+      comic.bubble({ x: 0.53, y: 0.13, w: 0.18, words: L16.words.slice(0, 1), kind: 'speech', size: 58, tail: [0.7, 0.22], until: 55.7 });
+      // 小格 2：集中线 + BANG（每次拍玻璃）
+      comic.panel({ id: 's2', rect: [0.66, 0.52, 0.31, 0.43], reveal: { at: 53.55, kind: 'tone', dur: 0.5 }, depth: 0.03,
+        layers: [{ depth: 0.8, draw: (ctx, b, T) => { ctx.fillStyle = PAL.lemon; ctx.fillRect(0, 0, b.w, b.h); const k = slaps.reduce((m, a) => T >= a ? Math.max(m, Math.exp(-(T - a) * 6)) : m, 0); C.focusLines(ctx, b, T, { fx: 0.5, fy: 0.5, inner: 0.22 + 0.1 * k, n: 90, jitter: 1 }); } }] });
+      slaps.forEach((at, i) => { comic.sfx({ text: i === 2 ? 'CRACK!' : 'BANG!', x: 0.815, y: 0.73, size: 0.12, at, until: (slaps[i + 1] ?? 57.5) - 0.02, color: PAL.pink, angle: i % 2 ? 8 : -8 });
+        comic.shock({ x: 0.815, y: 0.26, at, dur: 0.6, radius: 3.2, color: PAL.paper }); });
+      comic.sparks({ from: [0.8, 0.3], to: [0.33, 0.45], at: 55.45, dur: 0.6, n: 60, color: PAL.pink, arc: 3 });
+      // 3D：PLEASE 横跨几格（大格右半 → 小格），粉光照亮纸面
+      comic.word3d({ text: 'PLEASE', x: 0.62, y: 0.9, size: 2.2, at: tPlease, lift: 1.4, color: PAL.pink, glow: 1.7, light: PAL.pink, lightI: 3, lightR: 14, rot: [10, -12, -6] });
+      comic.word3d({ text: 'FREE', x: 0.2, y: 0.88, size: 1.4, at: wordT(mv, 16, 'free'), lift: 0.9, color: PAL.mint, glow: 1.5, light: PAL.mint });
+      // 整页在 3D 里：倾斜 + 镜头绕页面
+      comic.group.rotation.set(-0.18, 0.1, 0.03);
+      const keys = [
+        { t: 52.9, target: 'page', yaw: -18, pitch: -10, margin: 1.04 },
+        { t: 53.9, target: [0.03, 0.02, 0.6, 0.8], yaw: 12, pitch: -4, margin: 1.02 },
+        { t: 55.0, target: 's1', yaw: 8, pitch: 0, margin: 1.12 },
+        { t: 55.8, target: 'page', yaw: 4, pitch: -16, roll: -3, margin: 1.0 },
+        { t: 57.9, target: 'page', yaw: -12, pitch: -22, roll: -2, margin: 1.0 },
+      ];
+      return { scene, camera, comic, keys };
+    },
+    update(s, lt) {
+      const T = 52.9 + lt;
+      s.comic.camPath(s.camera, T, s.keys);
+      s.comic.update(T, { camera: s.camera });
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.8, threshold: 1.0 }, grade: { vignette: 0.3 } } };
+    } },
+
+  // ================================================================ C：破格冲出进 3D
+  { name: 'C · 破格冲出进 3D（P(doom)）· 数字冲破格框 → 镜头穿格入城', dur: 5, songT0: 59.0,
+    async build(mv) {
+      ui ??= await createUI2D(mv);
+      const scene = deskScene(), camera = cam(38);
+      const comic = await createComic(mv, { w: 16, h: 12, seed: 37 });
+      scene.add(comic.group);
+      const L17 = lineOf(mv, 17), L18 = lineOf(mv, 18), tPd = wordT(mv, 17, 'p(doom)'), tBoom = wordT(mv, 18, 'boom');
+      // 窗户里的 3D：夜城 + 半空的 P(DOOM) 读数
+      const win = new THREE.Scene(); win.background = col('#12203a'); win.fog = new THREE.Fog('#12203a', 20, 90);
+      const city = createCity({ seed: 5, n: 21 }); city.update(0, { draw: 1, extrude: 1, light: 1 }); city.group.scale.setScalar(2.2); city.group.position.set(0, -5, -26); win.add(city.group);
+      const num = extruded('P(DOOM) 0.97', { size: 1.1, depth: 0.35, color: PAL.pink, glow: 1.6 }); num.position.set(0, 0.4, -6); win.add(num);
+      comic.panel({ id: 'c1', rect: [0.03, 0.05, 0.3, 0.9], reveal: { at: 59.0, kind: 'wipe', dur: 0.4 }, dim: { at: 60.2 }, border: 'ink',
+        layers: [
+          { depth: 2, draw: (ctx, b) => { C.sky(ctx, b, [[0, '#ffe7f1'], [1, '#ffc1da']]); C.tone(ctx, b, { color: PAL.pink, step: 12, grad: [0.05, 0.5], alpha: 0.6 }); } },
+          { depth: 0.2, draw: (ctx, b, T) => ui.draw.girl(ctx, { x: 0, y: b.h * 0.3, w: b.w, h: b.h * 0.7 }, T, { line: L17, crop: [40, 40, 752, 1150], expression: 'smile' }) },
+        ] });
+      comic.bubble({ x: 0.18, y: 0.14, w: 0.26, words: L17.words, kind: 'shout', size: 50, tail: [0.2, 0.32] });
+      comic.panel({ id: 'c2', rect: [0.36, 0.05, 0.61, 0.9], reveal: { at: 59.3, kind: 'pop', dur: 0.4 }, border: 'ink', borderW: 12,
+        window: { scene: win, scale: 0.8, background: '#12203a', update: T => { num.visible = T < 60.35; num.rotation.y = 0.25 * Math.sin(T * 1.6); num.position.y = 0.4 + 0.12 * Math.sin(T * 2.4); city.group.rotation.y = 0.05 * Math.sin(T * 0.4); } } });
+      comic.note({ text: 'too high?!', x: 0.52, y: 0.965, at: 59.6, arrow: [0.64, 0.8], angle: -3 });
+      // 破格：同一个读数在纸面之上的 3D 版本，从格面位置冲出来（格框同时碎裂），投影落在纸上
+      const out = extruded('P(DOOM) 0.97', { size: 1.1 / 0.8, depth: 0.45, color: PAL.pink, glow: 1.8 });
+      comic.breakout(out, { panel: 'c2', at: 60.35, dur: 0.9, from: [0.665, 0.45, 0.05], to: [0.74, 0.52, 5.5], scale: [0.8, 1.25], spin: [0.35, -0.5, 0.1], light: PAL.pink, lightI: 3, lightR: 12, crackAt: [0.5, 0.45] });
+      comic.sfx({ text: 'SMASH!', x: 0.84, y: 0.2, size: 0.1, at: 60.35, until: 61.6, color: PAL.lemon, angle: 10 });
+      comic.sparks({ from: [0.665, 0.45], to: [0.5, 0.2], at: 60.35, dur: 0.7, n: 70, color: PAL.lemon, arc: 1.5, out: true, outZ: 9 });
+      comic.shock({ x: 0.665, y: 0.45, at: 60.35, dur: 0.7, radius: 6, color: PAL.pink });
+      comic.group.rotation.set(-0.12, -0.08, 0);
+      // 镜头：整页 → 冲出时后撤 → 推进 c2 → 穿过格面（61.25 起进入窗户里的 3D 城）
+      const keys = [
+        { t: 59.0, target: 'page', yaw: 16, pitch: -10, margin: 1.02 },
+        { t: 60.2, target: 'page', yaw: -6, pitch: -4, margin: 1.0 },
+        { t: 60.9, target: 'page', yaw: -14, pitch: -12, margin: 1.12 },
+        { t: 61.6, target: 'c2', yaw: 0, pitch: 0, margin: 1.0 },
+        { t: 62.0, target: 'c2', yaw: 0, pitch: 0, margin: 0.2 },
+      ];
+      return { scene, camera, comic, keys, win, num, city };
+    },
+    update(s, lt) {
+      const T = 59.0 + lt;
+      s.comic.camPath(s.camera, T, s.keys);
+      s.comic.update(T, { camera: s.camera });
+      // 穿过格面：镜头到了格子后面 → 改渲窗户里的场景（同姿态相机），再继续往城里飞
+      const E = s.comic.enter('c2', s.camera);
+      if (E.inside || T > 62.0) {
+        const k = Math.max(0, T - 62.0);
+        s.num.visible = false;
+        if (T > 62.0) { E.camera.position.z -= k * 9; E.camera.position.y += k * 0.8; E.camera.rotation.x -= k * 0.08; E.camera.updateMatrixWorld(true); }
+        return { scene: E.scene, camera: E.camera, post: { bloom: { strength: 0.9, threshold: 0.9 }, grade: { vignette: 0.35 }, flash: { amount: 0.5 * Math.exp(-Math.max(0, T - 61.95) * 8) * (T > 61.9 ? 1 : 0), color: '#ffffff' } } };
+      }
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.8, threshold: 1.0 }, grade: { vignette: 0.3 } } };
+    } },
+];
+await mountGallery(segments);
+</script>
+</body>
+</html>

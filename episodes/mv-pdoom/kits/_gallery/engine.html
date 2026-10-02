@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>engine 自检：转场 + 后处理</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<!-- 每个镜头 1 小节，依次演示 cut / flash / whip / wipe / dissolve-particles 转场，以及 bloom、色差、故障、调色、闪白。
+     物体跟拍点弹、跟鼓能量抖，右下角拍灯验证 music.beatAt 对齐。歌曲时间 22.055 起（副歌 1）。 -->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+
+const mv = await loadMV();
+const { music } = mv;
+const T0 = music.barTime(12);   // 副歌 1 第一小节 ≈ 22.055
+const BAR = music.period * 4;
+
+function makeShot(i, { bg, fg, kind, post }) {
+  return {
+    id: `s${i}-${kind}`, t0: T0 + i * BAR, t1: T0 + (i + 1) * BAR,
+    transitionIn: { kind, dur: kind === 'dissolve-particles' ? BAR * 0.5 : BAR * 0.25, color: PALETTE.lemon },
+    build({ THREE }) {
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(bg);
+      const camera = new THREE.PerspectiveCamera(35, 16 / 9, 0.1, 100);
+      scene.add(new THREE.HemisphereLight('#ffffff', '#222233', 1.2));
+      const d = new THREE.DirectionalLight('#ffffff', 2); d.position.set(2, 3, 4); scene.add(d);
+      const cubes = [];
+      for (let k = 0; k < 7; k++) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: fg, emissive: fg, emissiveIntensity: k === 3 ? 4 : 0.2, roughness: 0.4 }));
+        m.position.x = (k - 3) * 1.3; scene.add(m); cubes.push(m);
+      }
+      const lamps = [0, 1, 2, 3].map(k => {
+        const m = new THREE.Mesh(new THREE.CircleGeometry(0.12, 24), new THREE.MeshBasicMaterial({ color: '#ffffff' }));
+        m.position.set(3.2 + k * 0.35, -2.1, 0); scene.add(m); return m;
+      });
+      return { scene, camera, cubes, lamps };
+    },
+    update(S, t, { mv }) {
+      const b = mv.music.beatAt(t);
+      const kick = mv.music.pulse('kick', t, { decay: 0.1 });
+      S.cubes.forEach((c, k) => {
+        c.rotation.set(t * 0.7 + k, t * 0.9 + k * 0.3, 0);
+        c.position.y = Math.sin((b.i + b.phase) * Math.PI / 2 + k * 0.5) * 0.5 + (k === 3 ? kick * 0.6 : 0);
+        c.scale.setScalar(1 + (b.inBar === k % 4 ? 0.25 * (1 - b.phase) : 0));
+      });
+      S.lamps.forEach((m, k) => m.material.color.set(k === b.inBar ? PALETTE.lemon : '#333340'));
+      const drums = mv.music.energy('drums', t);
+      S.camera.position.set(Math.sin(t * 0.4) * 1.5, 0.4 + drums * 0.1, 9 - (t - T0 - i * BAR) * 0.4);
+      S.camera.lookAt(0, 0, 0);
+      return { scene: S.scene, camera: S.camera, post: typeof post === 'function' ? post(t, mv) : post };
+    },
+  };
+}
+
+const shots = [
+  makeShot(0, { bg: PALETTE.ink, fg: PALETTE.pink, kind: 'cut', post: { bloom: { strength: 1.2, threshold: 0.9 } } }),
+  makeShot(1, { bg: PALETTE.ink, fg: PALETTE.mint, kind: 'flash', post: { bloom: 0.8, chroma: 0.6 } }),
+  makeShot(2, { bg: '#101830', fg: PALETTE.lemon, kind: 'whip', post: { bloom: 0.6, grade: { warmth: -0.6, saturation: 1.2, vignette: 0.4 } } }),
+  makeShot(3, { bg: PALETTE.mint, fg: PALETTE.ink, kind: 'wipe', post: (t, mv) => ({ glitch: 0.8 * mv.music.pulse('snare', t, { decay: 0.15 }), grade: { contrast: 1.1 } }) }),
+  makeShot(4, { bg: PALETTE.ink, fg: PALETTE.paper, kind: 'dissolve-particles', post: (t, mv) => ({ bloom: 1, flash: 0.7 * mv.music.beatPulse(t, { decay: 0.08, downOnly: true }) }) }),
+];
+mv.mount(shots, { offset: T0, duration: BAR * 5 });
+</script>
+</body>
+</html>

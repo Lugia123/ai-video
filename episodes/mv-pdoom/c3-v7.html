@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 3 第七版（95.40–105.96 s，低分辨率样片）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeC3V7, C3V } from "./shots/c3-v7.js";   // #1070
+
+const half = false;    // 渲染器不传查询串，所以低分辨率单独一页（c3-v4-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const draw = await makeC3V7(mv);
+mv.mount(draw, { offset: C3V.t0, duration: C3V.end - C3V.t0 });
+</script>
+</body>
+</html>

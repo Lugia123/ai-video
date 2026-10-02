@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ep06 平台惯例不是字符串替换</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #EFE7D6; overflow: hidden; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  #hud {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 36px;
+    display: flex; align-items: center; gap: 12px; padding: 0 12px;
+    background: rgba(0,0,0,.6); color: #ddd; font: 13px/1 ui-monospace, Menlo, monospace;
+  }
+  #hud[hidden] { display: none; }
+  #hud .bar { flex: 1; height: 6px; background: #444; position: relative; cursor: pointer; }
+  #hud .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #ddd; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="hud" hidden><span id="hud-play">▶ 空格播放</span><div class="bar" id="hud-bar"><i></i></div><span id="hud-time"></span></div>
+<script type="module">
+/*
+ * ep06《平台惯例不是字符串替换》（标题：按 Ctrl+W 删个词，整个窗口没了？）
+ *
+ *   - 全部 Canvas 2D，画面是 t 的纯函数。纸剪 UI 来自 assets/lib/paper-kit.js，讲解员来自 paper-girl.js（切图版纸片女孩，#1027 起替换原来的 box-buddy.js；全片统一 s = 2.0），
+ *     配乐来自 lofi.js。时间轴 / 字幕 / 切点校验的写法与 ep02、ep05 相同。
+ *   - 时间轴全部由 narration/timings.json 推出（按句）。kw(段, '关键词') 定位到句内按字数比例估时刻，
+ *     落在「句末后 0.5s」之内的推到句末 + 0.5s（hold）。镜头切点 cutAfter()：离说完 ≥ 1.0s、离下一句开口 ≥ 0.3s（CUTS 校验）。
+ *   - 开头没有口号和片头：第 0 帧就是黑窗口 + 大键帽 Ctrl+W；前 3 秒内按下、整个窗口「啪」地合上被抽走。
+ *     系列名只在 s02 之后 1.5s 的无配音字卡上。
+ *   - 主比喻「三块地盘」：软件自己 / 黑窗口里的程序 / Windows 系统。
+ *   - 运镜：s01 开场轻推；s06 从 Mac 键盘横移到 Windows 键盘；s08 推近方向键并翻面。
+ *   - 再抓回来：s04 Ctrl+W 被抢走（~25%）、s06 Win 键被系统锁住（~42%）、s09 → 变小键盘 6（~62%）、s10 系统反过来问你（~73%）。
+ *   - 字幕按句切换，文字与 script.md 逐字一致（window.__debug.SUBS 可核对）。
+ */
+import { createKit, C, F, RAD, clamp, lerp, eo3, ei3, eio, eBack, hash, mulberry32 } from '../../assets/lib/paper-kit.js';
+import { createBuddy as createBuddy0 } from '../../assets/lib/paper-girl.js';
+const BUDDIES = [];   // 自查用（tools/render/pose-stats.mjs）：按创建顺序收集每个讲解员
+const createBuddy = (c, o) => { const b = createBuddy0(c, o); BUDDIES.push(b); return b; };
+/** 讲解员大小：全片统一 s = 2.0（站着约 480px 高，约 45% 画高），基准是 assets/characters/girl-q/motion.mp4 */
+const GS = 2;
+import { renderLofi, encodeWav } from '../../assets/lib/lofi.js';
+
+const W = 1920, H = 1080, FPS = 30;
+const RENDER = new URLSearchParams(location.search).get('render') === '1';
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const K = createKit(ctx);
+const { rr, circ, poly, paper, text, bigType, win } = K;
+let t = 0;
+
+/* ---------- 时间轴（旁白驱动，按句） ---------- */
+const TL = await (await fetch('narration/timings.json', { cache: 'no-store' })).json();
+const SEG = Object.fromEntries(TL.segments.map(s => [s.id, s]));
+const seg = id => SEG[id] ?? (() => { throw new Error(`timings.json 里没有段落 ${id}`); })();
+for (const s of TL.segments) {
+  let off = 0;
+  s.sents = (s.sentences ?? [{ text: s.text, start: s.start, end: s.end }]).map(x => {
+    const i0 = s.text.indexOf(x.text, off);
+    if (i0 < 0) throw new Error(`${s.id} 的句子对不上段落文本：${x.text}`);
+    off = i0 + x.text.length;
+    return { ...x, i0, i1: off };
+  });
+}
+const SENT_ENDS = TL.segments.flatMap(s => s.sents.map(x => x.end));
+
+/** 每个"字"的朗读权重：汉字 1；全大写缩写按字母数；其它英文词按音节粗估；逗号顿一下，句中冒号停久一点 */
+function units(str) {
+  const out = [];
+  for (const m of str.matchAll(/[A-Za-z]+|[0-9]+|./gsu)) {
+    const s = m[0];
+    let w = 0;
+    if (/^[A-Z]+$/.test(s)) w = s.length;
+    else if (/^[A-Za-z]+$/.test(s)) w = Math.ceil(s.length / 3);
+    else if (/^[0-9]+$/.test(s)) w = s.length;
+    else if (/[一-鿿]/.test(s)) w = 1;
+    else if ('，、'.includes(s)) w = 0.8;
+    else if ('。？！：；'.includes(s)) w = 1.4;
+    out.push([s, w, m.index]);
+  }
+  for (let k = out.length - 1; k >= 0 && !/[一-鿿A-Za-z0-9]/.test(out[k][0]); k--) out[k][1] = 0;
+  return out;
+}
+function timeAt(id, idx) {
+  const s = seg(id);
+  const x = s.sents.find(x => idx < x.i1) ?? s.sents[s.sents.length - 1];
+  const rel = idx - x.i0;
+  let before = 0, total = 0;
+  for (const [, w, i] of units(x.text)) { if (i < rel) before += w; total += w; }
+  return x.start + (x.end - x.start) * (total ? before / total : 0);
+}
+function hold(tt) {
+  for (const e of SENT_ENDS) if (tt > e + 1e-3 && tt < e + 0.5) return e + 0.5;
+  return tt;
+}
+function kw(id, needle, end = false) {
+  const i = seg(id).text.indexOf(needle);
+  if (i < 0) throw new Error(`段落 ${id} 里没有「${needle}」`);
+  return hold(timeAt(id, end ? i + needle.length : i));
+}
+const sent = (id, k) => seg(id).sents[k - 1];
+const CUT_AFTER = 1.0, CUT_BEFORE = 0.3;
+function cutAfter(id) {
+  const i = TL.segments.findIndex(s => s.id === id), s = TL.segments[i], n = TL.segments[i + 1];
+  const room = n ? n.start - s.end - CUT_AFTER - CUT_BEFORE : 0;
+  return s.end + CUT_AFTER + Math.max(0, room) / 2;
+}
+
+/* ---------- 字幕：按句切换，文字与旁白逐字一致；长句在最靠中间的逗号处断开 ---------- */
+const SUB_FONT = `600 46px ${F.zh}`, SUB_Y = 1012, SUB_MAX_W = 1760, SUB_MAX_CH = 26;
+function splitLong(p) {
+  if (Array.from(p).length <= SUB_MAX_CH) return [p];
+  const cuts = [...p.matchAll(/[，、：；]/g)].map(m => m.index + 1).filter(c => c < p.length);
+  if (!cuts.length) return [p];
+  const mid = p.length / 2, c = cuts.reduce((a, b) => (Math.abs(b - mid) < Math.abs(a - mid) ? b : a));
+  return [...splitLong(p.slice(0, c)), ...splitLong(p.slice(c))];
+}
+const SUBS = [];
+for (const s of TL.segments) {
+  s.sents.forEach((x, k) => {
+    const chunks = splitLong(x.text);
+    let idx = x.i0;
+    const starts = chunks.map(c => { const tt = timeAt(s.id, idx); idx += c.length; return tt; });
+    const next = s.sents[k + 1]?.start ?? TL.segments[TL.segments.indexOf(s) + 1]?.start ?? Infinity;
+    chunks.forEach((c, i) => SUBS.push({ id: s.id, text: c, t0: starts[i], t1: i + 1 < chunks.length ? starts[i + 1] : Math.min(x.end + 0.3, next - 0.02) }));
+  });
+}
+function drawSubtitle() {
+  const s = SUBS.find(s => t >= s.t0 && t < s.t1);
+  if (!s) return;
+  const a = clamp((t - s.t0) / 0.12) * (1 - clamp((t - (s.t1 - 0.1)) / 0.1));
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.font = SUB_FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(245,239,226,0.92)'; ctx.lineWidth = 14; ctx.strokeText(s.text, 960, SUB_Y);
+  ctx.fillStyle = C.ink; ctx.fillText(s.text, 960, SUB_Y);
+  ctx.restore();
+}
+
+/* ---------- 共用小件 ---------- */
+const ZH = F.zh;
+function withCam(cx, cy, z, fn) { ctx.save(); ctx.translate(960, 540); ctx.scale(z, z); ctx.translate(-cx, -cy); fn(); ctx.restore(); }
+function crayonLine(x0, y0, x1, y1, p, w = 12, col = C.red) {
+  if (p <= 0) return;
+  const x = lerp(x0, x1, p), y = lerp(y0, y1, p);
+  ctx.save(); ctx.lineCap = 'round';
+  ctx.strokeStyle = col; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x, y); ctx.stroke();
+  ctx.globalAlpha *= 0.45; ctx.lineWidth = w * 0.45; ctx.strokeStyle = '#FFF4E8';
+  ctx.beginPath(); ctx.moveTo(x0 + 3, y0 - 3); ctx.lineTo(x + 3, y - 3); ctx.stroke();
+  ctx.restore();
+}
+function inkCircle(cx, cy, rx, ry, p, seed, col = C.red) {
+  if (p <= 0) return;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate((hash(seed, 1) * 6) * RAD);
+  ctx.strokeStyle = col; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+  ctx.beginPath();
+  const a0 = -2.2 + hash(seed, 2) * 0.4, span = Math.PI * 2.15 * p;
+  for (let i = 0; i <= 40; i++) {
+    const a = a0 + span * i / 40, wob = 1 + 0.05 * Math.sin(a * 3 + seed);
+    const x = Math.cos(a) * rx * wob, y = Math.sin(a) * ry * wob;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke(); ctx.restore();
+}
+function pill(x, y, label, col, seed, size = 30, o = {}) {
+  ctx.font = `600 ${size}px ${ZH}`;
+  const w = ctx.measureText(label).width + size * 1.2, h = size * 1.6;
+  const x0 = o.center ? x - w / 2 : x;
+  paper(rr(x0, y, w, h, h / 2, seed), [x0, y, w, h], { fill: col, lift: 0.4, seed, inkW: 2.4 });
+  text(label, x0 + w / 2, y + h / 2 + 1, size, { align: 'center', base: 'middle', font: ZH, weight: 600, color: o.color ?? C.ink });
+  return w;
+}
+function codeLine(s, x, y, size, o = {}) {
+  ctx.font = `500 ${size}px ${F.code}`;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = o.color ?? C.ink; ctx.fillText(s, x, y);
+  return ctx.measureText(s).width;
+}
+function greenCheck(x, y, t0, seed, r = 38) {
+  const ok = eBack(clamp((t - t0) / 0.25));
+  if (ok <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(ok * r / 38, ok * r / 38);
+  paper(circ(0, 0, 38, seed), [-38, -38, 76, 76], { fill: C.green, lift: 0.8, seed, inkW: 2.4 });
+  ctx.strokeStyle = C.card; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-16, 1); ctx.lineTo(-4, 14); ctx.lineTo(17, -12); ctx.stroke();
+  ctx.restore();
+}
+/** 红叉小卡（测试失败） */
+function failTile(x, y, s, p, seed) {
+  if (p <= 0) return;
+  const k = eBack(p);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(hash(seed, 3) * 5 * RAD); ctx.scale(k * s, k * s);
+  paper(rr(-30, -30, 60, 60, 8, seed, 0.6), [-30, -30, 60, 60], { fill: '#FBE3DC', lift: 0.6, seed, inkW: 2 });
+  ctx.strokeStyle = C.red; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-14, -14); ctx.lineTo(14, 14); ctx.moveTo(14, -14); ctx.lineTo(-14, 14); ctx.stroke();
+  ctx.restore();
+}
+function stamp(label, x, y, tt, rot = -8, col = C.red, size = 44) {
+  const sp = eBack(clamp((t - tt) / 0.25));
+  if (sp <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot * RAD); ctx.scale(sp, sp);
+  ctx.font = `600 ${size}px ${ZH}`;
+  const sw = ctx.measureText(label).width + size;
+  ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.strokeRect(-sw / 2, -size * 0.86, sw, size * 1.6);
+  text(label, 0, 0, size, { align: 'center', base: 'middle', font: ZH, weight: 600, color: col });
+  ctx.restore();
+}
+function note(s, x, y, size, t0, o = {}) {
+  const a = clamp((t - t0) / 0.3);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a;
+  text(s, x, y + (1 - eo3(a)) * 12, size, { font: ZH, weight: 600, color: C.mute, ...o });
+  ctx.restore();
+}
+/** 小旗：杆底在 (x, y)，droop 0..1 耷拉 */
+function flag(x, y, droop, s = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -120); ctx.stroke();
+  ctx.translate(0, -118); ctx.rotate(lerp(0, 68, droop) * RAD);
+  const wave = Math.sin(t * 7) * 6 * (1 - droop);
+  paper(poly([[0, 0], [86, 14 + wave], [0, 48]], 7, 0.5, 20), [0, 0, 86, 48], { fill: C.green, lift: 0.5, seed: 7, inkW: 2.2 });
+  ctx.restore();
+}
+
+/* ---------- 键帽：中心 (x, y)；label 可多行（\n）；o.w 宽、o.col 底色、o.press 0..1 按下 ---------- */
+function keycap(x, y, label, o = {}) {
+  const w = o.w ?? 150, h = o.h ?? 110, pr = o.press ?? 0, seed = o.seed ?? 1;
+  ctx.save(); ctx.translate(x, y + pr * 8); if (o.rot) ctx.rotate(o.rot * RAD); if (o.s) ctx.scale(o.s, o.s);
+  paper(rr(-w / 2, -h / 2 + 8, w, h, 16, seed + 1, 0.6), [-w / 2, -h / 2 + 8, w, h], { fill: '#BFB6A6', lift: 1.4 - pr, seed: seed + 1, inkW: 2.4 });
+  paper(rr(-w / 2 + 6, -h / 2 + 2 - (1 - pr) * 4, w - 12, h - 18, 12, seed, 0.6), [-w / 2 + 6, -h / 2 - 2, w - 12, h - 18], { fill: o.col ?? C.card, lift: 0.2, seed, inkW: 2.2 });
+  const lines = String(label).split('\n'), size = o.size ?? 36;
+  lines.forEach((l, i) => text(l, 0, -6 - (1 - pr) * 4 + (i - (lines.length - 1) / 2) * size * 1.1, size, { align: 'center', base: 'middle', font: o.font ?? ZH, weight: 700, color: o.ink ?? C.ink }));
+  ctx.restore();
+}
+/** 纸键盘：左上 (x, y)，每格 u 宽；hot(i) 返回该键的底色（或 null） */
+const KB_ROWS = [14, 13, 13, 12, 9];
+function keyboard(x, y, u, hot = () => null, seed = 900) {
+  const W0 = u * 15.2, H0 = u * 5.6;
+  paper(rr(x, y, W0, H0, 22, seed), [x, y, W0, H0], { fill: '#D8D0C2', lift: 1.4, seed });
+  let i = 0;
+  KB_ROWS.forEach((n, r) => {
+    const kw0 = (W0 - u * 0.4) / n;
+    for (let k = 0; k < n; k++, i++) {
+      const kx = x + u * 0.2 + k * kw0, ky = y + u * 0.2 + r * u * 1.04;
+      ctx.fillStyle = hot(i) ?? C.card;
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(kx + 3, ky + 3, kw0 - 6, u * 0.92 - 6, 6); ctx.fill(); ctx.stroke();
+    }
+  });
+}
+/** 黑窗口里的一行命令；typo 是要删的那个词，del 0..1 表示它被删掉的进度；返回光标 x */
+function termLine(x, y, del, size = 46, del2 = 0) {
+  const pre = '$ echo ', w1 = 'hello ', typo = 'wrold';
+  ctx.font = `500 ${size}px ${F.code}`;
+  const cw = ctx.measureText('m').width;
+  const n = Math.round(typo.length * (1 - clamp(del))), n1 = n > 0 ? w1.length : Math.round(w1.length * (1 - clamp(del2)));
+  codeLine(pre + w1.slice(0, n1), x, y, size, { color: '#F3E9D2' });
+  codeLine(typo.slice(0, n), x + (pre.length + n1) * cw, y, size, { color: '#F08A74' });
+  const cx = x + (pre.length + n1 + n) * cw + 4;
+  if (Math.floor(t * 2.5) % 2 === 0) { ctx.fillStyle = '#F3E9D2'; ctx.fillRect(cx, y - size * 0.8, 5, size); }
+  return cx;
+}
+
+/* ================================================================
+ * 时刻表（全部从 timings.json 推出）
+ * ================================================================ */
+const T = {};
+for (const s of TL.segments) T[s.id] = s;
+T.cut = Object.fromEntries(TL.segments.map(s => [s.id, cutAfter(s.id)]));
+T.card0 = T.s02.end + 1.1; T.card1 = T.card0 + 1.5;               // s02 说完 1.1s 后 1.5s 无配音系列字卡
+T.end0 = T.s13.end + 2.8; T.end1 = TL.duration;
+// s01 钩子：前 3 秒内就按下 Ctrl+W、整个窗口「啪」地合上被抽走（front load）
+T.press = 0.9; T.slam = 1.25; T.gone = 1.9;
+T.want = kw('s01', '想删掉前一个词'); T.pa = kw('s01', '啪');
+// s02
+T.cmd = kw('s02', '把 Mac 上的 Cmd 键'); T.repl = kw('s02', '一股脑换成'); T.result = kw('s02', '的下场');
+T.notjust = kw('s02', '快捷键不是换个字'); T.who = kw('s02', '这个键，归谁管');
+// s03–s05：三块地盘
+T.three = kw('s03', '可能归三方管'); T.own = ['软件自己', '黑窗口里正在跑的程序', '还有 Windows 系统'].map(n => kw('s03', n));
+T.taken = kw('s04', '早就有主了'); T.kc = kw('s04', 'Ctrl+C 是'); T.kwk = kw('s04', 'Ctrl+W 是'); T.grab = kw('s04', '你把它抢过来'); T.cant = kw('s04', '人家就用不了了');
+T.shift = kw('s05', '改用 Ctrl 加 Shift'); T.free = kw('s05', '唯一一块还没被占的地盘');
+// s06
+T.macCmd = kw('s06', 'Mac 上的 Cmd 键'); T.move = kw('s06', '搬到 Windows'); T.win = kw('s06', '对应的是 Win 键'); T.sys = kw('s06', '可 Win 键');
+// s07
+T.count = kw('s07', '连个数都不一样'); T.n85 = kw('s07', 'Mac 版八十五个'); T.n72 = kw('s07', 'Windows 版七十二个'); T.pair = kw('s07', '只能一条一条地对');
+// s08
+T.worse = kw('s08', '更离谱的是'); T.wrong = kw('s08', '都会认错'); T.num = kw('s08', 'Windows 认键看编号'); T.mark = kw('s08', '还多带一个小标记');
+// s09
+T.robot = kw('s09', '用程序模拟按键时'); T.lost = kw('s09', '漏了这个标记'); T.six = kw('s09', '右方向键变成了'); T.pluck = kw('s09', 'Shift 还被系统摘掉了');
+T.looks = kw('s09', '看起来'); T.unbound = kw('s09', '就像是快捷键没绑好');
+// s10
+T.ime = kw('s10', '输入法也一样'); T.mac10 = kw('s10', '在 Mac 上'); T.placed = kw('s10', '由系统替你摆好'); T.win10 = kw('s10', '在 Windows 上'); T.ask = kw('s10', '系统反过来问你'); T.where = kw('s10', '这段字，在屏幕上哪儿');
+// s11–s12
+T.table = kw('s11', '不是一张对照表'); T.map = kw('s11', '“谁管什么”的地图');
+T.cols = kw('s12', '先把它们分成三列'); T.c3 = ['归软件的', '归黑窗口的', '归系统的'].map(n => kw('s12', n));
+// s13
+T.back = kw('s13', '回到开头那个 Ctrl+W'); T.fine = kw('s13', '它没坏'); T.owner = kw('s13', '它只是早就有主了');
+T.press13 = T.back + 0.9; T.press2 = T.owner + 1.6;
+
+/* ---------- 镜头 1（s01）：按 Ctrl+W 想删一个词 —— 整个窗口啪地合上被抽走 ---------- */
+const KEYX = 1290;                         // 大键帽 Ctrl+W 的中线：在窗口和讲解员之间
+const TW = { x: 150, y: 170, w: 980, h: 520, title: '黑窗口', seed: 11, rot: -0.6, fill: '#2A2623', titleFont: ZH };
+const buddy1 = createBuddy(ctx, {
+  path: [[0, 1650, 950, GS]],                 // 问号离画面右缘 ≥ 60px
+  acts: [
+    { type: 'startle', t0: T.slam + 0.05 },                       // 窗口啪地合上
+    { type: 'question', t0: T.slam + 3.1, t1: T.cut.s01 },        // 「想删掉前一个词……啪，整个窗口关了」
+  ],
+});
+function termWindow(o, del) {
+  win(o, (w) => {
+    codeLine('$ ls', 50, 80, 40, { color: '#8C8375' });
+    codeLine('notes  photos  todo.txt', 50, 140, 40, { color: '#8C8375' });
+    termLine(50, 240, del);
+  });
+}
+function shotHook() {
+  // 窗口合上：先压扁成一条（像书本合上），再被抽向右上
+  const sl = clamp((t - T.slam) / 0.3), fly = eio(clamp((t - T.slam - 0.3) / 0.45));
+  const u = eio(clamp(t / 1.0)), z = lerp(1.06, 1, u) * (1 + 0.06 * eio(clamp((t - 2.0) / 5)));
+  withCam(lerp(760, 960, u), lerp(450, 540, u), z, () => {
+    if (fly < 1) {
+      ctx.save();
+      const cx = TW.x + TW.w / 2, cy = TW.y + TW.h / 2;
+      ctx.translate(cx + fly * 1400, cy - fly * 700); ctx.rotate(fly * 25 * RAD); ctx.scale(1 - 0.5 * fly, lerp(1, 0.04, ei3(sl)));
+      ctx.translate(-cx, -cy);
+      termWindow({ ...TW, t0: null }, 0);
+      ctx.restore();
+    }
+    // 合上之后：原位只剩一个虚线框
+    const ga = clamp((t - T.gone) / 0.4);
+    if (ga > 0) {
+      ctx.save(); ctx.globalAlpha = ga * 0.8; ctx.setLineDash([18, 12]); ctx.lineDashOffset = -t * 40; ctx.strokeStyle = C.mute; ctx.lineWidth = 4;
+      ctx.strokeRect(TW.x, TW.y, TW.w, TW.h); ctx.restore();
+      note('我只想删掉一个词……', TW.x + TW.w / 2, TW.y + TW.h / 2 + 10, 50, T.want, { align: 'center', color: C.mute });
+    }
+  });
+  // 大键帽 Ctrl+W：按下
+  const pr = Math.sin(clamp((t - T.press) / 0.35) * Math.PI);
+  keycap(KEYX, 300, 'Ctrl+W', { w: 280, h: 170, size: 58, font: F.ui, press: pr, seed: 21, col: t > T.press ? C.mustard : C.card });
+  // 「啪」
+  stamp('啪！', KEYX, 130, T.slam + 0.05, -10, C.red, 80);
+  const re = eBack(clamp((t - T.pa) / 0.25));
+  if (re > 0 && t < T.cut.s01) { ctx.save(); ctx.translate(640, 830); ctx.rotate(-4 * RAD); ctx.scale(re, re); text('整个窗口没了', 0, 0, 76, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.red }); ctx.restore(); }
+  buddy1.draw(t);
+}
+
+/* ---------- 镜头 2（s02）：查找替换 Cmd → Ctrl，全部替换 —— 键盘红了一片；这个键，归谁管？ ---------- */
+const FR = { x: 360, y: 110, w: 1000, h: 330, title: '查找替换', seed: 31, rot: -0.5, titleFont: ZH };
+const HOT = new Set([15, 16, 17, 18, 19, 20, 28, 29, 30, 31, 32, 42, 43, 44, 45, 46, 47, 48, 49]);
+function shotReplace() {
+  const out = eio(clamp((t - T.notjust) / 0.5));
+  ctx.save(); ctx.translate(0, -out * 520); ctx.globalAlpha = 1 - out;
+  win({ ...FR, t0: T.cut.s01 }, (w) => {
+    text('查找：', 50, 80, 40, { base: 'middle', font: ZH, weight: 600, color: C.mute });
+    paper(rr(180, 50, 420, 64, 10, 32), [180, 50, 420, 64], { fill: C.sand, lift: 0, seed: 32, inkW: 2 });
+    codeLine('Cmd', 200, 94, 40);
+    text('替换为：', 50, 170, 40, { base: 'middle', font: ZH, weight: 600, color: C.mute });
+    paper(rr(180, 140, 420, 64, 10, 33), [180, 140, 420, 64], { fill: C.sand, lift: 0, seed: 33, inkW: 2 });
+    codeLine('Ctrl', 200, 184, 40);
+    const pr = Math.sin(clamp((t - T.repl) / 0.3) * Math.PI);
+    ctx.save(); ctx.translate(0, pr * 5);
+    paper(rr(660, 95, 280, 76, 14, 34), [660, 95, 280, 76], { fill: t > T.repl ? C.mustard : C.card, lift: 1 - pr, seed: 34 });
+    text('全部替换', 800, 134, 40, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+    ctx.restore();
+  });
+  ctx.restore();
+  // 键盘：替换后一片键帽变红
+  const ka = clamp((t - T.cut.s01 - 0.2) / 0.35);
+  if (ka > 0) {
+    ctx.save(); ctx.globalAlpha = ka;
+    const ky = lerp(520, 480, out);
+    const kz = 1 + 0.1 * eio(clamp((t - T.notjust - 0.4) / 3.5)) * (1 - eio(clamp((t - T.who + 0.2) / 0.6)));
+    ctx.translate(860, ky + 180); ctx.scale(kz, kz); ctx.translate(-860, -ky - 180);
+    keyboard(380, ky, 64, i => (HOT.has(i) && t > T.result - 0.2 + (i % 7) * 0.05 ? '#F2A08E' : null));
+    // 「先得问一句」：红键上一个个冒出问号
+    [...HOT].forEach((i, k) => {
+      const q = eBack(clamp((t - T.notjust - 0.5 - k * 0.17) / 0.25));
+      if (q <= 0) return;
+      let r = 0, c = i; while (c >= KB_ROWS[r]) c -= KB_ROWS[r++];
+      const kw0 = (64 * 15.2 - 64 * 0.4) / KB_ROWS[r];
+      ctx.save(); ctx.translate(380 + 64 * 0.2 + (c + 0.5) * kw0, ky + 64 * 0.2 + r * 64 * 1.04 + 28); ctx.scale(q, q);
+      text('？', 0, 0, 58, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.red });
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+  bigType('这个键，归谁管？', 860, 250, 104, T.who, { align: 'center', font: ZH, weight: 700, stagger: 0.06 });
+  buddyR.draw(t);
+}
+const buddyR = createBuddy(ctx, {
+  path: [[0, 1660, 950, GS]],
+  acts: [
+    { type: 'startle', t0: T.result },                            // 「一股脑换成 Ctrl 键的下场」
+    { type: 'question', t0: T.who, t1: T.card0 },                 // 「这个键，归谁管？」
+  ],
+});
+
+/* ---------- 系列字卡（无配音，1.5s） ---------- */
+function shotCard() {
+  const p = eo3(clamp((t - T.card0) / 0.25)), out = ei3(clamp((t - (T.card1 - 0.22)) / 0.22));
+  ctx.save(); ctx.translate(960 + (1 - p) * -500 + out * 600, 540); ctx.rotate(-1.2 * RAD);
+  ctx.globalAlpha = clamp(p * 3) * (1 - out);
+  paper(rr(-760, -150, 1520, 300, 16, 141), [-760, -150, 1520, 300], { fill: C.card, lift: 1.6, seed: 141 });
+  text('《移植不是翻译》', 0, -60, 44, { align: 'center', base: 'middle', font: ZH, weight: 600, color: C.mute });
+  text('第 6 集 · 平台惯例不是字符串替换', 0, 40, 80, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+/* ---------- 镜头 3（s03–s05）：三块地盘 —— Ctrl+字母早有主；Polter 占下唯一的空地 Ctrl+Shift ---------- */
+const LAND = [
+  { x: 380, label: '软件自己', col: C.sky },
+  { x: 960, label: '黑窗口里的程序', col: '#2A2623', ink: '#F3E9D2' },
+  { x: 1540, label: 'Windows 系统', col: C.pink },
+];
+const LY = 560, LR = 250;
+const LS = 0.85, LDX = -60, LDY = 50;       // 整块地盘的缩放和平移（屏幕 x = x * LS + LDX）
+const buddy3 = createBuddy(ctx, {
+  path: [[0, 1740, 950, GS]],                 // 站在三块地盘右边（地盘整体缩到 0.85 靠左）；原来走到地盘下面的那一段取消
+  acts: [
+    { type: 'point', t0: T.own[0], t1: T.own[2] + 1.4, at: [760, LY], hand: 'l' },     // 「可能归三方管」：三块地盘
+    { type: 'point', t0: T.kc, t1: T.kwk + 1.5, at: [760, 400], hand: 'l' },           // 「Ctrl+C 是……Ctrl+W 是……」
+    { type: 'shake', t0: T.cant - 0.2, t1: T.cant + 1.45 },                           // 「人家就用不了了」
+    { type: 'point', t0: T.shift + 0.3, t1: T.free, at: [263, 400], hand: 'l' },       // 「改用 Ctrl 加 Shift」
+    { type: 'thumbs', t0: T.free, t1: T.cut.s05, hand: 'l' },                          // 「唯一一块还没被占的地盘」
+  ],
+});
+function tag(label, x, y, a, col, seed, rot = 0) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= clamp(a * 3); ctx.translate(x, y); ctx.rotate(rot * RAD); ctx.scale(eBack(clamp(a)), eBack(clamp(a)));
+  pill(0, -24, label, col, seed, 32, { center: true });
+  ctx.restore();
+}
+function shotLand() {
+  // s05：Ctrl+Shift 落地后镜头推向「软件自己」那块，小人走回去前退回
+  const lz = 0.035 * eio(clamp((t - T.shift - 0.4) / 3)) * (1 - eio(clamp((t - T.free - 1.2) / 0.8)));
+  ctx.save(); ctx.translate(263, 450); ctx.scale(1 + lz, 1 + lz); ctx.translate(-263, -450);   // 以「软件自己」那块为锚轻推，右边不往讲解员那边长
+  ctx.translate(LDX, LDY); ctx.scale(LS, LS);
+  LAND.forEach((l, i) => {
+    const a = eBack(clamp((t - T.own[i]) / 0.35));
+    if (a <= 0) return;
+    ctx.save(); ctx.translate(l.x, LY); ctx.scale(a, a);
+    paper(circ(0, 0, LR, 40 + i, 1.4), [-LR, -LR, 2 * LR, 2 * LR], { fill: l.col, lift: 1, seed: 40 + i });
+    text(l.label, 0, LR - 70, 38, { align: 'center', base: 'middle', font: ZH, weight: 700, color: l.ink ?? C.ink });
+    ctx.restore();
+  });
+  // Ctrl+C / Ctrl+W 落进「黑窗口里的程序」
+  const drop = (t0, x1, y1) => { const p = eo3(clamp((t - t0) / 0.5)); return [x1, lerp(y1 - 480, y1, p), p]; };
+  const [cx1, cy1, pc] = drop(T.kc, 860, 470);
+  const grabbed = eio(clamp((t - T.grab - 0.1) / 0.8)) * (1 - eio(clamp((t - T.shift + 0.2) / 0.6)));
+  let [wx, wy, pw] = drop(T.kwk, 1060, 470);
+  wx = lerp(wx, 520, grabbed); wy = lerp(wy, 450, grabbed) - Math.sin(grabbed * Math.PI) * 140;
+  if (pc > 0) keycap(cx1, cy1, 'Ctrl+C', { w: 180, h: 100, size: 36, font: F.ui, seed: 51 });
+  tag('叫停', 860, 610, clamp((t - T.kc - 0.5) / 0.3), C.mustard, 53);
+  const gd = eo3(clamp((t - T.s04.start - 0.1) / 0.6)), gout = clamp((t - T.kc) / 0.3);
+  if (gd > 0 && gout < 1) { ctx.save(); ctx.globalAlpha = 1 - gout; keycap(960, lerp(-80, 330, gd), 'Ctrl+字母', { w: 230, h: 110, size: 36, font: F.ui, seed: 57, col: C.mustard }); ctx.restore(); }
+  const tk = eBack(clamp((t - T.taken) / 0.3));
+  if (tk > 0 && t < T.cut.s05) { ctx.save(); ctx.translate(960, 230); ctx.rotate(-5 * RAD); ctx.scale(tk, tk); pill(0, -28, '早就有主了', C.card, 58, 36, { center: true, color: C.red }); ctx.restore(); }
+  const shake = t > T.cant + 0.5 && t < T.shift ? 7 * Math.sin(t * 14) : 0;
+  if (pw > 0) keycap(wx, wy, 'Ctrl+W', { w: 180, h: 100, size: 36, font: F.ui, seed: 52, col: grabbed > 0.5 ? '#F2A08E' : C.card, rot: shake });
+  // 「删前一个词」小纸条：被抢走时撕掉
+  const ta = clamp((t - T.kwk - 0.5) / 0.3);
+  if (ta > 0) {
+    ctx.save(); ctx.globalAlpha = 1 - 0.5 * grabbed;
+    tag('删前一个词', 1060, 610, ta, C.mustard, 54);
+    ctx.restore();
+    if (grabbed > 0.3) crayonLine(965, 604, 1155, 616, clamp((t - T.cant) / 0.35), 8);
+  }
+  // 抢的那只「手」：从软件那块伸过来的箭头
+  if (t > T.grab && t < T.shift) { ctx.save(); ctx.globalAlpha = 1 - clamp((t - T.cant - 0.6) / 0.4); crayonLine(380, 380, 960, 400, clamp((t - T.grab) / 0.35), 10, C.blue); ctx.restore(); }
+  const ea = clamp((t - T.s05.start + 0.2) / 0.3) * (1 - clamp((t - T.shift - 0.3) / 0.3));
+  if (ea > 0) {
+    ctx.save(); ctx.globalAlpha = ea; ctx.setLineDash([14, 10]); ctx.lineDashOffset = -t * 40; ctx.strokeStyle = C.blue; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.ellipse(300, 540, 120 + 8 * Math.sin(t * 5), 80, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    note('空地？', 300, 555, 40, T.s05.start - 0.2, { align: 'center', color: C.blue });
+  }
+  // Ctrl+Shift+字母：落进「软件自己」那块空地，插上小旗
+  const ps = eBack(clamp((t - T.shift) / 0.4));
+  if (ps > 0) {
+    if (t > T.shift) { ctx.save(); ctx.globalAlpha = clamp((t - T.shift) / 0.3); ctx.restore(); }
+    keycap(310, lerp(160, 520, eo3(clamp((t - T.shift) / 0.5))), 'Ctrl+Shift\n+字母', { w: 240, h: 130, size: 34, font: F.ui, seed: 55, col: C.mustard });
+    if (t > T.free) { flag(455, 700, 0, 0.8); note('唯一没被占的地盘', 380, 290, 36, T.free, { align: 'center', color: C.ink }); }
+  }
+  // 系统那块：Win 键（先放着，下一镜头讲）
+  if (t > T.own[2] + 0.4) keycap(1540, 470, '⊞ Win', { w: 170, h: 100, size: 38, font: F.ui, seed: 56 });
+  ctx.restore();
+  buddy3.draw(t);
+}
+
+/* ---------- 镜头 4（s06）：从 Mac 横移到 Windows —— Cmd 归软件；对应的 Win 键归系统，被锁住 ---------- */
+const MACX = 620, WINX = 2500;
+const buddy6 = createBuddy(ctx, {
+  path: [[0, 1300, 950, GS], [T.move, 1300, 950, GS], [T.win + 0.2, 3135, 950, GS]],
+  acts: [
+    { type: 'point', t0: T.macCmd, t1: T.move + 0.1, at: [MACX, 420], hand: 'l' },   // 「Mac 上的 Cmd 键」；指完直接接走路
+    { type: 'startle', t0: T.sys + 0.5 },                                           // 「可 Win 键，是系统的」
+  ],
+});
+function shotPan() {
+  const u = eio(clamp((t - T.move) / (T.win + 0.1 - T.move)));
+  withCam(lerp(960, WINX - 120, u), 540, 1, () => {
+    // Mac 半边
+    keyboard(MACX - 480, 520, 58);
+    text('Mac', MACX - 330, 395, 56, { align: 'center', base: 'middle', font: F.ui, weight: 700, color: C.mute });
+    keycap(MACX, 380, '⌘ Cmd', { w: 240, h: 150, size: 50, font: F.ui, seed: 61, col: C.sky });
+    note('归软件用', MACX, 240, 44, T.macCmd + 0.4, { align: 'center', color: C.blue });
+    // Windows 半边
+    keyboard(WINX - 480, 520, 58);
+    text('Windows', WINX - 360, 395, 56, { align: 'center', base: 'middle', font: F.ui, weight: 700, color: C.mute });
+    const mo = clamp((t - T.win) / 0.4);
+    keycap(WINX, 380, mo < 0.5 ? '⌘ Cmd' : '⊞ Win', { w: 240, h: 150, size: 50, font: F.ui, seed: 62, col: mo < 0.5 ? C.sky : C.pink, s: 1 - 0.3 * Math.sin(mo * Math.PI) });
+    // 系统的大锁
+    const lk = eBack(clamp((t - T.sys - 0.2) / 0.35));
+    if (lk > 0) {
+      ctx.save(); ctx.translate(WINX + 210, lerp(150, 330, clamp((t - T.sys - 0.2) / 0.35))); ctx.scale(lk, lk);
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 14; ctx.beginPath(); ctx.arc(0, -40, 42, Math.PI, 0); ctx.stroke();
+      paper(rr(-64, -40, 128, 104, 14, 63), [-64, -40, 128, 104], { fill: C.mustard, lift: 1.2, seed: 63 });
+      ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(-4, 0, 8, 26);
+      ctx.restore();
+      note('归系统', WINX, 240, 44, T.sys + 0.3, { align: 'center', color: C.red });
+    }
+    buddy6.draw(t);
+  });
+}
+
+/* ---------- 镜头 5（s07）：两边的快捷键连个数都不一样 —— 85 vs 72，一条一条对 ---------- */
+const buddy7 = createBuddy(ctx, {
+  path: [[0, 1775, 950, GS]],
+  acts: [
+    { type: 'point', t0: T.n85, t1: T.n72 + 1.0, at: [900, 400], hand: 'l' },   // 「八十五个……七十二个」
+    { type: 'shake', t0: T.n72 + 1.0, t1: T.n72 + 2.6 },                        // ≠：连个数都不一样
+  ],
+});
+function chipCol(x, n, t0, total, seed, col) {
+  const k = Math.round(total * eo3(clamp((t - t0) / 1.8)));
+  for (let i = 0; i < k; i++) {
+    const c = i % 5, r = Math.floor(i / 5);
+    ctx.fillStyle = col; ctx.strokeStyle = C.ink; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.roundRect(x - 200 + c * 82, 250 + r * 36, 70, 26, 5); ctx.fill(); ctx.stroke();
+  }
+  return k;
+}
+function shotCount() {
+  const cz = 1 + 0.1 * eio(clamp((t - T.n72 - 0.5) / (T.cut.s07 - T.n72 - 0.5)));
+  ctx.save(); ctx.translate(860, 400); ctx.scale(cz, cz); ctx.translate(-860, -400);
+  const a = clamp((t - T.cut.s06) / 0.3);
+  ctx.save(); ctx.globalAlpha = a;
+  text('Mac 版', 520, 120, 52, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+  text('Windows 版', 1260, 120, 52, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+  ctx.restore();
+  const k1 = chipCol(520, 0, T.n85, 85, 71, C.sky), k2 = chipCol(1260, 0, T.n72, 72, 72, C.pink);
+  if (t > T.n85) text(`${k1} 个`, 520, 195, 60, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.blue });
+  if (t > T.n72) text(`${k2} 个`, 1260, 195, 60, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.red });
+  // 一条一条地对：中间连线往下走
+  const ne = eBack(clamp((t - T.n72 - 1.0) / 0.3));
+  if (ne > 0) { ctx.save(); ctx.translate(890, 175); ctx.scale(ne, ne); text('≠', 0, 0, 110, { align: 'center', base: 'middle', font: F.ui, weight: 800, color: C.red }); ctx.restore(); }
+  const pp = clamp((t - T.pair) / 2.4);
+  if (pp > 0 && pp < 1.2) {
+    const py = 263 + 17 * 36 * Math.min(pp, 1), px = 1040 + 14 * Math.sin(t * 20);
+    ctx.save(); ctx.translate(px, py); ctx.rotate(35 * RAD);
+    paper(poly([[-14, -150], [14, -150], [14, -20], [0, 0], [-14, -20]], 88, 0.4, 20), [-14, -150, 28, 150], { fill: C.mustard, lift: 1, seed: 88, inkW: 2.2 });
+    ctx.restore();
+  }
+  for (let r = 0; r < Math.floor(17 * pp); r++) {
+    const y = 263 + r * 36, miss = r * 5 >= 72 || r % 6 === 4;
+    crayonLine(740, y, 1040, y, 1, 8, miss ? C.red : C.green);
+    if (miss) inkCircle(1080, y, 22, 16, 1, 70 + r);
+  }
+  ctx.restore();
+  buddy7.draw(t);
+}
+
+/* ---------- 镜头 6（s08）：连按的是哪个键都会认错 —— 推近方向键，翻过来看编号和小标记 ---------- */
+const buddy8 = createBuddy(ctx, {
+  path: [[0, 1660, 950, GS]],
+  acts: [
+    { type: 'question', t0: T.wrong, t1: T.wrong + 1.8 },                          // 「连按的是哪个键，都会认错」
+    { type: 'point', t0: T.mark, t1: T.cut.s08, at: [1026, 378], hand: 'l' },       // 「还多带一个小标记」
+  ],
+});
+function shotKey() {
+  const u = eio(clamp((t - T.worse) / (T.mark + 1.5 - T.worse)));
+  const flip = clamp((t - T.num) / 0.6), sx = Math.cos(flip * Math.PI);
+  withCam(lerp(760, 1000, u), lerp(470, 440, u), lerp(0.8, 1.2, u), () => {   // 镜头中心偏右，方向键停在画面左中，右边留给讲解员
+    const dim = 1 - 0.6 * u;
+    ctx.save(); ctx.globalAlpha = dim;
+    keycap(260, 420, '←', { w: 300, h: 220, size: 130, font: F.ui, seed: 84 });
+    keycap(580, 420, '↓', { w: 300, h: 220, size: 130, font: F.ui, seed: 85 });
+    keycap(580, 180, '↑', { w: 300, h: 220, size: 130, font: F.ui, seed: 86 });
+    ctx.restore();
+    ctx.save(); ctx.translate(900, 420); ctx.scale(Math.abs(sx) || 0.02, 1);
+    if (sx >= 0) keycap(0, 0, '→', { w: 300, h: 220, size: 130, font: F.ui, seed: 81 });
+    else {
+      paper(rr(-150, -110, 300, 220, 18, 82), [-150, -110, 300, 220], { fill: '#E6DDCB', lift: 1.2, seed: 82 });
+      text('编号', 0, -30, 56, { align: 'center', base: 'middle', font: ZH, weight: 800 });
+      codeLine('4D', -40, 60, 60, { color: C.blue });
+    }
+    ctx.restore();
+    // 小标记：编号牌角上的夹子
+    const ma = eBack(clamp((t - T.mark) / 0.35));
+    if (ma > 0 && flip >= 1) {
+      ctx.save(); ctx.translate(1055, 305); ctx.rotate(18 * RAD); ctx.scale(ma, ma);
+      paper(rr(-40, -26, 80, 52, 8, 83), [-40, -26, 80, 52], { fill: C.red, lift: 1, seed: 83 });
+      text('E0', 0, 2, 32, { align: 'center', base: 'middle', font: F.ui, weight: 800, color: C.card });
+      ctx.restore();
+      note('小标记', 1150, 250, 40, T.mark + 0.3, { color: C.red });
+    }
+  });
+  buddy8.draw(t);
+}
+
+/* ---------- 镜头 7（s09）：程序模拟按键漏了标记 —— → 变成小键盘 6，Shift 被系统摘走；看起来像没绑好 ---------- */
+const buddy9 = createBuddy(ctx, {
+  path: [[0, 1710, 950, GS]],
+  acts: [
+    { type: 'startle', t0: T.six + 0.2 },                                            // 「右方向键变成了小键盘上的 6」
+    { type: 'point', t0: T.pluck + 0.35, t1: T.pluck + 2.35, at: [120, 300], hand: 'l' },   // 「Shift 还被系统摘掉了」
+    { type: 'shake', t0: T.unbound + 0.6, t1: T.unbound + 2.07 },                     // 「就像是快捷键没绑好」——其实不是
+  ],
+});
+function robotArm(x, y, press) {
+  ctx.save(); ctx.translate(x, y - 40 + press * 40);
+  paper(rr(-30, -420, 60, 360, 10, 91), [-30, -420, 60, 360], { fill: '#AEB8C2', lift: 1, seed: 91 });
+  paper(rr(-80, -70, 160, 70, 14, 92), [-80, -70, 160, 70], { fill: '#AEB8C2', lift: 1, seed: 92 });
+  ctx.restore();
+}
+function shotFake() {
+  const pr = Math.sin(clamp((t - T.robot - 0.4) / 0.5) * Math.PI);
+  note('程序在模拟按键', 500, 800, 40, T.robot, { align: 'center', color: C.mute });
+  // Shift（左）
+  const pl = eio(clamp((t - T.pluck) / 0.8));
+  keycap(lerp(300, 120, pl), lerp(560, 360, pl), 'Shift', { w: 240, h: 130, size: 46, font: F.ui, seed: 93, press: pr * (1 - pl), rot: pl * -8, s: lerp(1, 0.8, pl) });
+  if (pl > 0) { note('被系统摘掉', 120, 250, 38, T.pluck + 0.5, { align: 'center', color: C.red }); }
+  // →（右），标记夹子掉下去，然后翻成小键盘 6
+  const lost = clamp((t - T.lost) / 0.7), fl = clamp((t - T.six) / 0.5), fsx = Math.cos(fl * Math.PI);
+  ctx.save(); ctx.translate(700, 560); ctx.scale(Math.abs(fsx) || 0.02, 1);
+  keycap(0, 0, fl < 0.5 ? '→' : '6', { w: 180, h: 130, size: fl < 0.5 ? 80 : 70, font: F.ui, seed: 94, press: pr, col: fl < 0.5 ? C.card : '#F2A08E' });
+  ctx.restore();
+  if (fl >= 0.5) note('小键盘上的 6', 700, 700, 38, T.six + 0.4, { align: 'center', color: C.red });
+  if (t > T.lost) {
+    ctx.save(); ctx.translate(800 + lost * 60, 480 + lost * lost * 420); ctx.rotate(lost * 300 * RAD); ctx.globalAlpha = 1 - clamp((lost - 0.8) / 0.2);
+    paper(rr(-30, -20, 60, 40, 6, 95), [-30, -20, 60, 40], { fill: C.red, lift: 0.6, seed: 95 });
+    ctx.restore();
+  }
+  robotArm(300, 480, pr * (1 - pl)); robotArm(700, 480, pr);
+  // 右边：屏幕上的快捷键毫无反应 → 看起来像「没绑好」
+  win({ x: 900, y: 250, w: 540, h: 400, title: 'Polter', seed: 96, rot: 0.6, fill: '#2A2623', t0: T.cut.s08 + 0.1 }, () => {
+    codeLine('$ _', 40, 90, 40, { color: '#F3E9D2' });
+    if (t > T.six + 0.3) text('（没反应）', 40, 200, 40, { font: ZH, weight: 600, color: '#8C8375' });
+  });
+  const la = eBack(clamp((t - T.unbound) / 0.3));
+  if (la > 0) {
+    ctx.save(); ctx.translate(1170, 780); ctx.rotate(-4 * RAD); ctx.scale(la, la);
+    paper(rr(-240, -50, 480, 100, 10, 97), [-240, -50, 480, 100], { fill: C.mustard, lift: 1.2, seed: 97 });
+    text('快捷键没绑好？', 0, 2, 48, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+    ctx.restore();
+    crayonLine(950, 800, 1390, 760, clamp((t - T.unbound - 1.0) / 0.4), 10);
+    note('其实是漏了标记', 1170, 900, 38, T.unbound + 1.3, { align: 'center', color: C.red });
+  }
+  buddy9.draw(t);
+}
+
+/* ---------- 镜头 8（s10）：输入法 —— Mac 系统替你摆候选窗；Windows 系统反过来问你 ---------- */
+const CANDS = ['你好', '你', '泥', '拟'];
+function candBox(x, y, p, o = {}) {
+  if (p <= 0) return;
+  const k = eBack(clamp(p));
+  ctx.save(); ctx.translate(x, y); ctx.scale(lerp(0.6, 1, k), lerp(0.6, 1, k)); ctx.globalAlpha *= clamp(p * 3);
+  ctx.font = `600 32px ${ZH}`;
+  let w = 20; const xs = CANDS.map(c => { const x0 = w; w += 28 + ctx.measureText(c).width + 20; return x0; });
+  paper(rr(0, 0, w, 66, 12, 52), [0, 0, w, 66], { fill: o.fill ?? C.card, lift: 1.4, seed: 52, inkW: 2.4 });
+  CANDS.forEach((c, i) => { text(`${i + 1}`, xs[i], 44, 22, { font: F.ui, weight: 700, color: C.mute }); text(c, xs[i] + 24, 45, 32, { font: ZH, weight: 600, color: i === 0 ? C.blue : C.ink }); });
+  ctx.restore();
+}
+const buddy10 = createBuddy(ctx, {
+  path: [[0, 960, 958, GS]],
+  acts: [
+    { type: 'talk', t0: T.mac10, t1: T.placed + 1.6 },    // 「在 Mac 上……由系统替你摆好」（她夹在两扇窗中间只有 340 宽，指和摊手都会伸进窗口，用说话）
+    { type: 'nod', t0: T.where + 1.2, n: 3 },             // 软件量好回答，候选框落位
+  ],
+});
+function shotIme() {
+  const A = { x: 50, y: 150, w: 740, h: 560, title: 'Mac', seed: 101, rot: -0.5 }, B = { x: 1130, y: 150, w: 740, h: 560, title: 'Windows', seed: 102, rot: 0.5 };   // 中间留 340 宽给讲解员
+  // Mac：打拼音 → 候选框自己贴到光标旁
+  win({ ...A, t0: T.cut.s09 }, () => {
+    const ty = Math.round(5 * clamp((t - T.ime - 0.2) / 1.0));
+    codeLine('nihao'.slice(0, ty), 60, 120, 44, { color: C.ink }); ctx.fillStyle = C.ink; ctx.fillRect(60, 132, 27 * ty, 3); ctx.fillRect(64 + 27 * ty, 84, 4, 44);
+    const fly = eio(clamp((t - T.mac10 - 0.4) / (T.placed - T.mac10 - 0.1)));
+    const p = clamp((t - T.mac10 - 0.4) / 0.3);
+    candBox(lerp(400, 56, fly), lerp(-60, 160, fly), p);
+    if (p > 0) note('系统替你摆好 ✓', 60, 330, 38, T.placed + 0.3, { color: C.green });
+  });
+  // Windows：系统先问「这段字在屏幕上哪儿？」，软件量好框回答，候选框才落下
+  const bw = clamp((t - T.win10) / 0.3);
+  ctx.save(); ctx.globalAlpha = 0.25 + 0.75 * bw;
+  win({ ...B, t0: T.cut.s09 }, () => {
+    codeLine('nihao', 60, 120, 44, { color: C.ink }); ctx.fillStyle = C.ink; ctx.fillRect(60, 132, 135, 3); ctx.fillRect(200, 84, 4, 44);
+    const q = eBack(clamp((t - T.ask) / 0.3));
+    if (q > 0) {
+      ctx.save(); ctx.translate(390, 290); ctx.scale(q, q);
+      paper(rr(-40, -60, 380, 110, 22, 103), [-40, -60, 380, 110], { fill: C.pink, lift: 1, seed: 103 });
+      text('系统：', -10, -4, 32, { base: 'middle', font: ZH, weight: 700 });
+      text('这段字在哪儿？', 90, -4, 32, { base: 'middle', font: ZH, weight: 700 });
+      ctx.restore();
+    }
+    const m = clamp((t - T.where) / 0.5);
+    if (m > 0) { ctx.save(); ctx.setLineDash([12, 8]); ctx.strokeStyle = C.blue; ctx.lineWidth = 4; ctx.strokeRect(52, 76, 160 * m, 66); ctx.restore(); note('软件量好回答', 60, 210, 34, T.where + 0.3, { color: C.blue }); }
+    const wf = eio(clamp((t - T.where - 0.6) / 0.9));
+    candBox(lerp(420, 56, wf), lerp(-80, 250, wf), clamp((t - T.where - 0.6) / 0.3));
+    if (t > T.ask + 0.3 && t < T.where + 0.6) { ctx.save(); ctx.setLineDash([12, 10]); ctx.lineDashOffset = -t * 60; ctx.strokeStyle = C.red; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(420, 250); ctx.quadraticCurveTo(300, 150, 215, 110); ctx.stroke(); ctx.restore(); }
+    const g = clamp((t - T.where - 1.5) / 0.3);
+    if (g > 0) { ctx.save(); ctx.globalAlpha = g * (0.55 + 0.35 * Math.sin(t * 5)); ctx.strokeStyle = C.green; ctx.lineWidth = 8; ctx.strokeRect(44, 238, 360, 90); ctx.restore(); }
+  });
+  ctx.restore();
+  buddy10.draw(t);
+}
+
+/* ---------- 镜头 9（s11–s12）：对照表 → 「谁管什么」的地图 → 分三列 ---------- */
+const buddy11 = createBuddy(ctx, {
+  path: [[0, 1720, 950, GS]],
+  acts: [
+    { type: 'shake', t0: T.table, t1: T.table + 1.55 },                              // 「不是一张对照表」
+    { type: 'talk', t0: T.table + 3.06, t1: T.table + 5.2 },                         // 「而是一张『谁管什么』的地图」
+    { type: 'point', t0: T.cols, t1: T.cut.s12, at: [810, 400], hand: 'l' },          // 「先把它们分成三列」
+  ],
+});
+const KEYS12 = [['Ctrl+Shift+T', 0], ['Ctrl+C', 1], ['Win', 2], ['Ctrl+W', 1], ['Ctrl+Shift+N', 0], ['Win+D', 2]];
+function shotMap() {
+  const roll = eio(clamp((t - T.map + 0.2) / 0.7));
+  // 对照表：卷起来消失
+  if (roll < 1) {
+    const tilt = eio(clamp((t - T.table - 0.2) / (T.map - T.table)));
+    ctx.save(); ctx.translate(820, 480); ctx.rotate(-5 * tilt * RAD); ctx.scale(1 - 0.1 * tilt, (1 - roll) * (1 - 0.1 * tilt)); ctx.globalAlpha = 1 - roll;
+    paper(rr(-420, -300, 840, 600, 16, 111), [-420, -300, 840, 600], { fill: C.card, lift: 1.2, seed: 111 });
+    text('对照表', 0, -230, 52, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+    [['Cmd+C', 'Ctrl+C'], ['Cmd+W', 'Ctrl+W'], ['Cmd+T', 'Ctrl+T'], ['Cmd+N', 'Ctrl+N']].forEach(([a, b], i) => {
+      if (t < T.cut.s10 + 0.3 + i * 0.35) return;
+      codeLine(a, -320, -120 + i * 100, 44); text('→', 0, -134 + i * 100, 44, { align: 'center', base: 'middle', weight: 800, color: C.mute }); codeLine(b, 90, -120 + i * 100, 44);
+    });
+    ctx.restore();
+    crayonLine(420, 200, 1220, 760, clamp((t - T.table - 0.4) / 0.5), 12);
+    for (let i = 0; i < 4; i++) { const q = eBack(clamp((t - T.table - 1.0 - i * 0.35) / 0.25)); if (q > 0 && roll < 1) { ctx.save(); ctx.globalAlpha = 1 - roll; ctx.translate(1160, 380 + i * 100); ctx.scale(q, q); text('？', 0, 0, 70, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.red }); ctx.restore(); } }
+  }
+  // 地图 / 三列：三块地盘，键帽便签按「归谁」分进去
+  if (roll > 0) {
+    const cols = [[310, '归软件', C.sky], [790, '归黑窗口', '#D6D0C6'], [1270, '归系统', C.pink]];
+    cols.forEach(([x, label, col], k) => {
+      const a = eBack(clamp((t - T.map - k * 0.15) / 0.4));
+      if (a <= 0) return;
+      ctx.save(); ctx.translate(x, 450); ctx.scale(a, a);
+      paper(rr(-225, -320, 450, 620, 20, 120 + k), [-225, -320, 450, 620], { fill: col, lift: 1, seed: 120 + k });
+      text(label, 0, -255, 50, { align: 'center', base: 'middle', font: ZH, weight: 800 });
+      ctx.restore();
+    });
+    KEYS12.forEach(([k, c], i) => {
+      const n = KEYS12.filter((q, j) => q[1] === c && j < i).length;
+      const g = eio(clamp((t - Math.min(T.c3[c], T.cols + 0.5 + c * 0.6) - n * 0.2) / 0.5));
+      const x0 = 190 + i * 240, y0 = 860;
+      const x = lerp(x0, cols[c][0], g), y = lerp(y0, 320 + n * 160, g);
+      const a = clamp((t - T.cols - i * 0.08) / 0.3);
+      if (a > 0) keycap(x, y, k, { w: 280, h: 110, size: 34, font: F.ui, seed: 130 + i, s: lerp(0.75, 1, g) });
+    });
+  }
+  buddy11.draw(t);
+}
+
+/* ---------- 镜头 10（s13）：回到开头 —— 这次 Ctrl+W 删掉那个词，窗口好好的 ---------- */
+const buddy13 = createBuddy(ctx, {
+  path: [[0, 1700, 950, GS]],
+  acts: [
+    { type: 'point', t0: T.press13, t1: T.owner + 0.5, at: [700, 400], hand: 'l' },   // 这次只删掉了一个词
+    { type: 'thumbs', t0: T.owner + 0.5, t1: T.end0, hand: 'l' },                      // 「它只是早就有主了」
+  ],
+});
+function shotBack() {
+  const zz = 1 + 0.05 * eio(clamp((t - T.owner) / 5));
+  ctx.save(); ctx.translate(960, 540); ctx.scale(zz, zz); ctx.translate(-960, -540);
+  termWindowAt(TW, clamp((t - T.press13 - 0.1) / 0.5), clamp((t - T.press2 - 0.1) / 0.5));
+  const pr = Math.sin(clamp((t - T.press13) / 0.35) * Math.PI) + Math.sin(clamp((t - T.press2) / 0.35) * Math.PI);
+  keycap(KEYX, 300, 'Ctrl+W', { w: 280, h: 170, size: 58, font: F.ui, press: pr, seed: 21 });
+  const na = clamp((t - T.owner) / 0.3);
+  if (na > 0) { ctx.save(); ctx.globalAlpha = na; pill(KEYX - 20, 440, '归：黑窗口里的程序', C.mustard, 131, 34, { center: true }); ctx.restore(); }
+  if (t > T.press13 + 0.6) greenCheck(TW.x + TW.w - 60, TW.y + TW.h - 60, T.press13 + 0.6, 132, 44);
+  buddy13.draw(t);
+  ctx.restore();
+}
+function termWindowAt(o, del, del2) {
+  win({ ...o, t0: T.cut.s12 }, () => {
+    codeLine('$ ls', 50, 80, 40, { color: '#8C8375' });
+    codeLine('notes  photos  todo.txt', 50, 140, 40, { color: '#8C8375' });
+    termLine(50, 240, del, 46, del2);
+    if (del >= 1) note('只删掉了一个词 ✓', 50, 360, 40, T.press13 + 0.6, { color: '#7FD08F' });
+  });
+}
+
+/* ---------- 结尾字卡 ---------- */
+function shotEnd() {
+  const p = eo3(clamp((t - T.end0) / 0.2));
+  ctx.save(); ctx.globalAlpha = p;
+  pill(960, 380, '下一集', C.mustard, 99, 34, { center: true });
+  text('测试工具也要移植并校准', 960, 560, 72, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+/* ---------- 镜头表：切点在段间静音里，离上一句说完 ≥ 1.0s、离下一句开口 ≥ 0.3s（下面 CUTS 校验） ---------- */
+const SHOTS = [
+  { id: 'hook', t0: 0, draw: shotHook },
+  { id: 'replace', t0: T.cut.s01, draw: shotReplace },
+  { id: 'card', t0: T.card0, draw: shotCard },
+  { id: 'land', t0: T.card1, draw: shotLand },
+  { id: 'pan', t0: T.cut.s05, draw: shotPan },
+  { id: 'count', t0: T.cut.s06, draw: shotCount },
+  { id: 'key', t0: T.cut.s07, draw: shotKey },
+  { id: 'fake', t0: T.cut.s08, draw: shotFake },
+  { id: 'ime', t0: T.cut.s09, draw: shotIme },
+  { id: 'map', t0: T.cut.s10, draw: shotMap },
+  { id: 'back', t0: T.cut.s12, draw: shotBack },
+  { id: 'end', t0: T.end0, draw: shotEnd },
+];
+SHOTS.forEach((s, i) => { s.t1 = SHOTS[i + 1]?.t0 ?? Infinity; });
+const SENTS = TL.segments.flatMap(s => s.sents);
+const CUTS = SHOTS.slice(1).map(s => {
+  const prevEnd = Math.max(...SENTS.filter(x => x.end <= s.t0).map(x => x.end));
+  const inSent = SENTS.find(x => x.start < s.t0 && s.t0 < x.end);
+  const next = SENTS.find(x => x.start >= s.t0);
+  const c = { id: s.id, t: +s.t0.toFixed(3), afterEnd: +(s.t0 - prevEnd).toFixed(3), beforeStart: next ? +(next.start - s.t0).toFixed(3) : null };
+  if (inSent || c.afterEnd < CUT_AFTER - 1e-6 || (next && c.beforeStart < CUT_BEFORE - 1e-6)) throw new Error(`切点 ${s.id} 不满足节奏参数：${JSON.stringify(c)}`);
+  return c;
+});
+if (T.end0 - T.s13.end < 2.5 || TL.duration - T.end0 < 2.5) throw new Error('结尾停留 / 结尾字卡不足 2.5s');
+
+const SFX = [
+  { t: T.press, kind: 'click' }, { t: T.slam, kind: 'snip' }, { t: T.slam + 0.3, kind: 'whoosh' }, { t: T.pa, kind: 'boing' },
+  { t: T.repl, kind: 'click' }, { t: T.result, kind: 'boing' }, { t: T.who, kind: 'ding' },
+  { t: T.card0, kind: 'whoosh' },
+  ...T.own.map(tt => ({ t: tt, kind: 'pop' })), { t: T.kc + 0.4, kind: 'click' }, { t: T.kwk + 0.4, kind: 'click' }, { t: T.grab + 0.1, kind: 'whoosh' }, { t: T.cant, kind: 'snip' },
+  { t: T.shift + 0.4, kind: 'click' }, { t: T.free, kind: 'ding' },
+  { t: T.move, kind: 'whoosh' }, { t: T.win + 0.2, kind: 'pop' }, { t: T.sys + 0.4, kind: 'click' },
+  { t: T.n85, kind: 'pop' }, { t: T.n72, kind: 'pop' },
+  { t: T.worse, kind: 'whoosh' }, { t: T.num, kind: 'snip' }, { t: T.mark, kind: 'pop' },
+  { t: T.robot + 0.6, kind: 'click' }, { t: T.lost, kind: 'boing' }, { t: T.six + 0.25, kind: 'pop' }, { t: T.pluck + 0.2, kind: 'whoosh' }, { t: T.unbound + 1.0, kind: 'snip' },
+  { t: T.placed, kind: 'pop' }, { t: T.ask, kind: 'pop' }, { t: T.where + 1.0, kind: 'ding' },
+  { t: T.map, kind: 'whoosh' }, ...T.c3.map(tt => ({ t: tt, kind: 'pop' })),
+  { t: T.press13, kind: 'click' }, { t: T.press13 + 0.6, kind: 'ding' }, { t: T.press2, kind: 'click' },
+];
+
+/* ---------- seek：t 的纯函数 ---------- */
+function render(tt) {
+  t = Math.max(0, Math.min(TL.duration, tt));
+  K.setTime(t);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  K.drawBG();
+  const shot = SHOTS.find(s => t >= s.t0 && t < s.t1) ?? SHOTS[SHOTS.length - 1];
+  const since = t - shot.t0;
+  const z = shot.t0 > 0 ? 1 + 0.015 * Math.exp(-since * 12) : 1;
+  ctx.save();
+  ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
+  shot.draw();
+  ctx.restore();
+  drawSubtitle();
+}
+
+/* ---------- 配乐 ---------- */
+let musicBuf = null;
+const music = async () => (musicBuf ??= await renderLofi({
+  duration: TL.duration,
+  speech: TL.segments.map(s => [s.start, s.end]),
+  speechDb: TL.speech_mean_db ?? -21,
+  bright: [[0, 3.0], [T.card0, T.card1], [T.end0, TL.duration]],
+  sfx: SFX,
+}));
+/* ---------- 预览：空格播放（旁白 + 配乐），← → 跳 2 秒 ---------- */
+function startPreview() {
+  const hud = document.getElementById('hud'); hud.hidden = false;
+  let actx = null, narr = null, srcs = [], playing = false, tt = 0, t0 = 0;
+  const stop = () => { srcs.forEach(s => s.stop()); srcs = []; playing = false; };
+  const play = async () => {
+    actx ??= new AudioContext();
+    narr ??= await actx.decodeAudioData(await (await fetch('narration/narration.mp3')).arrayBuffer());
+    const mb = await music();
+    if (tt >= TL.duration) tt = 0;
+    srcs = [narr, mb].map(b => { const s = actx.createBufferSource(); s.buffer = b; s.connect(actx.destination); s.start(0, tt); return s; });
+    t0 = actx.currentTime - tt; playing = true;
+  };
+  const toggle = () => (playing ? (tt = actx.currentTime - t0, stop()) : play());
+  const jump = d => { const was = playing; if (playing) { tt = actx.currentTime - t0; stop(); } tt = clamp(tt + d, 0, TL.duration); if (was) play(); };
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    if (e.code === 'ArrowLeft') jump(-2);
+    if (e.code === 'ArrowRight') jump(2);
+  });
+  document.getElementById('hud-bar').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    jump((e.clientX - r.left) / r.width * TL.duration - (playing ? actx.currentTime - t0 : tt));
+  });
+  (function loop() {
+    if (playing) { tt = actx.currentTime - t0; if (tt >= TL.duration) { tt = TL.duration; stop(); } }
+    render(tt);
+    document.getElementById('hud-play').textContent = playing ? '❚❚' : '▶ 空格播放';
+    document.getElementById('hud-time').textContent = `${tt.toFixed(2)} / ${TL.duration.toFixed(2)}s`;
+    hud.querySelector('.bar i').style.width = `${tt / TL.duration * 100}%`;
+    requestAnimationFrame(loop);
+  })();
+}
+
+await document.fonts.load(`600 46px ${F.zh}`, '按删个词整个窗口没了软件黑窗口系统归谁管');
+await document.fonts.load(`800 100px ${F.big}`);
+await document.fonts.load(`600 30px ${F.ui}`);
+await document.fonts.load(`500 30px ${F.code}`);
+ctx.font = SUB_FONT;
+for (const s of SUBS) s.width = Math.round(ctx.measureText(s.text).width);
+render(0);
+window.__debug = { buddies: BUDDIES, SUBS, SHOTS: SHOTS.map(s => ({ id: s.id, t0: s.t0, t1: s.t1 })), CUTS, T, SUB_MAX_W, kw, SEGS: TL.segments.map(s => ({ id: s.id, start: s.start, end: s.end })) };
+window.__video = {
+  width: W, height: H, fps: FPS, duration: TL.duration,
+  seek: render,
+  renderAudio: async () => encodeWav(await music()),
+};
+if (!RENDER) startPreview();
+</script>
+</body>
+</html>

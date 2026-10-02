@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>face-bake：2D 立绘 → 3D 脸部贴图</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#111">
+<!--
+  由 tools/face-bake/bake.mjs 驱动（也可以手开：?glb=<相对项目根的 glb>&calib=tools/face-bake/calib.json）。
+  做法：在 glb 自己的 UV 空间里光栅化网格 —— 每个贴图像素都知道自己对应的 3D 点（静止姿态）；
+  3D 点的正面 (x, y) 经薄板样条（calib.json 的对应点）映射到立绘像素，取立绘颜色；
+  只在替换区域（多边形 + 羽化）× 朝前程度（法线 z，侧面渐变回原贴图）里覆盖，颜色按区域内两边的平均肤色做一次对齐。
+  UV 布局不参与标定，所以任何版本的 glb（新导出的 4K / 8K、UV 变了）都能直接重跑。
+  结果：window.__result = { png: dataURL（与原贴图同尺寸）, stats }。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+
+const q = new URLSearchParams(location.search);
+const ROOT = new URL('../../', location.href);
+const glbUrl = new URL(q.get('glb') || 'episodes/cast-cyber-girl/3d/tripo-girl/anime+girl+3d+model.glb', ROOT).href;
+const calib = await (await fetch(new URL(q.get('calib') || 'tools/face-bake/calib.json', ROOT))).json();
+
+const gltf = await new GLTFLoader().loadAsync(glbUrl);
+let mesh = null; gltf.scene.traverse(o => { if (o.isMesh && !mesh) mesh = o; });
+const map = mesh.material.map;
+const TW = map.image.width, TH = map.image.height;
+const portraitImg = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = new URL(calib.portrait, ROOT).href; });
+const PW = portraitImg.width, PH = portraitImg.height;
+const pixelsOf = (img, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, w, h); return g.getImageData(0, 0, w, h).data; };
+const texPx = pixelsOf(map.image, TW, TH), porPx = pixelsOf(portraitImg, PW, PH);
+
+// ---------------------------------------------------------------- 薄板样条（3D 正面 x,y → 立绘像素 u,v）
+function tps(src, dst) {
+  const n = src.length, U = r2 => (r2 < 1e-12 ? 0 : r2 * Math.log(r2));
+  const N = n + 3, A = Array.from({ length: N }, () => new Float64Array(N));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) { const dx = src[i][0] - src[j][0], dy = src[i][1] - src[j][1]; A[i][j] = U(dx * dx + dy * dy); }
+    A[i][n] = A[n][i] = 1; A[i][n + 1] = A[n + 1][i] = src[i][0]; A[i][n + 2] = A[n + 2][i] = src[i][1];
+  }
+  const solve = b => {   // 高斯消元（N ≤ 20）
+    const M = A.map((r, i) => [...r, b[i]]);
+    for (let c = 0; c < N; c++) {
+      let p = c; for (let r = c + 1; r < N; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+      [M[c], M[p]] = [M[p], M[c]];
+      for (let r = 0; r < N; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k <= N; k++) M[r][k] -= f * M[c][k]; }
+    }
+    return M.map((r, i) => r[N] / r[i]);
+  };
+  const wx = solve([...dst.map(d => d[0]), 0, 0, 0]), wy = solve([...dst.map(d => d[1]), 0, 0, 0]);
+  return (x, y) => {
+    let u = wx[n] + wx[n + 1] * x + wx[n + 2] * y, v = wy[n] + wy[n + 1] * x + wy[n + 2] * y;
+    for (let i = 0; i < n; i++) { const dx = x - src[i][0], dy = y - src[i][1], k = U(dx * dx + dy * dy); u += wx[i] * k; v += wy[i] * k; }
+    return [u, v];
+  };
+}
+const warp = tps(calib.landmarks.map(l => l.p3), calib.landmarks.map(l => l.p2));
+
+// ---------------------------------------------------------------- 区域（多边形内的有向距离 → 羽化）
+const poly = calib.region.polygon, feather = calib.region.feather, [fa, fb] = calib.region.facing;
+function insideDist(x, y) {
+  let inside = false, dmin = Infinity;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    const ex = xj - xi, ey = yj - yi, t = Math.max(0, Math.min(1, ((x - xi) * ex + (y - yi) * ey) / (ex * ex + ey * ey)));
+    dmin = Math.min(dmin, Math.hypot(x - xi - t * ex, y - yi - t * ey));
+  }
+  return inside ? dmin : -dmin;
+}
+const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+// ---------------------------------------------------------------- 每个顶点：立绘坐标 + 覆盖权重（静止姿态、网格局部坐标 = 身高 1、脚在原点）
+mesh.updateMatrixWorld(true);
+const g = mesh.geometry, P = g.attributes.position, N = g.attributes.normal, UV = g.attributes.uv, n = P.count;
+const aPUV = new Float32Array(n * 2), aMask = new Float32Array(n);
+const toWorld = mesh.matrixWorld, nm = new THREE.Matrix3().getNormalMatrix(toWorld), v = new THREE.Vector3(), nn = new THREE.Vector3();
+let sumP = [0, 0, 0], sumT = [0, 0, 0], cnt = 0;
+for (let i = 0; i < n; i++) {
+  v.fromBufferAttribute(P, i).applyMatrix4(toWorld); nn.fromBufferAttribute(N, i).applyMatrix3(nm).normalize();
+  const [pu, pv] = warp(v.x, v.y);
+  aPUV[i * 2] = pu / PW; aPUV[i * 2 + 1] = pv / PH;
+  let m = v.z > 0 ? sm(0, feather, insideDist(v.x, v.y)) * sm(fa, fb, nn.z) : 0;
+  for (const [cx, cy, rx, ry] of calib.region.keepOriginal?.ellipses || []) { const e = Math.hypot((v.x - cx) / rx, (v.y - cy) / ry); m *= sm(0.7, 1.15, e); }
+  aMask[i] = m;
+  if (m > 0.95 && pu >= 0 && pv >= 0 && pu < PW && pv < PH) {   // 颜色对齐：区域核心里两边的平均色
+    const po = (Math.floor(pv) * PW + Math.floor(pu)) * 4, tu = UV.getX(i), tv = UV.getY(i);
+    const to = (Math.min(TH - 1, Math.floor(tv * TH)) * TW + Math.min(TW - 1, Math.floor(tu * TW))) * 4;
+    for (let k = 0; k < 3; k++) { sumP[k] += porPx[po + k]; sumT[k] += texPx[to + k]; }
+    cnt++;
+  }
+}
+const cm = calib.region.colorMatch ?? 0.6;
+const gain = sumP.map((s, k) => 1 + cm * ((sumT[k] / Math.max(1, sumP[k])) - 1));
+
+// ---------------------------------------------------------------- 烘焙：原贴图打底 → UV 空间里画网格，按权重叠立绘
+const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
+renderer.setSize(8, 8);
+const rt = new THREE.WebGLRenderTarget(TW, TH, { type: THREE.UnsignedByteType });
+const raw = t => { t.colorSpace = THREE.NoColorSpace; t.needsUpdate = true; return t; };   // 按原始 sRGB 字节进出，不做色彩空间换算
+const texRaw = raw(map.clone()); texRaw.flipY = false;
+const porTex = raw(new THREE.Texture(portraitImg)); porTex.flipY = false;
+const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const bg = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  uniforms: { t: { value: texRaw } }, depthTest: false,
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+  fragmentShader: 'uniform sampler2D t; varying vec2 vUv; void main(){ gl_FragColor = texture2D(t, vUv); }',
+}));
+const bgScene = new THREE.Scene(); bgScene.add(bg);
+const bg2 = new THREE.BufferGeometry();
+bg2.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+bg2.setAttribute('uv', UV); bg2.setAttribute('aPUV', new THREE.BufferAttribute(aPUV, 2)); bg2.setAttribute('aMask', new THREE.BufferAttribute(aMask, 1));
+bg2.setIndex(g.index);
+const faceMat = new THREE.ShaderMaterial({
+  // 在着色器里就把原贴图（本三角形自己的 uv 处）和立绘按权重混好，不透明写出：外扩进缝隙的像素用的也是岛内的原色，不会混进图集缝隙里的灰 / 黑填充
+  uniforms: { por: { value: porTex }, org: { value: texRaw }, gain: { value: new THREE.Vector3(...gain) } },
+  depthTest: false, side: THREE.DoubleSide,
+  vertexShader: 'attribute vec2 aPUV; attribute float aMask; varying vec2 vP; varying vec2 vT; varying float vM; void main(){ vP = aPUV; vT = uv; vM = aMask; gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0); }',
+  fragmentShader: 'uniform sampler2D por; uniform sampler2D org; uniform vec3 gain; varying vec2 vP; varying vec2 vT; varying float vM; void main(){ if (vM < 0.003) discard; vec3 c = clamp(texture2D(por, vP).rgb * gain, 0.0, 1.0); gl_FragColor = vec4(mix(texture2D(org, vT).rgb, c, vM), 1.0); }',
+});
+const faceScene = new THREE.Scene(); const fm = new THREE.Mesh(bg2, faceMat); fm.frustumCulled = false; faceScene.add(fm);
+// 贴图缝隙（gutter）外扩：Tripo 的 UV 是碎片图集，岛边缘外面没填色，运行时双线性采样会混进原色 → 细亮裂纹。
+// ① 整个网格在 UV 空间里写模板 = 1（岛内）；② 脸部叠色按 ±1..3 px 偏移画几遍，只画进模板 ≠ 1 的缝隙（不碰别的岛）；③ 精确位置再画一遍。
+const rtS = new THREE.WebGLRenderTarget(TW, TH, { type: THREE.UnsignedByteType, stencilBuffer: true, depthBuffer: true });
+rt.dispose();
+const coverMat = new THREE.ShaderMaterial({ side: THREE.DoubleSide, depthTest: false, colorWrite: false,
+  stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp,
+  vertexShader: 'void main(){ gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0); }', fragmentShader: 'void main(){ gl_FragColor = vec4(0.0); }' });
+const coverScene = new THREE.Scene(); const cvm = new THREE.Mesh(bg2, coverMat); cvm.frustumCulled = false; coverScene.add(cvm);
+const dilMat = faceMat.clone();
+Object.assign(dilMat, { stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc, stencilZPass: THREE.KeepStencilOp, stencilFail: THREE.KeepStencilOp });
+dilMat.uniforms = { ...faceMat.uniforms, off: { value: new THREE.Vector2() } };
+dilMat.vertexShader = faceMat.vertexShader.replace('gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0);', 'gl_Position = vec4(uv * 2.0 - 1.0 + off, 0.0, 1.0);').replace('void main(){', 'uniform vec2 off; void main(){');
+const dilScene = new THREE.Scene(); const dm = new THREE.Mesh(bg2, dilMat); dm.frustumCulled = false; dilScene.add(dm);
+renderer.autoClear = false;
+renderer.setRenderTarget(rtS); renderer.clear(true, true, true);
+renderer.render(bgScene, cam);
+renderer.render(coverScene, cam);
+for (let r = 3; r >= 1; r--) for (let a = 0; a < 8; a++) {
+  dilMat.uniforms.off.value.set(Math.cos(a * Math.PI / 4) * r * 2 / TW, Math.sin(a * Math.PI / 4) * r * 2 / TH);
+  renderer.render(dilScene, cam);
+}
+renderer.render(faceScene, cam);
+const px = new Uint8Array(TW * TH * 4);
+renderer.readRenderTargetPixels(rtS, 0, 0, TW, TH, px);
+renderer.setRenderTarget(null);
+// RT 第 0 行 = uv.v = 0 = glTF 贴图的第一行（顶）→ 直接按行写出，不翻转
+const out = document.createElement('canvas'); out.width = TW; out.height = TH;
+out.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(px.buffer), TW, TH), 0, 0);
+// 调试：权重图（同一 UV 空间）
+const maskCanvas = (() => {
+  const s2 = new THREE.Scene(); const mm = new THREE.Mesh(bg2, new THREE.ShaderMaterial({ side: THREE.DoubleSide, depthTest: false,
+    vertexShader: 'attribute float aMask; varying float vM; void main(){ vM = aMask; gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0); }',
+    fragmentShader: 'varying float vM; void main(){ gl_FragColor = vec4(vec3(vM), 1.0); }' })); mm.frustumCulled = false; s2.add(mm);
+  const r2 = new THREE.WebGLRenderTarget(1024, 1024); renderer.setRenderTarget(r2); renderer.setClearColor('#000', 1); renderer.clear(); renderer.render(s2, cam);
+  const b = new Uint8Array(1024 * 1024 * 4); renderer.readRenderTargetPixels(r2, 0, 0, 1024, 1024, b); renderer.setRenderTarget(null);
+  const c = document.createElement('canvas'); c.width = c.height = 1024; c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(b.buffer), 1024, 1024), 0, 0); return c;
+})();
+window.__result = {
+  jpg: out.toDataURL('image/jpeg', 0.95), mask: maskCanvas.toDataURL('image/png'),
+  stats: { texture: [TW, TH], portrait: [PW, PH], coreSamples: cnt, gain: gain.map(x => +x.toFixed(3)), maskedVerts: aMask.reduce((a, m) => a + (m > 0.01), 0) },
+};
+document.body.append(out); out.style.width = '512px';
+</script>
+</body>
+</html>

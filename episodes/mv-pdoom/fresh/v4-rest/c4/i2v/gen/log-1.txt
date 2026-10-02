@@ -1,0 +1,11 @@
+episodes/mv-pdoom/fresh/v4-rest/c4/i2v/gen/back-bust-s31.png  seed=31  服务端 48.38s  总计 49.8s  模型 qwen_image_edit_2511_int8_convrot.safetensors + lightning8
+job 91542243dabb  wan i2v 512x768 61帧
+  01:06:56 queued
+  01:07:26 running
+  01:08:46 done
+episodes/mv-pdoom/fresh/v4-rest/c4/i2v/gen/show-draft-s1.mp4  512x768 61帧@16fps (3.75s)  seed=1  生成 82.7s（排队 31.0s）  整卡显存峰值 19460 MiB  模型 wan2.2 i2v A14B fp8 + lightx2v4
+job 80ca8e0314d6  wan i2v 512x768 61帧
+  01:08:53 queued
+  01:09:13 running
+  01:10:33 done
+episodes/mv-pdoom/fresh/v4-rest/c4/i2v/gen/show-draft-s2.mp4  512x768 61帧@16fps (3.75s)  seed=2  生成 82.7s（排队 20.4s）  整卡显存峰值 19364 MiB  模型 wan2.2 i2v A14B fp8 + lightx2v4

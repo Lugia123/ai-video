@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>girl.js 画廊：6 种皮肤 + 过渡 + 万花筒</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; bottom: 22px; font: 22px 'STM', monospace; color: #F2EDE4; letter-spacing: 0.08em; opacity: 0.85; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  副歌 1 的 8 小节（歌曲 22.055–36.6 s），真实音乐，她按 dance3d 编舞跟拍跳：
+  0 toon · 1–2 toon → points → voxel（「atoms rearranging」那种：溶解成粒子、散开、聚进体素格、方块弹出）· 3 voxel
+  · 4 blueprint（先从脚到头画出来）· 5 chrome · 6 hologram · 7 万花筒 8 份（toon；前 2 拍以脚心为中心，后 2 拍 center:'chest'）。
+  皮肤之间用 girl.morph（1 拍）。标签只在画廊里有。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights, kaleido } from '../girl.js';
+
+const mv = await loadMV();
+const { music } = mv;
+const BAR0 = 12;                                  // 副歌 1 第一小节
+const T0 = music.barTime(BAR0), BAR = music.period * 4, BEAT = music.period;
+const bar = T => (T - T0) / BAR;                  // 画廊内的小节数（连续）
+
+const girl = await createGirl(mv);
+const kal = kaleido(girl, { copies: 8 });
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.05, 100);
+scene.add(girl.root, kal.group, createGirlLights());
+
+// 地面：细网格 + 脚下一圈柔光
+const grid = new THREE.GridHelper(12, 48, new THREE.Color(PALETTE.pink).multiplyScalar(0.55), new THREE.Color('#26263a'));
+grid.material.transparent = true; grid.material.opacity = 0.7;
+scene.add(grid);
+const disc = new THREE.Mesh(new THREE.CircleGeometry(0.7, 64), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  uniforms: { c: { value: new THREE.Color(PALETTE.mint) }, k: { value: 0.3 } },
+  vertexShader: 'varying vec2 v; void main(){ v = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+  fragmentShader: 'uniform vec3 c; uniform float k; varying vec2 v; void main(){ float d = length(v - 0.5) * 2.0; gl_FragColor = vec4(c * k * pow(1.0 - clamp(d,0.0,1.0), 2.0), 1.0); }',
+}));
+disc.rotation.x = -Math.PI / 2; disc.position.y = 0.002; scene.add(disc);
+
+// 编舞：按 dance3d 拍子（第 0 拍 = 第一个重拍），每小节换一个舞步
+const B0 = Math.round(girl.beatOf(T0));
+const ROUTINE = [
+  { beat: B0 - 4, move: 'wave' },
+  { beat: B0 + 4, move: 'sideClap' },
+  { beat: B0 + 8, move: 'squatJump' },
+  { beat: B0 + 12, move: 'discoPoint' },
+  { beat: B0 + 16, move: 'sideClap', mirror: true },
+  { beat: B0 + 20, move: 'spin' },
+  { beat: B0 + 24, move: 'discoPoint', mirror: true },
+  { beat: B0 + 28, move: 'wave' },
+];
+
+// 皮肤时间表（小节，连续）
+const tag = document.getElementById('tag');
+function skinAt(T) {
+  const b = bar(T), beatIn = (b % 1) * 4;
+  if (b < 1) return ['toon', () => girl.setSkin('toon', T)];
+  if (b < 3) {
+    // 1.0–1.5：toon 溶解成粒子（p 0→0.35）· 1.5–2.0 粒子跳舞 · 2.0–3.0 散开 → 聚拢 → 体素（p 0.35→1）
+    const p = b < 1.5 ? 0.35 * (b - 1) / 0.5 : b < 2 ? 0.35 : 0.35 + 0.65 * (b - 2);
+    const name = p < 0.3 ? 'toon → points' : p <= 0.4 ? 'points' : p < 0.8 ? 'points → voxel' : 'voxel';
+    return [name, () => girl.morph('toon', 'voxel', p, T)];
+  }
+  const steps = [[3, 'voxel'], [4, 'blueprint'], [5, 'chrome'], [6, 'hologram'], [7, 'toon']];
+  let i = 0; for (let k = 0; k < steps.length; k++) if (b >= steps[k][0]) i = k;
+  const [start, name] = steps[i];
+  const prev = i > 0 ? steps[i - 1][1] : 'voxel';
+  const into = (b - start) * 4;                   // 进这个皮肤第几拍
+  if (i > 0 && into < 1) return [`${prev} → ${name}`, () => girl.morph(prev, name, into, T)];
+  if (name === 'blueprint') return [name, () => girl.setSkin('blueprint', T, { draw: Math.min(1, (into - 1) / 2) })];
+  return [name === 'toon' ? 'kaleido × 8' : name, () => girl.setSkin(name, T)];
+}
+
+function draw(T) {
+  const b = bar(T);
+  const kal8 = b >= 7;
+  girl.root.position.set(0, 0, 0);
+  girl.dance(ROUTINE, T);
+  const [name, apply] = skinAt(T);
+  apply();
+  tag.textContent = `${name}   bar ${Math.floor(b) + 1}/8`;
+
+  // 相机：前 7 小节缓慢环绕全身；第 8 小节正面拉远看万花筒
+  if (!kal8) {
+    const a = -0.55 + 0.9 * (b / 7);
+    const R = 3.1 - 0.25 * Math.sin(b * 0.9);
+    camera.position.set(Math.sin(a) * R, 0.72 + 0.12 * Math.sin(b * 1.3), Math.cos(a) * R);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(0, 0.5, 0);
+  } else {
+    const k = b - 7, cy = b < 7.5 ? 0.05 : 0.72;              // 后 2 拍以胸口为中心，镜头跟着对准胸口
+    camera.position.set(0, cy, (b < 7.5 ? 5.2 : 3.6) - 0.5 * k);
+    camera.up.set(Math.sin(k * 0.6), Math.cos(k * 0.6), 0);   // 慢慢转 roll，万花筒整体旋转
+    camera.lookAt(0, cy, 0);
+  }
+  camera.updateMatrixWorld();
+  kal.group.visible = kal8;
+  grid.visible = !kal8; disc.visible = !kal8;
+  if (kal8) kal.update(T, { camera, center: b < 7.5 ? 'feet' : 'chest' });   // 前 2 拍以脚心为中心，后 2 拍以胸口
+
+  const kick = music.pulse('kick', T, { decay: 0.12 });
+  disc.material.uniforms.k.value = 0.18 + 0.35 * kick;
+  const skin = girl.skin;
+  const post = {
+    bloom: { strength: skin === 'hologram' || name.includes('points') ? 1.0 : 0.8, threshold: 1.5, radius: 0.9 },
+    chroma: 0.25 + 0.5 * kick,
+    grade: { exposure: 1.05, saturation: 1.08, vignette: 0.35, contrast: 1.04 },
+    flash: kal8 ? 0.9 * Math.exp(-(T - (T0 + 7 * BAR)) / 0.12) : 0,
+    glitch: skin === 'hologram' ? girl.uniforms.glitch.value * 0.3 : 0,
+  };
+  mv.stage.render(scene, camera, post);
+}
+
+mv.mount(draw, { offset: T0, duration: BAR * 8 });
+
+// 自检：逐帧跑 dance3d 的穿模 / 反关节检查（胶囊体代理）
+window.__girl = girl; window.__R = ROUTINE;
+window.__still = (old = false, minMove = 0.08) => girl.stillness(old ? ROUTINE.map(e => ({ ...e, move: e.move === 'wave' ? 'glowWave' : e.move })) : ROUTINE, T0, T0 + BAR * 8, { minMove });
+window.__scan = (fps = 30) => {
+  const out = [];
+  for (let f = 0; f < BAR * 8 * fps; f++) { const T = T0 + f / fps; girl.dance(ROUTINE, T); for (const it of girl.check()) out.push({ f, T: +T.toFixed(2), ...it }); }
+  return out;
+};
+</script>
+</body>
+</html>

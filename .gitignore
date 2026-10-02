@@ -1,0 +1,162 @@
+# ai_video —— 入库规则
+# 原则：代码、文档、作为渲染输入的素材图入库；渲染产物、音视频、不能再分发的第三方资产不入库。
+# 缺的东西怎么补见 README.md「仓库里没有的东西」。
+
+# ===== 素材图：只留定稿页面实际加载的 + 角色设定 / 参考 =====
+# 这几个目录里生成图很多，先把图片整体忽略，再按白名单放行。
+# 这一段必须放在最前：后面的通用规则（*.mp4、_work/、out/、*-check* 等）会把白名单里混进来的视频和检查图再排除掉。
+# 「用到」的标准：MV 各段定稿页面 + ep01–08 正片和封面页面，用 Playwright 逐 0.5 秒 seek，抓到的网络请求。
+episodes/cast-cyber-girl/closeup/**/*.png
+episodes/cast-cyber-girl/closeup/**/*.jpg
+episodes/cast-cyber-girl/closeup/**/*.webp
+episodes/mv-pdoom/fresh/**/*.png
+episodes/mv-pdoom/fresh/**/*.jpg
+episodes/mv-pdoom/fresh/**/*.webp
+episodes/mv-pdoom/kits/**/*.png
+episodes/mv-pdoom/kits/**/*.jpg
+episodes/mv-pdoom/kits/**/*.webp
+assets/characters/**/*.png
+assets/characters/**/*.jpg
+assets/characters/**/*.webp
+# 近景女主：设定半身像、分层立绘、口型 / 表情层、漫画关键画、按钮参考、舞台大屏帧
+!episodes/cast-cyber-girl/closeup/base.png
+!episodes/cast-cyber-girl/closeup/bust-*.png
+!episodes/cast-cyber-girl/closeup/final/*
+!episodes/cast-cyber-girl/closeup/layers/**
+!episodes/cast-cyber-girl/closeup/eye/*
+!episodes/cast-cyber-girl/closeup/sing/*
+!episodes/cast-cyber-girl/closeup/topdown/*
+!episodes/cast-cyber-girl/closeup/bridge-comic/*
+!episodes/cast-cyber-girl/closeup/sydney/layers/*
+!episodes/cast-cyber-girl/closeup/parkour/layers/*
+!episodes/cast-cyber-girl/closeup/c3v7/*
+!episodes/cast-cyber-girl/closeup/c2tape/k[135].png
+!episodes/cast-cyber-girl/closeup/c2tape/k4?.png
+# 舞台大屏素材库只留定稿用到的 9 段（片段清单 clips.json 和 README 照常入库）
+!episodes/cast-cyber-girl/closeup/screen-clips/clap/*
+!episodes/cast-cyber-girl/closeup/screen-clips/face/*
+!episodes/cast-cyber-girl/closeup/screen-clips/hairflip/*
+!episodes/cast-cyber-girl/closeup/screen-clips/hand/*
+!episodes/cast-cyber-girl/closeup/screen-clips/low/*
+!episodes/cast-cyber-girl/closeup/screen-clips/mic-full/*
+!episodes/cast-cyber-girl/closeup/screen-clips/mic-half/*
+!episodes/cast-cyber-girl/closeup/screen-clips/point/*
+!episodes/cast-cyber-girl/closeup/screen-clips/profile/*
+# MV 分段素材：副歌 1 的 i2v 序列和 2D 切图、尾声的 i2v 序列和直播信息流
+!episodes/mv-pdoom/fresh/c1-v4/i2v/*
+!episodes/mv-pdoom/fresh/c1-v4/k2d*/cut-*.png
+!episodes/mv-pdoom/fresh/v4-rest/c4/entry-*-1080.png
+!episodes/mv-pdoom/fresh/v4-rest/c4/feed/**
+!episodes/mv-pdoom/fresh/v4-rest/c4/i2v/**
+# three.js 场景部件的贴图：表情贴花（只留定稿用到的几个偏航角）、超立方体图集
+!episodes/mv-pdoom/kits/tesseract-atlas.jpg
+!episodes/mv-pdoom/kits/face-decals/*
+!episodes/mv-pdoom/kits/face-decals-front/*
+!episodes/mv-pdoom/kits/face-decals-yaw/m10/*
+!episodes/mv-pdoom/kits/face-decals-yaw/n10/*
+!episodes/mv-pdoom/kits/face-decals-yaw/p10/*
+!episodes/mv-pdoom/kits/face-decals-yaw/p20/*
+!episodes/mv-pdoom/kits/face-decals-yaw/z0/*
+# 纸片女孩讲解员的切图（assets/lib/paper-girl.js 读这里）；旧吉祥物参考图
+!assets/characters/girl-q/poses/out/**
+!assets/characters/box-buddy-reference.png
+# 贴花配准检查图
+_reg-*.jpg
+
+# ===== 依赖 / 系统 / 缓存 =====
+node_modules/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+
+# ===== 音频 =====
+# 歌曲版权归原作者；旁白是 edge-tts 生成的，跑 tools/tts/tts.py 重新生成
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.ogg
+
+# ===== 视频（成片、样片、图生视频原片一律不入库） =====
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.gif
+
+# ===== 第三方 / 体积大的资产 =====
+# Mixamo 动作：Adobe 条款不允许单独再分发
+*.fbx
+# 角色 / 猫咪模型（自行用 Tripo 等生成后放回 episodes/cast-cyber-girl/3d/）
+*.glb
+*.gltf
+*.blend
+# 回形针物理烘焙数据：node tools/paperclip-bake/bake.mjs tower|pile 重新生成
+*.bin.gz
+# 歌词时间轴：歌词版权归原作者，格式和生成方法见 README
+episodes/mv-pdoom/data/lyrics.json
+# 中文意译文件里也逐句带着英文原句
+episodes/mv-pdoom/data/lyrics-zh.json
+
+# ===== 渲染产物 =====
+out/
+frames/
+frames-*/
+preview/
+preview-*/
+check/
+_check/
+_check.*
+_review-*
+final-check/
+contact-sheet*
+sheet.*
+*-sheet.*
+*_sheet.*
+*-compare*.*
+*compare-*.*
+*-check*.*
+*-check/
+*before-after*
+*before_after*
+seams*.jpg
+# 封面导出（tools/cover/cover.mjs 生成）
+**/cover/cover-*.png
+**/cover/thumb-*.png
+# 生图服务验收样例（tools/imggen/README.md 里有文字说明）
+tools/imggen/samples/
+# 换讲解员之前的备份
+_boxbuddy/
+
+# ===== 生图过程的中间件、草稿、草图、旧版 =====
+_work/
+_rejected/
+rejected/
+draft/
+drafts/
+*-draft/
+_drafts/
+draft-set/
+sketch/
+sketch[0-9]/
+_sketch/
+board-v[0-9]*/
+_v[0-9]*/
+_old/
+before/
+*.pre[0-9]*/
+_unused/
+probe/
+
+# ===== 本地留存（真人参考照片、调研抽帧、测试动作） =====
+episodes/cast-cyber-girl/refs/
+episodes/cast-cyber-girl/3d/anim/_test/
+# skillry 调研抽帧（100MB；结论见 episodes/mv-pdoom/research/skillry-ideas.md）
+episodes/mv-pdoom/research/skillry/
+
+# ===== 例外：被上面的 out/ 误伤的目录 =====
+# 纸片女孩讲解员的切图目录（目录名叫 out，但它是素材）
+!assets/characters/girl-q/poses/out/
+# README 用的截图
+!docs/images/

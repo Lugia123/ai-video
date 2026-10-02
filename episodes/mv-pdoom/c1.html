@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>mv-pdoom 样片 · 副歌 1</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!-- 第 1 期样片：副歌 1，歌曲时间 22.1–38.4 s。镜头在 shots/c1.js；普通打开点击 / 空格带音乐播放，?render=1 只等 seek。 -->
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { createGirl } from './kits/girl.js';
+import { createHolo } from './kits/hologram.js';
+import { makeC1 } from './shots/c1.js';
+
+const mv = await loadMV();
+const [, girl, holo] = await Promise.all([initType3D(), createGirl(mv), createHolo(mv, { height: 1.6, base: false })]);
+const { shots, cuts } = makeC1(mv, { girl, holo });
+window.__cuts = cuts;
+mv.mount(shots, { offset: 22.1, duration: 16.3 });
+</script>
+</body>
+</html>

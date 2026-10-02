@@ -1,0 +1,14 @@
+[Unit]
+Description=imggen: REST API (192.168.3.127:7860) -> ComfyUI
+After=imggen-comfy.service
+Wants=imggen-comfy.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/imggen
+ExecStart=/opt/imggen/venv/bin/python /opt/imggen/imggen_server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

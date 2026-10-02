@@ -1,0 +1,376 @@
+{
+ "src": "../../turnaround/tuxedo/front-tpose-smile.png",
+ "canvas": [
+  832,
+  1248
+ ],
+ "joints": {
+  "neck": [
+   416,
+   419
+  ],
+  "waist": [
+   416,
+   588
+  ],
+  "shoulder_l": [
+   329,
+   478
+  ],
+  "elbow_l": [
+   208,
+   472
+  ],
+  "wrist_l": [
+   83,
+   465
+  ],
+  "hand_l": [
+   3,
+   460
+  ],
+  "shoulder_r": [
+   498,
+   478
+  ],
+  "elbow_r": [
+   620,
+   472
+  ],
+  "wrist_r": [
+   746,
+   466
+  ],
+  "hand_r": [
+   827,
+   462
+  ],
+  "hip_l": [
+   350,
+   676
+  ],
+  "knee_l": [
+   342,
+   828
+  ],
+  "foot_l": [
+   311,
+   1093
+  ],
+  "hip_r": [
+   478,
+   676
+  ],
+  "knee_r": [
+   488,
+   829
+  ],
+  "foot_r": [
+   516,
+   1092
+  ],
+  "tail_root": [
+   414,
+   764
+  ],
+  "tail_1": [
+   414,
+   832
+  ],
+  "tail_2": [
+   418,
+   910
+  ],
+  "tail_tip": [
+   456,
+   966
+  ],
+  "grip_l": [
+   52,
+   463
+  ],
+  "grip_r": [
+   778,
+   464
+  ]
+ },
+ "note": "origin=部件 PNG 左上角在原画布的位置；pivot=关节枢轴（原画布坐标），pivot_local=相对部件 PNG；角度正值=屏幕上顺时针；世界变换 = 父变换 · T(pivot) · R(θ) · T(-pivot)；按 z 从小到大画。_l/_r=画面左/右。",
+ "parts": [
+  {
+   "name": "tail",
+   "file": "tail.png",
+   "parent": "pelvis",
+   "z": 0,
+   "origin": [
+    379,
+    762
+   ],
+   "disc": 0,
+   "size": [
+    112,
+    224
+   ],
+   "pivot": [
+    414.0,
+    764.0
+   ],
+   "pivot_local": [
+    35.0,
+    2.0
+   ]
+  },
+  {
+   "name": "shin_l",
+   "file": "shin_l.png",
+   "parent": "thigh_l",
+   "z": 1,
+   "origin": [
+    230,
+    783
+   ],
+   "disc": 44,
+   "size": [
+    185,
+    314
+   ],
+   "pivot": [
+    342.0,
+    828.0
+   ],
+   "pivot_local": [
+    112.0,
+    45.0
+   ]
+  },
+  {
+   "name": "shin_r",
+   "file": "shin_r.png",
+   "parent": "thigh_r",
+   "z": 1,
+   "origin": [
+    440,
+    784
+   ],
+   "disc": 44,
+   "size": [
+    158,
+    311
+   ],
+   "pivot": [
+    488.0,
+    829.0
+   ],
+   "pivot_local": [
+    48.0,
+    45.0
+   ]
+  },
+  {
+   "name": "thigh_l",
+   "file": "thigh_l.png",
+   "parent": "pelvis",
+   "z": 2,
+   "origin": [
+    294,
+    629
+   ],
+   "disc": 46,
+   "size": [
+    118,
+    204
+   ],
+   "pivot": [
+    350.0,
+    676.0
+   ],
+   "pivot_local": [
+    56.0,
+    47.0
+   ]
+  },
+  {
+   "name": "thigh_r",
+   "file": "thigh_r.png",
+   "parent": "pelvis",
+   "z": 2,
+   "origin": [
+    417,
+    629
+   ],
+   "disc": 46,
+   "size": [
+    119,
+    206
+   ],
+   "pivot": [
+    478.0,
+    676.0
+   ],
+   "pivot_local": [
+    61.0,
+    47.0
+   ]
+  },
+  {
+   "name": "pelvis",
+   "file": "pelvis.png",
+   "parent": null,
+   "z": 3,
+   "origin": [
+    323,
+    573
+   ],
+   "disc": 0,
+   "size": [
+    182,
+    174
+   ],
+   "pivot": [
+    416.0,
+    588.0
+   ],
+   "pivot_local": [
+    93.0,
+    15.0
+   ]
+  },
+  {
+   "name": "torso",
+   "file": "torso.png",
+   "parent": "pelvis",
+   "z": 4,
+   "origin": [
+    321,
+    393
+   ],
+   "disc": 0,
+   "size": [
+    186,
+    207
+   ],
+   "pivot": [
+    416.0,
+    588.0
+   ],
+   "pivot_local": [
+    95.0,
+    195.0
+   ]
+  },
+  {
+   "name": "arm_lo_l",
+   "file": "arm_lo_l.png",
+   "parent": "arm_up_l",
+   "z": 6,
+   "origin": [
+    20,
+    311
+   ],
+   "disc": 34,
+   "size": [
+    224,
+    321
+   ],
+   "pivot": [
+    208.0,
+    472.0
+   ],
+   "pivot_local": [
+    188.0,
+    161.0
+   ]
+  },
+  {
+   "name": "arm_lo_r",
+   "file": "arm_lo_r.png",
+   "parent": "arm_up_r",
+   "z": 6,
+   "origin": [
+    585,
+    307
+   ],
+   "disc": 34,
+   "size": [
+    229,
+    330
+   ],
+   "pivot": [
+    620.0,
+    472.0
+   ],
+   "pivot_local": [
+    35.0,
+    165.0
+   ]
+  },
+  {
+   "name": "arm_up_l",
+   "file": "arm_up_l.png",
+   "parent": "torso",
+   "z": 7,
+   "origin": [
+    205,
+    428
+   ],
+   "disc": 22,
+   "size": [
+    148,
+    99
+   ],
+   "pivot": [
+    329.0,
+    478.0
+   ],
+   "pivot_local": [
+    124.0,
+    50.0
+   ]
+  },
+  {
+   "name": "arm_up_r",
+   "file": "arm_up_r.png",
+   "parent": "torso",
+   "z": 7,
+   "origin": [
+    475,
+    428
+   ],
+   "disc": 22,
+   "size": [
+    149,
+    99
+   ],
+   "pivot": [
+    498.0,
+    478.0
+   ],
+   "pivot_local": [
+    23.0,
+    50.0
+   ]
+  },
+  {
+   "name": "head",
+   "file": "head.png",
+   "parent": "torso",
+   "z": 8,
+   "origin": [
+    274,
+    186
+   ],
+   "disc": 0,
+   "size": [
+    280,
+    246
+   ],
+   "pivot": [
+    416.0,
+    419.0
+   ],
+   "pivot_local": [
+    142.0,
+    233.0
+   ]
+  }
+ ]
+}

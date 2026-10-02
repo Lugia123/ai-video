@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>mv-pdoom v4 · 副歌 3</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!-- v4 副歌 3，歌曲时间 94.8–109.3 s：坠落穿过 0.81 → 回形针之海 → 2D 自动回复 → 整列被埋 → 引信 → 冷蓝雨中坐标轴。镜头在 shots/v4-04c.js。 -->
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { createUI2D } from './kits/ui2d.js';
+import { createGirl, loadAnims } from './kits/girl.js';
+import { loadFont } from './kits/vfx.js';
+import { makeV404c, ANIMS } from './shots/v4-04c.js';
+
+const mv = await loadMV();
+const [, ui, girl] = await Promise.all([initType3D(), createUI2D(mv), createGirl(mv), loadAnims(ANIMS), loadFont('Anton')]);
+const { shots, cuts } = await makeV404c(mv, { ui, girl });
+window.__cuts = cuts;
+mv.mount(shots, { offset: 94.8, duration: 14.5 });
+</script>
+</body>
+</html>

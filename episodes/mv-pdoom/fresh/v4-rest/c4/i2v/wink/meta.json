@@ -1,0 +1,1 @@
+{"src": "gen/wink-final-s1.mp4", "fps": 16, "frames": 17, "size": [832, 1248], "matte": "本地抠白底 + 三帧中值 + 收边去白边（c4/i2v/prep.py，改自 fresh/i2v-test/_work/prep2.py）"}

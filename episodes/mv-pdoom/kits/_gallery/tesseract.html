@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>kits/tesseract.js 演示：超立方体数据空间</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// kits/tesseract.js 的演示（#1048）。她悬在晶格里；镜头绕着她慢慢转一圈再拉远。?t= 秒可以直接看某一刻。
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims, getAnim } from '../girl.js';
+import { createTesseract } from '../tesseract.js';
+
+const mv = await loadMV({ width: 1920, height: 1080 });
+await loadAnims(['move__fall-idle', 'act__look-around']);
+const girl = await createGirl(mv);
+const scene = new THREE.Scene(); scene.add(createGirlLights({ key: 2.0, rim: 2.4, fill: 1.1 }));
+const tess = await createTesseract(mv); scene.add(tess.group);
+const cam = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 4000);
+const H = 2, C = new THREE.Vector3(0, 0, -20);
+const pose = T => { scene.add(girl.root); girl.root.scale.setScalar(H); girl.root.position.set(C.x, C.y - 1.0 + 0.15 * Math.sin(T * 1.3), C.z); girl.root.rotation.set(0, Math.PI + 0.5 * Math.sin(T * 0.8), 0); girl.root.updateMatrixWorld(true);
+  const m = getAnim('act__look-around'); girl.dancer.apply(m.solve((T % m.srcPeriod) / m.srcPeriod, girl.dancer)); girl.root.updateMatrixWorld(true); girl.setSkin('toon', T); };
+const T0 = 74.78, DUR = 6;
+mv.mount([{ id: 'tess-demo', t0: T0, t1: T0 + DUR, transitionIn: { kind: 'cut' }, build: () => ({}), update(_, T) {
+  const k = T - T0, a = 0.5 + 0.35 * k, d = 9 + 9 * Math.max(0, k - 2) ** 1.4;
+  cam.position.set(C.x + Math.sin(a) * d, C.y + 1.2 + 0.6 * k, C.z + Math.cos(a) * d); cam.lookAt(C.x, C.y + 0.2, C.z - 6); cam.updateMatrixWorld(true);
+  tess.update(T, { phase: k * 6 });
+  pose(T); tess.reflectArray(scene, cam, girl.root, C);
+  if (girl.face) try { girl.face.update(T, { expression: 'neutral', camera: cam }); } catch {}
+  return { scene, camera: cam, post: { bloom: { strength: 0.7, threshold: 1.0, radius: 0.8 }, chroma: 0.05, grade: { vignette: 0.4 } } };
+} }], { offset: T0, duration: DUR });
+</script>
+</body>
+</html>

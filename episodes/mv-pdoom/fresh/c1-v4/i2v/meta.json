@@ -1,0 +1,1 @@
+{"src": "gen/draft-s2.mp4", "fps": 16, "frames": 41, "size": [832, 1248], "red": 1.25, "red_frame": 20, "matte": "birefnet + 镜片反推 + 三帧中值 + 收边去白边（_work/prep2.py）"}

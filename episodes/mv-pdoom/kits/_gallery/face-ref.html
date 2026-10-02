@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>face-ref：多角度五官的角度参考图</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0">
+<!--
+  #936 给千问图像编辑当「角度参考」：3D 模型（toon + 网格投影的正面化五官）在 ?yaw= 度渲一张头肩像，白底，
+  构图对齐 closeup/final/neutral.png（竖幅 2:3，脸约占画高 24%，脸中心在画面上方 38%）。渲染器出 1920×1080，取中间 720×1080 再缩放成 832×1248 用。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { createGirl, createGirlLights } from '../girl.js';
+const Q = new URLSearchParams(location.search);
+const YAW = +(Q.get('yaw') || 0), PITCH = +(Q.get('pitch') || 0);
+const mv = await loadMV();
+const girl = await createGirl(mv, { points: 100 });
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#ffffff');
+scene.add(girl.root, createGirlLights());
+const camera = new THREE.PerspectiveCamera(14, 16 / 9, 0.05, 50);
+const hb = girl.dancer.S.info.Head.bone, sk = girl.mesh.skeleton, hbi = sk.boneInverses[sk.bones.indexOf(hb)];
+function draw(T) {
+  girl.root.position.set(0, 0, 0);
+  girl.pose(() => ({ neck: [PITCH * 0.4, 0, 0], head: [PITCH * 0.6, 0, 0] }));
+  girl.setSkin('toon', 0);
+  girl.root.updateMatrixWorld(true);
+  const h = new THREE.Vector3(0, 0.89, 0.05).applyMatrix4(hbi).applyMatrix4(hb.matrixWorld).applyMatrix4(girl.mesh.bindMatrix);
+  const fh = 1080 * 0.24, dist = 0.075 / (fh / 1080) / (2 * Math.tan(7 * Math.PI / 180)), y = YAW * Math.PI / 180;
+  const tgt = h.clone().add(new THREE.Vector3(0, -0.075 / 0.24 * (0.5 - 0.38), 0));   // 脸中心放在画面上方 38%
+  camera.position.set(tgt.x + Math.sin(y) * dist, tgt.y, tgt.z + Math.cos(y) * dist); camera.lookAt(tgt);
+  camera.updateMatrixWorld();
+  girl.face.update(T, { camera: Q.get('feat') === 'y' ? camera : null, style: Q.get('feat') === 'y' ? 'Y' : 'B', limits: false });            // 不给镜头 = 网格投影五官（位置和 3D 几何一致）
+  mv.stage.render(scene, camera, { bloom: 0, grade: { vignette: 0 } });
+}
+mv.mount(draw, { offset: 0, duration: 1 });
+// 3D 静止姿态坐标 → 当前帧屏幕像素（1920×1080），跟头骨蒙皮走（叠图配准用）
+window.__proj = pts => { draw(0.5); return pts.map(([x, y, z]) => { const v = new THREE.Vector3(x, y, z).applyMatrix4(hbi).applyMatrix4(hb.matrixWorld).applyMatrix4(girl.mesh.bindMatrix).project(camera); return [(v.x + 1) / 2 * 1920, (1 - v.y) / 2 * 1080]; }); };
+</script>
+</body>
+</html>

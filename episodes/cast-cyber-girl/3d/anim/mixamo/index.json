@@ -1,0 +1,3129 @@
+{
+ "about": "Mixamo 动捕片段（X Bot = mixamorig，FBX Without Skin，30 fps）。girl.js 的 loadAnims() 读这份。ok:false = 验片没通过，loadAnims 默认不加载。dance__* 按 beats 对拍伸缩（源第 k 拍 ↔ 音乐第 k 拍，stretch = 需要的加速倍数）；move__/act__ 按原速（bpm 132 ⇒ 1 音乐拍 = 源片段 0.4545 s，beats = 原速下占几拍）。metrics 来自 kits/_gallery/mocap.html 的 __analyze()：slide = 支撑脚水平速度中位数（身高=1，/s），overlap / handHead / reverse = 有问题的帧比例，seam = 首尾帧关键点平均距离。已做体型修正：上臂低于水平时外展 10°（X Bot 很瘦，照搬会插进她的泡泡袖 / 宽短裤）。 stillSec16 / stillLongest = 按 132 BPM 放 16 拍时，任意 1 拍窗口里手脚头位移都 < 0.08 的累计 / 最长时长（秒），主舞优先选 0 的。 pose = 姿态指标（度）：torsoMean/torsoMax = Spine2 相对直立的平均 / 最大前倾，headDown/headUp/headRoll = 颈+头相对胸腔的最大俯仰 / 侧倾，down20 = 头相对直立低头超过 20° 的时长占比。hunched（舞蹈）= torsoMean>12 或 torsoMax>45 或 down20>0.25，主舞不用；floor = 地板动作，只在地板段用。模型头颈可承受范围：低头 25°、抬头 22°、侧倾 18°（girl.js HEAD_LIMIT，超出自动限幅）。 root（W3 #939 起）= 带位移版 FBX 髋部首尾水平位移 dx/dz、最大抬高 maxUp（身高=1）、平均速度 speed（身高/s）；air = 离地窗口（片段本地秒，两脚最低点都 > 0.06 身高）；hips = 原地版髋高范围。",
+ "generated": "2026-09-29",
+ "clips": [
+  {
+   "name": "act__clap",
+   "category": "act",
+   "file": "act__clap.fbx",
+   "duration": 1.167,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.57,
+   "issues": [
+    "穿模（foreArmL/torsoHigh 56% 帧）"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0.005,
+    "minY": 0,
+    "overlap": 0.676,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.005
+   },
+   "pose": {
+    "torsoMean": -1.4,
+    "torsoMax": 0,
+    "headDown": 0,
+    "headUp": 17.4,
+    "headRoll": 6.1,
+    "neckMax": 11.2,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__float-arch",
+   "category": "act",
+   "file": "act__float-arch.fbx",
+   "duration": 0.033,
+   "loop": true,
+   "inPlace": true,
+   "ok": false,
+   "bpm": 132,
+   "beats": 0.07,
+   "issues": [
+    "单帧（下载的文件没有动画）"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（up76°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 1,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": -22.7,
+    "torsoMax": 0,
+    "headDown": 0,
+    "headUp": 75.9,
+    "headRoll": 4.8,
+    "neckMax": 38.3,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__float-flail",
+   "category": "act",
+   "file": "act__float-flail.fbx",
+   "duration": 3.6,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 7.92,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.021
+   },
+   "pose": {
+    "torsoMean": 2.1,
+    "torsoMax": 3.3,
+    "headDown": 19.1,
+    "headUp": 0,
+    "headRoll": 11.2,
+    "neckMax": 15.9,
+    "down20": 0.03
+   }
+  },
+  {
+   "name": "act__float-up",
+   "category": "act",
+   "file": "act__float-up.fbx",
+   "duration": 0.033,
+   "loop": true,
+   "inPlace": true,
+   "ok": false,
+   "bpm": 132,
+   "beats": 0.07,
+   "issues": [
+    "单帧（下载的文件没有动画）"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 1,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": 70,
+    "torsoMax": 70,
+    "headDown": 20,
+    "headUp": 0,
+    "headRoll": 0.2,
+    "neckMax": 10,
+    "down20": 1
+   }
+  },
+  {
+   "name": "act__fly-idle",
+   "category": "act",
+   "file": "act__fly-idle.fbx",
+   "duration": 2.633,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 5.79,
+   "issues": [
+    "循环接缝跳变"
+   ],
+   "notes": [
+    "水平漂浮；首尾不接（循环有跳变），当一次性动作用",
+    "头颈动作超出模型范围（up33°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.012,
+    "minY": -0.042,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.574
+   },
+   "pose": {
+    "torsoMean": 77.4,
+    "torsoMax": 79.1,
+    "headDown": 0,
+    "headUp": 32.9,
+    "headRoll": 8.9,
+    "neckMax": 17.7,
+    "down20": 1
+   }
+  },
+  {
+   "name": "act__kneel-down",
+   "category": "act",
+   "file": "act__kneel-down.fbx",
+   "duration": 2.767,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 6.09,
+   "issues": [],
+   "notes": [
+    "深蹲 / 落地时膝盖检查报反折（目检正常，是深屈膝）",
+    "头颈动作超出模型范围（up43°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.057,
+    "minY": 0,
+    "overlap": 0.171,
+    "handHead": 0,
+    "reverse": 0.354,
+    "seam": 0.245
+   },
+   "pose": {
+    "torsoMean": 36.7,
+    "torsoMax": 58,
+    "headDown": 0,
+    "headUp": 43.2,
+    "headRoll": 4.6,
+    "neckMax": 19.5,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__kneel-idle",
+   "category": "act",
+   "file": "act__kneel-idle.fbx",
+   "duration": 4.267,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 9.39,
+   "issues": [
+    "穿模（foreArmR/thighR 69% 帧）"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0.688,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": 2.3,
+    "torsoMax": 3.1,
+    "headDown": 0,
+    "headUp": 1.7,
+    "headRoll": 0.3,
+    "neckMax": 0.5,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__leap-forward",
+   "category": "act",
+   "file": "act__leap-forward.fbx",
+   "duration": 0.033,
+   "loop": false,
+   "inPlace": true,
+   "ok": false,
+   "bpm": 132,
+   "beats": 0.07,
+   "issues": [
+    "单帧（下载的文件没有动画）"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": 27.2,
+    "torsoMax": 27.2,
+    "headDown": 0.3,
+    "headUp": 0,
+    "headRoll": 5.9,
+    "neckMax": 7.9,
+    "down20": 1
+   }
+  },
+  {
+   "name": "act__look-around",
+   "category": "act",
+   "file": "act__look-around.fbx",
+   "duration": 7.833,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 17.23,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0.011,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": 8.4,
+    "torsoMax": 15.4,
+    "headDown": 3.6,
+    "headUp": 19.4,
+    "headRoll": 5.6,
+    "neckMax": 25.2,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__look-distance",
+   "category": "act",
+   "file": "act__look-distance.fbx",
+   "duration": 8,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 17.6,
+   "issues": [
+    "穿模（foreArmL/thighL 47% 帧）"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（up33°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.016,
+    "minY": 0,
+    "overlap": 0.467,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": 30,
+    "torsoMax": 51.4,
+    "headDown": 3.2,
+    "headUp": 33.2,
+    "headRoll": 17.9,
+    "neckMax": 16.2,
+    "down20": 0.1
+   }
+  },
+  {
+   "name": "act__pull-rope",
+   "category": "act",
+   "file": "act__pull-rope.fbx",
+   "duration": 14.733,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 32.41,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0.061,
+    "minY": 0,
+    "overlap": 0.21,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": 10.7,
+    "torsoMax": 21,
+    "headDown": 16.2,
+    "headUp": 15.3,
+    "headRoll": 16.1,
+    "neckMax": 20.7,
+    "down20": 0.23
+   }
+  },
+  {
+   "name": "act__push-both",
+   "category": "act",
+   "file": "act__push-both.fbx",
+   "duration": 0.033,
+   "loop": false,
+   "inPlace": true,
+   "ok": false,
+   "bpm": 132,
+   "beats": 0.07,
+   "issues": [
+    "单帧（下载的文件没有动画）"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（up26°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 1,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": 44.6,
+    "torsoMax": 44.6,
+    "headDown": 0,
+    "headUp": 25.5,
+    "headRoll": 8.1,
+    "neckMax": 0.3,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__push-heavy",
+   "category": "act",
+   "file": "act__push-heavy.fbx",
+   "duration": 2.667,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 5.87,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0.217,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.038
+   },
+   "pose": {
+    "torsoMean": 34,
+    "torsoMax": 39,
+    "headDown": 0,
+    "headUp": 14.6,
+    "headRoll": 5.5,
+    "neckMax": 4.5,
+    "down20": 0.94
+   }
+  },
+  {
+   "name": "act__reach-out",
+   "category": "act",
+   "file": "act__reach-out.fbx",
+   "duration": 4,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 8.8,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0.007,
+    "minY": 0,
+    "overlap": 0.192,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.072
+   },
+   "pose": {
+    "torsoMean": 5.4,
+    "torsoMax": 9.9,
+    "headDown": 0,
+    "headUp": 2.7,
+    "headRoll": 10.2,
+    "neckMax": 5.6,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__sing-walk",
+   "category": "act",
+   "file": "act__sing-walk.fbx",
+   "duration": 13.967,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 30.73,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（roll22°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.136,
+    "minY": 0,
+    "overlap": 0.165,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.001
+   },
+   "pose": {
+    "torsoMean": 3.4,
+    "torsoMax": 34.6,
+    "headDown": 22.1,
+    "headUp": 9.9,
+    "headRoll": 22.1,
+    "neckMax": 8.3,
+    "down20": 0.29
+   }
+  },
+  {
+   "name": "act__sit-swing-legs",
+   "category": "act",
+   "file": "act__sit-swing-legs.fbx",
+   "duration": 2.1,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.62,
+   "issues": [],
+   "notes": [
+    "坐姿悬空：需要放在杆 / 台阶上（胯高约 0.45）",
+    "头颈动作超出模型范围（roll29°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.009
+   },
+   "pose": {
+    "torsoMean": -6.8,
+    "torsoMax": 0,
+    "headDown": 16.1,
+    "headUp": 0,
+    "headRoll": 29.2,
+    "neckMax": 10.4,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__spin",
+   "category": "act",
+   "file": "act__spin.fbx",
+   "duration": 4,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 8.8,
+   "issues": [],
+   "notes": [
+    "有一段手捂脸，特写慎用",
+    "头颈动作超出模型范围（down25° / roll20°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.057,
+    "minY": 0,
+    "overlap": 0.025,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.001
+   },
+   "pose": {
+    "torsoMean": 2.6,
+    "torsoMax": 21.5,
+    "headDown": 25.4,
+    "headUp": 14.4,
+    "headRoll": 19.7,
+    "neckMax": 10.1,
+    "down20": 0.2
+   }
+  },
+  {
+   "name": "act__swagger-walk",
+   "category": "act",
+   "file": "act__swagger-walk.fbx",
+   "duration": 1.033,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.27,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0.912,
+    "minY": 0,
+    "overlap": 0.033,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.054
+   },
+   "pose": {
+    "torsoMean": 2.5,
+    "torsoMax": 4.5,
+    "headDown": 4.8,
+    "headUp": 0,
+    "headRoll": 6.3,
+    "neckMax": 3.3,
+    "down20": 0
+   }
+  },
+  {
+   "name": "act__swim-under",
+   "category": "act",
+   "file": "act__swim-under.fbx",
+   "duration": 4.533,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 9.97,
+   "issues": [],
+   "notes": [
+    "水平游泳姿势，漂浮镜头用"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.074
+   },
+   "pose": {
+    "torsoMean": 73.3,
+    "torsoMax": 77.5,
+    "headDown": 0.4,
+    "headUp": 15.9,
+    "headRoll": 5.5,
+    "neckMax": 9.9,
+    "down20": 1
+   }
+  },
+  {
+   "name": "act__victory",
+   "category": "act",
+   "file": "act__victory.fbx",
+   "duration": 1.867,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.11,
+   "issues": [
+    "穿模（foreArmL/thighL 30% 帧）"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（down34° / up35°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.136,
+    "minY": 0,
+    "overlap": 0.321,
+    "handHead": 0.018,
+    "reverse": 0,
+    "seam": 0.003
+   },
+   "pose": {
+    "torsoMean": -0.9,
+    "torsoMax": 22.5,
+    "headDown": 34,
+    "headUp": 35.1,
+    "headRoll": 8.2,
+    "neckMax": 11.1,
+    "down20": 0.13
+   }
+  },
+  {
+   "name": "dance__arm-wave",
+   "category": "dance",
+   "file": "dance__arm-wave.fbx",
+   "duration": 5.2,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 12,
+   "srcBpm": 143.9,
+   "stretch": 0.953,
+   "issues": [],
+   "notes": [
+    "有低动作段（16 拍里最长 0.60s 手脚头几乎不动），主舞慎用"
+   ],
+   "metrics": {
+    "slide": 0.133,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.007
+   },
+   "stillSec16": 3.8,
+   "stillLongest": 0.6,
+   "pose": {
+    "torsoMean": 3.4,
+    "torsoMax": 20.3,
+    "headDown": 18.6,
+    "headUp": 17.3,
+    "headRoll": 16.6,
+    "neckMax": 6.1,
+    "down20": 0
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__arms",
+   "category": "dance",
+   "file": "dance__arms.fbx",
+   "duration": 21.967,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 37,
+   "srcBpm": 100.0,
+   "stretch": 1.306,
+   "issues": [],
+   "notes": [
+    "源速度偏慢，对到 132 BPM 要加速 ×1.31，看着会偏快",
+    "有低动作段（16 拍里最长 0.57s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（up51° / roll36°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.139,
+    "minY": 0,
+    "overlap": 0.047,
+    "handHead": 0.008,
+    "reverse": 0,
+    "seam": 0.007
+   },
+   "stillSec16": 0.57,
+   "stillLongest": 0.57,
+   "pose": {
+    "torsoMean": 9.1,
+    "torsoMax": 31.1,
+    "headDown": 18.2,
+    "headUp": 51.2,
+    "headRoll": 35.9,
+    "neckMax": 12.3,
+    "down20": 0
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__back-slide",
+   "category": "dance",
+   "file": "dance__back-slide.fbx",
+   "duration": 1.033,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 2,
+   "srcBpm": 138.6,
+   "stretch": 1.137,
+   "issues": [
+    "hunched：躯干平均前倾 14°，主舞不用"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0.58,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.043
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 14.1,
+    "torsoMax": 18.6,
+    "headDown": 9.4,
+    "headUp": 0,
+    "headRoll": 3.9,
+    "neckMax": 4.1,
+    "down20": 0.13
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__bboy1",
+   "category": "dance",
+   "file": "dance__bboy1.fbx",
+   "duration": 2.2,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 4,
+   "srcBpm": 112.6,
+   "stretch": 1.21,
+   "issues": [
+    "hunched：躯干平均前倾 14°（地板动作，只在明确的地板段用）"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0.284,
+    "minY": 0,
+    "overlap": 0.318,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.029
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 14.2,
+    "torsoMax": 20.1,
+    "headDown": 18.5,
+    "headUp": 14.8,
+    "headRoll": 13.6,
+    "neckMax": 7.2,
+    "down20": 0.14
+   },
+   "hunched": true,
+   "floor": true
+  },
+  {
+   "name": "dance__body-wave",
+   "category": "dance",
+   "file": "dance__body-wave.fbx",
+   "duration": 7.067,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 19,
+   "srcBpm": 163.5,
+   "stretch": 0.818,
+   "issues": [],
+   "notes": [
+    "对拍后减速 ×0.82",
+    "有低动作段（16 拍里最长 0.47s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（down38° / up25° / roll39°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.177,
+    "minY": 0,
+    "overlap": 0.038,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.01
+   },
+   "stillSec16": 0.47,
+   "stillLongest": 0.47,
+   "pose": {
+    "torsoMean": 2.1,
+    "torsoMax": 34.5,
+    "headDown": 38.5,
+    "headUp": 25.3,
+    "headRoll": 38.6,
+    "neckMax": 14.8,
+    "down20": 0.05
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__crazy-legs",
+   "category": "dance",
+   "file": "dance__crazy-legs.fbx",
+   "duration": 2.467,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 4,
+   "srcBpm": 94.8,
+   "stretch": 1.357,
+   "issues": [
+    "脚滑 0.36/s",
+    "hunched：躯干平均前倾 22°，主舞不用"
+   ],
+   "notes": [
+    "源速度偏慢，对到 132 BPM 要加速 ×1.36，看着会偏快",
+    "头颈动作超出模型范围（up24° / roll27°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.361,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.039
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 22.3,
+    "torsoMax": 33.3,
+    "headDown": 0,
+    "headUp": 24.1,
+    "headRoll": 27.4,
+    "neckMax": 0.4,
+    "down20": 0
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__freeze-combo",
+   "category": "dance",
+   "file": "dance__freeze-combo.fbx",
+   "duration": 6.7,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 13,
+   "srcBpm": 112.6,
+   "stretch": 1.134,
+   "issues": [
+    "脚滑 0.49/s",
+    "hunched：躯干平均前倾 18°，最大前倾 88°，低头>20° 占 70%（地板动作，只在明确的地板段用）"
+   ],
+   "notes": [
+    "含倒立 freeze，机位要跟低",
+    "头颈动作超出模型范围（down26° / up60° / roll27°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.495,
+    "minY": 0,
+    "overlap": 0.175,
+    "handHead": 0.025,
+    "reverse": 0.09,
+    "seam": 0.03
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 18.5,
+    "torsoMax": 87.6,
+    "headDown": 26.3,
+    "headUp": 60.1,
+    "headRoll": 27.2,
+    "neckMax": 15.4,
+    "down20": 0.7
+   },
+   "hunched": true,
+   "floor": true
+  },
+  {
+   "name": "dance__house2",
+   "category": "dance",
+   "file": "dance__house2.fbx",
+   "duration": 26.167,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 48,
+   "srcBpm": 109.1,
+   "stretch": 1.199,
+   "issues": [
+    "hunched：躯干平均前倾 24°，最大前倾 63°，主舞不用"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（up48° / roll37°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.261,
+    "minY": 0,
+    "overlap": 0.152,
+    "handHead": 0,
+    "reverse": 0.066,
+    "seam": 0.02
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 23.9,
+    "torsoMax": 63.4,
+    "headDown": 24.8,
+    "headUp": 48.1,
+    "headRoll": 37.3,
+    "neckMax": 16.6,
+    "down20": 0.1
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__house3",
+   "category": "dance",
+   "file": "dance__house3.fbx",
+   "duration": 21.367,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 46,
+   "srcBpm": 128.5,
+   "stretch": 1.022,
+   "issues": [
+    "hunched：躯干平均前倾 46°，最大前倾 88°，主舞不用"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（up70° / roll66°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.228,
+    "minY": 0,
+    "overlap": 0.123,
+    "handHead": 0,
+    "reverse": 0.023,
+    "seam": 0.003
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 46.1,
+    "torsoMax": 87.9,
+    "headDown": 21.7,
+    "headUp": 69.6,
+    "headRoll": 65.6,
+    "neckMax": 22.3,
+    "down20": 0.01
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__jazz-around",
+   "category": "dance",
+   "file": "dance__jazz-around.fbx",
+   "duration": 2.267,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 4,
+   "srcBpm": 105.8,
+   "stretch": 1.247,
+   "issues": [
+    "脚滑 0.42/s",
+    "手穿头 9%"
+   ],
+   "notes": [
+    "右前臂偶尔扫过头（约 9% 的帧）",
+    "头颈动作超出模型范围（roll23°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.417,
+    "minY": 0,
+    "overlap": 0.09,
+    "handHead": 0.09,
+    "reverse": 0.09,
+    "seam": 0.083
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 1.8,
+    "torsoMax": 14.7,
+    "headDown": 18.4,
+    "headUp": 3.9,
+    "headRoll": 23.1,
+    "neckMax": 7.7,
+    "down20": 0
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__kick-step",
+   "category": "dance",
+   "file": "dance__kick-step.fbx",
+   "duration": 6.333,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 12,
+   "srcBpm": 112.6,
+   "stretch": 1.161,
+   "issues": [
+    "脚滑 0.38/s"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0.375,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.02
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 8.6,
+    "torsoMax": 23.1,
+    "headDown": 17.1,
+    "headUp": 11.4,
+    "headRoll": 8.9,
+    "neckMax": 9.3,
+    "down20": 0.13
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__locking2",
+   "category": "dance",
+   "file": "dance__locking2.fbx",
+   "duration": 17,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 34,
+   "srcBpm": 120.0,
+   "stretch": 1.1,
+   "issues": [
+    "hunched：躯干平均前倾 21°，最大前倾 66°，低头>20° 占 53%，主舞不用"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（down32° / up35° / roll35°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.173,
+    "minY": 0,
+    "overlap": 0.124,
+    "handHead": 0,
+    "reverse": 0.069,
+    "seam": 0.01
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 20.7,
+    "torsoMax": 65.6,
+    "headDown": 32.5,
+    "headUp": 34.6,
+    "headRoll": 34.9,
+    "neckMax": 14.7,
+    "down20": 0.53
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__moonwalk",
+   "category": "dance",
+   "file": "dance__moonwalk.fbx",
+   "duration": 17.233,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 37,
+   "srcBpm": 128.5,
+   "stretch": 1.025,
+   "issues": [
+    "hunched：低头>20° 占 61%，主舞不用"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（down35° / roll26°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.173,
+    "minY": 0,
+    "overlap": 0.077,
+    "handHead": 0,
+    "reverse": 0.01,
+    "seam": 0.018
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 8.9,
+    "torsoMax": 39.3,
+    "headDown": 35,
+    "headUp": 19.2,
+    "headRoll": 26,
+    "neckMax": 11,
+    "down20": 0.61
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__quake1",
+   "category": "dance",
+   "file": "dance__quake1.fbx",
+   "duration": 15.767,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 30,
+   "srcBpm": 112.6,
+   "stretch": 1.156,
+   "issues": [],
+   "notes": [
+    "有低动作段（16 拍里最长 1.40s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（down46° / up60° / roll26°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.104,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.014
+   },
+   "stillSec16": 3.6,
+   "stillLongest": 1.4,
+   "pose": {
+    "torsoMean": 0.6,
+    "torsoMax": 17.9,
+    "headDown": 46.2,
+    "headUp": 60.2,
+    "headRoll": 26.4,
+    "neckMax": 13.7,
+    "down20": 0.1
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__raise-roof",
+   "category": "dance",
+   "file": "dance__raise-roof.fbx",
+   "duration": 4.1,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 8,
+   "srcBpm": 120.0,
+   "stretch": 1.128,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（roll24°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.111,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.036
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": -4.1,
+    "torsoMax": 7.9,
+    "headDown": 22.7,
+    "headUp": 21.2,
+    "headRoll": 24.5,
+    "neckMax": 11.1,
+    "down20": 0
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__robot2",
+   "category": "dance",
+   "file": "dance__robot2.fbx",
+   "duration": 15.333,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 27,
+   "srcBpm": 105.8,
+   "stretch": 1.249,
+   "issues": [
+    "hunched：躯干平均前倾 15°，最大前倾 77°，低头>20° 占 33%，主舞不用"
+   ],
+   "notes": [
+    "有低动作段（16 拍里最长 0.60s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（up28° / roll31°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.099,
+    "minY": 0,
+    "overlap": 0.159,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.003
+   },
+   "stillSec16": 1.13,
+   "stillLongest": 0.6,
+   "pose": {
+    "torsoMean": 14.7,
+    "torsoMax": 77.3,
+    "headDown": 21.3,
+    "headUp": 28,
+    "headRoll": 31.4,
+    "neckMax": 9.2,
+    "down20": 0.33
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__runningman",
+   "category": "dance",
+   "file": "dance__runningman.fbx",
+   "duration": 6.1,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 10,
+   "srcBpm": 100.0,
+   "stretch": 1.342,
+   "issues": [
+    "hunched：躯干平均前倾 14°，主舞不用"
+   ],
+   "notes": [
+    "源速度偏慢，对到 132 BPM 要加速 ×1.34，看着会偏快",
+    "头颈动作超出模型范围（up41° / roll19°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.271,
+    "minY": 0,
+    "overlap": 0.038,
+    "handHead": 0,
+    "reverse": 0.033,
+    "seam": 0.015
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 13.9,
+    "torsoMax": 35.4,
+    "headDown": 22.2,
+    "headUp": 41.4,
+    "headRoll": 19.3,
+    "neckMax": 9,
+    "down20": 0.06
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__shimmy",
+   "category": "dance",
+   "file": "dance__shimmy.fbx",
+   "duration": 11.967,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 20,
+   "srcBpm": 100.0,
+   "stretch": 1.316,
+   "issues": [],
+   "notes": [
+    "源速度偏慢，对到 132 BPM 要加速 ×1.32，看着会偏快",
+    "有低动作段（16 拍里最长 1.03s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（up27° / roll19°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.164,
+    "minY": 0,
+    "overlap": 0.017,
+    "handHead": 0,
+    "reverse": 0.006,
+    "seam": 0.008
+   },
+   "stillSec16": 2.23,
+   "stillLongest": 1.03,
+   "pose": {
+    "torsoMean": 3.4,
+    "torsoMax": 15.2,
+    "headDown": 19.4,
+    "headUp": 26.9,
+    "headRoll": 18.9,
+    "neckMax": 8.9,
+    "down20": 0
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__shuffle",
+   "category": "dance",
+   "file": "dance__shuffle.fbx",
+   "duration": 7.5,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 12,
+   "srcBpm": 94.8,
+   "stretch": 1.375,
+   "issues": [
+    "hunched：躯干平均前倾 14°，低头>20° 占 28%，主舞不用"
+   ],
+   "notes": [
+    "源速度偏慢，对到 132 BPM 要加速 ×1.38，看着会偏快",
+    "有低动作段（16 拍里最长 0.77s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（up22°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.173,
+    "minY": 0,
+    "overlap": 0.218,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.001
+   },
+   "stillSec16": 0.77,
+   "stillLongest": 0.77,
+   "pose": {
+    "torsoMean": 13.7,
+    "torsoMax": 42.5,
+    "headDown": 17.7,
+    "headUp": 22.5,
+    "headRoll": 15.7,
+    "neckMax": 12.4,
+    "down20": 0.28
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__slide-step",
+   "category": "dance",
+   "file": "dance__slide-step.fbx",
+   "duration": 4.467,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 8,
+   "srcBpm": 105.8,
+   "stretch": 1.228,
+   "issues": [
+    "hunched：躯干平均前倾 16°，主舞不用"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（roll19°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.234,
+    "minY": 0,
+    "overlap": 0.134,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.017
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 16,
+    "torsoMax": 26,
+    "headDown": 13,
+    "headUp": 12.6,
+    "headRoll": 18.9,
+    "neckMax": 7.8,
+    "down20": 0.14
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__slide-walk",
+   "category": "dance",
+   "file": "dance__slide-walk.fbx",
+   "duration": 0.967,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 2,
+   "srcBpm": 120.0,
+   "stretch": 1.063,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0.654,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0.071,
+    "seam": 0.057
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 3.9,
+    "torsoMax": 6.1,
+    "headDown": 9,
+    "headUp": 0,
+    "headRoll": 2.8,
+    "neckMax": 4.6,
+    "down20": 0
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__snake",
+   "category": "dance",
+   "file": "dance__snake.fbx",
+   "duration": 15.267,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 27,
+   "srcBpm": 105.8,
+   "stretch": 1.244,
+   "issues": [
+    "手穿头 8%",
+    "hunched：躯干平均前倾 25°，最大前倾 76°，主舞不用"
+   ],
+   "notes": [
+    "有低动作段（16 拍里最长 0.97s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（up63° / roll74°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.148,
+    "minY": 0,
+    "overlap": 0.444,
+    "handHead": 0.077,
+    "reverse": 0.011,
+    "seam": 0.011
+   },
+   "stillSec16": 1.97,
+   "stillLongest": 0.97,
+   "pose": {
+    "torsoMean": 24.8,
+    "torsoMax": 75.6,
+    "headDown": 13.5,
+    "headUp": 63.2,
+    "headRoll": 73.8,
+    "neckMax": 19.2,
+    "down20": 0
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__soul-spin",
+   "category": "dance",
+   "file": "dance__soul-spin.fbx",
+   "duration": 4.033,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 9,
+   "srcBpm": 131.9,
+   "stretch": 0.986,
+   "issues": [
+    "脚滑 0.36/s",
+    "hunched：低头>20° 占 30%，主舞不用"
+   ],
+   "notes": [],
+   "metrics": {
+    "slide": 0.364,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.018
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": 11.1,
+    "torsoMax": 20.1,
+    "headDown": 14.8,
+    "headUp": 12.5,
+    "headRoll": 15.9,
+    "neckMax": 6.2,
+    "down20": 0.3
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "dance__tut1",
+   "category": "dance",
+   "file": "dance__tut1.fbx",
+   "duration": 16.933,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 25,
+   "srcBpm": 90.0,
+   "stretch": 1.49,
+   "issues": [],
+   "notes": [
+    "源速度偏慢，对到 132 BPM 要加速 ×1.49，看着会偏快",
+    "头颈动作超出模型范围（down28° / up23° / roll19°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.108,
+    "minY": 0,
+    "overlap": 0.091,
+    "handHead": 0,
+    "reverse": 0.002,
+    "seam": 0.006
+   },
+   "stillSec16": 0,
+   "stillLongest": 0,
+   "pose": {
+    "torsoMean": -0.3,
+    "torsoMax": 16.9,
+    "headDown": 27.5,
+    "headUp": 23.3,
+    "headRoll": 18.7,
+    "neckMax": 10.1,
+    "down20": 0
+   },
+   "hunched": false,
+   "floor": false
+  },
+  {
+   "name": "dance__wave1",
+   "category": "dance",
+   "file": "dance__wave1.fbx",
+   "duration": 16.833,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 34,
+   "srcBpm": 120.0,
+   "stretch": 1.089,
+   "issues": [
+    "hunched：最大前倾 52°，低头>20° 占 27%，主舞不用"
+   ],
+   "notes": [
+    "有低动作段（16 拍里最长 0.83s 手脚头几乎不动），主舞慎用",
+    "头颈动作超出模型范围（down49° / roll36°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.125,
+    "minY": 0,
+    "overlap": 0.107,
+    "handHead": 0,
+    "reverse": 0.012,
+    "seam": 0.002
+   },
+   "stillSec16": 1.8,
+   "stillLongest": 0.83,
+   "pose": {
+    "torsoMean": 5.9,
+    "torsoMax": 51.9,
+    "headDown": 49.3,
+    "headUp": 11,
+    "headRoll": 35.9,
+    "neckMax": 15.4,
+    "down20": 0.27
+   },
+   "hunched": true,
+   "floor": false
+  },
+  {
+   "name": "move__aerial-backflip",
+   "category": "move",
+   "file": "move__aerial-backflip.fbx",
+   "duration": 2.133,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.69,
+   "issues": [
+    "穿模（foreArmR/thighR 38% 帧）"
+   ],
+   "notes": [
+    "腾空很高（保留了垂直位移），机位要留头顶空间",
+    "头颈动作超出模型范围（down36° / up62°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.196,
+    "minY": 0,
+    "overlap": 0.641,
+    "handHead": 0.016,
+    "reverse": 0.094,
+    "seam": 1.584
+   },
+   "pose": {
+    "torsoMean": 38.7,
+    "torsoMax": 82.2,
+    "headDown": 35.8,
+    "headUp": 62.3,
+    "headRoll": 14.3,
+    "neckMax": 29.5,
+    "down20": 0.7
+   }
+  },
+  {
+   "name": "move__fall-air",
+   "category": "move",
+   "file": "move__fall-air.fbx",
+   "duration": 4.5,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 9.9,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.007
+   },
+   "pose": {
+    "torsoMean": 81.9,
+    "torsoMax": 87.6,
+    "headDown": 0,
+    "headUp": 9.8,
+    "headRoll": 17.5,
+    "neckMax": 15.4,
+    "down20": 1
+   }
+  },
+  {
+   "name": "move__fall-hard-land",
+   "category": "move",
+   "file": "move__fall-hard-land.fbx",
+   "duration": 2.5,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 5.5,
+   "issues": [
+    "穿模（foreArmR/thighR 28% 帧）"
+   ],
+   "notes": [
+    "深蹲 / 落地时膝盖检查报反折（目检正常，是深屈膝）",
+    "头颈动作超出模型范围（down26° / up60°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.279,
+    "minY": 0,
+    "overlap": 0.293,
+    "handHead": 0,
+    "reverse": 0.373,
+    "seam": 1.076
+   },
+   "pose": {
+    "torsoMean": 54.3,
+    "torsoMax": 89.1,
+    "headDown": 26,
+    "headUp": 59.8,
+    "headRoll": 8.8,
+    "neckMax": 37.1,
+    "down20": 0.83
+   }
+  },
+  {
+   "name": "move__fall-idle",
+   "category": "move",
+   "file": "move__fall-idle.fbx",
+   "duration": 0.7,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 1.54,
+   "issues": [],
+   "notes": [],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.004
+   },
+   "pose": {
+    "torsoMean": 67.3,
+    "torsoMax": 67.6,
+    "headDown": 4.7,
+    "headUp": 0,
+    "headRoll": 4.5,
+    "neckMax": 1.9,
+    "down20": 1
+   }
+  },
+  {
+   "name": "move__fall-off-edge",
+   "category": "move",
+   "file": "move__fall-off-edge.fbx",
+   "duration": 6.667,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 14.67,
+   "issues": [
+    "穿地"
+   ],
+   "notes": [
+    "从高处起落：胯部自带大幅垂直位移，需要配平台 / 边缘",
+    "头颈动作超出模型范围（down36° / up33°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.123,
+    "minY": -0.071,
+    "overlap": 0.01,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 1.114
+   },
+   "pose": {
+    "torsoMean": 19.8,
+    "torsoMax": 82.9,
+    "headDown": 35.9,
+    "headUp": 33.1,
+    "headRoll": 16.5,
+    "neckMax": 40.7,
+    "down20": 0.48
+   }
+  },
+  {
+   "name": "move__fall-roll",
+   "category": "move",
+   "file": "move__fall-roll.fbx",
+   "duration": 2.133,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.69,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（down39° / roll26°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.775,
+    "minY": 0,
+    "overlap": 0.188,
+    "handHead": 0,
+    "reverse": 0.109,
+    "seam": 0.926
+   },
+   "pose": {
+    "torsoMean": 22.6,
+    "torsoMax": 85.9,
+    "headDown": 39.3,
+    "headUp": 10.3,
+    "headRoll": 26.2,
+    "neckMax": 49.5,
+    "down20": 0.58
+   }
+  },
+  {
+   "name": "move__front-flip",
+   "category": "move",
+   "file": "move__front-flip.fbx",
+   "duration": 1.667,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 3.67,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（down36° / up39°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.743,
+    "minY": 0,
+    "overlap": 0.224,
+    "handHead": 0,
+    "reverse": 0.082,
+    "seam": 0.203
+   },
+   "pose": {
+    "torsoMean": 1.8,
+    "torsoMax": 76.6,
+    "headDown": 36.4,
+    "headUp": 39.3,
+    "headRoll": 17.2,
+    "neckMax": 5.6,
+    "down20": 0.14
+   }
+  },
+  {
+   "name": "move__hang-idle",
+   "category": "move",
+   "file": "move__hang-idle.fbx",
+   "duration": 2.6,
+   "loop": true,
+   "inPlace": true,
+   "ok": false,
+   "bpm": 132,
+   "beats": 5.72,
+   "issues": [
+    "双手交叉挡在脸前，悬挂请用 move__hang-sway"
+   ],
+   "notes": [
+    "头颈动作超出模型范围（up28°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 1,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.002
+   },
+   "pose": {
+    "torsoMean": -23.9,
+    "torsoMax": 0,
+    "headDown": 0,
+    "headUp": 27.6,
+    "headRoll": 3.2,
+    "neckMax": 14.6,
+    "down20": 0
+   }
+  },
+  {
+   "name": "move__hang-sway",
+   "category": "move",
+   "file": "move__hang-sway.fbx",
+   "duration": 2.333,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 5.13,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（up34°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0
+   },
+   "pose": {
+    "torsoMean": -16,
+    "torsoMax": 0,
+    "headDown": 0,
+    "headUp": 33.8,
+    "headRoll": 2.9,
+    "neckMax": 27.8,
+    "down20": 0
+   }
+  },
+  {
+   "name": "move__jump-down",
+   "category": "move",
+   "file": "move__jump-down.fbx",
+   "duration": 3.233,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 7.11,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（up28°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.063,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.494
+   },
+   "pose": {
+    "torsoMean": 25.3,
+    "torsoMax": 39.5,
+    "headDown": 21.5,
+    "headUp": 28.2,
+    "headRoll": 16.3,
+    "neckMax": 19.7,
+    "down20": 0.32
+   }
+  },
+  {
+   "name": "move__jump-grab-hang",
+   "category": "move",
+   "file": "move__jump-grab-hang.fbx",
+   "duration": 2,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.4,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（down36° / up41° / roll21°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0.033,
+    "handHead": 0,
+    "reverse": 0.117,
+    "seam": 0.341
+   },
+   "pose": {
+    "torsoMean": 7.1,
+    "torsoMax": 55.6,
+    "headDown": 36,
+    "headUp": 41,
+    "headRoll": 20.9,
+    "neckMax": 31.8,
+    "down20": 0.27
+   }
+  },
+  {
+   "name": "move__land-run",
+   "category": "move",
+   "file": "move__land-run.fbx",
+   "duration": 0.933,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.05,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "深蹲 / 落地时膝盖检查报反折（目检正常，是深屈膝）",
+    "头颈动作超出模型范围（up61° / roll28°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.009,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0.321,
+    "seam": 0.215
+   },
+   "pose": {
+    "torsoMean": 66.3,
+    "torsoMax": 87.8,
+    "headDown": 1.5,
+    "headUp": 61.1,
+    "headRoll": 28.2,
+    "neckMax": 35.8,
+    "down20": 1
+   }
+  },
+  {
+   "name": "move__run-jump",
+   "category": "move",
+   "file": "move__run-jump.fbx",
+   "duration": 2.033,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.47,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "头颈动作超出模型范围（up46° / roll25°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.652,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.082
+   },
+   "pose": {
+    "torsoMean": 41.3,
+    "torsoMax": 61.9,
+    "headDown": 7.2,
+    "headUp": 45.6,
+    "headRoll": 25.4,
+    "neckMax": 20.8,
+    "down20": 0.48
+   }
+  },
+  {
+   "name": "move__run-jump__inplace",
+   "category": "move",
+   "file": "move__run-jump__inplace.fbx",
+   "duration": 2.033,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.47,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "头颈动作超出模型范围（up46° / roll25°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.822,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.082
+   },
+   "pose": {
+    "torsoMean": 41.3,
+    "torsoMax": 61.9,
+    "headDown": 7.2,
+    "headUp": 45.6,
+    "headRoll": 25.4,
+    "neckMax": 20.8,
+    "down20": 0.48
+   }
+  },
+  {
+   "name": "move__run-slide",
+   "category": "move",
+   "file": "move__run-slide.fbx",
+   "duration": 1.533,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 3.37,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "头颈动作超出模型范围（up26° / roll44°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.479,
+    "minY": 0,
+    "overlap": 0.044,
+    "handHead": 0,
+    "reverse": 0.044,
+    "seam": 0.072
+   },
+   "pose": {
+    "torsoMean": 49.7,
+    "torsoMax": 85.5,
+    "headDown": 16.9,
+    "headUp": 25.9,
+    "headRoll": 43.5,
+    "neckMax": 18.9,
+    "down20": 0.62
+   }
+  },
+  {
+   "name": "move__skate-push",
+   "category": "move",
+   "file": "move__skate-push.fbx",
+   "duration": 2.167,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.77,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（up38° / roll21°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.307,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.037
+   },
+   "pose": {
+    "torsoMean": 31.9,
+    "torsoMax": 47.4,
+    "headDown": 0,
+    "headUp": 38,
+    "headRoll": 21.1,
+    "neckMax": 12.2,
+    "down20": 0.42
+   }
+  },
+  {
+   "name": "move__sprint",
+   "category": "move",
+   "file": "move__sprint.fbx",
+   "duration": 0.533,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 1.17,
+   "issues": [
+    "穿模（foreArmL/torsoHigh 38% 帧）"
+   ],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "头颈动作超出模型范围（up37° / roll25°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.495,
+    "minY": 0,
+    "overlap": 0.438,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.06
+   },
+   "pose": {
+    "torsoMean": 46.3,
+    "torsoMax": 54,
+    "headDown": 0,
+    "headUp": 37.4,
+    "headRoll": 25.1,
+    "neckMax": 3.6,
+    "down20": 0
+   }
+  },
+  {
+   "name": "move__sprint-jump",
+   "category": "move",
+   "file": "move__sprint-jump.fbx",
+   "duration": 0.9,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 1.98,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道"
+   ],
+   "metrics": {
+    "slide": 2.718,
+    "minY": 0,
+    "overlap": 0.077,
+    "handHead": 0,
+    "reverse": 0.038,
+    "seam": 0.127
+   },
+   "pose": {
+    "torsoMean": 21.2,
+    "torsoMax": 28.8,
+    "headDown": 13.5,
+    "headUp": 11.5,
+    "headRoll": 9.9,
+    "neckMax": 17.2,
+    "down20": 0.62
+   }
+  },
+  {
+   "name": "move__sprint-roll",
+   "category": "move",
+   "file": "move__sprint-roll.fbx",
+   "duration": 1.167,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.57,
+   "issues": [
+    "穿地"
+   ],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "深蹲 / 落地时膝盖检查报反折（目检正常，是深屈膝）",
+    "前滚翻，胯会贴地",
+    "头颈动作超出模型范围（down26° / up41° / roll34°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.036,
+    "minY": -0.062,
+    "overlap": 0.206,
+    "handHead": 0,
+    "reverse": 0.265,
+    "seam": 0.092
+   },
+   "pose": {
+    "torsoMean": 31.1,
+    "torsoMax": 74.5,
+    "headDown": 26,
+    "headUp": 40.9,
+    "headRoll": 33.5,
+    "neckMax": 18.1,
+    "down20": 0.59
+   }
+  },
+  {
+   "name": "move__sprint-roll__inplace",
+   "category": "move",
+   "file": "move__sprint-roll__inplace.fbx",
+   "duration": 1.167,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.57,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "深蹲 / 落地时膝盖检查报反折（目检正常，是深屈膝）",
+    "前滚翻，胯会贴地",
+    "头颈动作超出模型范围（down26° / up41° / roll34°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.036,
+    "minY": 0,
+    "overlap": 0.206,
+    "handHead": 0,
+    "reverse": 0.265,
+    "seam": 0.092
+   },
+   "pose": {
+    "torsoMean": 31.1,
+    "torsoMax": 74.5,
+    "headDown": 26,
+    "headUp": 40.9,
+    "headRoll": 33.5,
+    "neckMax": 18.1,
+    "down20": 0.59
+   }
+  },
+  {
+   "name": "move__sprint__inplace",
+   "category": "move",
+   "file": "move__sprint__inplace.fbx",
+   "duration": 0.533,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 1.17,
+   "issues": [
+    "穿模（foreArmL/torsoHigh 38% 帧）"
+   ],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "头颈动作超出模型范围（up37° / roll25°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.495,
+    "minY": 0,
+    "overlap": 0.438,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.06
+   },
+   "pose": {
+    "torsoMean": 46.3,
+    "torsoMax": 54,
+    "headDown": 0,
+    "headUp": 37.4,
+    "headRoll": 25.1,
+    "neckMax": 3.6,
+    "down20": 0
+   }
+  },
+  {
+   "name": "move__twist-flip",
+   "category": "move",
+   "file": "move__twist-flip.fbx",
+   "duration": 2.2,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.84,
+   "issues": [],
+   "notes": [
+    "腾空很高（保留了垂直位移）",
+    "头颈动作超出模型范围（up51° / roll37°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.061,
+    "minY": 0,
+    "overlap": 0.015,
+    "handHead": 0,
+    "reverse": 0.091,
+    "seam": 0.109
+   },
+   "pose": {
+    "torsoMean": 26.3,
+    "torsoMax": 73.5,
+    "headDown": 23.6,
+    "headUp": 51,
+    "headRoll": 37,
+    "neckMax": 19.7,
+    "down20": 0.42
+   }
+  },
+  {
+   "name": "move__vault",
+   "category": "move",
+   "file": "move__vault.fbx",
+   "duration": 1.167,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.57,
+   "issues": [],
+   "notes": [
+    "头颈动作超出模型范围（up29° / roll24°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.123,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.315
+   },
+   "pose": {
+    "torsoMean": 15.7,
+    "torsoMax": 37.7,
+    "headDown": 0,
+    "headUp": 29,
+    "headRoll": 24.4,
+    "neckMax": 11.8,
+    "down20": 0
+   }
+  },
+  {
+   "name": "move__wall-flip",
+   "category": "move",
+   "file": "move__wall-flip.fbx",
+   "duration": 2.233,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.91,
+   "issues": [],
+   "notes": [
+    "蹬墙翻：需要墙面，腾空高",
+    "头颈动作超出模型范围（up72° / roll40°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.481,
+    "minY": 0,
+    "overlap": 0.149,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.145
+   },
+   "pose": {
+    "torsoMean": 7.3,
+    "torsoMax": 89,
+    "headDown": 10.5,
+    "headUp": 71.6,
+    "headRoll": 39.9,
+    "neckMax": 52.2,
+    "down20": 0.3
+   }
+  },
+  {
+   "name": "move__wall-run",
+   "category": "move",
+   "file": "move__wall-run.fbx",
+   "duration": 0.933,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.05,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "需要墙面"
+   ],
+   "metrics": {
+    "slide": 2.026,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0.071,
+    "seam": 0.477
+   },
+   "pose": {
+    "torsoMean": 13.4,
+    "torsoMax": 53.1,
+    "headDown": 9.9,
+    "headUp": 21.4,
+    "headRoll": 10.5,
+    "neckMax": 7.8,
+    "down20": 0.54
+   }
+  },
+  {
+   "name": "move__run-fast",
+   "category": "move",
+   "file": "move__run-fast.fbx",
+   "duration": 0.533,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 1.17,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "高速跑步循环（带位移版约 3.15 身高/s）；比 sprint 更直立",
+    "头颈动作超出模型范围（up23°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.514,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.075
+   },
+   "pose": {
+    "torsoMean": 32.2,
+    "torsoMax": 34.9,
+    "headDown": 0,
+    "headUp": 23.1,
+    "headRoll": 13,
+    "neckMax": 6.2,
+    "down20": 0
+   },
+   "root": {
+    "dx": 0,
+    "dz": 1.68,
+    "maxUp": 0.01,
+    "speed": 3.15
+   },
+   "air": [],
+   "hips": [
+    0.5,
+    0.58
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__sprint-full",
+   "category": "move",
+   "file": "move__sprint-full.fbx",
+   "duration": 1.067,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.35,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "全速冲刺循环（带位移版约 3.72 身高/s），前倾大",
+    "头颈动作超出模型范围（up45° / roll20°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.442,
+    "minY": 0,
+    "overlap": 0.031,
+    "handHead": 0,
+    "reverse": 0.063,
+    "seam": 0.056
+   },
+   "pose": {
+    "torsoMean": 48.3,
+    "torsoMax": 59.6,
+    "headDown": 0,
+    "headUp": 44.7,
+    "headRoll": 19.5,
+    "neckMax": 3.6,
+    "down20": 0
+   },
+   "root": {
+    "dx": 0,
+    "dz": 3.97,
+    "maxUp": 0.05,
+    "speed": 3.72
+   },
+   "air": [],
+   "hips": [
+    0.43,
+    0.58
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__dive-from-run",
+   "category": "move",
+   "file": "move__dive-from-run.fbx",
+   "duration": 1.2,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.64,
+   "issues": [
+    "穿模 / 反关节（overlap:handL/foreArmR 58% d0.98）",
+    "穿模 / 反关节（overlap:foreArmL/foreArmR 44% d0.97）",
+    "穿模 / 反关节（overlap:handR/foreArmL 17% d0.74）"
+   ],
+   "notes": [
+    "带位移动作按原地版加载（inPlace）；水平位移见 root，由镜头自己给",
+    "跑动中向前鱼跃扑倒，0.6 s 起离地；两前臂交叉帧多（穿模 61%），镜头别怼手",
+    "头颈动作超出模型范围（up51°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.592,
+    "minY": -0.826,
+    "overlap": 0.611,
+    "handHead": 0.111,
+    "reverse": 0.056,
+    "seam": 0.798
+   },
+   "pose": {
+    "torsoMean": 60.1,
+    "torsoMax": 86.6,
+    "headDown": 6,
+    "headUp": 51.2,
+    "headRoll": 5.7,
+    "neckMax": 16.6,
+    "down20": 0.86
+   },
+   "root": {
+    "dx": 0.01,
+    "dz": 2.44,
+    "maxUp": 0.06,
+    "speed": 2.03
+   },
+   "air": [
+    [
+     0.6,
+     1.2
+    ]
+   ],
+   "hips": [
+    -0.41,
+    0.59
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__run-jump-up",
+   "category": "move",
+   "file": "move__run-jump-up.fbx",
+   "duration": 2.167,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.77,
+   "issues": [],
+   "notes": [
+    "带位移动作按原地版加载（inPlace）；水平位移见 root，由镜头自己给",
+    "助跑后向上跳起（髋最高 1.09 身高），0.57 s 起离地到结束",
+    "头颈动作超出模型范围（up63° / roll36°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.427,
+    "minY": 0,
+    "overlap": 0.108,
+    "handHead": 0,
+    "reverse": 0.031,
+    "seam": 0.5
+   },
+   "pose": {
+    "torsoMean": 39.6,
+    "torsoMax": 71.8,
+    "headDown": 0,
+    "headUp": 62.6,
+    "headRoll": 35.6,
+    "neckMax": 15.9,
+    "down20": 0.43
+   },
+   "root": {
+    "dx": 0.13,
+    "dz": 1.27,
+    "maxUp": 0.58,
+    "speed": 0.59
+   },
+   "air": [
+    [
+     0.57,
+     2.17
+    ]
+   ],
+   "hips": [
+    0.46,
+    1.09
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__wall-run-up",
+   "category": "move",
+   "file": "move__wall-run-up.fbx",
+   "duration": 2.1,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.62,
+   "issues": [
+    "穿模 / 反关节（overlap:foreArmR/thighR 37% d0.65）"
+   ],
+   "notes": [
+    "带位移动作按原地版加载（inPlace）；水平位移见 root，由镜头自己给",
+    "蹬墙向上跑（髋最高 1.73 身高）：需要墙面，0.33 s 起离地",
+    "头颈动作超出模型范围（up37°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.626,
+    "minY": 0,
+    "overlap": 0.403,
+    "handHead": 0,
+    "reverse": 0.113,
+    "seam": 1.051
+   },
+   "pose": {
+    "torsoMean": 26.1,
+    "torsoMax": 62.1,
+    "headDown": 0.9,
+    "headUp": 37,
+    "headRoll": 10.4,
+    "neckMax": 17.2,
+    "down20": 0.37
+   },
+   "root": {
+    "dx": 0,
+    "dz": 2.14,
+    "maxUp": 1.57,
+    "speed": 1.02
+   },
+   "air": [
+    [
+     0.33,
+     2.07
+    ]
+   ],
+   "hips": [
+    0.46,
+    1.73
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__wall-jump-off",
+   "category": "move",
+   "file": "move__wall-jump-off.fbx",
+   "duration": 1.267,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.79,
+   "issues": [],
+   "notes": [
+    "带位移动作按原地版加载（inPlace）；水平位移见 root，由镜头自己给",
+    "蹬墙后翻跳离开墙面，根往后退 0.87 身高",
+    "头颈动作超出模型范围（up32° / roll27°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0.054,
+    "seam": 0.349
+   },
+   "pose": {
+    "torsoMean": 37,
+    "torsoMax": 69.7,
+    "headDown": 11.5,
+    "headUp": 32.3,
+    "headRoll": 27.4,
+    "neckMax": 41.8,
+    "down20": 0.73
+   },
+   "root": {
+    "dx": 0,
+    "dz": -0.87,
+    "maxUp": 0.45,
+    "speed": 0.69
+   },
+   "air": [
+    [
+     0.2,
+     1.23
+    ]
+   ],
+   "hips": [
+    0.67,
+    1.25
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__vault-spin",
+   "category": "move",
+   "file": "move__vault-spin.fbx",
+   "duration": 2.1,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.62,
+   "issues": [
+    "穿模 / 反关节（reverse-joint:legL/ 35% d102）"
+   ],
+   "notes": [
+    "带位移动作按原地版加载（inPlace）；水平位移见 root，由镜头自己给",
+    "转体撑越（带位移 4.0 身高），越过窗口 0.47–1.1 s；左腿反关节 35% 帧，特写避开腿",
+    "头颈动作超出模型范围（up36° / roll28°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 1.484,
+    "minY": 0,
+    "overlap": 0.21,
+    "handHead": 0,
+    "reverse": 0.226,
+    "seam": 0.124
+   },
+   "pose": {
+    "torsoMean": 26.8,
+    "torsoMax": 84.3,
+    "headDown": 6.8,
+    "headUp": 36.4,
+    "headRoll": 27.6,
+    "neckMax": 13.2,
+    "down20": 0.42
+   },
+   "root": {
+    "dx": -0.01,
+    "dz": 4.02,
+    "maxUp": 0.54,
+    "speed": 1.91
+   },
+   "air": [
+    [
+     0.47,
+     1.1
+    ]
+   ],
+   "hips": [
+    0.45,
+    0.9
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__hard-landing",
+   "category": "move",
+   "file": "move__hard-landing.fbx",
+   "duration": 2.5,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 5.5,
+   "issues": [
+    "穿模 / 反关节（reverse-joint:legL/ 37% d127）",
+    "穿模 / 反关节（overlap:foreArmR/thighR 28% d0.59）"
+   ],
+   "notes": [
+    "带位移动作按原地版加载（inPlace）；水平位移见 root，由镜头自己给",
+    "从高处重落地蹲伏再站起：0–0.57 s 在空中；深蹲膝盖检查报反折（目检正常）",
+    "头颈动作超出模型范围（down26° / up60°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.279,
+    "minY": 0,
+    "overlap": 0.293,
+    "handHead": 0,
+    "reverse": 0.373,
+    "seam": 1.076
+   },
+   "pose": {
+    "torsoMean": 54.3,
+    "torsoMax": 89.1,
+    "headDown": 26,
+    "headUp": 59.8,
+    "headRoll": 8.8,
+    "neckMax": 37.1,
+    "down20": 0.83
+   },
+   "root": {
+    "dx": 0,
+    "dz": 0.21,
+    "maxUp": 0,
+    "speed": 0.08
+   },
+   "air": [
+    [
+     0,
+     0.57
+    ]
+   ],
+   "hips": [
+    0.3,
+    1.52
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__backflip-superhero",
+   "category": "move",
+   "file": "move__backflip-superhero.fbx",
+   "duration": 1.867,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 4.11,
+   "issues": [
+    "穿模 / 反关节（overlap:foreArmL/foreArmR 36% d0.73）",
+    "穿模 / 反关节（overlap:handR/foreArmL 20% d0.62）",
+    "穿模 / 反关节（reverse-joint:legL/ 18% d67）",
+    "穿模 / 反关节（overlap:foreArmR/thighR 16% d0.91）"
+   ],
+   "notes": [
+    "带位移动作按原地版加载（inPlace）；水平位移见 root，由镜头自己给",
+    "后空翻落地成超级英雄单膝跪姿，0–1.23 s 在空中",
+    "头颈动作超出模型范围（up55° / roll26°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 0.424,
+    "minY": 0,
+    "overlap": 0.518,
+    "handHead": 0.018,
+    "reverse": 0.179,
+    "seam": 1.026
+   },
+   "pose": {
+    "torsoMean": 12.3,
+    "torsoMax": 80.7,
+    "headDown": 16.3,
+    "headUp": 54.7,
+    "headRoll": 26.3,
+    "neckMax": 6.8,
+    "down20": 0.36
+   },
+   "root": {
+    "dx": 0.04,
+    "dz": 1.29,
+    "maxUp": 0.17,
+    "speed": 0.69
+   },
+   "air": [
+    [
+     0,
+     1.23
+    ]
+   ],
+   "hips": [
+    0.28,
+    1.47
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__run-fast__inplace",
+   "category": "move",
+   "file": "move__run-fast__inplace.fbx",
+   "duration": 0.533,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 1.17,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "高速跑步循环（带位移版约 3.15 身高/s）；比 sprint 更直立",
+    "头颈动作超出模型范围（up23°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.659,
+    "minY": 0,
+    "overlap": 0,
+    "handHead": 0,
+    "reverse": 0,
+    "seam": 0.075
+   },
+   "pose": {
+    "torsoMean": 32.2,
+    "torsoMax": 34.9,
+    "headDown": 0,
+    "headUp": 23.1,
+    "headRoll": 13,
+    "neckMax": 6.2,
+    "down20": 0
+   },
+   "root": {
+    "dx": 0,
+    "dz": 1.68,
+    "maxUp": 0.01,
+    "speed": 3.15
+   },
+   "air": [],
+   "hips": [
+    0.54,
+    0.58
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "move__sprint-full__inplace",
+   "category": "move",
+   "file": "move__sprint-full__inplace.fbx",
+   "duration": 1.067,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.35,
+   "issues": [],
+   "notes": [
+    "原地版：支撑脚会往后滑，要配合移动的地面 / 跑道",
+    "全速冲刺循环（带位移版约 3.72 身高/s），前倾大",
+    "头颈动作超出模型范围（up45° / roll20°），girl.js 已自动限幅（超出部分一半分给 Spine2）"
+   ],
+   "metrics": {
+    "slide": 2.862,
+    "minY": 0,
+    "overlap": 0.031,
+    "handHead": 0,
+    "reverse": 0.063,
+    "seam": 0.056
+   },
+   "pose": {
+    "torsoMean": 48.3,
+    "torsoMax": 59.6,
+    "headDown": 0,
+    "headUp": 44.7,
+    "headRoll": 19.5,
+    "neckMax": 3.6,
+    "down20": 0
+   },
+   "root": {
+    "dx": 0,
+    "dz": 3.97,
+    "maxUp": 0.05,
+    "speed": 3.72
+   },
+   "air": [],
+   "hips": [
+    0.5,
+    0.58
+   ],
+   "addedBy": "W3 #939（2026-09-30，kits/_gallery/v4-03a-probe.html + mocap.html __analyze）"
+  },
+  {
+   "name": "act__jump-reach",
+   "category": "act",
+   "file": "act__jump-reach.fbx",
+   "duration": 0.833,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 1.83,
+   "issues": [],
+   "notes": [
+    "Mixamo「Jumping Up」（Jumping Up From Action Idle），2026-10-01 下载，X Bot / FBX Without Skin / 30 fps / 不精简",
+    "深蹲 → 双臂张开向上跃起；片段在空中结束（没有落地），落地用倒放",
+    "没跑 mocap.html 的自动体检，metrics / pose 缺"
+   ]
+  },
+  {
+   "name": "act__terrified",
+   "category": "act",
+   "file": "act__terrified.fbx",
+   "duration": 20.0,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 44.0,
+   "issues": [],
+   "notes": [
+    "Mixamo「Terrified」（Being Terrified While Standing），2026-10-01 下载，X Bot / FBX Without Skin / 30 fps / 不精简",
+    "0–0.8 s 站着，0.8–1.0 s 猛地缩身、双拳收到胸前，之后一直弓背发抖",
+    "没跑 mocap.html 的自动体检，metrics / pose 缺"
+   ]
+  },
+  {
+   "name": "act__rapping",
+   "category": "act",
+   "file": "act__rapping.fbx",
+   "duration": 7.9,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 17.38,
+   "issues": [],
+   "notes": [
+    "Mixamo「Rapping」（MC Rapping On The Microphone），2026-10-01 下载（#1044），X Bot / FBX Without Skin / 30 fps / 不精简",
+    "站定唱：一只手像握麦在嘴前，另一只手随节奏比划；髋部水平位移 ≤ 0.2 m，朝向在 ±16° 内晃",
+    "给舞台 C 位站定唱歌用",
+    "没跑 mocap.html 的自动体检，metrics / pose 缺"
+   ]
+  },
+  {
+   "name": "act__talk-gesture",
+   "category": "act",
+   "file": "act__talk-gesture.fbx",
+   "duration": 3.93,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 8.65,
+   "issues": [],
+   "notes": [
+    "Mixamo「Talking」（Asking A Question With Two Hands），2026-10-01 下载（#1044），X Bot / FBX Without Skin / 30 fps / 不精简",
+    "站定、双手摊开比划（像在问问题）；髋几乎不动",
+    "站定唱歌的备选（不握麦）",
+    "没跑 mocap.html 的自动体检，metrics / pose 缺"
+   ]
+  },
+  {
+   "name": "dance__salsa-updown",
+   "category": "dance",
+   "file": "dance__salsa-updown.fbx",
+   "duration": 2.43,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "beats": 8,
+   "issues": [],
+   "notes": [
+    "Mixamo「Salsa Dancing」（Salsa Dancing Up And Back），2026-10-01 下载（#1044），X Bot / FBX Without Skin / 30 fps / 不精简",
+    "前后步：先退约 0.2 m、再进约 0.5 m、回原位，2.43 s 一个循环，朝向稳定（±14°）。给伴舞「Forward / backward / repeat」",
+    "beats=8 是按萨尔萨基本步 8 拍记的，对到 132 BPM 会放慢到 ×0.67；想快一点可以在编排里给 rate",
+    "原地版（inPlace 默认清掉髋部位移），要真的前后走就别清位移",
+    "没跑 mocap.html 的自动体检，metrics / pose 缺"
+   ]
+  },
+  {
+   "name": "act__turn-left-90",
+   "category": "act",
+   "file": "act__turn-left-90.fbx",
+   "duration": 0.93,
+   "loop": false,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.05,
+   "issues": [],
+   "notes": [
+    "Mixamo「Left Turn 90」（Standing Left Turn），2026-10-01 下载（#1044），X Bot / FBX Without Skin / 30 fps / 不精简",
+    "站姿原地左转 90°：髋朝向 -6° → 84°，0.93 s，髋水平漂移 ≤ 0.1 m",
+    "另一个「Standing Turn Left 90」起始朝向偏了 58°，没要",
+    "没跑 mocap.html 的自动体检，metrics / pose 缺"
+   ]
+  },
+  {
+   "name": "move__walk-back__inplace",
+   "category": "move",
+   "file": "move__walk-back__inplace.fbx",
+   "duration": 0.967,
+   "loop": true,
+   "inPlace": true,
+   "ok": true,
+   "bpm": 132,
+   "beats": 2.13,
+   "issues": [],
+   "notes": [
+    "Mixamo「Walking Backwards」（Female Walk Backwards，id c9ccf998），2026-10-02 下载（#1052），X Bot / FBX Without Skin / 30 fps / 不精简 / In Place",
+    "向后走的循环，一步约 0.48 s（30 帧两步）；原地版，支撑脚会往前滑，要配脚锁或按步速移动根",
+    "给副歌 4 尾声走廊里「面朝那只眼往后退」用",
+    "没跑 mocap.html 的自动体检，metrics / pose 缺"
+   ]
+  }
+ ]
+}

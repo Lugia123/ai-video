@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>脸部变形诊断</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 24px; top: 18px; font: 30px 'STM', monospace; color: #F4E04D; white-space: pre; text-shadow: 0 0 6px #000; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  诊断用：seek(k) 画第 k 个对照（整数秒一个）。?fixed=1 用修过的 girl（脸部权重 + 脸部描边 + 头颈限幅），出 face-fixed。
+  帧 = crew.mp4 14.4 s 那一帧（歌曲 36.455 s，moonwalk，脸部特写机位），以及 crew 其余 5 个特写时刻。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims } from '../girl.js';
+import { smoothSkinWeights } from '../../../../assets/lib/dance3d.js';
+
+const mv = await loadMV();
+const q = new URLSearchParams(location.search);
+const FIXED = q.get('fixed') === '1';
+const { music } = mv;
+const T0 = music.barTime(12), BAR = music.period * 4;
+const SEQ = [
+  { bar: 11, anim: 'dance__house3' }, { bar: 14, anim: 'dance__locking2' }, { bar: 16, anim: 'dance__raise-roof' }, { bar: 18, anim: 'dance__moonwalk' },
+];
+// crew.mp4 的 6 个特写时刻（页面秒 → 歌曲秒；31.6 / 42.6 是第 3 遍）
+const CREW_T = [2.6, 3.2, 13.6, 14.4, 31.6, 42.6].map(t => ({ page: t, T: T0 + (t % (BAR * 8)), u: ((t % (BAR * 8)) / BAR) % 1 }));
+const T14 = CREW_T[3];
+
+const opts = FIXED ? {} : { faceFix: false, faceOutline: 'all', headLimit: false };
+const [orig] = await Promise.all([createGirl(mv, { points: 100, ...opts }), loadAnims(SEQ.map(e => e.anim))]);
+const smoothed = FIXED ? null : await createGirl(mv, { points: 100, ...opts });
+if (smoothed) smoothSkinWeights(smoothed.mesh, smoothed.model);
+const wfix = FIXED ? null : await createGirl(mv, { points: 100, faceFix: true, faceOutline: 'all', headLimit: false });   // 只修权重（描边、限幅都不动），单独证明权重的影响
+
+// 权重热力图材质：R = Neck，B = Spine/Spine1/Spine2，G = Head（蒙皮后画）
+function heatMaterial(girl) {
+  const g = girl.mesh.geometry, SI = g.attributes.skinIndex, SW = g.attributes.skinWeight, n = SI.count;
+  const names = girl.mesh.skeleton.bones.map(b => b.name.replace(/^mixamorig/, ''));
+  const col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    let h = 0, ne = 0, sp = 0;
+    for (let k = 0; k < 4; k++) { const nm = names[SI.getComponent(i, k)], w = SW.getComponent(i, k); if (nm === 'Head') h += w; else if (nm === 'Neck') ne += w; else if (/^Spine/.test(nm)) sp += w; }
+    col.set([ne, h * 0.85, sp], i * 3);
+  }
+  g.setAttribute('aHeat', new THREE.BufferAttribute(col, 3));
+  return new THREE.ShaderMaterial({
+    vertexShader: `#include <common>
+#include <skinning_pars_vertex>
+attribute vec3 aHeat; varying vec3 vC; varying vec3 vN;
+void main(){ vC = aHeat;
+#include <skinbase_vertex>
+#include <beginnormal_vertex>
+#include <skinnormal_vertex>
+#include <begin_vertex>
+#include <skinning_vertex>
+vN = normalize(normalMatrix * objectNormal);
+gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0); }`,
+    fragmentShader: `varying vec3 vC; varying vec3 vN; void main(){ float l = 0.55 + 0.45 * max(dot(normalize(vN), normalize(vec3(0.3, 0.5, 1.0))), 0.0); gl_FragColor = vec4((vC + 0.06) * l, 1.0); }`,
+  });
+}
+const heat = heatMaterial(orig), heatFix = wfix ? heatMaterial(wfix) : null;
+
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#1a1a24');
+scene.add(createGirlLights());
+const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.02, 50);
+const tag = document.getElementById('tag');
+const head = g => g.dancer.S.info.Head.bone.getWorldPosition(new THREE.Vector3());
+function faceCam(g, u = T14.u, side = 0) {
+  const h = head(g);
+  // 诊断用大特写（比 crew 的脸部机位近一倍，才看得清下巴 / 嘴角 / 描边）；FULL=1 时用 crew 原机位
+  const k = q.get('full') === '1' ? 1 : 0.5;
+  if (side) { camera.position.set(h.x + 0.85 * k, h.y + 0.02, h.z + 0.3 * k); }
+  else camera.position.set(h.x + (0.3 - 0.22 * u) * k, h.y + 0.02, h.z + 0.95 * k);
+  camera.lookAt(h.x, h.y - 0.04, h.z);
+}
+// 低头 / 歪头扫描：静止站姿，头 + 颈一起转（颈 40%，头 60%）
+const tilt = (p, r) => () => ({ neck: [p * 0.4, 0, r * 0.4], head: [p * 0.6, 0, r * 0.6] });
+
+const V = [];
+if (!FIXED) {
+  V.push(
+    ['① 当前 toon（14.4 s）', g => { g.play(SEQ, T14.T); g.setSkin('toon', T14.T); }, orig],
+    ['② 原始 PBR 材质', g => { g.play(SEQ, T14.T); g.setSkin('toon', T14.T); g.mesh.material = g.look.items[0].pbr; g.hull.visible = false; }, orig],
+    ['③ toon · 描边外壳关', g => { g.play(SEQ, T14.T); g.setSkin('toon', T14.T); g.hull.visible = false; }, orig],
+    ['④ toon · 背面内衬关（只画正面）', g => { g.play(SEQ, T14.T); g.setSkin('toon', T14.T); g.mesh.material = g.frontOnly; }, orig],
+    ['⑤ toon · 开 smoothSkinWeights（girl.js 本来没开）', g => { g.play(SEQ, T14.T); g.setSkin('toon', T14.T); }, smoothed],
+    ['⑥ 权重热力图（同帧）红=Neck 绿=Head 蓝=Spine', g => { g.play(SEQ, T14.T); g.setSkin('toon', T14.T); g.mesh.material = heat; g.hull.visible = false; }, orig],
+    ['⑦ 权重热力图 · 静止正面', g => { g.pose('rest'); g.setSkin('toon', 0); g.mesh.material = heat; g.hull.visible = false; }, orig, 0],
+    ['⑧ 权重热力图 · 静止侧面', g => { g.pose('rest'); g.setSkin('toon', 0); g.mesh.material = heat; g.hull.visible = false; }, orig, 1],
+    ['⑨ 修后权重热力图 · 静止正面', g => { g.pose('rest'); g.setSkin('toon', 0); g.mesh.material = heatFix; g.hull.visible = false; }, wfix, 0],
+    ['⑩ 修后权重热力图 · 静止侧面', g => { g.pose('rest'); g.setSkin('toon', 0); g.mesh.material = heatFix; g.hull.visible = false; }, wfix, 1],
+  );
+  for (const [p, r] of [[30, 0], [40, 0], [20, 20]]) for (const [gg, nm] of [[orig, '原始权重'], [wfix, '修后权重']])
+    V.push([`低头 ${p}° 歪头 ${r}° · 描边关 · ${nm}`, g => { g.pose(tilt(p, r)); g.setSkin('toon', 0); g.hull.visible = false; }, gg, 0]);
+} else {
+  for (const c of CREW_T) V.push([`修后 · crew ${c.page}s`, g => { g.play(SEQ, c.T); g.setSkin('toon', c.T); }, orig, 0, c.u]);
+  for (const [p, r] of [[10, 0], [20, 0], [30, 0], [40, 0], [0, 20], [20, 20]]) V.push([`低头 ${p}° 歪头 ${r}° · 修后`, g => { g.pose(tilt(p, r)); g.setSkin('toon', 0); }, orig, 0]);
+  // 景别测试：脸（下巴到发际 0.115）占画高 12 / 20 / 30 / 45 %（贴图里脸只有约 144 px 高）
+  for (const f of [0.12, 0.2, 0.3, 0.45]) V.push([`景别 · 脸占画高 ${Math.round(f * 100)}%`, g => { g.pose('rest'); g.setSkin('toon', 0); }, orig, 0, null, f]);
+}
+if (!FIXED) for (const c of CREW_T) V.push([`修前 · crew ${c.page}s`, g => { g.play(SEQ, c.T); g.setSkin('toon', c.T); }, orig, 0, c.u]);
+
+function draw(T) {
+  const k = Math.max(0, Math.min(V.length - 1, Math.floor(T - 1000 + 1e-6)));
+  const [label, fn, g, side = 0, u, faceFrac] = V[k];
+  for (const x of [orig, smoothed, wfix]) if (x) scene.remove(x.root);
+  scene.add(g.root);
+  g.root.position.set(0, 0, 0);
+  fn(g);
+  g.root.updateMatrixWorld(true);
+  faceCam(g, u ?? T14.u, side);
+  if (faceFrac) {   // 景别测试：按脸占画高反推距离（fov 28）
+    const h = head(g), dist = 0.115 / faceFrac / (2 * Math.tan(14 * Math.PI / 180));
+    camera.position.set(h.x, h.y + 0.03, h.z + dist); camera.lookAt(h.x, h.y + 0.03, h.z);
+  }
+  tag.textContent = `${k + 1}. ${label}`;
+  mv.stage.render(scene, camera, { bloom: 0, grade: { vignette: 0 } });
+}
+mv.mount(draw, { offset: 1000, duration: V.length });
+
+// 贴图密度：脸部三角形的「贴图像素 / 世界长度」→ 脸（下巴到发际 ≈ 0.115 单位）在贴图里有多少像素高
+window.__texel = () => {
+  const m = orig.mesh, g = m.geometry, P = g.attributes.position, UV = g.attributes.uv, N = g.attributes.normal, idx = g.index;
+  const hy = orig.dancer.S.info.Head.bone.getWorldPosition(new THREE.Vector3()).y;
+  const tex = orig.look.items[0].pbr.map.image, TW = tex.width, TH = tex.height;
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), ua = new THREE.Vector2(), ub = new THREE.Vector2(), uc = new THREE.Vector2();
+  let wa = 0, ta = 0;
+  for (let t = 0; t < idx.count; t += 3) {
+    const i = idx.getX(t), j = idx.getX(t + 1), k = idx.getX(t + 2);
+    a.fromBufferAttribute(P, i); b.fromBufferAttribute(P, j); c.fromBufferAttribute(P, k);
+    if (a.z < 0.03 || a.y < hy - 0.03 || a.y > hy + 0.07 || Math.abs(a.x) > 0.05 || N.getZ(i) < 0.4) continue;
+    ua.fromBufferAttribute(UV, i); ub.fromBufferAttribute(UV, j); uc.fromBufferAttribute(UV, k);
+    wa += b.clone().sub(a).cross(c.clone().sub(a)).length() / 2;
+    ta += Math.abs((ub.x - ua.x) * (uc.y - ua.y) - (uc.x - ua.x) * (ub.y - ua.y)) / 2 * TW * TH;
+  }
+  const pxPerUnit = Math.sqrt(ta / wa), faceH = 0.115;
+  return { tex: [TW, TH], pxPerUnit: Math.round(pxPerUnit), facePx: Math.round(pxPerUnit * faceH) };
+};
+
+// 量化：脸部顶点（下巴到眉、前侧）偏离「跟着头骨刚性运动」的距离（mm，按身高 160 cm 换算）
+window.__rigid = () => {
+  const res = {};
+  for (const [g, nm] of [[orig, 'orig'], [wfix, 'fix']]) {
+    if (!g) continue;
+    const m = g.mesh, P = m.geometry.attributes.position, hb = g.dancer.S.info.Head.bone;
+    g.root.position.set(0, 0, 0);
+    g.pose('rest'); g.root.updateMatrixWorld(true); m.skeleton.update();
+    const headRest = hb.matrixWorld.clone(), ids = [];
+    const headY = hb.getWorldPosition(new THREE.Vector3()).y;
+    for (let i = 0; i < P.count; i++) { const y = P.getY(i), z = P.getZ(i); if (z > 0.03 && y > headY - 0.032 && y < headY + 0.06 && Math.abs(P.getX(i)) < 0.055 && m.geometry.attributes.normal.getZ(i) > 0.2) ids.push(i); }   // 下巴到眉、朝前（不含垂在脸侧的头发和下巴下面的过渡带）
+    const v = new THREE.Vector3(), r = new THREE.Vector3();
+    for (const [p, rr] of [[20, 0], [30, 0], [40, 0], [20, 20]]) {
+      g.pose(tilt(p, rr)); g.root.updateMatrixWorld(true); m.skeleton.update();
+      const rigid = hb.matrixWorld.clone().multiply(headRest.clone().invert());
+      const ds = [];
+      for (const i of ids) {
+        v.fromBufferAttribute(P, i); m.applyBoneTransform(i, v); v.applyMatrix4(m.matrixWorld);
+        r.fromBufferAttribute(P, i).applyMatrix4(rigid);
+        ds.push(v.distanceTo(r) * 1600);
+      }
+      ds.sort((a, b) => a - b);
+      res[`${nm} 低头${p} 歪${rr}`] = { p95Mm: +ds[Math.floor(ds.length * 0.95)].toFixed(1), meanMm: +(ds.reduce((a, b) => a + b, 0) / ds.length).toFixed(2), maxMm: +ds.at(-1).toFixed(1), n: ids.length };
+    }
+  }
+  return res;
+};
+window.__n = V.length;
+</script>
+</body>
+</html>

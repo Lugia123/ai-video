@@ -1,0 +1,81 @@
+{
+ "size": [
+  832,
+  1248
+ ],
+ "chin_y": 655,
+ "neck_pivot": [
+  416,
+  690
+ ],
+ "eye_box": [
+  228,
+  330,
+  592,
+  470
+ ],
+ "mouth_box": [
+  325,
+  525,
+  505,
+  630
+ ],
+ "order": [
+  "01-body",
+  "02-head",
+  "eyes/<state>",
+  "mouth/<state>",
+  "04-hair"
+ ],
+ "eyes": [
+  "open",
+  "closed",
+  "half",
+  "wink",
+  "smile",
+  "surprised"
+ ],
+ "mouth": [
+  "rest",
+  "a",
+  "i",
+  "u",
+  "e",
+  "o",
+  "smile",
+  "surprised"
+ ],
+ "notes": "所有图层同一画布 832x1248 对齐。头部组(02-head+eyes+mouth+04-hair)绕 neck_pivot 旋转/平移；01-body 是去发底图，头发摆动或转头时露出的部分由它补上。",
+ "neck_line": [
+  [
+   340,
+   606
+  ],
+  [
+   362,
+   626
+  ],
+  [
+   400,
+   655
+  ],
+  [
+   432,
+   656
+  ],
+  [
+   470,
+   630
+  ],
+  [
+   518,
+   597
+  ],
+  [
+   540,
+   590
+  ]
+ ],
+ "collar_hue": "pink",
+ "notes_rig": "neck_line / collar_hue 供 assets/lib/layer-rig.js 用：颌线下方折线（以上刚性跟头、到 neck_pivot.y 渐变跟身体）；头图层里衣领的颜色（分离后钉在身体上）。"
+}

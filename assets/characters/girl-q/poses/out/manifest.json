@@ -1,0 +1,264 @@
+{
+ "note": "坐标单位 = 原图像素；neck = 脖子接口（领口顶点），各图层 origin 相对 neck；foot = 脚底基线在 neck 下方多少像素。",
+ "heads": {
+  "front": {
+   "head": {
+    "file": "head-front/head.png",
+    "origin": [
+     -190.0,
+     -354.0
+    ]
+   },
+   "hairBack": {
+    "file": "head-front/hair_back.png",
+    "origin": [
+     -195.0,
+     -60.0
+    ]
+   },
+   "face": {
+    "origin": [
+     -117.0,
+     -173.0
+    ],
+    "states": {
+     "idle": "head-front/face/idle.png",
+     "happy": "head-front/face/happy.png",
+     "question": "head-front/face/question.png",
+     "surprised": "head-front/face/surprised.png",
+     "droop": "head-front/face/droop.png",
+     "blank": "head-front/face/blank.png",
+     "talkA": "head-front/face/talkA.png",
+     "talkH": "head-front/face/talkH.png",
+     "lookR": "head-front/face/lookR.png",
+     "blink": "head-front/face/blink.png",
+     "lookL": "head-front/face/lookL.png"
+    }
+   },
+   "top": -354.0
+  },
+  "r34": {
+   "states": {
+    "idle": {
+     "file": "head34/idle.png",
+     "origin": [
+      -240.0,
+      -375.0
+     ]
+    },
+    "blink": {
+     "file": "head34/blink.png",
+     "origin": [
+      -241.0,
+      -375.0
+     ]
+    },
+    "talkA": {
+     "file": "head34/talkA.png",
+     "origin": [
+      -241.0,
+      -375.0
+     ]
+    }
+   },
+   "hairBack": {
+    "file": "head34/hair_back.png",
+    "origin": [
+     -240.0,
+     -2.0
+    ]
+   },
+   "top": -375
+  }
+ },
+ "bodies": {
+  "idle": {
+   "facing": "front",
+   "file": "bodies/idle.png",
+   "origin": [
+    -135.0,
+    -14.0
+   ],
+   "foot": 438.0
+  },
+  "point": {
+   "facing": "front",
+   "file": "bodies/point.png",
+   "origin": [
+    -128.0,
+    -14.0
+   ],
+   "foot": 411.0,
+   "fore": {
+    "file": "fore/point.png",
+    "origin": [
+     -75.0,
+     -207.0
+    ]
+   }
+  },
+  "question": {
+   "facing": "front",
+   "file": "bodies/question.png",
+   "origin": [
+    -280.0,
+    -14.0
+   ],
+   "foot": 436.0
+  },
+  "startle": {
+   "facing": "front",
+   "file": "bodies/startle.png",
+   "origin": [
+    -172.0,
+    -14.0
+   ],
+   "foot": 438.0,
+   "fore": {
+    "file": "fore/startle.png",
+    "origin": [
+     -313.0,
+     -204.0
+    ]
+   }
+  },
+  "thumbs": {
+   "facing": "front",
+   "file": "bodies/thumbs.png",
+   "origin": [
+    -172.0,
+    -14.0
+   ],
+   "foot": 436.0
+  },
+  "shake": {
+   "facing": "front",
+   "file": "bodies/shake.png",
+   "origin": [
+    -243.0,
+    -14.0
+   ],
+   "foot": 436.0,
+   "fore": {
+    "file": "fore/shake.png",
+    "origin": [
+     -241.0,
+     -39.0
+    ]
+   }
+  },
+  "nod": {
+   "facing": "front",
+   "file": "bodies/nod.png",
+   "origin": [
+    -171.0,
+    -14.0
+   ],
+   "foot": 448.0
+  },
+  "hop": {
+   "facing": "front",
+   "file": "bodies/hop.png",
+   "origin": [
+    -152.0,
+    -14.0
+   ],
+   "foot": 438.0,
+   "fore": {
+    "file": "fore/hop.png",
+    "origin": [
+     -292.0,
+     -282.0
+    ]
+   }
+  },
+  "droop": {
+   "facing": "front",
+   "file": "bodies/droop.png",
+   "origin": [
+    -96.0,
+    -14.0
+   ],
+   "foot": 396.0
+  },
+  "knife": {
+   "facing": "front",
+   "file": "bodies/knife.png",
+   "origin": [
+    -154.0,
+    -14.0
+   ],
+   "foot": 432.0,
+   "fore": {
+    "file": "fore/knife.png",
+    "origin": [
+     -94.0,
+     -105.0
+    ]
+   }
+  },
+  "talk_open": {
+   "facing": "front",
+   "file": "bodies/talk_open.png",
+   "origin": [
+    -232.0,
+    -14.0
+   ],
+   "foot": 439.0
+  },
+  "look": {
+   "facing": "front",
+   "file": "bodies/look.png",
+   "origin": [
+    -142.0,
+    -14.0
+   ],
+   "foot": 441.0
+  },
+  "blank": {
+   "facing": "front",
+   "file": "bodies/blank.png",
+   "origin": [
+    -132.0,
+    -14.0
+   ],
+   "foot": 437.0
+  },
+  "walk1": {
+   "facing": "r34",
+   "file": "bodies/walk1.png",
+   "origin": [
+    -216.0,
+    -14.0
+   ],
+   "foot": 405.0
+  },
+  "walk2": {
+   "facing": "r34",
+   "file": "bodies/walk2.png",
+   "origin": [
+    -214.0,
+    -14.0
+   ],
+   "foot": 391.0
+  },
+  "walk3": {
+   "facing": "r34",
+   "file": "bodies/walk3.png",
+   "origin": [
+    -244.0,
+    -14.0
+   ],
+   "foot": 399.0
+  },
+  "walk4": {
+   "facing": "r34",
+   "file": "bodies/walk4.png",
+   "origin": [
+    -214.0,
+    -14.0
+   ],
+   "foot": 409.0
+  }
+ }
+}

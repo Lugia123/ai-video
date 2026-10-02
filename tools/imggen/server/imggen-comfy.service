@@ -1,0 +1,17 @@
+[Unit]
+Description=imggen: ComfyUI backend (127.0.0.1:8188, /opt/imggen)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/imggen/ComfyUI
+# triton 运行时编译要 Python.h；系统没装 python3-dev，用解包到 /opt/imggen/pyhdr 的头文件，不动系统
+Environment=CPATH=/opt/imggen/pyhdr/root/usr/include/python3.10:/opt/imggen/pyhdr/root/usr/include
+# --vram-headroom 3: 动态显存模式下按整卡（含 sontia 等别人的进程）始终空出 3GB；--reserve-vram 在该模式下不起作用
+ExecStart=/opt/imggen/venv/bin/python main.py --listen 127.0.0.1 --port 8188 --vram-headroom 3 --disable-auto-launch --preview-method none
+Restart=always
+RestartSec=5
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

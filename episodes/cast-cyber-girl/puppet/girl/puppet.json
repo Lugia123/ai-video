@@ -1,0 +1,445 @@
+{
+ "src": "../../turnaround/final/front-tpose.png",
+ "canvas": [
+  832,
+  1248
+ ],
+ "joints": {
+  "neck": [
+   416,
+   336
+  ],
+  "waist": [
+   416,
+   532
+  ],
+  "shoulder_l": [
+   336,
+   390
+  ],
+  "elbow_l": [
+   215,
+   392
+  ],
+  "wrist_l": [
+   96,
+   390
+  ],
+  "hand_l": [
+   10,
+   388
+  ],
+  "shoulder_r": [
+   496,
+   390
+  ],
+  "elbow_r": [
+   617,
+   392
+  ],
+  "wrist_r": [
+   740,
+   388
+  ],
+  "hand_r": [
+   824,
+   386
+  ],
+  "hip_l": [
+   372,
+   645
+  ],
+  "knee_l": [
+   352,
+   880
+  ],
+  "foot_l": [
+   325,
+   1208
+  ],
+  "hip_r": [
+   462,
+   645
+  ],
+  "knee_r": [
+   468,
+   880
+  ],
+  "foot_r": [
+   495,
+   1208
+  ],
+  "grip_l": [
+   60,
+   389
+  ],
+  "grip_r": [
+   775,
+   387
+  ]
+ },
+ "note": "origin=部件 PNG 左上角在原画布的位置；pivot=关节枢轴（原画布坐标），pivot_local=相对部件 PNG；角度正值=屏幕上顺时针；世界变换 = 父变换 · T(pivot) · R(θ) · T(-pivot)；按 z 从小到大画。_l/_r=画面左/右。",
+ "parts": [
+  {
+   "name": "hair_back",
+   "file": "hair_back.png",
+   "parent": "head",
+   "z": -1,
+   "origin": [
+    309,
+    249
+   ],
+   "disc": 0,
+   "size": [
+    200,
+    292
+   ],
+   "pivot": [
+    416.0,
+    336.0
+   ],
+   "pivot_local": [
+    107.0,
+    87.0
+   ]
+  },
+  {
+   "name": "shin_l",
+   "file": "shin_l.png",
+   "parent": "thigh_l",
+   "z": 1,
+   "origin": [
+    284,
+    845
+   ],
+   "disc": 34,
+   "size": [
+    94,
+    368
+   ],
+   "pivot": [
+    352.0,
+    880.0
+   ],
+   "pivot_local": [
+    68.0,
+    35.0
+   ]
+  },
+  {
+   "name": "shin_r",
+   "file": "shin_r.png",
+   "parent": "thigh_r",
+   "z": 1,
+   "origin": [
+    438,
+    845
+   ],
+   "disc": 34,
+   "size": [
+    93,
+    368
+   ],
+   "pivot": [
+    468.0,
+    880.0
+   ],
+   "pivot_local": [
+    30.0,
+    35.0
+   ]
+  },
+  {
+   "name": "thigh_l",
+   "file": "thigh_l.png",
+   "parent": "pelvis",
+   "z": 2,
+   "origin": [
+    298,
+    598
+   ],
+   "disc": 46,
+   "size": [
+    122,
+    286
+   ],
+   "pivot": [
+    372.0,
+    645.0
+   ],
+   "pivot_local": [
+    74.0,
+    47.0
+   ]
+  },
+  {
+   "name": "thigh_r",
+   "file": "thigh_r.png",
+   "parent": "pelvis",
+   "z": 2,
+   "origin": [
+    395,
+    598
+   ],
+   "disc": 46,
+   "size": [
+    131,
+    285
+   ],
+   "pivot": [
+    462.0,
+    645.0
+   ],
+   "pivot_local": [
+    67.0,
+    47.0
+   ]
+  },
+  {
+   "name": "pelvis",
+   "file": "pelvis.png",
+   "parent": null,
+   "z": 3,
+   "origin": [
+    291,
+    508
+   ],
+   "disc": 0,
+   "size": [
+    226,
+    194
+   ],
+   "pivot": [
+    416.0,
+    532.0
+   ],
+   "pivot_local": [
+    125.0,
+    24.0
+   ]
+  },
+  {
+   "name": "torso",
+   "file": "torso.png",
+   "parent": "pelvis",
+   "z": 4,
+   "origin": [
+    330,
+    298
+   ],
+   "disc": 0,
+   "size": [
+    169,
+    236
+   ],
+   "pivot": [
+    416.0,
+    532.0
+   ],
+   "pivot_local": [
+    86.0,
+    234.0
+   ]
+  },
+  {
+   "name": "arm_lo_l",
+   "file": "arm_lo_l.png",
+   "parent": "arm_up_l",
+   "z": 6,
+   "origin": [
+    22,
+    207
+   ],
+   "disc": 36,
+   "size": [
+    231,
+    368
+   ],
+   "pivot": [
+    215.0,
+    392.0
+   ],
+   "pivot_local": [
+    193.0,
+    185.0
+   ]
+  },
+  {
+   "name": "arm_lo_r",
+   "file": "arm_lo_r.png",
+   "parent": "arm_up_r",
+   "z": 6,
+   "origin": [
+    580,
+    207
+   ],
+   "disc": 36,
+   "size": [
+    228,
+    366
+   ],
+   "pivot": [
+    617.0,
+    392.0
+   ],
+   "pivot_local": [
+    37.0,
+    185.0
+   ]
+  },
+  {
+   "name": "arm_up_l",
+   "file": "arm_up_l.png",
+   "parent": "torso",
+   "z": 7,
+   "origin": [
+    214,
+    348
+   ],
+   "disc": 34,
+   "size": [
+    158,
+    95
+   ],
+   "pivot": [
+    336.0,
+    390.0
+   ],
+   "pivot_local": [
+    122.0,
+    42.0
+   ]
+  },
+  {
+   "name": "arm_up_r",
+   "file": "arm_up_r.png",
+   "parent": "torso",
+   "z": 7,
+   "origin": [
+    461,
+    350
+   ],
+   "disc": 34,
+   "size": [
+    158,
+    85
+   ],
+   "pivot": [
+    496.0,
+    390.0
+   ],
+   "pivot_local": [
+    35.0,
+    40.0
+   ]
+  },
+  {
+   "name": "head",
+   "file": "head.png",
+   "parent": "torso",
+   "z": 8,
+   "origin": [
+    334,
+    176
+   ],
+   "disc": 0,
+   "size": [
+    152,
+    172
+   ],
+   "pivot": [
+    416.0,
+    336.0
+   ],
+   "pivot_local": [
+    82.0,
+    160.0
+   ]
+  },
+  {
+   "name": "hair_front",
+   "file": "hair_front.png",
+   "parent": "head",
+   "z": 8.5,
+   "origin": [
+    349,
+    208
+   ],
+   "disc": 0,
+   "size": [
+    123,
+    66
+   ],
+   "pivot": [
+    416.0,
+    336.0
+   ],
+   "pivot_local": [
+    67.0,
+    128.0
+   ]
+  },
+  {
+   "name": "eyes",
+   "file": "eyes/open.png",
+   "parent": "head",
+   "z": 8.1,
+   "origin": [
+    356,
+    243
+   ],
+   "size": [
+    105,
+    45
+   ],
+   "pivot": [
+    416.0,
+    336.0
+   ],
+   "pivot_local": [
+    60.0,
+    93.0
+   ],
+   "states": {
+    "closed": "eyes/closed.png",
+    "half": "eyes/half.png",
+    "open": "eyes/open.png",
+    "smile": "eyes/smile.png",
+    "surprised": "eyes/surprised.png",
+    "wink": "eyes/wink.png"
+   }
+  },
+  {
+   "name": "mouth",
+   "file": "mouth/rest.png",
+   "parent": "head",
+   "z": 8.2,
+   "origin": [
+    379,
+    296
+   ],
+   "size": [
+    62,
+    40
+   ],
+   "pivot": [
+    416.0,
+    336.0
+   ],
+   "pivot_local": [
+    37.0,
+    40.0
+   ],
+   "states": {
+    "a": "mouth/a.png",
+    "e": "mouth/e.png",
+    "i": "mouth/i.png",
+    "o": "mouth/o.png",
+    "rest": "mouth/rest.png",
+    "smile": "mouth/smile.png",
+    "surprised": "mouth/surprised.png",
+    "u": "mouth/u.png"
+   }
+  }
+ ]
+}

@@ -1,0 +1,208 @@
+{
+ "about": "#936 +10° 组（千问按 3D 角度参考生成）base.png 上的标定，832×1248 像素。瞳孔 / 眼宽 / 嘴线从放大网格图读出。实测角度：画面右眼宽 107 px、左眼 68 px（比例 0.64），鼻尖在两眼中点左 56 px → 约 +18°（比名义 +10° 转得多），按实测记。 角度 = fit_pose.py 拟合（眼 6 点 + 嘴角 + 下巴尖，俯仰固定 0）。",
+ "nominal": 10,
+ "yaw": 15.5,
+ "pupils": [
+  [
+   275,
+   420
+  ],
+  [
+   443,
+   403
+  ]
+ ],
+ "skinAt": [
+  330,
+  470,
+  8
+ ],
+ "regBox": [
+  150,
+  250,
+  600,
+  700
+ ],
+ "parts": {
+  "eyeL": {
+   "ellipse": [
+    259,
+    420,
+    44,
+    34
+   ],
+   "anchor": [
+    275,
+    420
+   ],
+   "cut": [
+    [
+     222,
+     404,
+     6,
+     14
+    ]
+   ]
+  },
+  "eyeR": {
+   "ellipse": [
+    444,
+    400,
+    64,
+    40
+   ],
+   "anchor": [
+    443,
+    403
+   ]
+  },
+  "mouth": {
+   "ellipse": [
+    360,
+    565,
+    72,
+    56
+   ],
+   "anchor": [
+    357,
+    545
+   ]
+  }
+ },
+ "fit2d": {
+  "about": "base.png 上的关键点（像素，从 2.6 倍放大网格图读，约 ±2 px）。_img 后缀 = 画面左 / 右（R = 画面左 = 她的右侧）。",
+  "pupilR_img": [
+   275,
+   420
+  ],
+  "pupilL_img": [
+   443,
+   403
+  ],
+  "eyeOutR_img": [
+   232,
+   414
+  ],
+  "eyeInR_img": [
+   291,
+   430
+  ],
+  "eyeInL_img": [
+   398,
+   402
+  ],
+  "eyeOutL_img": [
+   498,
+   393
+  ],
+  "noseTip": [
+   305,
+   502
+  ],
+  "mouthR_img": [
+   315,
+   549
+  ],
+  "mouthL_img": [
+   399,
+   538
+  ],
+  "chinTip": [
+   355,
+   639
+  ],
+  "jawR_img": [
+   [
+    248,
+    502
+   ],
+   [
+    267,
+    568
+   ],
+   [
+    317,
+    614
+   ]
+  ],
+  "jawL_img": [
+   [
+    467,
+    595
+   ],
+   [
+    428,
+    614
+   ],
+   [
+    398,
+    629
+   ]
+  ]
+ },
+ "fit": {
+  "yaw": 15.5,
+  "pitch": 0.0,
+  "roll": 3.4,
+  "scale": 3817.8,
+  "tx": 396.4,
+  "ty": 484.6,
+  "rmsPoints_px": 9.9,
+  "rmsAll_px": 9.9,
+  "interocular_px": 168.9,
+  "perPoint_px": {
+   "pupilR_img": 10.8,
+   "pupilL_img": 8.0,
+   "eyeOutR_img": 5.8,
+   "eyeInR_img": 18.9,
+   "eyeInL_img": 7.3,
+   "eyeOutL_img": 10.8,
+   "mouthR_img": 1.8,
+   "mouthL_img": 3.8,
+   "chinTip": 10.7
+  },
+  "contour_px": [],
+  "diag_allPoints_px": {
+   "pupilR_img": 10.8,
+   "pupilL_img": 8.0,
+   "eyeOutR_img": 5.8,
+   "eyeInR_img": 18.9,
+   "eyeInL_img": 7.3,
+   "eyeOutL_img": 10.8,
+   "noseTip": 35.5,
+   "mouthR_img": 1.8,
+   "mouthL_img": 3.8,
+   "chinTip": 10.7
+  },
+  "diag_contour_px": [
+   -21.2,
+   2.7,
+   1.4,
+   -33.8,
+   -24.2,
+   -11.8
+  ],
+  "subset": [
+   "pupilR_img",
+   "pupilL_img",
+   "eyeOutR_img",
+   "eyeInR_img",
+   "eyeInL_img",
+   "eyeOutL_img",
+   "mouthR_img",
+   "mouthL_img",
+   "chinTip"
+  ],
+  "contour": false,
+  "pitchFixed": "0"
+ },
+ "refYawToFit": {
+  "about": "参考图角度 → 生成结果的拟合角度（批量时按这个反推参考角度）",
+  "pairs": [
+   [
+    10,
+    15.5
+   ]
+  ]
+ }
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>face-anime：五官层 角度 × 状态</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; top: 20px; font: 40px 'STM', monospace; color: #F4E04D; white-space: pre; }
+</style>
+</head>
+<body style="margin:0">
+<div id="tag"></div>
+<!--
+  #935 验收图：动漫式五官层（按头相对镜头的 yaw / pitch 在屏幕空间摆 2D 五官 + 脸皮遮罩 + 鼻梁描边）。seek(1000 + k) 画第 k 格：
+  yaw（镜头绕脸转，正 = 镜头在她的左侧）0 / 15 / 30 / 45 / −30° × pitch（头：−12 = 低头 12°，+10 = 仰头 10°）0 / −12 / +10 × 状态 闭嘴 / a / o / 眨眼中。脸约占画高 25%。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights } from '../girl.js';
+const Q = new URLSearchParams(location.search);
+const mv = await loadMV();
+const girl = await createGirl(mv, { points: 100, face: Q.get('orig') ? 'original' : 'live' });
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#1c1c26');
+scene.add(girl.root, createGirlLights());
+const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.02, 50);
+const tag = document.getElementById('tag');
+const ANG = []; for (const p of [0, -12, 10]) for (const y of [0, 15, 30, 45, -30]) ANG.push([`yaw ${y}° · pitch ${p}°`, y, -p]);
+const ST = [['闭嘴', 'rest', 'open'], ['a', 'a', 'open'], ['o', 'o', 'open'], ['眨眼中', 'rest', 'closed']];
+const V = []; for (const a of ANG) for (const s of ST) V.push({ a, s });
+const FACE = +(Q.get('face') || 0.25), bloom = Q.get('bloom') === '0' ? 0 : Q.get('bloom') === 'hot' ? { strength: 1.2, threshold: 0.6 } : { strength: 0.5, threshold: 1.4 };
+const chroma = +(Q.get('chroma') || 0), YAW = Q.get('yaw');
+window.__n = V.length;
+// 脸中心（静止姿态 (0, 0.89, 0.05)）跟着头骨走：蒙皮 = bone.matrixWorld · boneInverse
+const hb = girl.dancer.S.info.Head.bone, hbi = girl.mesh.skeleton.boneInverses[girl.mesh.skeleton.bones.indexOf(hb)];
+const faceCenter = () => new THREE.Vector3(0, 0.89, 0.05).applyMatrix4(hbi).applyMatrix4(hb.matrixWorld).applyMatrix4(girl.mesh.bindMatrix);
+function draw(T) {
+  const k = Math.max(0, Math.min(V.length - 1, Math.floor(T - 1000 + 1e-6))), { a: [an, yaw, pitch], s: [sn, mouth, eyes] } = V[k];
+  girl.root.position.set(0, 0, 0);
+  girl.pose(() => ({ neck: [pitch * 0.4, 0, 0], head: [pitch * 0.6, 0, 0] }));
+  girl.setSkin('toon', 0);
+  girl.root.updateMatrixWorld(true);
+  const h = faceCenter(), dist = 0.066 / FACE / (2 * Math.tan(14 * Math.PI / 180)), y = yaw * Math.PI / 180;
+  camera.position.set(h.x + Math.sin(y) * dist, h.y, h.z + Math.cos(y) * dist); camera.lookAt(h);
+  camera.updateMatrixWorld();
+  if (girl.face) { const dbg = +(Q.get("dbg") || 0); window.__st = girl.face.update(T, { mouth, blink: eyes, camera, on: dbg === 3 ? 0 : 1, mouthScale: +(Q.get("mouthk") || 1) }); girl.face.uniforms.faceDbg.value = dbg === 3 ? 0 : dbg; }
+  tag.textContent = `${an} · ${sn}`;
+  if (girl.face) girl.face.uniforms.faceSmoothOn.value = Q.get('smooth') === '0' ? 0 : 1;
+  mv.stage.render(scene, camera, { bloom, chroma, grade: { vignette: 0.15 } });
+}
+mv.mount(draw, { offset: 1000, duration: V.length });
+window.__clean = girl.face?.cleanStats;
+if (Q.get('basic')) { const bm = new THREE.MeshBasicMaterial({ map: girl.face.cleanMap }); const orig = girl.setSkin; girl.setSkin = (...a) => { orig(...a); girl.mesh.material = bm; if (girl.hull) girl.hull.visible = false; }; } window.__girl = girl; window.THREE = THREE;
+</script>
+</body>
+</html>

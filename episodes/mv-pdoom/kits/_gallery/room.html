@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>room 画廊：她的卧室 + 手机</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// 每个机位 1 s：a 房间全景 · b 反打她（趴床尾看手机，屏幕光照脸）· c 手持第一人称 · d 手机背面特写（壳 / 贴纸 / 挂件）
+//              e 手机正面特写（屏幕 + 玻璃反光 + 手）· f 床上方看窗和书桌
+import * as THREE from 'three';
+import { loadMV, PALETTE as PAL } from '../../engine/index.js';
+import { initType3D } from '../type3d.js';
+import { createUI2D } from '../ui2d.js';
+import { createRoom, createPhone, createHands, portraitCard, screenColor } from '../room.js';
+
+const mv = await loadMV();
+await initType3D();
+const ui = await createUI2D(mv);
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#05040a');
+const room = createRoom(); scene.add(room.group);
+const A = room.anchors;
+const S = ui.surface(720, 1280);
+const phone = createPhone(S); scene.add(phone.group);
+const hands = createHands(phone); phone.group.add(hands.group);
+const card = portraitCard(ui, { w: 0.8 }); scene.add(card.mesh);
+card.mesh.position.set(A.face.x, 0.95, A.bed.z1 - 0.5);
+phone.group.position.copy(A.phoneHeld);
+phone.group.lookAt(V(A.face.x, 1.05, A.face.z - 0.2));
+const cam = new THREE.PerspectiveCamera(35, 16 / 9, 0.01, 60);
+const views = [
+  { pos: V(2.5, 1.9, 2.3), look: V(-0.9, 0.7, -1.6), fov: 50 },
+  { pos: V(-0.35, 1.0, 0.55), look: V(-0.9, 0.9, -1.2), fov: 34 },
+  { pov: true, fov: 42 },
+  { phoneBack: true, fov: 30 },
+  { phoneFront: true, fov: 30 },
+  { pos: V(-1.0, 1.5, -2.2), look: V(0.2, 1.1, 2.8), fov: 55 },
+];
+const msgs = [{ from: 'them', text: 'hey', at: 0 }, { from: 'me', text: 'cant sleep', at: 0 }, { from: 'them', text: 'AGI', at: 0, size: 150 }];
+mv.mount(T => {
+  const i = Math.min(views.length - 1, Math.floor(T)), v = views[i];
+  S.clear(PAL.paper);
+  ui.draw.chatHeader(S.ctx, { x: 0, y: 0, w: 720, h: 130 }, T, { name: 'Assistant', typing: true });
+  ui.draw.thread(S.ctx, { x: 8, y: 140, w: 704, h: 1100 }, T, { msgs, size: 64, gap: 26 });
+  S.commit();
+  const sp = phone.screen.getWorldPosition(V(0, 0, 0)), nrm = V(0, 0, 1).applyQuaternion(phone.group.getWorldQuaternion(new THREE.Quaternion()));
+  room.update(T, { screen: { pos: sp.clone().addScaledVector(nrm, 0.35), color: screenColor(S), k: 1 } });
+  card.update(T, { girl: { expression: 'neutral', look: () => ({ nod: 8 }) }, glow: { x: 512, y: 1000, r: 760, color: screenColor(S), k: 1 } });
+  cam.fov = v.fov;
+  hands.group.visible = !!(v.pov || v.phoneBack || v.phoneFront); room.hug.visible = !v.pov;
+  phone.group.position.copy(A.phoneHeld); if (!hands.group.visible) phone.group.position.y -= 0.07; phone.group.lookAt(V(A.face.x, 1.05, A.face.z - 0.2)); phone.group.updateMatrixWorld(true);
+  if (v.pov) { cam.position.copy(A.face).add(V(0, 0.08, 0.1)); cam.up.set(0, 1, 0); cam.lookAt(phone.group.position.clone().add(V(0, -0.02, 0.2))); }
+  else if (v.phoneBack) { const p = phone.group.localToWorld(V(0.03, 0.05, -0.32)); cam.position.copy(p); cam.up.set(0, 1, 0); cam.lookAt(phone.group.position); }
+  else if (v.phoneFront) { const p = phone.group.localToWorld(V(-0.05, 0.03, 0.3)); cam.position.copy(p); cam.up.set(0, 1, 0); cam.lookAt(phone.group.localToWorld(V(0, -0.01, 0))); }
+  else { cam.position.copy(v.pos); cam.up.set(0, 1, 0); cam.lookAt(v.look); }
+  cam.updateProjectionMatrix();
+  phone.update(T, cam);
+  mv.stage.render(scene, cam, { bloom: { strength: 0.5, threshold: 0.9 }, grade: { vignette: 0.25 } });
+}, { duration: views.length });
+</script>
+</body>
+</html>

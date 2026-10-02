@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 4 + 尾声 v4（123.87–156.65 s，全分辨率）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeC4V4, C4 } from './shots/c4-v4.js';   // #1052 分镜：fresh/v4-rest/c4/plan.md
+
+const half = false;    // 全分辨率；低分辨率样片用 c4-v4-half.html
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = await makeC4V4(mv);
+mv.mount(shots, { offset: C4.t0, duration: C4.end - C4.t0 });
+</script>
+</body>
+</html>

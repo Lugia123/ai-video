@@ -1,0 +1,180 @@
+{
+ "group": "z0",
+ "yaw": -2.8,
+ "skin": [
+  254.0,
+  222.0,
+  195.0
+ ],
+ "pupils": [
+  [
+   324,
+   414
+  ],
+  [
+   516,
+   412
+  ]
+ ],
+ "parts": {
+  "mouth": {
+   "x": 319,
+   "y": 505,
+   "w": 210,
+   "h": 128,
+   "anchor": [
+    424.5,
+    547.0
+   ],
+   "states": {
+    "a": {
+     "file": "mouth-a.png",
+     "top": 518,
+     "bottom": 625
+    },
+    "rest": {
+     "file": "mouth-rest.png",
+     "top": 542,
+     "bottom": 562
+    },
+    "e": {
+     "file": "mouth-e.png",
+     "top": 530,
+     "bottom": 579
+    },
+    "i": {
+     "file": "mouth-i.png",
+     "top": 538,
+     "bottom": 580
+    },
+    "o": {
+     "file": "mouth-o.png",
+     "top": 524,
+     "bottom": 620
+    },
+    "smileup": {
+     "file": "mouth-smileup.png",
+     "top": 535,
+     "bottom": 555
+    },
+    "u": {
+     "file": "mouth-u.png",
+     "top": 545,
+     "bottom": 564
+    }
+   }
+  },
+  "eyeL": {
+   "x": 251,
+   "y": 365,
+   "w": 128,
+   "h": 93,
+   "anchor": [
+    324,
+    414
+   ],
+   "states": {
+    "open": {
+     "file": "eyeL-open.png",
+     "top": 375,
+     "bottom": 445
+    },
+    "closed": {
+     "file": "eyeL-closed.png",
+     "top": 379,
+     "bottom": 450
+    },
+    "half": {
+     "file": "eyeL-half.png",
+     "top": 379,
+     "bottom": 445
+    }
+   }
+  },
+  "eyeR": {
+   "x": 457,
+   "y": 354,
+   "w": 130,
+   "h": 95,
+   "anchor": [
+    516,
+    412
+   ],
+   "states": {
+    "open": {
+     "file": "eyeR-open.png",
+     "top": 374,
+     "bottom": 439
+    },
+    "closed": {
+     "file": "eyeR-closed.png",
+     "top": 363,
+     "bottom": 441
+    },
+    "half": {
+     "file": "eyeR-half.png",
+     "top": 363,
+     "bottom": 439
+    }
+   }
+  }
+ },
+ "registration": {
+  "a": {
+   "scale": 1.0,
+   "rot": -0.0,
+   "tx": -0.0,
+   "ty": -0.0,
+   "inliers": 571
+  },
+  "closed": {
+   "scale": 1.0,
+   "rot": -0.0,
+   "tx": 0.0,
+   "ty": 0.0,
+   "inliers": 600
+  },
+  "e": {
+   "scale": 1.0,
+   "rot": 0.0,
+   "tx": -0.0,
+   "ty": -0.0,
+   "inliers": 600
+  },
+  "half": {
+   "scale": 1.0,
+   "rot": 0.0,
+   "tx": 0.0,
+   "ty": -0.0,
+   "inliers": 599
+  },
+  "i": {
+   "scale": 1.0,
+   "rot": 0.0,
+   "tx": 0.0,
+   "ty": -0.0,
+   "inliers": 600
+  },
+  "o": {
+   "scale": 1.0001,
+   "rot": -0.0,
+   "tx": -0.1,
+   "ty": -0.0,
+   "inliers": 534
+  },
+  "smile": {
+   "scale": 1.0001,
+   "rot": -0.0,
+   "tx": -0.0,
+   "ty": -0.1,
+   "inliers": 547
+  },
+  "u": {
+   "scale": 1.0,
+   "rot": 0.0,
+   "tx": 0.0,
+   "ty": 0.0,
+   "inliers": 600
+  }
+ }
+}

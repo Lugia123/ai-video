@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) v4-01 定稿：「关盒子」样片（14.6–22.6 s）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeV401Box } from './shots/v4-01-box.js';   // #1029：关盒子段单独看（14.6–22.6）
+
+const mv = await loadMV(new URLSearchParams(location.search).get('full') ? {} : { width: 960, height: 540 });   // 默认低分辨率样片；?full=1 是 1920×1080
+const q = new URLSearchParams(location.search), from = Number(q.get('from') ?? 14.6);
+const shots = await makeV401Box(mv, { footLock: q.get('lock') !== '0', from });
+mv.mount(shots, { offset: from, duration: 22.6 - from });
+</script>
+</body>
+</html>

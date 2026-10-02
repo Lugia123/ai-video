@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) v4-03：v4 主歌 2 跑酷 + 预副歌 2</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { makeV403b } from './shots/v4-03b.js';
+
+const mv = await loadMV();
+await initType3D();
+const shots = await makeV403b(mv);
+mv.mount(shots, { offset: 52.8, duration: 5.6 });
+</script>
+</body>
+</html>

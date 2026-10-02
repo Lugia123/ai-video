@@ -1,0 +1,256 @@
+{
+ "fps": 16,
+ "clips": {
+  "eyes-blink": {
+   "frames": 41,
+   "size": [
+    662,
+    374
+   ],
+   "mode": "loop",
+   "alpha": false,
+   "action": "眨眼，眼珠向一侧瞥一下再看回镜头",
+   "shot": "眼睛大特写（正面，整幅画面，只到鼻尖）",
+   "suits": "句首 / 句间的空拍；带「看」「眼」的词；安静的长音",
+   "src": "_work/gen/eyes-blink-draft-s1.mp4"
+  },
+  "wink-34": {
+   "frames": 41,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "斜看镜头，wink，笑一下",
+   "shot": "近景（3/4 侧脸）",
+   "suits": "俏皮的短句、句尾的重音",
+   "src": "_work/gen/wink-34-draft-s1.mp4"
+  },
+  "hairflip": {
+   "frames": 49,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "甩头，长发甩出一个大弧再落回",
+   "shot": "半身（正面）",
+   "suits": "强拍、段落开头、鼓点重的地方",
+   "src": "_work/gen/hairflip-draft-s1.mp4"
+  },
+  "nod": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "随拍轻轻点头、歪头、闭眼笑（幅度小）",
+   "shot": "半身（正面）",
+   "suits": "任何句子的垫底；说唱密集的句子",
+   "src": "_work/gen/nod-draft-s2.mp4"
+  },
+  "point": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "抬手，食指直指镜头",
+   "shot": "半身（正面，手冲镜头）",
+   "suits": "带「you」的句子、点名式的重音",
+   "src": "_work/gen/point-draft-s1.mp4"
+  },
+  "heart": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "双手在胸前比心",
+   "shot": "半身（正面）",
+   "suits": "副歌里讨喜的句子、结尾",
+   "src": "_work/gen/heart-draft-s1.mp4"
+  },
+  "peace": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "剪刀手一直举在眼边，睁眼 → wink，歪头",
+   "shot": "半身（正面）",
+   "suits": "句尾的定格、俏皮的词",
+   "src": "_work/gen/peace-draft-s3.mp4"
+  },
+  "kiss": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "指尖贴唇，向镜头送飞吻",
+   "shot": "半身（正面，手冲镜头）",
+   "suits": "句尾、段落收尾",
+   "src": "_work/gen/kiss-draft-s1.mp4"
+  },
+  "sway": {
+   "frames": 49,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "闭眼陶醉，头慢慢左右摇，嘴轻轻哼",
+   "shot": "近景（正面，头肩）",
+   "suits": "长音、拖腔、抒情的句子",
+   "src": "_work/gen/sway-draft-s1.mp4"
+  },
+  "low": {
+   "frames": 41,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "抱胸抬下巴俯视镜头，歪头挑眉，身体随拍晃",
+   "shot": "半身（仰角）",
+   "suits": "强硬、挑衅的句子",
+   "src": "_work/gen/low-draft-s1.mp4"
+  },
+  "high": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "仰头看镜头，把手伸向镜头",
+   "shot": "全身（俯角）",
+   "suits": "向上喊的句子、「please」这类求助的词",
+   "src": "_work/gen/high-draft-s1.mp4"
+  },
+  "hand": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "张开的手掌伸向镜头，五指收拢握成拳",
+   "shot": "手的特写（脸在后面）",
+   "suits": "带「stop / hold / grab」意思的词、重拍",
+   "src": "_work/gen/hand-draft-s1.mp4"
+  },
+  "profile": {
+   "frames": 41,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "侧脸迎风，慢慢转头看向镜头",
+   "shot": "近景（正侧脸 → 正面）",
+   "suits": "句子开头、铺垫的句子",
+   "src": "_work/gen/profile-draft-s1.mp4"
+  },
+  "turnback": {
+   "frames": 41,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "背对镜头，回头越过肩膀看镜头（回眸）",
+   "shot": "半身（背面 → 3/4 回眸）",
+   "suits": "段落开头、转折的句子",
+   "src": "_work/gen/turnback-draft-s1.mp4"
+  },
+  "clap": {
+   "frames": 33,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "双手举过头顶跟拍拍手",
+   "shot": "半身（正面，双臂上举）",
+   "suits": "带观众一起的段落、副歌",
+   "src": "_work/gen/clap-draft-s1.mp4"
+  },
+  "mic-full": {
+   "frames": 49,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "握着麦克风唱歌，左右踩步，伸出的手臂挥动、指向前方",
+   "shot": "全身（正面）",
+   "suits": "任何唱词句子；副歌、大全景里屏幕要看清「她在唱」的时候",
+   "src": "_work/gen/mic-full-draft-s1.mp4"
+  },
+  "mic-half": {
+   "frames": 49,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "握着麦克风动情地唱，唱到高处闭眼仰头，手按胸口",
+   "shot": "半身特写（略侧）",
+   "suits": "抒情、长音的句子；副歌的重点句",
+   "src": "_work/gen/mic-half-draft-s1.mp4"
+  },
+  "face": {
+   "frames": 41,
+   "size": [
+    848,
+    480
+   ],
+   "mode": "loop",
+   "alpha": true,
+   "action": "对着镜头唱，眨眼、扬眉，头轻轻左右摆",
+   "shot": "近距离面部特写（正面）",
+   "suits": "任何唱词句子；想让屏幕上的脸最大的时候",
+   "src": "_work/gen/face-draft-s1.mp4"
+  },
+  "goggles": {
+   "frames": 41,
+   "size": [
+    832,
+    1248
+   ],
+   "mode": "once",
+   "alpha": true,
+   "action": "双手把额头的护目镜拉下来戴上，眼睛亮红",
+   "shot": "半身（正面，竖构图）",
+   "suits": "「shinigami eyes」；变脸、发狠的句子",
+   "src": "../../../mv-pdoom/fresh/i2v-test/frames-draft2（#1037 / #1039 图生视频试点，gen/draft-s2.mp4）",
+   "fit": {
+    "scale": 0.55,
+    "y": 0.24
+   }
+  }
+ }
+}

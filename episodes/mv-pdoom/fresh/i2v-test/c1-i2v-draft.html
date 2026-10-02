@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 副歌 1 · 图生视频试点（#1037，低分辨率）</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// c1-v4-half.html 的副本：⑥ 2D 特写换成 Wan 图生视频（fresh/i2v-test/c1-v4-i2v.js）。默认用 frames-draft2（#1039 干净抠图的草稿帧）。
+import { loadMV } from '../../engine/index.js';
+import { makeC1V4, C1 } from './c1-v4-i2v.js';
+const v = new URLSearchParams(location.search).get('v') ?? 'frames-draft2';
+const mv = await loadMV({ width: 960, height: 540 });
+const shots = await makeC1V4(mv, { i2v: v });
+mv.mount(shots, { offset: C1.t0, duration: C1.end - C1.t0 });
+</script>
+</body>
+</html>

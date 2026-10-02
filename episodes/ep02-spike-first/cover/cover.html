@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ep02 封面</title>
+<style>
+  html, body { margin: 0; background: #EFE7D6; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+/*
+ * ep02 封面：兑现开场画面——搭到一半的纸架子轰然塌掉（红色「？」块碎开），纸片女孩在废墟边举着「先试这个」。
+ *   ?ratio=4x3  → 1440×1080（横版）
+ *   ?ratio=9x16 → 1080×1920（竖版：上标题、中间塌架子、下小人）
+ *   ?ratio=16x9 → 1920×1080（宽版，左右分栏：左边标题 + 举牌小人，右边塌架子）
+ * 导出：node tools/cover/cover.mjs episodes/ep02-spike-first
+ * 页面画完后置 window.__coverReady = true。
+ */
+import { createKit, C, F, RAD, clamp, lerp, eo3, hash, mulberry32 } from '../../../assets/lib/paper-kit.js';
+import { createBuddy } from '../../../assets/lib/paper-girl.js';
+
+const RATIO = new URLSearchParams(location.search).get('ratio') ?? '4x3';
+const V = RATIO === '9x16', WIDE = RATIO === '16x9';
+const W = V ? 1080 : WIDE ? 1920 : 1440, H = V ? 1920 : 1080;
+const cv = document.getElementById('c');
+cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d');
+const K = createKit(ctx, { W, H, bgSeed: 303, creases: V ? [[-10, 1180, 1090, 1230]] : WIDE ? [[-10, 610, 1930, 650]] : [[-10, 610, 1450, 650]] });
+const { rr, paper, text, poly } = K;
+const ZH = F.zh;
+
+/* ---------- 版式 ---------- */
+const L = V ? {
+  title: [{ x: 540, y: 360, align: 'center', size: 146 }, { x: 540, y: 540, align: 'center', size: 96 }],
+  scaf: { cx: 330, base: 1330, s: 1.05 },
+  buddy: { x: 700, y: 1860, s: 2 }, slip: 1.4,
+  tape: { x: 30, y: 60, rot: -4 },
+} : WIDE ? {
+  title: [{ x: 70, y: 215, align: 'left', size: 160 }, { x: 76, y: 355, align: 'left', size: 92 }],
+  scaf: { cx: 1220, base: 975, s: 1.05, line: [-1300, 700] },
+  buddy: { x: 640, y: 985, s: 2 }, slip: 1.5,
+  tape: { x: 1540, y: 40, rot: 5 },
+} : {
+  title: [{ x: 70, y: 215, align: 'left', size: 160 }, { x: 76, y: 355, align: 'left', size: 92 }],
+  scaf: { cx: 400, base: 975, s: 1.0 },
+  buddy: { x: 1290, y: 975, s: 2 }, slip: 1.2,
+  tape: { x: 1060, y: 40, rot: 5 },
+};
+
+/* ---------- 塌到一半的纸架子：越高的块越往外甩、转得越多 ---------- */
+function drawScaffold(o) {
+  const bw = 214, bh = 84, gap = 10, r = mulberry32(303);
+  ctx.save(); ctx.translate(o.cx, o.base); ctx.scale(o.s, o.s);
+  ctx.strokeStyle = 'rgba(30,27,24,0.35)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(o.line?.[0] ?? -600, 4); ctx.lineTo(o.line?.[1] ?? 900, 4); ctx.stroke();
+  const blocks = [];
+  for (let lv = 0; lv < 6; lv++) for (let c = 0; c < 2; c++) {
+    const x0 = (c ? 1 : -1) * (bw / 2 + gap / 2), y0 = -bh / 2 - lv * (bh + gap);
+    const k = lv / 5, fly = 0.35 + 0.65 * k;
+    const x = x0 + (80 + 260 * r()) * k * (c ? 1 : -0.4) + 60 * k, y = y0 + 90 * k * r() - 40 * k;
+    blocks.push({ lv, c, x, y, rot: ((r() * 2 - 1) * 40 + (c ? 25 : -15)) * fly * (lv ? 1 : 0.15), bad: lv === 1 && c === 0, week: lv * 2 + c + 1, col: [C.sky, C.sand, C.mint, C.card][(lv * 2 + c) * 7 % 4 + 0 & 3] });
+  }
+  // 速度线 + 纸屑
+  const d = mulberry32(9);
+  for (let i = 0; i < 12; i++) {
+    const x = -300 + d() * 800, y = -620 + d() * 560, s = 10 + d() * 14;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(d() * 6); ctx.fillStyle = [C.sand, C.sky, C.card, C.red][i % 4]; ctx.fillRect(-s / 2, -s / 3, s, s * 0.66);
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.strokeRect(-s / 2, -s / 3, s, s * 0.66); ctx.restore();
+  }
+  for (const b of blocks) {
+    if (b.bad) {
+      // 红块碎成三片，落在底下
+      for (let k = 0; k < 3; k++) {
+        ctx.save(); ctx.translate(-230 + k * 70, -30 - k * 8); ctx.rotate(((k - 1) * 30 + 12) * RAD);
+        paper(poly([[-44, -32], [40, -36], [34, 30], [-38, 34]], 330 + k, 3), [-44, -36, 84, 70], { fill: C.red, lift: 0.8, seed: 330 + k, inkW: 2.6 });
+        ctx.restore();
+      }
+      text('？', -160, -110, 90, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.red });
+      continue;
+    }
+    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot * RAD);
+    paper(rr(-bw / 2, -bh / 2, bw, bh, 8, 320 + b.week), [-bw / 2, -bh / 2, bw, bh], { fill: b.col, lift: 1 + b.lv * 0.4, seed: 320 + b.week, inkW: 2.6 });
+    text(`第 ${b.week} 周`, 0, 3, 30, { align: 'center', base: 'middle', font: ZH, weight: 600, color: 'rgba(30,27,24,0.7)' });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+/* ---------- 主标题：纸剪字——白纸描边 + 投影 + 错位色版；数字用红/绿强调 ---------- */
+const fontOf = (p, size) => p.num ? `800 ${size * 1.12}px ${F.big}` : `600 ${size}px ${ZH}`;
+function paperType(parts, x, y, size, align) {
+  const widths = parts.map(p => { ctx.font = fontOf(p, size); return ctx.measureText(p.s).width; });
+  const total = widths.reduce((a, b) => a + b, 0);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const x0 = cx;
+  ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+  // 1. 整行白纸底（带投影），2. 错位色版，3. 墨色字
+  for (const pass of [0, 1, 2]) {
+    cx = x0;
+    parts.forEach((p, i) => {
+      ctx.font = fontOf(p, size);
+      if (pass === 0) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(70,48,25,0.38)'; ctx.shadowBlur = 14; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 10;
+        ctx.strokeStyle = C.card; ctx.lineWidth = size * 0.2; ctx.strokeText(p.s, cx, y);
+        ctx.restore();
+      } else if (pass === 1) {
+        ctx.fillStyle = p.col && p.col !== C.mute ? C.ink : C.mustard;
+        ctx.fillText(p.s, cx + size * 0.04, y + size * 0.04);
+      } else {
+        ctx.fillStyle = p.col ?? C.ink; ctx.fillText(p.s, cx, y);
+      }
+      cx += widths[i];
+    });
+  }
+  ctx.restore();
+  return { x0, x1: x0 + total };
+}
+
+/* ---------- 系列标签：斜贴的纸胶带 ---------- */
+function tape(o) {
+  const label = '移植不是翻译 · 02';
+  ctx.font = `600 34px ${ZH}`;
+  const w = ctx.measureText(label).width + 70, h = 64;
+  ctx.save(); ctx.translate(o.x + w / 2, o.y + h / 2); ctx.rotate(o.rot * RAD);
+  // 胶带两端锯齿
+  const p = new Path2D(), r = mulberry32(77);
+  p.moveTo(-w / 2, -h / 2);
+  p.lineTo(w / 2, -h / 2);
+  for (let k = 0; k <= 8; k++) p.lineTo(w / 2 + (k % 2 ? -7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.lineTo(-w / 2, h / 2);
+  for (let k = 8; k >= 0; k--) p.lineTo(-w / 2 + (k % 2 ? 7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.closePath();
+  paper(p, [-w / 2, -h / 2, w, h], { fill: 'rgba(240,180,60,0.88)', lift: 0.5, seed: 141, ink: false });
+  text(label, 0, 2, 34, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+/* ---------- 主标题 ---------- */
+const TITLE = [
+  [{ s: '三个月', col: C.red }, { s: '全白干？' }],
+  [{ s: '先做' }, { s: '最没把握', col: C.red }, { s: '的那件事' }],
+];
+
+/* ---------- 讲解员：举着「先试这个」 ---------- */
+const buddy = createBuddy(ctx, {
+  path: [[0, L.buddy.x, L.buddy.y, L.buddy.s]],
+  acts: [{ type: 'point', t0: 0, t1: 99, at: [L.buddy.x - 400, L.buddy.y - 700] }],   // 举起左手——手里举着「先试这个」
+});
+function trySlip(x, y, s, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot * RAD); ctx.scale(s, s);
+  paper(rr(-130, -50, 260, 100, 8, 171), [-130, -50, 260, 100], { fill: C.mustard, lift: 1.6, seed: 171, inkW: 2.8 });
+  text('先试这个', 0, 3, 46, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+  ctx.restore();
+}
+
+await document.fonts.load(`600 150px ${ZH}`, '三个月全白干？先做最没把握的那件事移植不是翻译第周');
+K.setTime(0);
+K.drawBG();
+tape(L.tape);
+drawScaffold(L.scaf);
+{
+  // 纸片女孩举起一只手，手里举着牌子：牌子画在她前面，右下角盖住指尖（手在牌子后面托着），在头的左边，不挡脸、字全露
+  const st = buddy.draw(3.3, { force: { face: 'happy' } });
+  const k = L.slip, [hx, hy] = st.hand;
+  trySlip(hx - (130 * k - 10), hy - 50 * k + 30, k, -7);
+}
+TITLE.forEach((parts, i) => paperType(parts, L.title[i].x, L.title[i].y, L.title[i].size, L.title[i].align));
+ctx.font = `600 ${L.title[0].size}px ${ZH}`;
+const m = ctx.measureText('三个月全白干');
+window.__coverInfo = { W, H, titleInkH: Math.round(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent), minH: Math.round(H * (V ? 0.06 : 0.09)) };
+window.__coverReady = true;
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>head-turn：2D 头部转头</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!--
+  #942 2D 特写头部包演示：平视一排 7 个角度（−45 … +45，负角为镜像），头从 −45° 转到 +45° 再转回来，同时唱 22.8–29.9 那一句。
+  相邻两个角度之间做网格变形插值（Live2D 做法）：两张图的对应点（kits/face2d/turn-mesh.json）按角度插值成目标网格，
+  两张图各自按三角形仿射变形到目标网格，再按权重交叉淡化。每张图是分层合成的（后发 / 脸 / 眉 / 眼 <状态> / 嘴 <口型> / 前发），口型按 lyrics 词级时间，自动眨眼。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { lipsync, blinks } from '../../../../assets/lib/layer-rig.js';
+const mv = await loadMV();
+const T0 = 21.9, DUR = 9;
+const K = '../face2d/';
+const mesh = await fetch(K + 'turn-mesh.json').then(r => r.json());
+const [W, H] = mesh.size;
+const SL = Object.entries(mesh.slots).map(([k, s]) => ({ ...s, key: +k })).sort((a, b) => a.yaw - b.yaw);
+const loadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error(src)); im.src = src; });
+// 每个槽位的分层
+for (const s of SL) {
+  s.rig = await fetch(K + s.group + '/rig.json').then(r => r.json());
+  s.L = {};
+  for (const n of ['00-back', '01-face', '02-brows', '03-front', ...s.rig.eyes.map(e => 'eyes/' + e), ...s.rig.mouth.map(m => 'mouth/' + m)])
+    s.L[n] = await loadImg(K + s.group + '/' + n + '.png').catch(() => null);
+}
+// 合成缓存：槽位 × 眼 × 嘴
+const cache = new Map();
+function composite(s, eye, mouth) {
+  const key = s.group + '|' + eye + '|' + mouth;
+  if (cache.has(key)) return cache.get(key);
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  for (const n of ['00-back', '01-face', '02-brows', 'eyes/' + (s.L['eyes/' + eye] ? eye : 'open'), 'mouth/' + (s.L['mouth/' + mouth] ? mouth : 'rest'), '03-front']) if (s.L[n]) x.drawImage(s.L[n], 0, 0);
+  cache.set(key, c); return c;
+}
+// 三角形仿射变形：把 img 里的三角 (s0,s1,s2) 画到目标 (d0,d1,d2)，裁剪区略外扩 0.6 px 盖住缝
+function warpTri(ctx, img, s, d) {
+  const [x0, y0] = s[0], [x1, y1] = s[1], [x2, y2] = s[2], [u0, v0] = d[0], [u1, v1] = d[1], [u2, v2] = d[2];
+  const den = x0 * (y1 - y2) + x1 * (y2 - y0) + x2 * (y0 - y1); if (Math.abs(den) < 1e-6) return;
+  const a = (u0 * (y1 - y2) + u1 * (y2 - y0) + u2 * (y0 - y1)) / den, b = (v0 * (y1 - y2) + v1 * (y2 - y0) + v2 * (y0 - y1)) / den;
+  const c = (u0 * (x2 - x1) + u1 * (x0 - x2) + u2 * (x1 - x0)) / den, e = (v0 * (x2 - x1) + v1 * (x0 - x2) + v2 * (x1 - x0)) / den;
+  const f = (u0 * (x1 * y2 - x2 * y1) + u1 * (x2 * y0 - x0 * y2) + u2 * (x0 * y1 - x1 * y0)) / den, g = (v0 * (x1 * y2 - x2 * y1) + v1 * (x2 * y0 - x0 * y2) + v2 * (x0 * y1 - x1 * y0)) / den;
+  const cx = (u0 + u1 + u2) / 3, cy = (v0 + v1 + v2) / 3, ex = p => [p[0] + (p[0] - cx) * 0.012 + Math.sign(p[0] - cx) * 0.6, p[1] + (p[1] - cy) * 0.012 + Math.sign(p[1] - cy) * 0.6];
+  ctx.save(); ctx.beginPath(); ctx.moveTo(...ex(d[0])); ctx.lineTo(...ex(d[1])); ctx.lineTo(...ex(d[2])); ctx.closePath(); ctx.clip();
+  ctx.setTransform(a, b, c, e, f, g); ctx.drawImage(img, 0, 0); ctx.restore();
+}
+const bufs = [0, 1].map(() => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; });
+const out = document.createElement('canvas'); out.width = W; out.height = H; const octx = out.getContext('2d');
+function morphTo(dst, img, src, tgt) { const x = dst.getContext('2d'); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, W, H); x.imageSmoothingQuality = 'high'; for (const t of mesh.tri) warpTri(x, img, t.map(i => src[i]), t.map(i => tgt[i])); }
+// 口型 / 眨眼
+const timingsOf = lines => ({ segments: lines.map(l => ({ text: l.text, start: l.start, end: l.end, sentences: l.words.map(w => ({ text: w.w, start: w.start, end: w.end })) })) });
+const lips = lipsync(timingsOf(mv.lyrics.lines));
+const blinkAt = blinks({ seed: 31, from: 0, to: 200, min: 2.2, max: 4 });
+const yawAt = T => -45 * Math.cos(2 * Math.PI * (T - T0) / DUR);
+// three：全屏贴图
+const tex = new THREE.CanvasTexture(out); tex.colorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(PALETTE.ink);
+const cam = new THREE.OrthographicCamera(-960, 960, 540, -540, 0, 10);
+// 显示区域：画布 y 40 … 900（头肩），缩放到 1080 高
+const Y0 = 20, Y1 = 820, sc = 1080 / (Y1 - Y0);
+const quad = new THREE.Mesh(new THREE.PlaneGeometry(W * sc, H * sc), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+quad.position.y = -(H / 2 - (Y0 + Y1) / 2) * sc; scene.add(quad);   // 画布 y =（Y0+Y1）/2 放在屏幕中心
+const glow = new THREE.Mesh(new THREE.CircleGeometry(700, 64), new THREE.MeshBasicMaterial({ color: new THREE.Color(PALETTE.pink).multiplyScalar(0.18) }));
+glow.position.z = -1; scene.add(glow);
+function draw(T) {
+  const yaw = yawAt(T);
+  let i = 0; while (i < SL.length - 2 && yaw > SL[i + 1].yaw) i++;
+  const A = SL[i], B = SL[i + 1], t = Math.min(1, Math.max(0, (yaw - A.yaw) / (B.yaw - A.yaw)));
+  const b = blinkAt(T), eye = b || 'open';
+  const m = lips(T) || 'rest';
+  const tgt = A.pts.map((p, k) => [p[0] + (B.pts[k][0] - p[0]) * t, p[1] + (B.pts[k][1] - p[1]) * t]);
+  morphTo(bufs[0], composite(A, eye, m), A.pts, tgt);
+  morphTo(bufs[1], composite(B, eye, m), B.pts, tgt);
+  const w = (x => x * x * (3 - 2 * x))(Math.min(1, Math.max(0, (t - 0.35) / 0.3)));   // 网格位置全程连续插值，颜色只在中间 30% 交叉淡化（减少重影）
+  octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = 'source-over'; octx.globalAlpha = 1; octx.clearRect(0, 0, W, H);
+  octx.globalCompositeOperation = 'lighter'; octx.globalAlpha = 1 - w; octx.drawImage(bufs[0], 0, 0); octx.globalAlpha = w; octx.drawImage(bufs[1], 0, 0);
+  octx.globalCompositeOperation = 'source-over'; octx.globalAlpha = 1;
+  tex.needsUpdate = true;
+  window.__last = { T: +T.toFixed(3), yaw: +yaw.toFixed(1), A: A.key, B: B.key, w: +w.toFixed(2), eye, mouth: m };
+  mv.stage.render(scene, cam, { bloom: 0, grade: { vignette: 0.3 } });
+}
+mv.mount(draw, { offset: T0, duration: DUR });
+</script>
+</body>
+</html>

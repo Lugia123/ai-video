@@ -1,0 +1,120 @@
+{
+ "about": "#942 h_p15_pd base.png 标定（下巴在画框外，未标）。",
+ "refYaw": 15,
+ "refPitch": 15,
+ "fit2d": {
+  "pupilR_img": [
+   269,
+   517
+  ],
+  "eyeOutR_img": [
+   210,
+   506
+  ],
+  "eyeInR_img": [
+   295,
+   523
+  ],
+  "pupilL_img": [
+   480,
+   458
+  ],
+  "eyeInL_img": [
+   423,
+   450
+  ],
+  "eyeOutL_img": [
+   537,
+   437
+  ],
+  "noseTip": [
+   358,
+   606
+  ],
+  "mouthR_img": [
+   358,
+   656
+  ],
+  "mouthL_img": [
+   467,
+   628
+  ],
+  "jawR_img": [
+   [
+    245,
+    623
+   ],
+   [
+    280,
+    680
+   ]
+  ],
+  "jawL_img": [
+   [
+    571,
+    641
+   ]
+  ]
+ },
+ "skinAt": [
+  0,
+  0,
+  8
+ ],
+ "regBox": [
+  150,
+  250,
+  700,
+  780
+ ],
+ "fit": {
+  "yaw": 9.1,
+  "pitch": 0.0,
+  "roll": 15.2,
+  "scale": 4758.0,
+  "tx": 421.9,
+  "ty": 566.4,
+  "rmsPoints_px": 12.2,
+  "rmsAll_px": 12.2,
+  "interocular_px": 219.1,
+  "perPoint_px": {
+   "pupilR_img": 8.7,
+   "eyeOutR_img": 11.2,
+   "eyeInR_img": 25.4,
+   "pupilL_img": 4.6,
+   "eyeInL_img": 14.8,
+   "eyeOutL_img": 6.8,
+   "mouthR_img": 4.3,
+   "mouthL_img": 5.9
+  },
+  "contour_px": [],
+  "diag_allPoints_px": {
+   "pupilR_img": 8.7,
+   "eyeOutR_img": 11.2,
+   "eyeInR_img": 25.4,
+   "pupilL_img": 4.6,
+   "eyeInL_img": 14.8,
+   "eyeOutL_img": 6.8,
+   "noseTip": 31.2,
+   "mouthR_img": 4.3,
+   "mouthL_img": 5.9
+  },
+  "diag_contour_px": [
+   -22.5,
+   -10.4,
+   -13.1
+  ],
+  "subset": [
+   "pupilR_img",
+   "eyeOutR_img",
+   "eyeInR_img",
+   "pupilL_img",
+   "eyeInL_img",
+   "eyeOutL_img",
+   "mouthR_img",
+   "mouthL_img"
+  ],
+  "contour": false,
+  "pitchFixed": "0"
+ }
+}

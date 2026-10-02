@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FBX 重定向自检</title>
+<script type="importmap">{"imports": {"three": "../../../../assets/vendor/three/three.module.min.js"}}</script>
+<style>html,body{margin:0;background:#EFE7D6}</style></head>
+<body>
+<!-- 左：FBX 源骨架（SkeletonHelper，按腿长缩放到同尺寸）；右：重定向到少女。每行一个时刻。?fbx=../anim/_test/idle.fbx&n=6 -->
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/FBXLoader.js';
+import { createDancer, mixamoMove, toonify, measureSkeleton } from '../../../../assets/lib/dance3d.js';
+const q = new URLSearchParams(location.search);
+const file = q.get('fbx') || '../anim/_test/idle.fbx', N = +(q.get('n') || 6);
+const CW = 320, CH = 400, W = CW * N, H = CH * 2;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H); renderer.setScissorTest(true); document.body.append(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#EFE7D6');
+scene.add(new THREE.HemisphereLight('#fff6e8', '#b8a890', 1.6));
+const sun = new THREE.DirectionalLight('#fff0d8', 2.2); sun.position.set(1, 2, 2); scene.add(sun);
+scene.add(new THREE.GridHelper(2, 20, '#b0a590', '#d5cab5'));
+const girl = (await new GLTFLoader().loadAsync('../tripo-girl/anime+girl+3d+model.glb')).scene;
+scene.add(girl);
+const dancer = createDancer(girl); toonify(girl);
+const src = await new FBXLoader().loadAsync(file);
+const Ssrc = measureSkeleton(src);
+const k = dancer.S.legLen / Ssrc.legLen;
+src.scale.setScalar(k); src.position.x = -0.7; scene.add(src);
+src.traverse(o => { if (o.isMesh) o.visible = false; });
+const helper = new THREE.SkeletonHelper(src); helper.material.linewidth = 3; scene.add(helper);
+const clip = src.animations[0];
+src.scale.setScalar(1); src.position.x = 0; src.updateMatrixWorld(true);
+const move = mixamoMove(src, clip, { beats: 8 });
+src.scale.setScalar(k); src.position.x = -0.7;
+const cam = new THREE.PerspectiveCamera(30, CW / CH, 0.01, 50);
+const info = { clip: clip.name, duration: clip.duration, tracks: clip.tracks.length, srcLeg: Ssrc.legLen, bones: Object.keys(Ssrc.info).length, issues: [] };
+for (let i = 0; i < N; i++) {
+  const u = (i / N) * move.beats;
+  dancer.apply(move.solve(u, dancer));          // 内部 setTime → 源骨架也停在同一时刻
+  info.issues.push(dancer.check().map(x => `${x.kind}:${x.a}${x.b ? '×' + x.b : ''}`).join(','));
+  for (const [row, pos] of [[0, [0.35, 0.6, 3.2]], [1, [2.6, 0.6, 1.2]]]) {
+    renderer.setViewport(i * CW, H - (row + 1) * CH, CW, CH); renderer.setScissor(i * CW, H - (row + 1) * CH, CW, CH);
+    cam.position.set(pos[0] - 0.35, pos[1], pos[2]); cam.lookAt(-0.35, 0.5, 0); renderer.render(scene, cam);
+  }
+}
+window.__out = info;
+</script></body></html>

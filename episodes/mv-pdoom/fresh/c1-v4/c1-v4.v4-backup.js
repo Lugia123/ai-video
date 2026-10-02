@@ -1,0 +1,1007 @@
+// shots/c1-v4.js — 副歌 1 v4（歌曲时间 22.509–38.4 s）。#1024
+// 分镜：fresh/c1-v4/plan.md（总管 10-01 通过）。
+//
+//   const shots = await makeC1V4(mv);   // c1-v4.html 单独挂；拼接页（v4-0to58.html）检测到这个文件自动换掉占位
+//
+// 一个世界：跑酷段那条路（createSpiralRun，同 seed、远处是 v4-03 开头那段「整条路滚转一圈」）+ 粉月。
+//   v4-01 结尾那只盒子摆在路上 d = 60，盒子 = 一栋楼最顶上的那一间：
+//   ① 22.5 盒内：墙上一个巨大的 P(DOOM) 指针仪表；四面墙上的眼一只接一只睁大，每睁一只指针「咔」往上跳一格，她盯着指针一步步往后退、背贴到墙上（她不碰任何东西）。FOOM 那拍指针打满、表盘玻璃炸裂（#1046）
+//   ② 25.58 FOOM：四面墙往外倒平，脚下整栋楼从地底冲出来，把她顶上 26 m 高空；楼身正面亮出 FOOM
+//   ③ 26.32 Trapped：墙又砸回来（正面换成玻璃），头顶一层层落下同样的房间，拉远：整栋楼每间都是她（克隆共享她的骨架 → 动作完全同步）
+//   ④ 27.94 推回她那扇窗：窗缝下塞进一张纸条，夹着一小袋发光蘑菇，她蹲下去捡 → 28.55 切 2D 特写：看一眼、丢进嘴里 → 29.12 shrooms：瞳孔变彩色漩涡，画面融化成万花筒，亮窗拼出笑脸（#1046）
+//   ⑤ 29.91 楼顶：她手搭凉棚望远处；对面整片城的亮窗拼成一张笑脸，31.14 楼缝里伸出长着柠黄眼睛的触手
+//   ⑥ 33.40 2D：拉下额头那副护目镜，红眼（Wan 图生视频逐帧抠图 fresh/c1-v4/i2v/，#1046）
+//   ⑦ 35.70 她的视角：红色 HUD 扫掉面具、标名字 + 倒计时
+//   ⑧ 37.32 倒计时归零：面具城塌下去；她从楼顶跃出 → 37.95 落到路上起跑，38.4 机位 = v4-03 第一帧（同一个 chase 参数）
+// 所有 update 都是歌曲时间 T 的纯函数。
+
+import * as THREE from 'three';
+import { PALETTE as PAL } from '../engine/palette.js';
+import { createSpiralRun, textTexture } from '../kits/world4.js';
+import { mulberry32 } from '../kits/world.js';
+import { createGirl, createGirlLights, loadAnims, getAnim } from '../kits/girl.js';
+import { blendSolved } from '../../../assets/lib/dance3d.js';
+
+export const ANIMS = ['act__kneel-down', 'act__terrified', 'act__swagger-walk', 'move__sprint-jump', 'dance__tut1',
+  'act__look-distance', 'move__run-jump', 'move__land-run', 'move__run-fast__inplace'];
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const smooth = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const eOut = p => 1 - (1 - clamp(p)) ** 3;
+const col = c => new THREE.Color(c);
+const hdr = (c, k) => new THREE.Color(c).multiplyScalar(k);
+const V3 = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+const D2R = Math.PI / 180;
+const FONT = '"UIAnton", "Anton", Impact, sans-serif';
+
+function pchip(keys, t) {
+  const n = keys.length;
+  if (t <= keys[0][0]) return keys[0][1]; if (t >= keys[n - 1][0]) return keys[n - 1][1];
+  const d = []; for (let i = 0; i < n - 1; i++) d.push((keys[i + 1][1] - keys[i][1]) / (keys[i + 1][0] - keys[i][0]));
+  const m = keys.map((_, i) => i === 0 ? d[0] : i === n - 1 ? d[n - 2] : d[i - 1] * d[i] <= 0 ? 0 : 2 * d[i - 1] * d[i] / (d[i - 1] + d[i]));
+  let i = 0; while (t > keys[i + 1][0]) i++;
+  const h = keys[i + 1][0] - keys[i][0], s = (t - keys[i][0]) / h, s2 = s * s, s3 = s2 * s;
+  return (2 * s3 - 3 * s2 + 1) * keys[i][1] + (s3 - 2 * s2 + s) * h * m[i] + (-2 * s3 + 3 * s2) * keys[i + 1][1] + (s3 - s2) * h * m[i + 1];
+}
+const pv = (keys, t) => V3(pchip(keys.map(k => [k[0], k[1]]), t), pchip(keys.map(k => [k[0], k[2]]), t), pchip(keys.map(k => [k[0], k[3]]), t));
+
+// ================================================================ 时间表（歌曲秒）
+export const C1 = {
+  t0: 22.5, end: 38.4,
+  burst: 22.509,                       // 全黑四只眼 → 炸亮（v4-01 演到 22.6，这一拍接走）
+  // 四只眼一只接一只睁大，每睁一只指针「咔」跳一格；之后指针自己往红区爬，FOOM 打满
+  eyes: [['N', 23.0], ['W', 23.6], ['S', 23.866], ['E', 24.32]],   // S（她身后那面墙）在反打镜头里睁开
+  gauge: [[22.509, 0.02], [23.0, 0.05], [23.6, 0.15], [23.866, 0.38], [24.32, 0.55], [24.78, 0.72], [25.23, 0.88], [25.577, 1.0]],
+  note: 1e9, cut2d: 29.907, eat: 28.86, swirl: 29.124, onRoof: 29.62,   // 第三版：吃蘑菇相关的 2D 和纸条全删；shrooms 在 3D 里过渡到楼顶（onRoof = 她出现在楼顶）   // 用户：吃蘑菇那个 2D 多余 → 纸条塞进来直接接 shrooms 幻觉
+  foom: 25.577, hud0: 37.315, trap: 26.32, shroom: 27.94, roof: 29.907, lies: 31.14, d2: 33.40, snap: 33.874, pov: 35.70, zero: 37.315, road: 37.95,   // hud0 = zero：用户说推回护目镜那一镜多余，HUD / 面具塌掉直接接跳楼
+  // 第 ③ 段：墙砸回来、上面几层落下来的时刻
+  slam: { N: 26.32, W: 26.40, E: 26.40, S: 26.47 },
+  land: [26.50, 26.60, 26.70, 26.80],     // 第 RH、RH+1、RH+2、RH+3 层落到位（RH 这一层只有她两边的房间）
+  crown: 26.88, crownFlip: 27.52,
+};
+const ZC = 60, S = 4.4, HS = S / 2, H = 2.0, NC = 5, RH = 6, NR = 10;   // 盒子在路上 d = 60；房间边长 = 盒子边长；5 列 × 10 层，她在第 6 层正中
+const ROOF = NR * S;                     // 楼顶高度
+const D0 = 100;                          // 38.4 时她在路上的位置（= v4-03 的 d = 0）
+
+export async function makeC1V4(mv) {
+  const { music, lyrics } = mv;
+  const W = mv.width, Hh = mv.height;
+  await loadAnims(ANIMS);
+  await new FontFace('UIAnton', `url(${new URL('../../../assets/fonts/anton/Anton-Regular.ttf', import.meta.url)})`).load().then(f => document.fonts.add(f));
+  const girl = await createGirl(mv);
+  const kick = (T, d = 0.12) => music.pulse('kick', T, { decay: d });
+  const line = p => lyrics.lines.find(l => l.start > 22 && l.text.toLowerCase().startsWith(p.toLowerCase()));
+  const L = { up: line("I'm upping"), cause: line("'cause"), trap: line('Trapped'), bag: line('with a bag'), see: line('See'), eyes: line('with your') };
+  const wt = (ln, i) => ln.words[i].start;
+
+  // ================================================================ 世界：路 + 楼 + 星 + 粉月
+  const scene = new THREE.Scene(); scene.background = col('#06060b'); scene.fog = new THREE.Fog('#06060b', 40, 230);
+  const run = createSpiralRun({ length: D0 + 175, foldStart: 1e9, foldEnd: 2e9, obstacles: [], seed: 21, roll: { start: D0 + 22, end: D0 + 102, turns: 1, radius: 8 } });
+  run.update(0, { d: ZC, fold: 1 });
+  { const bm = run.group.children.find(o => o.isInstancedMesh), z = new THREE.Matrix4().makeScale(0, 0, 0);   // 楼要占地方：清掉 d = 60 附近的路边楼
+    run.buildings.forEach((b, i) => { if (Math.abs(b.d - ZC) < 16 && Math.abs(b.s) < 16) bm.setMatrixAt(i, z); });
+    bm.instanceMatrix.needsUpdate = true; }
+  scene.add(run.group);
+  { const rnd = mulberry32(77), n = 900, p = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { const a = rnd() * Math.PI * 2, e = Math.asin(0.08 + rnd() * 0.92), r = 420; p.set([Math.cos(a) * Math.cos(e) * r, Math.sin(e) * r, Math.sin(a) * Math.cos(e) * r - 150], i * 3); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: col(PAL.paper).multiplyScalar(1.4), size: 1.6, sizeAttenuation: false, fog: false })));
+  }
+  const moon = new THREE.Mesh(new THREE.CircleGeometry(26, 64), new THREE.MeshBasicMaterial({ color: col(PAL.pink).multiplyScalar(1.25), fog: false }));
+  moon.position.set(-60, 95, -(D0 + 277)); moon.lookAt(0, 0, -D0); scene.add(moon);    // 和 v4-03 里粉月相对她起跑点的位置一样
+  const hemi = new THREE.HemisphereLight('#6f78e6', '#221848', 0.3); scene.add(hemi);
+  const gl = createGirlLights({ key: 2.2, rim: 2.6, fill: 1.0 }); scene.add(gl);
+  const glKey = gl.children.filter(l => l.isLight);
+
+  // ================================================================ 招牌（墨底 + 霓虹边 + 白字，一张贴图）
+  function makeSign(text, color, th, { vertical = false } = {}) {
+    const c = document.createElement('canvas'), g0 = c.getContext('2d'); g0.font = `170px ${FONT}`;
+    c.width = Math.ceil(g0.measureText(text).width) + 110; c.height = 270; const g = c.getContext('2d');
+    g.fillStyle = '#0d0c14'; g.fillRect(0, 0, c.width, c.height); g.strokeStyle = color; g.lineWidth = 16; g.strokeRect(8, 8, c.width - 16, c.height - 16);
+    g.fillStyle = '#F2EDE4'; g.font = `170px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, c.width / 2, 143);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+    const bh = th * 270 / 160, bw = bh * c.width / c.height;          // 字高 ≈ th（Anton 170 px 的大写字身约 160 px）
+    const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), mat);
+    const g2 = new THREE.Group(); g2.add(m);
+    const s = { text, g: g2, m, mat, bw, bh, th, at: Infinity, until: Infinity,
+      set(T, { dim = 0.22 } = {}) {
+        const a = T - s.at; s.g.visible = a >= 0 && T < s.until;
+        mat.color.setScalar(a >= 0 ? 1.15 + 1.6 * Math.exp(-a / 0.3) : dim);
+        m.scale.setScalar(a >= 0 ? lerp(0.9, 1, eOut(a / 0.1)) : 0.9);
+      } };
+    return s;
+  }
+  const allSigns = [];
+  const sign = (text, color, th, at, until = Infinity) => { const s = makeSign(text, color, th); s.at = at; s.until = until; allSigns.push(s); return s; };
+
+  // ================================================================ 翻牌屏（split-flap）：canvas 逐帧画，纯函数
+  function makeFlip({ wm, hm, rows, px = 260 }) {
+    const c = document.createElement('canvas'); c.width = Math.round(wm * px); c.height = Math.round(hm * px); const g = c.getContext('2d');
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+    const cells = [];
+    rows.forEach((r, ri) => {
+      const cw = r.cw * px, ch = r.h * px, gap = 0.06 * cw, total = r.n * cw + (r.n - 1) * gap, x0 = (c.width - total) / 2, y = r.y * px;
+      for (let i = 0; i < r.n; i++) cells.push({ row: ri, i, x: x0 + i * (cw + gap), y, w: cw, h: ch, color: r.color, seq: [[-1e9, ' ']] });
+    });
+    const rowCells = ri => cells.filter(q => q.row === ri);
+    function setText(ri, t, text, { stagger = 0.018 } = {}) {
+      const cs = rowCells(ri), n = cs.length, s = text.padStart(Math.floor((n + text.length) / 2)).padEnd(n).slice(0, n);
+      cs.forEach((q, i) => q.seq.push([t + i * stagger, s[i]]));
+    }
+    function spin(ri, t0, t1, rnd, { step = 0.05, chars = 'ABCDEFGHJKLMNOPRSTUVWXYZ0123456789' } = {}) {
+      for (const q of rowCells(ri)) for (let t = t0 + rnd() * step; t < t1; t += step * (0.7 + 0.6 * rnd())) q.seq.push([t, chars[Math.floor(rnd() * chars.length)]]);
+    }
+    const FL = 0.085;
+    function glyph(q, ch, clipTop, sy = 1) {      // 画一个字的上半或下半（sy 压扁 = 翻动中的那片）
+      g.save(); g.beginPath();
+      if (clipTop) g.rect(q.x, q.y, q.w, q.h / 2); else g.rect(q.x, q.y + q.h / 2, q.w, q.h / 2);
+      g.clip();
+      g.translate(0, q.y + q.h / 2); g.scale(1, sy); g.translate(0, -(q.y + q.h / 2));
+      g.fillStyle = '#1b1b26'; g.fillRect(q.x, q.y, q.w, q.h);
+      g.fillStyle = q.color; g.font = `${Math.round(q.h * 0.82)}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(ch, q.x + q.w / 2, q.y + q.h * 0.53);
+      g.restore();
+    }
+    let lastKey = '';
+    function draw(T) {
+      // 状态签名没变就不重画（同一 T 重复 seek 结果一样）
+      const st = cells.map(q => { let k = 0; while (k + 1 < q.seq.length && q.seq[k + 1][0] <= T) k++; return [k, clamp((T - q.seq[k][0]) / FL)]; });
+      const key = st.map(([k, p]) => k + ':' + p.toFixed(3)).join('|');
+      if (key === lastKey) return; lastKey = key;
+      g.fillStyle = '#0b0a12'; g.fillRect(0, 0, c.width, c.height);
+      cells.forEach((q, i) => {
+        const [k, p] = st[i], nw = q.seq[k][1], old = k > 0 ? q.seq[k - 1][1] : ' ';
+        if (p >= 1) { glyph(q, nw, true); glyph(q, nw, false); }
+        else {
+          glyph(q, nw, true); glyph(q, old, false);
+          if (p < 0.5) glyph(q, old, true, Math.cos(p * Math.PI));
+          else glyph(q, nw, false, -Math.cos(p * Math.PI));
+        }
+        g.fillStyle = '#05050a'; g.fillRect(q.x, q.y + q.h / 2 - 1.5, q.w, 3);   // 中缝
+      });
+      tex.needsUpdate = true;
+    }
+    return { canvas: c, tex, setText, spin, draw, cells };
+  }
+
+  // ================================================================ 盒子 = 她那一间（照 v4-01-box 的做法：板 + 灯管 + 接缝 + 四只眼）
+  const box = new THREE.Group(); scene.add(box);
+  const TH = 0.14;
+  const slate = new THREE.MeshStandardMaterial({ color: '#4a4c70', roughness: 0.58, metalness: 0.12 });
+  const tubeGeo = new Map();
+  function tubeRect(w, d, color, r = 0.03) {
+    const g = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color: hdr(color, 1.9) }), e = 0.1;
+    for (const [len, x, z, rz] of [[w - 2 * e, 0, -e, true], [w - 2 * e, 0, -d + e, true], [d - 2 * e, -w / 2 + e, -d / 2, false], [d - 2 * e, w / 2 - e, -d / 2, false]]) {
+      const k = len.toFixed(3) + ':' + r; if (!tubeGeo.has(k)) tubeGeo.set(k, new THREE.CylinderGeometry(r, r, len, 8));
+      const m = new THREE.Mesh(tubeGeo.get(k), mat); m.position.set(x, r + 0.005, z); if (rz) m.rotation.z = Math.PI / 2; else m.rotation.x = Math.PI / 2; g.add(m);
+    }
+    return { g, mat, base: hdr(color, 1.9) };
+  }
+  function seams(w, d) {
+    const pts = []; for (let i = 1; i < 4; i++) { const x = -w / 2 + i * w / 4, z = -i * d / 4; pts.push(x, 0.004, 0, x, 0.004, -d, -w / 2, 0.004, z, w / 2, 0.004, z); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    const mat = new THREE.LineBasicMaterial({ color: hdr(PAL.mint, 0.22) });
+    return new THREE.LineSegments(g, mat);
+  }
+  function makeEye(R = 0.72, { flat = true } = {}) {
+    const g = new THREE.Group(), add = (geo, mat, y) => { const m = new THREE.Mesh(geo, mat); if (flat) { m.rotation.x = -Math.PI / 2; m.position.y = y; } else m.position.z = y; g.add(m); return m; };
+    add(new THREE.RingGeometry(R, R * 1.24, 64), new THREE.MeshBasicMaterial({ color: '#4a4a5a' }), 0.012);
+    add(new THREE.CircleGeometry(R, 64), new THREE.MeshBasicMaterial({ color: '#0b0a06' }), 0.013);
+    const lit = new THREE.MeshBasicMaterial({ color: hdr(PAL.lemon, 1.6) });
+    add(new THREE.CircleGeometry(R * 0.26, 40), lit, 0.016);
+    for (const k of [0.46, 0.66, 0.86]) add(new THREE.RingGeometry(R * k - R * 0.03, R * k + R * 0.03, 64), lit, 0.016);
+    return { g, lit };
+  }
+  const winTex = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d'), rnd = mulberry32(5);
+    g.fillStyle = '#111120'; g.fillRect(0, 0, 512, 512);
+    for (let y = 0; y < 14; y++) for (let x = 0; x < 12; x++) if (rnd() < 0.55) { const h = rnd(); g.fillStyle = h < 0.7 ? '#ffe9b8' : h < 0.85 ? PAL.lemon : h < 0.93 ? PAL.pink : PAL.mint; g.fillRect(x * 42 + 12, y * 36 + 10, 22, 16); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; })();
+  function makePanel(w, d, color, { eye = true, eyeR = 0.45, eyeAt = [0, 3.4], windows = true } = {}) {
+    const tilt = new THREE.Group();
+    if (windows) { const o = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: winTex, color: hdr('#ffffff', 1.1) })); o.rotation.x = Math.PI / 2; o.position.set(0, -TH - 0.004, -d / 2); tilt.add(o); }
+    const solid = new THREE.Mesh(new THREE.BoxGeometry(w, TH, d), slate); solid.position.set(0, -TH / 2, -d / 2); tilt.add(solid);
+    const tube = tubeRect(w, d, color), sm = seams(w, d); tilt.add(tube.g, sm);
+    let e = null; if (eye) { e = makeEye(eyeR); e.g.position.set(eyeAt[0], 0, -eyeAt[1]); tilt.add(e.g); }
+    return { tilt, tube, eye: e, solid, seams: sm, win: tilt.children[0] };
+  }
+  const floor = makePanel(S, S, PAL.mint, { eye: false, windows: false }); floor.tilt.position.z = HS; box.add(floor.tilt);
+  const walls = {};
+  for (const [k, x, z, ry, color] of [['N', 0, -HS, 0, PAL.pink], ['S', 0, HS, Math.PI, PAL.lemon], ['W', -HS, 0, Math.PI / 2, PAL.pink], ['E', HS, 0, -Math.PI / 2, PAL.mint]]) {
+    const hinge = new THREE.Group(); hinge.position.set(x, 0, z); hinge.rotation.y = ry;
+    const p = makePanel(S, S, color); hinge.add(p.tilt); box.add(hinge); walls[k] = p;
+  }
+  const flaps = ['W', 'E'].map(k => { const f = makePanel(S, HS, PAL.mint, { eye: false }); f.tilt.position.set(0, -TH - 0.01, -S); walls[k].tilt.add(f.tilt); return f; });
+  // 正面（N）墙：盒子阶段内面是翻牌屏；③ 起换成玻璃窗（slate 实心板藏掉，只留灯管框 + 极淡的玻璃）
+  const glass = new THREE.Mesh(new THREE.PlaneGeometry(S - 0.2, S - 0.2), new THREE.MeshBasicMaterial({ color: hdr('#9fd8ff', 0.25), transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide }));
+  glass.rotation.x = -Math.PI / 2; glass.position.set(0, 0.01, -HS); walls.N.tilt.add(glass);
+
+  // P(DOOM) 指针仪表（N 墙内面）：表盘 0 → 1，右边 0.7–1 一截红区；指针每一跳带一点过冲（「咔」）；数字读数在表盘下半
+  const GY = 1.6, GR = 1.22;                                      // 表盘中心离地高度、半径（米）
+  const gC = document.createElement('canvas'); gC.width = gC.height = 1024; const gg = gC.getContext('2d');
+  const gTex = new THREE.CanvasTexture(gC); gTex.colorSpace = THREE.SRGBColorSpace; gTex.anisotropy = 8;
+  const gMat = new THREE.MeshBasicMaterial({ map: gTex, transparent: true, color: hdr('#ffffff', 1.0) });
+  const gMesh = new THREE.Mesh(new THREE.PlaneGeometry(2 * GR * 1.12, 2 * GR * 1.12), gMat);
+  gMesh.rotation.x = -Math.PI / 2; gMesh.position.set(0, 0.03, -GY); walls.N.tilt.add(gMesh);
+  const gGlass = new THREE.Mesh(new THREE.CircleGeometry(GR * 1.02, 64), new THREE.MeshBasicMaterial({ color: hdr('#cfe8ff', 0.5), transparent: true, opacity: 0.08, depthWrite: false }));
+  gGlass.rotation.x = -Math.PI / 2; gGlass.position.set(0, 0.09, -GY); walls.N.tilt.add(gGlass);
+  const gLight = new THREE.PointLight('#fff1dc', 0, 7, 1.4); gLight.position.set(0, GY, -HS + 0.5); box.add(gLight);   // 表盘的光照在她脸上（盒子里很暗，不打这盏脸上的五官看不清）
+  const ANG = v => (225 - 270 * v) * D2R;                        // 值 → 角度（225° 到 -45°，顺时针扫 270°）
+  function gaugeVal(T) {
+    const K = C1.gauge; let i = 0; while (i + 1 < K.length && K[i + 1][0] <= T) i++;
+    const [t, v] = K[i], prev = i > 0 ? K[i - 1][1] : v, a = T - t;
+    if (T < K[0][0]) return 0.02;
+    const jump = v + (prev - v) * Math.exp(-a * 14) * Math.cos(a * 40);   // 「咔」：一下跳过去、过冲、回弹
+    const creep = i >= 4 && i < K.length - 1 ? (K[i + 1][1] - v) * 0.25 * smooth(a / (K[i + 1][0] - t)) : 0;   // 后半段指针自己往上蹭
+    const peg = T >= C1.foom ? 0.012 * Math.sin(T * 90) : 0;
+    return jump + creep + peg;
+  }
+  let gKey = '';
+  function drawGauge(T) {
+    const v = gaugeVal(T), key = v.toFixed(3) + (T >= C1.burst ? 1 : 0);
+    if (key === gKey) return v; gKey = key;
+    paintGauge(gg, v); gTex.needsUpdate = true; return v;
+  }
+  function paintGauge(g, v) {                                   // 同一块表的画法：盒子里那块和楼顶那块共用（同一个道具）
+    const red = clamp((v - 0.62) / 0.3), c = 512, R = 450; g.clearRect(0, 0, 1024, 1024);
+    g.fillStyle = '#0d0c14'; g.beginPath(); g.arc(c, c, R + 30, 0, 7); g.fill();
+    g.lineWidth = 22; g.strokeStyle = PAL.lemon; g.beginPath(); g.arc(c, c, R + 20, 0, 7); g.stroke();
+    const arc = (v0, v1, r, w, color) => { g.lineWidth = w; g.strokeStyle = color; g.beginPath(); g.arc(c, c, r, -ANG(v0), -ANG(v1)); g.stroke(); };
+    arc(0, 0.62, R - 40, 26, '#3a3a52'); arc(0.62, 1, R - 40, 52, '#ff2e4a');       // 红区
+    for (let k = 0; k <= 20; k++) { const a = ANG(k / 20), big = k % 5 === 0, r0 = R - (big ? 110 : 80), r1 = R - 60;
+      g.lineWidth = big ? 10 : 5; g.strokeStyle = '#F2EDE4'; g.beginPath(); g.moveTo(c + Math.cos(a) * r0, c - Math.sin(a) * r0); g.lineTo(c + Math.cos(a) * r1, c - Math.sin(a) * r1); g.stroke(); }
+    g.fillStyle = '#F2EDE4'; g.font = `64px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (const [k, txt] of [[0, '0'], [0.5, '.5'], [1, '1']]) { const a = ANG(k); g.fillText(txt, c + Math.cos(a) * (R - 170), c - Math.sin(a) * (R - 170)); }
+    g.fillStyle = PAL.lemon; g.font = `150px ${FONT}`; g.fillText('P(DOOM)', c, c + 175);
+    g.fillStyle = red > 0.5 ? '#ff4a5e' : '#F2EDE4'; g.font = `120px ${FONT}`; g.fillText(Math.min(1, Math.max(0, v)).toFixed(2), c, c + 315);
+    const a = ANG(clamp(v, 0, 1.03)); g.lineCap = 'round';
+    g.lineWidth = 34; g.strokeStyle = 'rgba(255,60,80,0.35)'; g.beginPath(); g.moveTo(c, c); g.lineTo(c + Math.cos(a) * (R - 70), c - Math.sin(a) * (R - 70)); g.stroke();
+    g.lineWidth = 16; g.strokeStyle = '#ffffff'; g.beginPath(); g.moveTo(c - Math.cos(a) * 60, c + Math.sin(a) * 60); g.lineTo(c + Math.cos(a) * (R - 70), c - Math.sin(a) * (R - 70)); g.stroke();
+    g.fillStyle = '#ff2e4a'; g.beginPath(); g.arc(c, c, 38, 0, 7); g.fill();
+  }
+  // 表盘玻璃炸裂：FOOM 那一拍，一把碎片从表盘中心往屋里飞
+  const NSH = 70, shards = new THREE.InstancedMesh(new THREE.TetrahedronGeometry(0.07), new THREE.MeshBasicMaterial({ color: hdr('#dff4ff', 1.8) }), NSH); shards.frustumCulled = false; box.add(shards);
+  const shardData = (() => { const rnd = mulberry32(606), d = []; for (let i = 0; i < NSH; i++) { const a = rnd() * Math.PI * 2, r = rnd() * GR; d.push({ p: V3(Math.cos(a) * r, GY + Math.sin(a) * r, -HS + 0.12), v: V3(Math.cos(a) * (1 + 3 * rnd()), Math.sin(a) * (1 + 3 * rnd()) + 1.5, 2 + 5 * rnd()), s: 0.5 + rnd() * 1.4, w: rnd() * 20 }); } return d; })();
+  function placeShards(T) {
+    const k = T - C1.foom; shards.visible = k > 0 && k < 0.9; if (!shards.visible) return;
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+    shardData.forEach((d, i) => { const p = d.p.clone().addScaledVector(d.v, k); p.y -= 4.9 * k * k; m4.compose(p, q.setFromEuler(e.set(d.w * k, d.w * 0.7 * k, 0)), V3(d.s, d.s, d.s * 0.3)); shards.setMatrixAt(i, m4); });
+    shards.instanceMatrix.needsUpdate = true;
+  }
+  // 眼：盒子合严时四只都睁着（接 v4-01）；22.509 灯一亮全眯成一条缝，之后按 C1.eyes 一只接一只睁大
+  const eyeAt = Object.fromEntries(C1.eyes);
+  function eyeOpen(k, T) {
+    if (T < C1.burst) return 1;
+    const t = eyeAt[k], a = T - t;
+    if (T < t) return lerp(1, 0.12, smooth((T - C1.burst) / 0.1));
+    return 0.12 + 1.13 * eOut(a / 0.12) - 0.13 * smooth((a - 0.12) / 0.3);   // 猛地睁大（略过头）再稳在 1.12
+  }
+  // 歌词：屏外上沿一个招牌位，只亮当前这个词（P(doom) 那个词就是翻牌屏本身）
+  walls.N.eye.g.position.z = -4.0; walls.N.eye.g.scale.setScalar(0.55);
+  const boxWords = [[L.up, 0], [L.up, 1], [L.up, 2], [L.cause, 0], [L.cause, 1], [L.cause, 2], [L.cause, 3]].map(([ln, k], i, arr) => {
+    const next = arr[i + 1], until = next ? (next[0] === ln ? wt(ln, next[1]) : ln.end) : C1.foom;
+    const st = sign(ln.words[k].w.toUpperCase().replace(/[,.]/g, ''), ln === L.up ? PAL.mint : PAL.pink, 0.4, wt(ln, k), Math.min(until, ln === L.up ? wt(L.up, 3) : C1.foom));
+    st.g.rotation.x = -Math.PI / 2; st.g.position.set(0, 0.05, -3.27); walls.N.tilt.add(st.g); return st; });
+  // 纸条（#1046）：从她那扇窗的玻璃下沿塞进来，夹着一小袋发光蘑菇（Chinese room：只会从门缝递纸条进来）
+  const note = new THREE.Group(); box.add(note);
+  { const paper = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.3), new THREE.MeshBasicMaterial({ color: hdr('#F2EDE4', 1.15) })); paper.rotation.x = -Math.PI / 2; paper.position.y = 0.006; note.add(paper);
+    const clip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.02, 0.08), new THREE.MeshBasicMaterial({ color: '#9aa0b0' })); clip.position.set(-0.12, 0.02, -0.1); note.add(clip);
+    const bag = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.035, 0.2), new THREE.MeshBasicMaterial({ color: hdr('#d8f0ff', 0.6), transparent: true, opacity: 0.35, depthWrite: false })); bag.position.set(-0.06, 0.025, -0.02); note.add(bag);
+    [[PAL.pink, -0.1, 0.03], [PAL.mint, -0.04, -0.05], [PAL.lemon, -0.02, 0.04], ['#9a7bff', -0.09, -0.06]].forEach(([c, x, z]) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.025, 10, 6), new THREE.MeshBasicMaterial({ color: hdr(c, 2.2) })); m.position.set(x, 0.03, z); note.add(m); }); }
+  function placeNote(T) {
+    note.visible = false;                                    // 第三版：纸条去掉
+    const u = eOut((T - C1.note) / 0.3); note.position.set(lerp(0.05, -0.15, u), 0.01, lerp(-HS - 0.35, -0.55, u)); note.rotation.y = lerp(0.4, -0.15, u);
+  }
+  const lidOpen = T => T < C1.foom ? 90 : lerp(90, -170, eOut((T - C1.foom) / 0.22));
+  const wallAngle = (k, T) => {
+    if (T < C1.foom) return 90;
+    const sl = C1.slam[k];
+    if (T < sl) { const u = (T - (C1.foom + { N: 0, W: 0.04, E: 0.04, S: 0.08 }[k])) / 0.24; if (u <= 0) return 90; if (u < 1) return 90 * (1 - u * u); const a = (u - 1) * 0.24; return 3 * Math.exp(-a * 12) * Math.abs(Math.sin(a * 30)); }
+    const u = (T - sl) / 0.15; if (u < 1) return 90 * u ** 2.2;
+    const a = T - sl - 0.15; return 90 - 2.5 * Math.exp(-a * 14) * Math.abs(Math.sin(a * 38));
+  };
+
+  // ================================================================ 楼：她那一间在 (列 2, 层 RH)。下面 RH 层从地底冲出来，上面几层从天上落下来
+  const towerZ = -ZC;
+  const rise = T => T < C1.foom ? 0 : pchip([[C1.foom, 0], [C1.foom + 0.12, 0.07], [C1.foom + 0.42, 0.78], [C1.trap - 0.06, 1]], T);
+  const floorY = T => RH * S * rise(T);
+  const dropOff = (land, T) => { const tau = land - T; if (tau <= 0) { const a = -tau; return 0.25 * Math.exp(-a * 12) * Math.abs(Math.sin(a * 30)); } return tau > 0.35 ? 1e4 : 70 * (tau / 0.35) ** 2; };
+  const rowLand = r => r === RH ? C1.land[0] : C1.land[Math.min(3, r - RH)] ?? C1.land[3];
+  const COLC = [PAL.pink, PAL.mint, PAL.lemon, PAL.mint, PAL.pink];
+  const TINT = ['#5a2e8a', '#1f5a6a', '#6a2a4a', '#2a3a7a'];
+  const roomTex = (() => { const c = document.createElement('canvas'); c.width = 16; c.height = 128; const g = c.getContext('2d'), v = g.createLinearGradient(0, 0, 0, 128);
+    v.addColorStop(0, '#222'); v.addColorStop(0.7, '#aaa'); v.addColorStop(1, '#fff'); g.fillStyle = v; g.fillRect(0, 0, 16, 128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  const cells = [];
+  const slab = new THREE.BoxGeometry(S, TH, S), backG = new THREE.PlaneGeometry(S, S), divG = new THREE.PlaneGeometry(S, S);
+  for (let r = 0; r <= NR - 1; r++) for (let c = 0; c < NC; c++) {
+    if (r === RH && c === 2) continue;
+    const g = new THREE.Group(); scene.add(g);
+    const fl = new THREE.Mesh(slab, slate); fl.position.y = -TH / 2; g.add(fl);
+    const backMat = new THREE.MeshBasicMaterial({ map: roomTex, color: col('#000') });
+    const back = new THREE.Mesh(backG, backMat); back.position.set(0, HS, HS - 0.02); back.rotation.y = Math.PI; g.add(back);
+    for (const sx of [-1, 1]) { const d = new THREE.Mesh(divG, slate); d.position.set(sx * (HS - 0.01), HS, 0); d.rotation.y = -sx * Math.PI / 2; g.add(d); }
+    const fr = tubeRect(S, S, COLC[c], 0.045); fr.g.rotation.x = Math.PI / 2; fr.g.position.set(0, 0, -HS); g.add(fr.g);   // 窗框立在正面
+    if (c === 0 || c === NC - 1) { const o = new THREE.Mesh(new THREE.PlaneGeometry(S, S), new THREE.MeshBasicMaterial({ map: winTex, color: hdr('#ffffff', 1.0) })); o.position.set((c === 0 ? -1 : 1) * (HS + 0.01), HS, 0); o.rotation.y = (c === 0 ? -1 : 1) * Math.PI / 2; g.add(o); }
+    const cell = { r, c, g, backMat, tint: col(TINT[(r * 3 + c) % 4]), fr, clone: null, cap: null };
+    cells.push(cell);
+  }
+  const lowRoof = new THREE.Mesh(new THREE.BoxGeometry(NC * S, 0.3, S), slate); scene.add(lowRoof);   // 冲上来那一截的顶（RH 层落下来之前）
+  const roofSlab = new THREE.Mesh(new THREE.BoxGeometry(NC * S + 0.4, 0.5, S + 0.4), slate); scene.add(roofSlab);
+  const roofEdge = tubeRect(NC * S + 0.4, S + 0.4, PAL.pink, 0.06); roofEdge.g.position.set(0, 0.26, (S + 0.4) / 2); roofSlab.add(roofEdge.g);
+  // 楼顶的冠：大翻牌 P(DOOM)（在楼顶后沿，朝 -Z）
+  const crown = new THREE.Group(); crown.rotation.y = Math.PI; scene.add(crown);
+  // 楼顶的冠 = 同一款 P(DOOM) 指针表（#1046 衔接表：FOOM 之后读数不回落，钉在 0.99 打颤）
+  const cC = document.createElement('canvas'); cC.width = cC.height = 1024; const cg = cC.getContext('2d');
+  const cTex = new THREE.CanvasTexture(cC); cTex.colorSpace = THREE.SRGBColorSpace; cTex.anisotropy = 8;
+  const crownMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBasicMaterial({ map: cTex, transparent: true, color: hdr('#fff', 1.15) })); crownMesh.position.set(0, 11.0, 0); crown.add(crownMesh);
+  let cKey = '';
+  const drawCrown = T => { const v = 0.99 + 0.006 * Math.sin(T * 60), k = v.toFixed(3); if (k === cKey) return; cKey = k; paintGauge(cg, v); cTex.needsUpdate = true; };
+  for (const sx of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4.4, 0.6), slate); leg.position.set(sx * 12, -0.9, 0.3); crown.add(leg); }
+
+  // 克隆：所有房间里的她 = 同一副骨架上的蒙皮复制（动作和她完全同步，整列）
+  const skClone = src => { const m = new THREE.SkinnedMesh(src.geometry, src.material); m.bind(src.skeleton, src.bindMatrix); m.bindMode = THREE.DetachedBindMode; m.bindMatrixInverse.identity(); m.frustumCulled = false; m.matrixAutoUpdate = false; return m; };
+  for (const cl of cells) {
+    const g = new THREE.Group(); g.matrixAutoUpdate = false; g.add(skClone(girl.mesh)); if (girl.hull) g.add(skClone(girl.hull)); scene.add(g); cl.clone = g;
+  }
+  // 蘑菇：每间窗台上长一朵（④），她下面那间长最大的一朵，伞上写 SHROOMS
+  const spotTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'), rnd = mulberry32(31);
+    g.fillStyle = '#fff'; g.fillRect(0, 0, 256, 256); g.fillStyle = '#ffffff'; for (let i = 0; i < 26; i++) { g.globalAlpha = 1; g.fillStyle = '#3a2050'; const x = rnd() * 256, y = rnd() * 140, r = 6 + rnd() * 14; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  const capGeo = new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), stemGeo = new THREE.CylinderGeometry(0.22, 0.3, 1, 12);
+  const rndCap = mulberry32(55);
+  for (const cl of cells) {
+    const big = cl.r === RH - 1 && cl.c === 2;
+    const g = new THREE.Group(), color = [PAL.pink, PAL.mint, PAL.lemon][Math.floor(rndCap() * 3)];
+    const capMat = new THREE.MeshBasicMaterial({ map: spotTex, color: hdr(big ? PAL.pink : color, 1.3) });
+    const cap = new THREE.Mesh(capGeo, capMat), stem = new THREE.Mesh(stemGeo, new THREE.MeshBasicMaterial({ color: hdr('#F2EDE4', 0.9) }));
+    stem.position.y = 0.5; cap.position.y = 0.95; cap.scale.set(1, 0.62, 1); g.add(stem, cap);
+    g.position.set((rndCap() - 0.5) * 1.6, 0.05, -HS - 0.4); g.rotation.x = -0.35;   // 从窗台往外歪着长
+    cl.g.add(g);
+    cl.cap = { g, big, at: big ? wt(L.bag, 4) - 0.25 : C1.shroom + 0.1 + rndCap() * 0.9, size: big ? 2.3 : 0.75 + rndCap() * 0.5 };
+    g.visible = false;
+  }
+  const bigCell = cells.find(q => q.r === RH - 1 && q.c === 2);
+
+  // ================================================================ 第 ①–④ 段的招牌
+  const flipFOOM = 'FOOM'.split('').map((ch, i) => { const s = sign(ch, [PAL.pink, PAL.mint, PAL.lemon, PAL.pink][i], 2.3, C1.foom + 0.08 + i * 0.06, C1.trap + 0.04); scene.add(s.g); return s; });
+  // 一句一排，唱完就灭（同一时间只亮当前这一句）
+  const sTrapRow = [['TRAPPED', PAL.pink, 0], ['IN', PAL.mint, 1], ['THE', PAL.mint, 2]].map(([w, c, k]) => { const st = sign(w, c, 2.2, wt(L.trap, k), L.trap.end); scene.add(st.g); return st; });
+  { const tot = sTrapRow.reduce((a, q) => a + q.bw, 0) + 0.5 * 2; let x = tot / 2; for (const q of sTrapRow) { q.x = x - q.bw / 2; x -= q.bw + 0.5; } }
+  const sChinese = sign('CHINESE', PAL.lemon, 3.9, wt(L.trap, 3), L.trap.end), sRoom = sign('ROOM', PAL.lemon, 3.9, wt(L.trap, 4), L.trap.end);
+  const sShrooms3 = sign('SHROOMS', PAL.pink, 1.0, wt(L.bag, 4), L.bag.end); scene.add(sShrooms3.g);   // 第三版：shrooms 那拍不切 2D，招牌挂在她那扇窗上方
+  const sBag = ['WITH', 'A', 'BAG', 'OF'].map((w, i) => { const s = sign(w, [PAL.mint, PAL.lemon, PAL.pink, PAL.mint][i], 0.95, wt(L.bag, i), L.bag.end); scene.add(s.g); return s; });
+  { const tot = sBag.reduce((a, s) => a + s.bw, 0) + 0.5 * 3; let x = tot / 2; for (const s of sBag) { s.x = x - s.bw / 2; x -= s.bw + 0.5; } }   // 一排，从画面左（+x）往右
+  const sShrooms = sign('SHROOMS', PAL.lemon, 0.5, wt(L.bag, 4), L.bag.end); bigCell.cap.g.add(sShrooms.g);
+  sShrooms.g.position.set(0, 1.12, -1.3); sShrooms.g.rotation.set(0.35, Math.PI, 0); sShrooms.until = 0;   // #1046 起不用（SHROOMS 在 2D 特写里）
+  const cellOf = (r, c) => cells.find(q => q.r === r && q.c === c);
+  crown.add(sChinese.g, sRoom.g); { const g = 0.6, tot = sChinese.bw + sRoom.bw + g; sChinese.g.position.set(-tot / 2 + sChinese.bw / 2, -HS - 3.2, S + 0.2); sRoom.g.position.set(tot / 2 - sRoom.bw / 2, -HS - 3.2, S + 0.2); }   // crown 整体转了 π，局部 +z = 楼正面外侧；两块挂在最上面两层的正面
+
+  // ================================================================ 面具城（第 ⑤–⑧ 段）：一整面亮窗，窗的亮灭 = 一张数据贴图，逐帧按 T 算
+  const FC = { x0: -90, x1: 150, y0: -2, y1: 150, z: -(D0 + 240), nx: 80, ny: 46 };
+  const cw = (FC.x1 - FC.x0) / FC.nx, chh = (FC.y1 - FC.y0) / FC.ny;
+  const face = { cx: 42, cy: 24, R: 17.5 };                        // 笑脸在格子坐标里的圆心 / 半径
+  const stData = new Uint8Array(FC.nx * FC.ny * 4), stTex = new THREE.DataTexture(stData, FC.nx, FC.ny); stTex.magFilter = stTex.minFilter = THREE.NearestFilter;
+  const cellInfo = [];
+  { const rnd = mulberry32(404); let x = 0; const hgt = new Array(FC.nx).fill(0), exists = new Array(FC.nx).fill(true);
+    while (x < FC.nx) { const w = 3 + Math.floor(rnd() * 5), inFace = x + w > face.cx - face.R - 2 && x < face.cx + face.R + 2; const h = x < 20 ? 8 + Math.floor(rnd() * 8) : inFace ? FC.ny - Math.floor(rnd() * 2) : 26 + Math.floor(rnd() * 16);
+      for (let i = x; i < Math.min(FC.nx, x + w); i++) hgt[i] = h; x += w; if (!inFace && rnd() < 0.6 && x < FC.nx) { exists[x] = false; x++; } }
+    for (let j = 0; j < FC.ny; j++) for (let i = 0; i < FC.nx; i++) {
+      const dx = i + 0.5 - face.cx, dy = (j + 0.5 - face.cy) * chh / cw, d = Math.hypot(dx, dy);
+      const inDisc = d < face.R;
+      const eyeL = Math.hypot(i + 0.5 - (face.cx - 6.5), (j + 0.5 - (face.cy + 5)) * 1.6) < 2.6, eyeR = Math.hypot(i + 0.5 - (face.cx + 6.5), (j + 0.5 - (face.cy + 5)) * 1.6) < 2.6;
+      const md = Math.hypot(dx, (j + 0.5 - (face.cy + 3)) * chh / cw), mouth = md > 9.5 && md < 12.3 && j + 0.5 < face.cy - 1.2;
+      cellInfo.push({ ex: exists[i] && j < hgt[i], lit0: rnd() < 0.45 ? 0.5 + 0.5 * rnd() : 0.06, smile: inDisc && !eyeL && !eyeR && !mouth, feature: inDisc && (eyeL || eyeR || mouth), sw: 29.95 + rnd() * 0.65 + (Math.abs(dx) / 40) * 0.2, j, i, flick: rnd() });
+    }
+  }
+  const facadeMat = new THREE.ShaderMaterial({
+    uniforms: { uState: { value: stTex }, uGrid: { value: new THREE.Vector2(FC.nx, FC.ny) }, uScan: { value: 2 }, uWarm: { value: hdr('#ffe2a8', 1.25) }, uSmile: { value: hdr(PAL.lemon, 2.1) }, uRed: { value: hdr('#ff2a3a', 2.2) }, uWall: { value: col('#0e0e1a') } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform sampler2D uState; uniform vec2 uGrid; uniform float uScan; uniform vec3 uWarm, uSmile, uRed, uWall; varying vec2 vUv;
+      void main(){ vec2 g = vUv * uGrid; vec2 cell = floor(g); vec2 f = fract(g);
+        vec4 s = texture2D(uState, (cell + 0.5) / uGrid);
+        if (s.g < 0.5) discard;
+        if (vUv.y > uScan + 0.002) discard;
+        float win = step(0.16, f.x) * step(f.x, 0.84) * step(0.2, f.y) * step(f.y, 0.8);
+        vec3 wc = s.b > 0.5 ? uSmile : uWarm;
+        vec3 c = mix(uWall, wc * s.r, win);
+        c += uRed * 3.0 * exp(-abs(vUv.y - uScan) * 260.0);
+        gl_FragColor = vec4(c, 1.0); }`,
+  });
+  const facade = new THREE.Mesh(new THREE.PlaneGeometry(FC.x1 - FC.x0, FC.y1 - FC.y0), facadeMat);
+  const fGroup = new THREE.Group(); fGroup.add(facade); facade.position.set((FC.x0 + FC.x1) / 2, (FC.y0 + FC.y1) / 2, FC.z); scene.add(fGroup);
+  const faceW = new THREE.Vector3(FC.x0 + face.cx * cw, FC.y0 + face.cy * chh, FC.z);       // 笑脸中心（世界）
+  const sLies = sign('LIES', PAL.pink, 21, wt(L.see, 4), L.see.end + 0.05); fGroup.add(sLies.g); sLies.g.position.set(faceW.x, faceW.y + 41, FC.z + 30);
+  const sSee = ['SEE', 'THROUGH', 'THE', "SHOGGOTH'S"].map((w, i) => { const s = sign(w, PAL.mint, 13, wt(L.see, i), L.see.end + 0.05); fGroup.add(s.g); return s; });
+  { let x = -50; for (const s of sSee) { s.g.position.set(x + s.bw / 2, 24, FC.z + 30); x += s.bw + 4; } }
+  function facadeState(T) {
+    const scanY = T < C1.pov + 0.15 ? 2 : lerp(1.02, -0.05, clamp((T - (C1.pov + 0.15)) / 1.15));
+    facadeMat.uniforms.uScan.value = scanY;
+    for (let k = 0; k < cellInfo.length; k++) {
+      const q = cellInfo[k], o = k * 4;
+      let b = q.lit0, smile = 0;
+      if (T >= q.sw) { if (q.smile) { b = 1; smile = 1; } else b = q.feature ? 0 : 0.05 + 0.05 * q.flick; }
+      else if (T > q.sw - 0.12) b = q.flick < 0.5 ? 1 : 0.1;                       // 换之前闪一下
+      stData[o] = Math.round(clamp(b) * 255); stData[o + 1] = q.ex ? 255 : 0; stData[o + 2] = smile ? 255 : 0; stData[o + 3] = 255;
+    }
+    stTex.needsUpdate = true;
+    const sink = T < C1.hud0 ? 0 : 230 * smooth((T - C1.hud0) / 0.6) ** 1.4;
+    fGroup.position.y = -sink; fGroup.visible = T >= C1.swirl && T < C1.road + 0.1 && sink < 225;
+  }
+
+  // 第三版：面具后面那座城（和跑酷段同一座城：亮窗楼块 + 霓虹线 + 粉月），分近 / 中 / 远三层纵深 + 一点光尘；面具就是这座城的亮窗拼出来的
+  { const rnd = mulberry32(515), mm = new THREE.Matrix4(), Q = new THREE.Quaternion();
+    const mid = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ map: winTex, color: hdr('#ffffff', 0.95) }), 160);
+    for (let i = 0; i < 160; i++) { const z = lerp(towerZ - 45, FC.z + 25, rnd()), x = (rnd() - 0.5) * 520 + 30, nearC = Math.abs(x - faceW.x) < 135, w = 8 + rnd() * 14, h = nearC ? 5 + rnd() * 12 : 20 + rnd() ** 1.5 * 70;
+      mm.compose(V3(x, h / 2 - 2, z), Q, V3(w, h, w)); mid.setMatrixAt(i, mm); }
+    scene.add(mid);
+    const farMat = new THREE.MeshBasicMaterial({ map: winTex, color: hdr('#9aa0ff', 0.28) });
+    const far = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), farMat, 120);
+    for (let i = 0; i < 120; i++) { const x = lerp(-420, 520, i / 119) + (rnd() - 0.5) * 8, z = FC.z - 70 - rnd() * 90, w = 10 + rnd() * 18, h = 50 + rnd() ** 1.3 * 130;
+      mm.compose(V3(x, h / 2 - 2, z), Q, V3(w, h, w)); far.setMatrixAt(i, mm); }
+    scene.add(far);
+    const neon = new THREE.Group(); scene.add(neon);                                // 楼与楼之间的地面霓虹线（远处的街）
+    for (let k = 0; k < 9; k++) { const z = lerp(towerZ - 60, FC.z + 10, k / 8), m = new THREE.Mesh(new THREE.PlaneGeometry(600, 0.6), new THREE.MeshBasicMaterial({ color: hdr([PAL.pink, PAL.mint, PAL.lemon][k % 3], 1.6) })); m.rotation.x = -Math.PI / 2; m.position.set(30, 0.2, z); neon.add(m); }
+    const n = 700, p = new Float32Array(n * 3); for (let i = 0; i < n; i++) p.set([(rnd() - 0.5) * 500 + 30, 5 + rnd() * 120, lerp(towerZ - 30, FC.z, rnd())], i * 3);
+    const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(p, 3));
+    scene.add(new THREE.Points(dg, new THREE.PointsMaterial({ color: hdr('#ffd8ec', 0.9), size: 1.4, sizeAttenuation: false, transparent: true, opacity: 0.45, depthWrite: false })));
+  }
+  // 触手：程序化管子，逐帧重算顶点（锥形 + 摆动），每根挂三只柠黄同心圆眼
+  const TENT = [];
+  { const rnd = mulberry32(808);
+    const bases = [[-30, -4], [-8, 6], [18, -2], [68, 4], [90, -6], [112, 2], [130, -3], [5, -20], [40, -26], [78, -22], [-20, -24], [100, -28]];
+    bases.forEach(([bx, dz], i) => {
+      const back = dz < -15, n = 44, rad = 9;
+      const geo = new THREE.BufferGeometry(), pos = new Float32Array(n * rad * 3), idx = [];
+      for (let a = 0; a < n - 1; a++) for (let b = 0; b < rad; b++) { const p = a * rad + b, q = a * rad + (b + 1) % rad; idx.push(p, p + rad, q, q, p + rad, q + rad); }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setIndex(idx);
+      const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: '#4a2a78', roughness: 0.35, metalness: 0.15, emissive: col('#5a1a8a'), emissiveIntensity: 0.9, fog: false, transparent: true }));
+      mesh.frustumCulled = false; fGroup.add(mesh);
+      const eyes = [0.32, 0.58, 0.8].map(s => { const e = makeEye(1, { flat: false }); fGroup.add(e.g); return { e, s }; });
+      TENT.push({ bx: bx, bz: FC.z + (back ? 8 + dz : 2 + dz * 0.15), bzHide: FC.z - 16 + dz * 0.3, back, mesh, geo, pos, n, rad, eyes, r0: 8 + rnd() * 5, ht: (back ? 120 : 85) + rnd() * 50, ph: rnd() * 6.28, ph2: rnd() * 6.28, at: back ? C1.pov + 0.3 + rnd() * 0.5 : C1.lies + rnd() * 0.55 });
+    });
+  }
+  const _t = V3(), _n = V3(), _b = V3(), _c = V3(), _ref = V3(0, 0, 1);
+  function tentacles(T) {
+    // 第三版：死神之眼看穿之前，触手只在笑脸面具后面隐约可见（藏在楼后、暗、半透明、偶尔动一下）；HUD 镜头（35.7）起烧掉面具、触手冲到前面完全显形；跳楼起一根都不出现
+    const rv = smooth((T - C1.pov) / 0.6), gone = T >= C1.zero;
+    for (const q of TENT) {
+      const grow = gone ? 0 : eOut((T - q.at) / 0.9);
+      q.mesh.visible = grow > 0.01;
+      const bz = lerp(q.bzHide, q.bz, rv), calm = lerp(0.3 + 0.7 * Math.max(0, Math.sin(T * 0.9 + q.ph)) ** 8, 1, rv);
+      q.mesh.material.opacity = lerp(0.32, 1, rv); q.mesh.material.emissiveIntensity = lerp(0.2, 0.9, rv); q.mesh.material.depthWrite = rv > 0.5;
+      for (const e of q.eyes) e.e.g.visible = q.mesh.visible;
+      if (!q.mesh.visible) continue;
+      const P = [];
+      for (let a = 0; a < q.n; a++) {
+        const s = a / (q.n - 1), ht = q.ht * grow;
+        const sway = calm * 26 * s ** 1.4 * Math.sin(2.4 * s * Math.PI + T * 1.7 + q.ph), swz = calm * 14 * s ** 1.6 * Math.sin(1.7 * s * Math.PI + T * 1.3 + q.ph2);
+        const toward = (faceW.x - q.bx) * 0.3 * s * s * rv;
+        P.push(V3(q.bx + sway + toward, -4 + ht * s * lerp(1.35, 1, rv), bz + swz + 10 * s * s));   // 藏着的时候梢头从楼顶天际线后面探出来一点
+      }
+      for (let a = 0; a < q.n; a++) {
+        const s = a / (q.n - 1), r = q.r0 * (1 - 0.88 * s) * (0.6 + 0.4 * grow);
+        _t.subVectors(P[Math.min(q.n - 1, a + 1)], P[Math.max(0, a - 1)]).normalize();
+        _n.crossVectors(_t, _ref).normalize(); _b.crossVectors(_t, _n);
+        for (let b = 0; b < q.rad; b++) { const th = b / q.rad * Math.PI * 2; _c.copy(P[a]).addScaledVector(_n, Math.cos(th) * r).addScaledVector(_b, Math.sin(th) * r); q.pos.set([_c.x, _c.y, _c.z], (a * q.rad + b) * 3); }
+      }
+      q.geo.attributes.position.needsUpdate = true; q.geo.computeVertexNormals();
+      for (const e of q.eyes) {
+        const a = Math.round(e.s * (q.n - 1)), r = q.r0 * (1 - 0.88 * e.s) * 0.95;
+        e.e.g.position.copy(P[a]).add(V3(0, 0, r * 0.9)); e.e.g.scale.setScalar(r * grow);
+        e.e.lit.color.copy(hdr(PAL.lemon, lerp(0.35, 1.6 + 1.2 * Math.max(0, Math.sin(T * 9 + e.s * 20)), rv)));
+      }
+    }
+  }
+  const tentEyes = cam => { for (const q of TENT) for (const e of q.eyes) if (e.e.g.visible) { e.e.g.parent.updateWorldMatrix(true, false); e.e.g.lookAt(cam.position); } };
+  const tentLight = new THREE.DirectionalLight(PAL.pink, 0), tentRim = new THREE.DirectionalLight(PAL.mint, 0); tentRim.position.set(120, 40, -420); tentRim.target.position.copy(faceW); scene.add(tentRim, tentRim.target);
+  const tentLight0 = 0; tentLight.position.set(-80, 60, -100); tentLight.target.position.copy(faceW); scene.add(tentLight, tentLight.target);
+
+  // ================================================================ 她：动作分段（keys = [[歌曲 T, 片段本地秒]] 单调三次插值；dance = 从 t0 起按拍播）
+  const FACE = -0.45;                                // 盒子阶段她朝向表盘（在她右前方）：根在朝 -Z 的基础上再转多少
+  const SEG = [
+    { anim: 'act__kneel-down', keys: [[22.40, 2.40], [22.62, 2.25], [22.95, 1.0]], fade: 0, yaw: FACE },   // 跪着 → 起身，抬头看表
+    { anim: 'act__terrified', keys: [[22.98, 0.78], [23.14, 1.0], [23.32, 1.06]], fade: 0.12, yaw: FACE },    // 第一只眼睁开：猛地一缩
+    { anim: 'act__swagger-walk', keys: [[23.32, 1.55], [24.72, 0.0]], fade: 0.22, yaw: FACE },                 // 盯着表往后退：走路片段倒放（1.5 步周期），脚锁把它变成真的后退
+    { anim: 'act__terrified', keys: [[24.72, 0.85], [24.95, 1.1], [25.38, 1.55]], fade: 0.2, yaw: FACE },     // 背贴到墙上缩着发抖
+    { anim: 'move__sprint-jump', keys: [[25.38, 0.0], [C1.foom, 0.12], [25.82, 0.38], [26.02, 0.62]], fade: 0.14, yawKeys: [[25.38, FACE], [25.64, FACE], [25.88, 0]] },   // FOOM：被掀起来（腾空时转回正面）
+    { anim: 'act__terrified', keys: [[26.0, 1.0], [26.4, 1.35]], fade: 0.12 },                                  // 落在冲上天的楼顶：缩着稳住
+    { anim: 'dance__tut1', dance: 26.146, from: 26.45, fade: 0.25 },                                           // 和所有房间里的她一起 tut（规则手册）
+    { anim: 'act__look-distance', keys: [[C1.onRoof, 0.6], [C1.roof, 0.9], [30.8, 3.0], [32.4, 4.3], [33.5, 5.0]], fade: 0, cut: true },
+    { anim: 'move__run-jump', keys: [[C1.zero, 0.3], [C1.road, 1.0]], fade: 0, cut: true },
+    { anim: 'move__land-run', keys: [[C1.road, 0.0], [38.05, 0.12], [38.32, 0.5]], fade: 0, cut: true },
+    { anim: 'move__run-fast__inplace', dance: 38.0, rate: 1.8, fade: 0.1, from: 38.32 },             // 和 v4-03 的 SEQ 第一段完全同一个相位
+  ];
+  for (const s of SEG) { s.m = getAnim(s.anim); s.t0 = s.from ?? (s.keys ? s.keys[0][0] : s.dance); s.yaw ??= 0; }
+  const yawOf = (s, T) => s.yawKeys ? pchip(s.yawKeys, T) : s.yaw;
+  const I = girl.dancer.S.info;
+  const solveSeg = (s, T) => s.keys ? s.m.solve(pchip(s.keys, T) / s.m.srcPeriod, girl.dancer) : s.m.solve((girl.beatOf(T) - girl.beatOf(s.dance)) * (s.rate ?? 1), girl.dancer);
+  function poseAt(T) {
+    let i = 0; for (let k = 0; k < SEG.length; k++) if (SEG[k].t0 - SEG[k].fade <= T) i = k;
+    const s = SEG[i];
+    if (i > 0 && !s.cut && T < s.t0) { const p = smooth((T - (s.t0 - s.fade)) / s.fade), a = SEG[i - 1]; return { pose: blendSolved(solveSeg(a, T), solveSeg(s, T), p), yaw: lerp(yawOf(a, T), yawOf(s, T), p) }; }
+    return { pose: solveSeg(s, T), yaw: yawOf(s, T) };
+  }
+  // 她的根：盒 / 房间里 = 盒局部 (0, 0, 0.35)；楼顶 / 跃出 / 路上见 placeGirl
+  const HER_BOX = V3(-0.75, 0, -0.45);              // 盒子阶段起点：表盘左前方；后退的量来自脚锁，起点在脚锁表算完后按「退到墙」反推（见下）
+  const ROOF_P = V3(0.4, ROOF + 0.25, towerZ - 1.2);
+  const leapOff = 37.497;
+  // 路上的位置：落地那一下（38.05）地速先压到 2.5 m/s（蹲着吃住冲击，脚不溜冰），0.28 s 内回到 11 m/s；38.4 时正好在 d = D0（= v4-03 起点）
+  const vRoad = T => T < 38.05 ? 11 : lerp(2.5, 11, smooth((T - 38.05) / 0.28));
+  const RT0 = 37.85, RDT = 0.001, rTab = [0]; for (let t = RT0; t < C1.end + 0.05; t += RDT) rTab.push(rTab[rTab.length - 1] + vRoad(t + RDT / 2) * RDT);
+  const rAt = T => { const x = clamp((T - RT0) / RDT, 0, rTab.length - 1), i = Math.floor(x); return lerp(rTab[i], rTab[Math.min(rTab.length - 1, i + 1)], x - i); };
+  const roadD = T => D0 + rAt(T) - rAt(38.4);
+  // 落地那一镜用 v4-03 那条路的复制品（同 seed / 长度 / 滚转 / 断崖 / 障碍 → 楼的排布逐栋一样），38.4 硬切前后两边的楼对得上。
+  //   参数照抄 shots/v4-03a.js 的 E / vOf / dRun / D（只读，不改它）；复制品整体平移到 x = OX，和楼 / 面具城互不相见。
+  const R2 = (() => {
+    const E = { accel: 41.34, vault: { start: 42.40, over: 0.56 }, jump: { start: 43.22, off: 0.38, land: 1.45 }, wall: { start: 44.85, a: 0.15 / 1.1 },
+      wallOff: { start: 45.72, a: 0.2 / 1.6, b: 1.23 / 1.6 }, land: { start: 46.35, rate: 2.0 }, slide: { start: 46.90, low: 0.55 / 1.4 }, cliff: { start: 47.60, off: 0.38 } };
+    E.landHit = E.land.start + 0.57 / E.land.rate; E.cliffOff = E.cliff.start + E.cliff.off;
+    const vOf = t => { let v = t < E.accel ? 11 : lerp(11, 15, smooth((t - E.accel) / 0.7)); if (t > E.wall.start && t < E.wallOff.start + E.wallOff.b) v = Math.min(v, 12); const k = t - E.landHit; if (k > 0 && k < 0.6) v = lerp(5, 15, smooth(k / 0.6)); return v; };
+    const T0 = 38.4, DT = 0.001, NT = Math.ceil((E.cliffOff + 0.2 - T0) / DT) + 2, tab = new Float64Array(NT);
+    for (let i = 1; i < NT; i++) tab[i] = tab[i - 1] + vOf(T0 + (i - 0.5) * DT) * DT;
+    const dRun = t => { const x = (t - T0) / DT; if (x <= 0) return vOf(T0) * (t - T0); if (x >= NT - 1) return tab[NT - 1]; const i = Math.floor(x); return lerp(tab[i], tab[i + 1], x - i); };
+    const D = { gate: dRun(E.vault.start + E.vault.over), gapA: dRun(E.jump.start + E.jump.off) + 0.4, gapB: dRun(E.jump.start + E.jump.land) - 0.4,
+      wall: dRun(E.wall.start + E.wall.a) - 1, wallEnd: dRun(E.wallOff.start + E.wallOff.a) + 1, beam: dRun(E.slide.start + E.slide.low), cliff: dRun(E.cliffOff) + 0.3 };
+    const obstacles = [{ type: 'gate', d: D.gate - 0.15, len: 0.3, h: 1.0 }, { type: 'gap', d: D.gapA, len: D.gapB - D.gapA }, { type: 'wall', d: D.wall, len: D.wallEnd - D.wall, side: 1, h: 4.0 }, { type: 'beam', d: D.beam - 0.2, len: 0.4, y: 1.25 }];
+    const r = createSpiralRun({ length: D.cliff + 30, roll: { start: dRun(40.4), end: dRun(46.2), turns: 1, radius: 8 }, words: [], obstacles, cliff: D.cliff, t0: T0, speed: 15 });
+    const OX = 3000; r.group.position.x = OX; scene.add(r.group);
+    // 路起点（d = 0）之前补一截路面：她 38.05 落在 d ≈ -3（v4-03 自己 38.4 之前也没有这截，只是镜头看不到）
+    const ext = new THREE.Group(); ext.position.set(OX, 0, 0); scene.add(ext);
+    const flat = (w, h, c, x, y, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c })); m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); ext.add(m); };
+    flat(28, 16, '#15142a', 0, -0.01, 8);
+    for (const x of [-2.2, 2.2]) flat(0.12, 16, hdr(PAL.mint, 1.6), x, 0, 8);
+    for (let z = 1; z < 16; z += 3) flat(0.12, 1.2, hdr(PAL.lemon, 1.3), 0, 0, z);
+    const m2 = new THREE.Mesh(new THREE.CircleGeometry(26, 64), new THREE.MeshBasicMaterial({ color: col(PAL.pink).multiplyScalar(1.25), fog: false }));
+    m2.position.set(OX - 60, 95, -D.cliff - 150); m2.lookAt(OX, 0, -40); scene.add(m2);
+    const frameAt = (d, sd = 0) => { const f = r.frameAt(d, sd, 1); f.pos.x += OX; return f; };
+    return { r, OX, frameAt, dRun, D, ext, moon: m2 };
+  })();
+  const landD = T => rAt(T) - rAt(38.4);               // 复制品里的 d：38.4 时 = 0（= v4-03 起点）
+  const wob = (r, c, T) => { const a = 0.9 * smooth((T - C1.swirl) / 0.4) * (T < C1.onRoof + 0.3 ? 1 : 0); return a * Math.sin(r * 0.9 - (T - C1.swirl) * 5 + c * 0.25); };   // shrooms：楼像水面一样扭（幻觉）
+  function placeGirl(T, lock = true) {
+    scene.add(girl.root); girl.root.visible = true; girl.root.scale.setScalar(H);
+    const { pose, yaw } = poseAt(T);
+    let pos, face = Math.PI + yaw, up = null;
+    if (T < C1.onRoof) pos = box.localToWorld(HER_BOX.clone().lerp(V3(0, 0, 0.35), smooth((T - 25.64) / 0.26)));
+    else if (T < C1.zero) pos = ROOF_P.clone();
+    else if (T < C1.road) {
+      const z0 = towerZ + 1.0;
+      if (T < leapOff) pos = V3(0.4, ROOF + 0.25, z0 - 6 * (T - C1.zero));
+      else { const k = T - leapOff; pos = V3(0.4, ROOF + 0.25 + 3 * k - 7.5 * k * k, z0 - 6 * (leapOff - C1.zero) - 7 * k); }
+    } else {
+      const f = R2.frameAt(landD(T)); pos = f.pos.clone().addScaledVector(f.up, Math.max(0, 22 * (38.05 - T)));
+      up = f.up; face = Math.PI;
+    }
+    if (lock) pos.add(lockOff(T));
+    girl.root.position.copy(pos); girl.root.rotation.set(0, face, 0);
+    girl.root.updateMatrixWorld(true); girl.dancer.apply(pose); girl.root.updateMatrixWorld(true);
+  }
+
+  // 脚锁（同 v4-01-box）：片段是原地版，重心一动脚就在地上滑 → 把「接下来一直贴地」的那只脚钉住，滑动量变成根的位移。
+  //   按 60 fps 预演成表（相对根的坐标，和楼 / 盒子在哪无关），之后 lockOff(T) 查表插值 —— 纯函数。
+  const LOCKS = [[22.40, 25.36], [26.42, C1.roof - 0.002], [C1.roof, C1.d2]];
+  const LFPS = 60, lockTabs = LOCKS.map(([tA, tB]) => {
+    const FEET = ['LeftToeBase', 'RightToeBase'], LOW = 0.12, fr = [], rel = k => I[k].bone.getWorldPosition(V3()).sub(girl.root.position);
+    for (let f = 0; f <= Math.round((tB - tA) * LFPS); f++) { placeGirl(tA + f / LFPS, false); fr.push(Object.fromEntries(FEET.map(k => [k, rel(k)]))); }
+    const ahead = (k, f, n) => { let m = -1e9; for (let i = f; i <= Math.min(fr.length - 1, f + n); i++) m = Math.max(m, fr[i][k].y); return m; };
+    const y0 = Math.min(...fr.map(q => Math.min(q.LeftToeBase.y, q.RightToeBase.y)));
+    let anchor = null; const off = V3(), raw = [];
+    for (let f = 0; f < fr.length; f++) {
+      if (anchor && f > 0) { off.x -= fr[f][anchor].x - fr[f - 1][anchor].x; off.z -= fr[f][anchor].z - fr[f - 1][anchor].z; }
+      if (anchor && ahead(anchor, f, 6) - y0 > LOW) anchor = null;
+      else if (anchor && ahead(anchor, f, 18) - y0 > LOW) { const o = FEET.find(k => k !== anchor); if (fr[f][o].y - y0 <= LOW && ahead(o, f, 18) - y0 <= LOW) anchor = o; }
+      if (!anchor) { const c = FEET.filter(k => fr[f][k].y - y0 <= LOW).sort((a, b) => ahead(a, f, 18) - ahead(b, f, 18)); anchor = c[0] ?? null; }
+      raw.push(off.clone());
+    }
+    const G = [0.04, 0.12, 0.68, 0.12, 0.04], tab = raw.map((_, f) => { const o = V3(); G.forEach((w, i) => o.addScaledVector(raw[clamp(f + i - 2, 0, raw.length - 1)], w)); return o; });
+    // 整段的平均漂移拉回来（她别越跳越偏到墙里去）：减掉一条从 0 到末值的直线里一半
+    return { tA, tB, tab };
+  });
+  function lockOff(T) {
+    for (const L of lockTabs) if (T >= L.tA && T <= L.tB) { const x = (T - L.tA) * LFPS, i = Math.floor(x), j = Math.min(L.tab.length - 1, i + 1); return L.tab[i].clone().lerp(L.tab[j], x - i); }
+    const L0 = lockTabs[0];                                  // 拽完光缆的漂移：腾空那 0.26 s 里收回盒子正中
+    if (T > L0.tB && T < LOCKS[1][0]) return L0.tab[L0.tab.length - 1].clone().multiplyScalar(1 - smooth((T - 25.64) / 0.26));
+    return V3();
+  }
+  { const back = lockOff(24.95); HER_BOX.x = -1.15 - back.x; HER_BOX.z = 1.5 - back.z; }   // 退到 24.95 时背贴后墙（后墙内面 z = +2.2，她背离根约 0.25）
+  window.__lockDrift = () => lockTabs.map(L => ({ tA: L.tA, max: +Math.max(...L.tab.map(o => Math.hypot(o.x, o.z))).toFixed(2), end: [+L.tab[L.tab.length - 1].x.toFixed(2), +L.tab[L.tab.length - 1].z.toFixed(2)] }));
+
+  // ================================================================ 每帧：世界
+  function world(T) {
+    // 盒 = 她那一间
+    const fy = floorY(T);
+    box.position.set(wob(RH, 2, T), fy + 0.03, towerZ); box.updateMatrixWorld(true);
+    for (const k of 'NSWE') walls[k].tilt.rotation.x = wallAngle(k, T) * D2R;
+    const lid = lidOpen(T); for (const f of flaps) { f.tilt.rotation.x = lid * D2R; f.tilt.visible = T < C1.trap; }
+    const burst = T >= C1.burst ? Math.exp(-(T - C1.burst) / 0.35) : 0, on = T >= C1.burst ? 1 : 0;
+    for (const k of 'NSWE') { const w = walls[k]; w.tube.mat.color.copy(w.tube.base).multiplyScalar(on * (1 + 2.5 * burst)); w.seams.material.color.copy(hdr(PAL.mint, 0.22 * on)); }
+    floor.tube.mat.color.copy(floor.tube.base).multiplyScalar(on * (1 + 2.5 * burst)); floor.seams.material.color.copy(hdr(PAL.mint, 0.22 * on));
+    for (const f of flaps) { f.tube.mat.color.copy(f.tube.base).multiplyScalar(on); f.seams.material.color.copy(hdr(PAL.mint, 0.22 * on)); }
+    for (const k of 'NSWE') { const e = walls[k].eye, o = eyeOpen(k, T), pop = T >= eyeAt[k] ? Math.exp(-(T - eyeAt[k]) / 0.25) : 0;
+      e.g.scale.z = (k === 'N' ? 0.55 : 1) * o; e.g.scale.x = (k === 'N' ? 0.55 : 1) * (1 + 0.12 * (o > 1 ? o - 1 : 0) / 0.12);
+      e.lit.color.copy(hdr(PAL.lemon, (T < C1.burst ? 1.4 : 0.8 + 0.6 * Math.min(1, o)) + 2.5 * pop)); }
+    // 正面墙：盒子阶段 = 翻牌屏；③ 起 = 玻璃窗
+    const isGlass = T >= C1.slam.N - 0.05;
+    walls.N.solid.visible = walls.N.win.visible = !isGlass; glass.visible = isGlass; walls.N.eye.g.visible = !isGlass;
+    gMesh.visible = gGlass.visible = !isGlass && T >= C1.burst;   // 22.5–22.509 全黑只剩眼：表盘也不露
+    walls.N.seams.visible = !isGlass;
+    const gv = drawGauge(T), jolt = C1.eyes.reduce((a, [, t]) => a + (T >= t ? Math.exp(-(T - t) / 0.18) : 0), 0);
+    gMat.color.copy(hdr('#ffffff', T < C1.burst ? 0 : 1.0 + 0.5 * burst + 0.4 * jolt + 0.5 * clamp((gv - 0.7) / 0.3) * (0.5 + 0.5 * Math.sin(T * 30))));
+    gGlass.visible = gGlass.visible && T < C1.foom; placeShards(T); placeNote(T);
+    gLight.intensity = T < C1.burst || T >= C1.foom ? 0 : 2.2 + 0.8 * Math.min(1, jolt); gLight.color.set(gv > 0.62 ? '#ffb0b8' : '#fff1dc');
+    // 楼
+    const lowY = fy - RH * S;
+    for (const q of cells) {
+      let y, vis = true, lit;
+      if (q.r < RH) { y = lowY + q.r * S; vis = y + S > -1; lit = smooth((T - (C1.trap + 0.1 + (RH - 1 - q.r) * 0.09)) / 0.12); }
+      else { const land = rowLand(q.r), off = dropOff(land, T); y = q.r * S + off; vis = off < 1e3; lit = smooth((T - land - 0.04) / 0.1); }
+      const x = (q.c - 2) * S + wob(q.r, q.c, T);
+      q.g.position.set(x, y, towerZ); q.g.visible = vis;
+      const fl = lit * (0.85 + 0.15 * Math.sin(T * 7 + q.r * 1.3 + q.c));
+      q.backMat.color.copy(q.tint).multiplyScalar(0.25 + 1.1 * fl);
+      q.fr.mat.color.copy(q.fr.base).multiplyScalar(0.15 + 0.85 * lit);
+      // 克隆：和她同一副骨架，平移到这一间
+      const show = q.g.visible && lit > 0.3 && T >= C1.trap && T < C1.onRoof;
+      q.clone.visible = show;
+      if (show) { const d = V3(x - box.position.x, y - (box.position.y - 0.03), 0); q.clone.matrix.makeTranslation(d.x, d.y, d.z); q.clone.matrixWorldNeedsUpdate = true; }
+      // 蘑菇
+      const cp = q.cap, gr = eOut((T - cp.at) / (cp.big ? 0.35 : 0.5));
+      cp.g.visible = false;                              // #1046：窗里不再长蘑菇
+      if (cp.g.visible) { const breathe = 1 + 0.06 * Math.sin(T * 6 + q.r + q.c * 2); cp.g.scale.setScalar(cp.size * gr * breathe); }
+    }
+    lowRoof.position.set(0, fy - 0.17, towerZ); lowRoof.visible = T < C1.land[0] + 0.05;
+    roofSlab.position.set(wob(NR, 2, T), dropOff(C1.crown - 0.1, T) + ROOF + 0.25, towerZ);
+    roofSlab.visible = T >= C1.trap && dropOff(C1.crown - 0.1, T) < 1e3;
+    crown.position.set(wob(NR, 2, T), ROOF + 3.2 + dropOff(C1.crown, T), towerZ + HS - 0.3);
+    crown.visible = T >= C1.trap && dropOff(C1.crown, T) < 1e3 && T < C1.roof;   // 楼顶段起收掉（跃出时镜头在它后面）
+    drawCrown(T);
+    // 招牌
+    flipFOOM.forEach((s, i) => { const up = eOut((T - s.at) / 0.25); s.g.position.set((1.5 - i) * 4.9, fy + lerp(-3, 5.9, up), towerZ + HS + 1.2); s.g.rotation.y = Math.PI; /* 她身后、头顶上方，跟着楼一起冲上来 */ });
+    sShrooms3.g.position.set(-3.2 + wob(RH, 1, T), RH * S + 2.4, towerZ - HS - 0.5);   /* 她那扇窗右边（画面右）那一间的窗上，和她错开 */ sShrooms3.g.rotation.y = Math.PI;
+    sBag.forEach((s, i) => { s.g.position.set(s.x, RH * S - 0.8, towerZ - HS - 0.4);   /* 她那扇窗下沿下面一排 */ s.g.rotation.y = Math.PI; });
+    for (const s of allSigns) s.set(T);
+    for (const s of sSee) if (T >= C1.pov) s.g.visible = false;     // 主观镜头里让给倒计时
+    for (const s of flipFOOM) s.g.visible = T >= C1.foom - 0.02 && T < s.until;
+    sTrapRow.forEach(q => { q.g.position.set(q.x, RH * S - 2.5, towerZ - HS - 0.45); q.g.rotation.y = Math.PI; });   // 她那一层窗下沿（下面那层的上半截）
+    // 面具城 + 触手
+    facadeState(T); tentacles(T);
+    tentLight.intensity = T >= C1.roof ? lerp(0.6, 4.5, smooth((T - C1.pov) / 0.6)) : 0; tentRim.intensity = T >= C1.roof ? lerp(0.5, 3.5, smooth((T - C1.pov) / 0.6)) : 0;
+    // 灯：盒子阶段暗（眼 + 翻牌屏 + 灯管），出盒以后正常
+    const out = smooth((T - C1.foom) / 0.3);
+    const dark = T < C1.burst ? 0 : 1;                       // 22.5–22.509：接 v4-01 的全黑，只剩四只眼
+    for (const l of glKey) { l.userData.base ??= l.intensity; l.intensity = dark * l.userData.base * lerp(0.45, 1, out); }
+    hemi.intensity = dark * lerp(0.35, 0.5, out);
+    const far = T >= C1.swirl && T < C1.road; scene.fog.near = far ? 90 : 40; scene.fog.far = far ? 760 : 230; scene.fog.color.set(far ? '#0b0816' : '#06060b');   // 楼顶段：远处一层层淡进雾里（纵深）
+    R2.r.update(T, { d: Math.max(0, landD(T)), fold: 1 }); R2.r.group.visible = R2.ext.visible = R2.moon.visible = T >= C1.road;
+    // 她
+    placeGirl(T);
+    girl.setSkin('toon', T);
+    if (T < C1.burst) girl.root.visible = false;
+    scene.updateMatrixWorld(true);
+  }
+
+  // ================================================================ 镜头
+  const cam = new THREE.PerspectiveCamera(60, W / Hh, 0.05, 2000); scene.add(cam);
+  const shakeY = (T, list) => { let y = 0; for (const [t, a] of list) { const k = T - t; if (k > 0) y += a * Math.exp(-k * 9) * Math.sin(k * 55); } return y; };
+  function look(pos, tgt, fov, up = null) { cam.position.copy(pos); cam.up.copy(up ?? V3(0, 1, 0)); cam.lookAt(tgt); cam.fov = fov; cam.updateProjectionMatrix(); cam.updateMatrixWorld(true); }
+  const BL = p => box.localToWorld(p.clone());
+  // 盒内三个机位（#1046）：A1 她身后右侧（表 + N / W / E 三只眼睁开）→ 23.95 A2 反打她的脸（后墙那只眼在她头顶睁开）→ 24.75 A3 右后墙角高处看表进红区、她缩在左下墙角
+  const CAM_A = { a2: 23.72, a3: 24.30 };
+  const camA = T => {
+    const sh = shakeY(T, C1.eyes.map(([, t]) => [t, 0.03]).concat([[C1.burst, 0.06]]));
+    if (T < CAM_A.a2) { const u = smooth((T - 22.5) / 1.45); look(BL(V3(lerp(1.7, 1.55, u), 1.05 + sh, lerp(2.05, 1.8, u))), BL(V3(-0.25, 1.75, -2.2)), 72); return; }
+    if (false) { const hd = box.worldToLocal(girl.headPosition(V3())), u = smooth((T - CAM_A.a2) / 0.8);
+      look(BL(V3(hd.x + 0.35, hd.y - 0.02 + sh, hd.z - lerp(1.0, 0.85, u))), BL(V3(hd.x + 0.05, hd.y + 0.18, hd.z)), 50); return; }   // 跟着她的脸（和眼睛同高，五官层俯仰限 ±12°）；她身后后墙那只眼在画面上沿
+    look(BL(V3(1.5, 2.55 + sh, 1.95)), BL(V3(-0.35, 1.45, -2.2)), 72);
+  };
+  const camB = T => {    // FOOM：墙倒、楼把她顶上去 —— 镜头跟着往上、绕到楼前面仰看她和楼身上的 FOOM
+    const fy = floorY(T);
+    const p = pv([[C1.foom, 1.5, 2.55, 1.95], [25.74, 0.9, 4.6, 1.6], [25.98, 1.4, 1.6, -4.8], [C1.trap, 0.9, 0.5, -6.6]], T);
+    look(V3(p.x, fy + p.y + 0.03 + shakeY(T, [[C1.foom, 0.12]]), towerZ + p.z), V3(pchip([[C1.foom, -0.35], [25.74, -0.6]], T), fy + pchip([[C1.foom, 1.45], [25.74, 0.2], [25.98, 1.6], [C1.trap, 2.7]], T), towerZ + pchip([[C1.foom, -2.2], [25.74, -0.6], [C1.trap, 0]], T)), pchip([[C1.foom, 72], [25.74, 74], [C1.trap, 68]], T));
+  };
+  const camC = T => {    // Trapped：先在她窗前（玻璃砸上来），再急速拉远 → 整栋楼
+    const fy = floorY(T), u = smooth((T - 26.62) / 0.85);
+    const p = V3(lerp(0.9, 0, u), lerp(fy + 0.5, 8, u), towerZ + lerp(-6.6, -44, u));
+    const tg = V3(lerp(-0.6, 0, u), lerp(fy + 2.0, 25, u), towerZ);
+    look(p.add(V3(0, shakeY(T, [[C1.slam.N, 0.08], ...C1.land.map(t => [t, 0.05]), [C1.crown, 0.06]]), 0)), tg, lerp(68, 64, u));
+  };
+  const camD = T => {    // 推回她那扇窗（各房间里的她都在跳）；29.124 shrooms：顺着扭动的楼往上升，到楼顶甩到身后，正好落在楼顶镜头的第一帧（面具城的亮窗正在拼笑脸）
+    const fy = floorY(T), u = smooth((T - C1.shroom) / 0.5);
+    const p0 = V3(lerp(0.3, -0.4, u), fy + lerp(1.0, 1.5, u), towerZ - HS + lerp(-15, -6.8, u)), t0 = V3(-0.5 * u, fy + lerp(0.6, 1.0, u), towerZ);
+    if (T < C1.swirl) { look(p0, t0, lerp(52, 48, u)); return; }
+    const e = ROOF_P.clone(), E0 = e.clone().add(V3(1.5, 2.0, 3.6)), ET = V3(faceW.x * 0.55, 62, FC.z);
+    const a = smooth((T - C1.swirl) / 0.5), b = smooth((T - (C1.swirl + 0.42)) / (C1.roof - C1.swirl - 0.42));
+    const up = p0.clone().lerp(V3(0.5, ROOF + 7, towerZ - 12), a), upT = t0.clone().lerp(V3(0, ROOF - 2, towerZ), a);
+    look(up.lerp(E0, b), upT.lerp(ET, b), lerp(lerp(48, 58, a), 46, b));
+  };
+  const camE = T => {    // 楼顶：她右肩后方，看向面具城；32.0 起慢推
+    const u = smooth((T - 31.0) / 2.4), hd = ROOF_P.clone();
+    look(hd.clone().add(V3(lerp(1.5, 1.1, u), lerp(2.0, 1.85, u), lerp(3.6, 2.4, u))), V3(faceW.x * lerp(0.55, 0.75, u), lerp(62, 68, u), FC.z), lerp(46, 34, u));
+  };
+  const camG = T => {    // 她的视角（护目镜里）
+    const u = smooth((T - C1.pov) / 1.5);
+    look(ROOF_P.clone().add(V3(0, 1.75, 0)), faceW.clone().add(V3(0, 4, 0)), lerp(36, 27, u));
+  };
+  const camH = T => {    // 跃出楼顶：身后跟拍，冲出楼沿时往下看
+    const p = girl.root.position, u = smooth((T - leapOff) / 0.4);
+    look(V3(p.x + 1.2, ROOF + lerp(1.9, 3.2, u), Math.max(p.z + lerp(3.4, 2.2, u), towerZ - HS - 0.6 + lerp(3.4, 0, u))), V3(p.x, p.y + lerp(1.2, -3.5, u), p.z - lerp(3, 5, u)), lerp(60, 70, u));
+  };
+  // 路上：v4-03 的 chase（38.4 时 back 3.6、lat -0.8、up 0.45、ahead 6、lookUp 0.9、fov 60，含跑步微震）
+  const stepShake = T => { const per = 0.533 / 1.8 / 2, ph = (((T - 38.0) % per) + per) % per / per; return Math.exp(-ph * 7) * 0.035; };
+  const camR = T => {
+    const d = landD(T), k = smooth((T - C1.road) / 0.4);
+    const back = lerp(5.5, 3.6, k), up = lerp(2.4, 0.45, k), fc = R2.frameAt(d - back, -0.8), fa = R2.frameAt(d + 6, 0), sh = stepShake(T) * smooth((T - 38.15) / 0.1);
+    cam.position.copy(fc.pos).addScaledVector(fc.up, up + sh).addScaledVector(fc.side, sh * 0.4); cam.up.copy(fc.up);
+    cam.lookAt(fa.pos.addScaledVector(fa.up, lerp(0.2, 0.9, k))); cam.fov = 60; cam.updateProjectionMatrix(); cam.updateMatrixWorld(true);
+  };
+
+  // 屏幕速度线（照搬 v4-03a 的 drawSpeedLines：边缘放射、按帧号换一批）。38.15 起渐强到 v4-03 起跑那一镜的强度 0.35
+  const NSL = 90, slPos = new Float32Array(NSL * 6), slGeo = new THREE.BufferGeometry(); slGeo.setAttribute('position', new THREE.BufferAttribute(slPos, 3));
+  const slMat = new THREE.LineBasicMaterial({ color: col(PAL.paper).multiplyScalar(1.3), transparent: true, opacity: 0.5, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending });
+  const speedLines = new THREE.LineSegments(slGeo, slMat); speedLines.frustumCulled = false; speedLines.renderOrder = 20; cam.add(speedLines);
+  const hash = (a, b) => { let h = Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  function drawSpeedLines(T) {
+    const amt = T >= 38.15 ? 0.35 * smooth((T - 38.15) / 0.25) : 0;
+    speedLines.visible = amt > 0.02; if (!speedLines.visible) return;
+    const f = Math.floor(T * 30), z = -1, hh = Math.tan(cam.fov * D2R / 2), ww = hh * cam.aspect;
+    for (let i = 0; i < NSL; i++) {
+      const a = hash(i, f) * Math.PI * 2, r0 = lerp(0.55, 0.95, hash(i + 99, f)), len = lerp(0.08, 0.35, hash(i + 7, f)) * (0.5 + amt), on = hash(i + 55, f) < amt;
+      slPos.set(on ? [Math.cos(a) * r0 * ww, Math.sin(a) * r0 * hh, z, Math.cos(a) * (r0 + len) * ww, Math.sin(a) * (r0 + len) * hh, z] : [0, 0, z, 0, 0, z], i * 6);
+    }
+    slGeo.attributes.position.needsUpdate = true; slMat.opacity = 0.35 + 0.35 * amt;
+  }
+
+  // ================================================================ ⑥ 2D 关键画：拉下护目镜
+  const s2 = new THREE.Scene(); s2.background = col('#07070d');
+  const oc = new THREE.OrthographicCamera(-8, 8, 4.5, -4.5, 0.1, 100); oc.position.z = 10;
+  const ld = new THREE.TextureLoader(), K = n => new URL(`../fresh/c1-v4/k2d/cut-${n}.png`, import.meta.url).href;
+  const tex2 = await Promise.all(['A', 'B2', 'C2', 'C2open'].map(n => ld.loadAsync(K(n))));
+  tex2.forEach(t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; });
+  // #1046：拉护目镜换成 Wan 图生视频（首帧 neutral → 尾帧红眼）的逐帧抠图（16 fps，41 帧，按 t 取最近一帧，视频本身不播放）
+  const VDIR = new URL('../fresh/c1-v4/i2v/', import.meta.url), VMETA = await (await fetch(new URL('meta.json', VDIR))).json();
+  const vtex = await Promise.all(Array.from({ length: VMETA.frames }, (_, i) => ld.loadAsync(new URL(`f-${String(i).padStart(3, '0')}.png`, VDIR).href)));
+  vtex.forEach(t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; });
+  const VDUR = VMETA.frames / VMETA.fps, SNAP = C1.d2 + VMETA.red * (C1.pov - C1.d2) / VDUR;   // 2.3 s 镜头放完 2.56 s 视频；闪光 / 抖动 / HUD 挪到红眼亮起那一刻（≈34.52）
+  const IMH = 13.2, IMW = IMH * 832 / 1248;
+  const charMat = new THREE.MeshBasicMaterial({ map: tex2[0], transparent: true });
+  const charM = new THREE.Mesh(new THREE.PlaneGeometry(IMW, IMH), charMat); charM.position.z = 1; s2.add(charM);
+  // 镜片里的红色 HUD（贴在关键画上，按原图像素坐标画）
+  const hudC = document.createElement('canvas'); hudC.width = 832; hudC.height = 1248; const hg = hudC.getContext('2d');
+  const hudT = new THREE.CanvasTexture(hudC); hudT.colorSpace = THREE.SRGBColorSpace;
+  const hudM = new THREE.Mesh(new THREE.PlaneGeometry(IMW, IMH), new THREE.MeshBasicMaterial({ map: hudT, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  hudM.position.z = 1.1; s2.add(hudM);
+  // 背景：虚化的霓虹城（纯 canvas，种子固定）
+  const bgC = document.createElement('canvas'); bgC.width = 1600; bgC.height = 900;
+  { const g = bgC.getContext('2d'), rnd = mulberry32(2024), gr = g.createLinearGradient(0, 0, 0, 900); gr.addColorStop(0, '#0b0820'); gr.addColorStop(1, '#170a22'); g.fillStyle = gr; g.fillRect(0, 0, 1600, 900);
+    g.filter = 'blur(18px)';
+    for (let i = 0; i < 70; i++) { const c = [PAL.pink, PAL.mint, PAL.lemon, '#ffe2a8'][Math.floor(rnd() * 4)]; g.globalAlpha = 0.25 + rnd() * 0.45; g.fillStyle = c; const x = rnd() * 1600, y = 300 + rnd() * 600, r = 12 + rnd() * 50; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+    g.globalAlpha = 0.85; g.fillStyle = PAL.pink; g.beginPath(); g.arc(330, 190, 110, 0, 7); g.fill(); }
+  const bgT = new THREE.CanvasTexture(bgC); bgT.colorSpace = THREE.SRGBColorSpace;
+  const bgM = new THREE.Mesh(new THREE.PlaneGeometry(18, 10.2), new THREE.MeshBasicMaterial({ map: bgT })); bgM.position.z = -5; s2.add(bgM);
+  const s2Signs = [['WITH YOUR', PAL.mint, wt(L.eyes, 0)], ['SHINIGAMI', PAL.pink, wt(L.eyes, 2)], ['EYES', PAL.lemon, wt(L.eyes, 3)]].map(([t, c, at], i) => {
+    const s = makeSign(t, c, i === 1 ? 1.15 : 0.9); s.at = at; s2.add(s.g); s.g.position.set(-7.4 + s.bw / 2, 2.0 - i * 1.75, 2); return s; });
+  const EYE_PX = [[296, 386], [509, 386]];
+  function draw2D(T) {
+    const k = T - C1.d2;
+    const phase = T < SNAP ? 1 : 2;
+    charMat.map = vtex[Math.min(VMETA.frames - 1, Math.max(0, Math.floor(k * VDUR / (C1.pov - C1.d2) * VMETA.fps)))];
+    const pullY = 0;                                         // 拉的动作视频里已经有了
+    const snapK = T >= SNAP ? Math.exp(-(T - SNAP) / 0.08) : 0;
+    const sc = 1 + 0.05 * smooth(k / 2.3);
+    charM.scale.setScalar(sc); hudM.scale.setScalar(sc);
+    charM.position.set(3.7 - 0.25 * smooth(k / 2.3), -0.75 + pullY - 0.12 * snapK, 1); hudM.position.set(charM.position.x, charM.position.y, 1.1);
+    bgM.position.x = 0.3 * smooth(k / 2.3);
+    // 镜片里的 HUD：红眼亮起之后，两只眼各一圈准星 + 一行小字
+    hg.clearRect(0, 0, 832, 1248);
+    const on = phase === 2 ? smooth((T - SNAP - 0.08) / 0.25) : 0;
+    if (on > 0) {
+      hg.globalAlpha = on; hg.strokeStyle = '#ff3040'; hg.fillStyle = '#ff3040'; hg.lineWidth = 3;
+      for (const [x, y] of EYE_PX) { const r = 34 + 6 * Math.sin(T * 8); hg.beginPath(); hg.arc(x, y, r, 0, 7); hg.stroke(); for (let a = 0; a < 4; a++) { const th = a * Math.PI / 2 + T * 1.5; hg.beginPath(); hg.moveTo(x + Math.cos(th) * (r + 6), y + Math.sin(th) * (r + 6)); hg.lineTo(x + Math.cos(th) * (r + 18), y + Math.sin(th) * (r + 18)); hg.stroke(); } }
+      hg.font = `22px ${FONT}`; hg.fillText('SHOGGOTH  00:00:0' + Math.max(0, Math.ceil(C1.hud0 - T)), 236, 350); hg.fillText('P(DOOM) 0.99', 470, 486);
+      hg.globalAlpha = 0.18 * on; hg.fillRect(222, 330 + ((T * 260) % 160), 390, 3);
+    }
+    hudT.needsUpdate = true;
+    for (const s of s2Signs) s.set(T, { dim: 0.18 });
+    oc.updateMatrixWorld(true);
+    return { flash: snapK > 0.01 ? { amount: 0.35 * snapK, color: '#ff4060' } : 0, shake: snapK };
+  }
+
+  // ================================================================ ①b 2D 近景（23.72–24.30，#1046 返修：3D 不拍脸近景）：她仰头盯着左边那块表，惊恐；
+  //   表就是盒子里那块（同一张贴图，指针实时跳），23.866 她身后后墙那只眼睁开
+  const s4 = new THREE.Scene(); s4.background = col('#0b0a16');
+  { // 她身后 = 盒子内部：两面深色墙板在后角相交（接缝网格 + 墙角 / 墙边的粉、薄荷霓虹灯管），左边那块表的光打在墙上（暖白 → 红）
+    const c = document.createElement('canvas'); c.width = 1600; c.height = 900; const g = c.getContext('2d');
+    const wall = (pts, c0, c1) => { const gr = g.createLinearGradient(pts[0][0], 0, pts[1][0], 0); gr.addColorStop(0, c0); gr.addColorStop(1, c1); g.fillStyle = gr; g.beginPath(); pts.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); };
+    const CX = 980;                                                // 后墙角（在她身后偏左）
+    wall([[0, -40], [CX, 120], [CX, 760], [0, 960]], '#2c2c48', '#3a3b5e');
+    wall([[CX, 120], [1640, -60], [1640, 980], [CX, 760]], '#363856', '#26263c');
+    g.fillStyle = '#1c1a2c'; g.beginPath(); g.moveTo(0, 960); g.lineTo(CX, 760); g.lineTo(1640, 980); g.lineTo(1640, 900); g.lineTo(0, 900); g.fill();
+    g.strokeStyle = 'rgba(95,227,192,0.22)'; g.lineWidth = 2;
+    for (let k = 1; k < 4; k++) { const f = k / 4; g.beginPath(); g.moveTo(CX * f, -40 + 160 * f); g.lineTo(CX * f, 960 - 200 * f); g.stroke(); g.beginPath(); g.moveTo(CX + (1640 - CX) * f, 120 - 180 * f); g.lineTo(CX + (1640 - CX) * f, 760 + 220 * f); g.stroke(); }
+    for (let k = 1; k < 4; k++) { const f = k / 4; g.beginPath(); g.moveTo(0, -40 + 1000 * f); g.lineTo(CX, 120 + 640 * f); g.lineTo(1640, -60 + 1040 * f); g.stroke(); }
+    const tube = (pts, color) => { g.save(); g.strokeStyle = color; g.shadowColor = color; g.shadowBlur = 28; g.lineWidth = 9; g.beginPath(); pts.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); g.restore(); };
+    tube([[CX, 120], [CX, 760]], PAL.pink); tube([[0, 960], [CX, 760], [1640, 980]], PAL.mint); tube([[0, -40], [CX, 120], [1640, -60]], PAL.pink);
+    const lg = g.createRadialGradient(260, 420, 10, 260, 420, 620); lg.addColorStop(0, 'rgba(255,214,190,0.55)'); lg.addColorStop(0.5, 'rgba(255,120,140,0.18)'); lg.addColorStop(1, 'rgba(255,120,140,0)'); g.fillStyle = lg; g.fillRect(0, 0, 1600, 900);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(18, 10.2), new THREE.MeshBasicMaterial({ map: t })); m.position.z = -5; s4.add(m); }
+  const s4EyeW = makeEye(0.55, { flat: false }); s4EyeW.g.position.set(-3.6, 3.3, -4); s4EyeW.g.scale.set(0.8, 1, 1); s4.add(s4EyeW.g);   // 左墙那只眼（已经睁开）
+  const s4Eye = makeEye(0.75, { flat: false }); s4Eye.g.position.set(5.9, 3.2, -4); s4Eye.g.scale.set(0.82, 1, 1); s4.add(s4Eye.g);   // 后墙（右墙板）那只眼：23.866 睁开
+  const s4Gauge = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 7.6), new THREE.MeshBasicMaterial({ map: gTex, transparent: true })); s4Gauge.position.set(-5.2, 0.9, 0.5); s4Gauge.rotation.y = 0.35; s4.add(s4Gauge);
+  const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'), r = g.createRadialGradient(128, 128, 0, 128, 128, 128); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c); })();
+  const s4Glow = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, color: col('#ffd2b0') })); s4Glow.position.set(-2.5, 1.5, 1.5); s4.add(s4Glow);
+  const gTexImg = await ld.loadAsync(new URL('../fresh/c1-v4/k2d-gauge/cut-g2.png', import.meta.url).href); gTexImg.colorSpace = THREE.SRGBColorSpace; gTexImg.anisotropy = 8;
+  const s4Girl = new THREE.Mesh(new THREE.PlaneGeometry(IMW, IMH), new THREE.MeshBasicMaterial({ map: gTexImg, transparent: true })); s4Girl.position.z = 1; s4.add(s4Girl);
+  function drawGauge2D(T) {
+    const k = T - CAM_A.a2, v = drawGauge(T), jolt = C1.eyes.reduce((a, [, t]) => a + (T >= t ? Math.exp(-(T - t) / 0.18) : 0), 0);
+    const o = eyeOpen('S', T); s4Eye.g.scale.set(1, Math.max(0.12, o), 1); s4Eye.lit.color.copy(hdr(PAL.lemon, 0.8 + 0.6 * Math.min(1, o) + (T >= eyeAt.S ? 2.5 * Math.exp(-(T - eyeAt.S) / 0.25) : 0)));
+    const sh = 0.04 * Math.sin(T * 63) * (0.4 + Math.min(1, jolt));
+    s4Girl.scale.setScalar(1.08 + 0.05 * smooth(k / 0.58)); s4Girl.position.set(3.5 + sh, -0.95 + 0.5 * sh, 1);
+    s4Glow.material.color.copy(col(v > 0.62 ? '#ff8090' : '#ffd2b0')).multiplyScalar(0.35 + 0.35 * Math.min(1, jolt));
+    s4Gauge.material.color.setScalar(1.0 + 0.4 * Math.min(1, jolt));
+    oc.updateMatrixWorld(true);
+    return { flash: T >= eyeAt.S ? { amount: 0.22 * Math.exp(-(T - eyeAt.S) / 0.1), color: '#fff2b0' } : 0 };
+  }
+  // ⑥b 2D（37.05–37.315）：HUD 结束，她把护目镜推回额头（图生视频倒着放：红眼灭掉、镜片推上去），再接跳楼。衔接表：护目镜全片默认在额头
+  function drawGogglesUp(T) {
+    const u = clamp((T - C1.hud0) / (C1.zero - C1.hud0));
+    charMat.map = vtex[Math.round((1 - u) * (VMETA.frames - 1))];
+    charM.scale.setScalar(1.05); hudM.scale.setScalar(1.05); charM.position.set(3.45, -0.75, 1); hudM.position.set(3.45, -0.75, 1.1); bgM.position.x = 0.3;
+    hg.clearRect(0, 0, 832, 1248); hudT.needsUpdate = true;
+    for (const st of s2Signs) st.set(T, { dim: 0.18 });
+    oc.position.set(0, 0, 10); oc.updateMatrixWorld(true);
+  }
+
+  // ================================================================ ④b 2D：吃蘑菇 → 幻觉（#1046）。28.55 看一眼纸条上的蘑菇 → 28.86 丢进嘴里 → 29.12 shrooms：瞳孔彩色漩涡、画面融化，
+  //   外圈变万花筒、中间的亮窗慢慢拼成那张笑脸 → 29.907 切楼顶（那边亮窗接着拼成笑脸面具）
+  const s3 = new THREE.Scene(); s3.background = col('#07070d');
+  const KS = n => new URL(`../fresh/c1-v4/k2d-shroom/cut-${n}.png`, import.meta.url).href;
+  const tex3 = await Promise.all(['a2', 'b2', 'c1'].map(n => ld.loadAsync(KS(n))));
+  tex3.forEach(t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; });
+  const bg3 = new THREE.Mesh(new THREE.PlaneGeometry(18, 10.2), new THREE.MeshBasicMaterial({ map: bgT })); bg3.position.z = -5; s3.add(bg3);
+  const meltMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false,
+    uniforms: { map: { value: tex3[0] }, uWarp: { value: 0 }, uT: { value: 0 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform sampler2D map; uniform float uWarp, uT; varying vec2 vUv;
+      vec3 hue(vec3 c, float h){ const vec3 k = vec3(0.57735); float ca = cos(h); return c * ca + cross(k, c) * sin(h) + k * dot(k, c) * (1.0 - ca); }
+      void main(){ vec2 uv = vUv; float w = uWarp;
+        uv.x += w * 0.018 * sin(uv.y * 22.0 + uT * 7.0); uv.y += w * 0.025 * (0.5 + 0.5 * sin(uv.x * 9.0 - uT * 4.0)) * uv.y;   // 往下淌
+        vec4 c = texture2D(map, uv); if (c.a < 0.02) discard;
+        c.rgb = mix(c.rgb, hue(c.rgb, w * (uv.y * 2.0 + uT * 1.5)), w * 0.12);   // 她本人只轻微偏色（固有色不换）
+        gl_FragColor = vec4(c.rgb, c.a);
+        #include <colorspace_fragment>
+      }` });
+  const eatM = new THREE.Mesh(new THREE.PlaneGeometry(IMW, IMH), meltMat); eatM.position.z = 1; s3.add(eatM);
+  // 万花筒：外圈把一张「亮窗」格子按 6 瓣折叠旋转；中间那块不折叠，格子慢慢拼成笑脸（uForm 0 → 1）
+  const kalMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, depthTest: false,
+    uniforms: { uT: { value: 0 }, uOp: { value: 0 }, uForm: { value: 0 }, uAsp: { value: 16 / 9 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform float uT, uOp, uForm, uAsp; varying vec2 vUv;
+      float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+      vec3 win(vec2 p, float form){
+        vec2 g = p * 26.0, c = floor(g), f = fract(g);
+        float inWin = step(0.18, f.x) * step(f.x, 0.82) * step(0.2, f.y) * step(f.y, 0.8);
+        vec2 q = (c + 0.5) / 26.0; float d = length(q);
+        float eyes = step(length((q - vec2(-0.12, 0.08)) * vec2(1.0, 1.6)), 0.05) + step(length((q - vec2(0.12, 0.08)) * vec2(1.0, 1.6)), 0.05);
+        float md = length(q - vec2(0.0, 0.05)), mouth = step(0.17, md) * step(md, 0.215) * step(q.y, -0.02);
+        float smile = step(d, 0.32) * (1.0 - min(1.0, eyes + mouth));
+        float rnd = step(0.55, h(c + floor(uT * 3.0)));
+        float lit = mix(rnd, smile, form);
+        vec3 tint = mix(mix(vec3(1.0, 0.18, 0.53), vec3(0.37, 0.89, 0.75), h(c + 3.1)), vec3(0.96, 0.88, 0.3), mix(step(0.6, h(c + 7.7)), smile, form));
+        return tint * lit * inWin * 1.6 + vec3(0.04, 0.03, 0.08);
+      }
+      void main(){ vec2 p = (vUv - 0.5) * vec2(uAsp, 1.0); float r = length(p), a = atan(p.y, p.x);
+        vec3 c;
+        if (r > 0.36) { float seg = 6.2831853 / 6.0; a = mod(a + uT * 0.6, seg); a = abs(a - seg * 0.5); vec2 k = r * vec2(cos(a), sin(a)); c = win(k * (1.0 + 0.15 * sin(uT * 2.0)), 0.0) * (1.0 - 0.4 * uForm); }
+        else c = win(p, uForm);
+        gl_FragColor = vec4(c, uOp);
+        #include <colorspace_fragment>
+      }` });
+  const kal = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), kalMat); kal.position.z = 1.5; kal.renderOrder = 5; s3.add(kal);
+  const s3Signs = [['WITH A', PAL.mint, wt(L.bag, 0), 0.85], ['BAG OF', PAL.lemon, wt(L.bag, 2), 0.85], ['SHROOMS', PAL.pink, wt(L.bag, 4), 1.25]].map(([t, c, at, th], i) => {
+    const st = makeSign(t, c, th); st.at = at; st.until = L.bag.end; s3.add(st.g); st.g.position.set(-7.3 + st.bw / 2, 2.0 - i * 1.8, 2); st.g.renderOrder = 6; st.m.material.depthTest = false; return st; });
+  function drawEat(T) {
+    const k = T - C1.cut2d, tr = T - C1.swirl;
+    meltMat.uniforms.map.value = T < C1.eat ? tex3[0] : T < C1.swirl ? tex3[1] : tex3[2];
+    const warp = smooth(tr / 0.5); meltMat.uniforms.uWarp.value = warp; meltMat.uniforms.uT.value = T;
+    const sc = 1 + 0.06 * smooth(k / 1.35) + (T >= C1.eat && T < C1.swirl ? 0.03 * Math.exp(-(T - C1.eat) / 0.15) : 0);
+    eatM.scale.setScalar(sc); eatM.position.set(3.7 - 0.2 * smooth(k / 1.35), -0.75, 1);
+    kalMat.uniforms.uT.value = T; kalMat.uniforms.uOp.value = 0.9 * smooth((T - 29.42) / 0.3); kalMat.uniforms.uForm.value = smooth((T - 29.55) / 0.33);
+    bg3.material.color.setHSL((T * 0.6) % 1, 0.9 * warp, 1 - 0.45 * warp);   // 幻觉调色只作用在背景（和外圈万花筒）
+    for (const st of s3Signs) st.set(T, { dim: 0.18 });
+    return { flash: tr > 0 ? { amount: 0.3 * Math.exp(-tr / 0.12), color: '#c8a0ff' } : 0, chroma: 0.08 + 0.5 * warp };
+  }
+
+  // ================================================================ ⑦ HUD（她的视角）：镜片框 + 红色准星 + 倒计时（画在镜头前的一张 canvas 上）
+  const hC = document.createElement('canvas'); hC.width = W; hC.height = Hh; const hx = hC.getContext('2d');
+  const hT = new THREE.CanvasTexture(hC); hT.colorSpace = THREE.SRGBColorSpace;
+  const hudPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: hT, transparent: true, depthTest: false, depthWrite: false, toneMapped: false }));
+  hudPlane.renderOrder = 50; cam.add(hudPlane);
+  function drawHUD(T) {
+    hudPlane.visible = T >= C1.pov && T < C1.hud0;
+    if (!hudPlane.visible) return;
+    const hh = 2 * Math.tan(cam.fov * D2R / 2) * 0.5; hudPlane.position.set(0, 0, -0.5); hudPlane.scale.set(hh * W / Hh, hh, 1);
+    const u = Hh / 540; hx.clearRect(0, 0, W, Hh);
+    // 镜片框：灰色半透明镜片（整屏轻微压灰）+ 黑色框边（圆角宽带形）
+    hx.fillStyle = 'rgba(150,160,170,0.10)'; hx.fillRect(0, 0, W, Hh);
+    hx.save(); hx.beginPath(); hx.rect(0, 0, W, Hh); hx.roundRect(W * 0.035, Hh * 0.07, W * 0.93, Hh * 0.86, Hh * 0.2); hx.fillStyle = 'rgba(20,22,28,0.94)'; hx.fill('evenodd'); hx.restore();
+    // 目标框
+    const p = faceW.clone().project(cam), q = faceW.clone().add(V3(face.R * cw, 0, 0)).project(cam);
+    const cx = (p.x + 1) / 2 * W, cy = (1 - p.y) / 2 * Hh, r = Math.abs(q.x - p.x) / 2 * W * 1.05;
+    const red = '#ff2a3a', a = smooth((T - C1.pov) / 0.2);
+    hx.globalAlpha = a; hx.strokeStyle = red; hx.fillStyle = red; hx.lineWidth = 3 * u;
+    const bx0 = cx - r, by0 = cy - r * 0.95, bx1 = cx + r, by1 = cy + r * 0.95, L2 = r * 0.28;
+    for (const [x, y, sx, sy] of [[bx0, by0, 1, 1], [bx1, by0, -1, 1], [bx0, by1, 1, -1], [bx1, by1, -1, -1]]) { hx.beginPath(); hx.moveTo(x + sx * L2, y); hx.lineTo(x, y); hx.lineTo(x, y + sy * L2); hx.stroke(); }
+    const left = Math.max(0, C1.hud0 - T), ss = Math.floor(left), cc = Math.floor((left - ss) * 100);
+    hx.font = `${Math.round(40 * u)}px ${FONT}`; hx.textAlign = 'left'; hx.textBaseline = 'bottom';
+    hx.fillText('SHOGGOTH', bx0, by0 - 8 * u);
+    hx.font = `${Math.round(48 * u)}px ${FONT}`; hx.textBaseline = 'top';
+    hx.fillText(`00:00:0${ss}.${String(cc).padStart(2, '0')}`, bx0, by1 + 8 * u);
+    hx.font = `${Math.round(30 * u)}px ${FONT}`; hx.fillText('P(DOOM) 0.99', W * 0.07, Hh * 0.79);
+    hx.textAlign = 'right'; hx.fillText(T < C1.pov + 0.15 ? 'SCAN' : T < C1.pov + 1.3 ? 'BURNING MASK' : 'TRUE FORM', W * 0.93, Hh * 0.12);
+    hx.globalAlpha = 0.08 * a; for (let y = 0; y < Hh; y += 4 * u) hx.fillRect(0, y, W, u);   // 扫描线
+    hx.globalAlpha = 1;
+    hT.needsUpdate = true;
+  }
+
+  // ================================================================ 镜头表
+  const postBase = (T, extra = {}) => ({ bloom: { strength: 0.8, threshold: 1.0 }, chroma: 0.1 + 0.3 * kick(T), grade: { vignette: 0.38 }, ...extra });
+  const face3d = (T) => { if (girl.face && girl.root.visible) window.__facePose = girl.face.update(T, { camera: cam, expression: T < C1.foom ? (T > 22.98 ? 'surprised' : 'neutral') : undefined }); };
+  const shot3d = (id, t0, t1, camFn, extra = () => ({}), { faceOn = true, hide = false } = {}) => ({
+    id, t0, t1, transitionIn: { kind: 'cut' }, build() { return {}; },
+    update(_, T) { world(T); camFn(T); tentEyes(cam); drawSpeedLines(T); if (hide) girl.root.visible = false; drawHUD(T); if (faceOn) face3d(T); return { scene, camera: cam, post: postBase(T, extra(T)) }; },
+  });
+  const shots = [
+    { id: 'c1-gauge2d', t0: CAM_A.a2, t1: CAM_A.a3, transitionIn: { kind: 'cut' }, build() { return {}; },
+      update(_, T) { const r = drawGauge2D(T); return { scene: s4, camera: oc, post: { bloom: { strength: 0.6, threshold: 1.1 }, chroma: 0.1 + 0.3 * kick(T), grade: { vignette: 0.4 }, flash: r.flash } }; } },
+    shot3d('c1-box', C1.t0, CAM_A.a2, camA, T => ({ flash: T >= C1.burst ? { amount: 0.55 * Math.exp(-(T - C1.burst) / 0.12) + C1.eyes.reduce((a, [, t]) => a + (T >= t ? 0.22 * Math.exp(-(T - t) / 0.1) : 0), 0), color: '#fff2b0' } : 0, chroma: 0.1 + 0.3 * kick(T) + 0.5 * (T >= C1.burst ? Math.exp(-(T - C1.burst) / 0.2) : 0) })),
+    shot3d('c1-box2', CAM_A.a3, C1.foom, camA, T => ({ flash: T >= C1.burst ? { amount: 0.55 * Math.exp(-(T - C1.burst) / 0.12) + C1.eyes.reduce((a, [, t]) => a + (T >= t ? 0.22 * Math.exp(-(T - t) / 0.1) : 0), 0), color: '#fff2b0' } : 0, chroma: 0.1 + 0.3 * kick(T) + 0.5 * (T >= C1.burst ? Math.exp(-(T - C1.burst) / 0.2) : 0) })),
+    shot3d('c1-foom', C1.foom, C1.trap, camB, T => ({ flash: { amount: 0.4 * Math.exp(-(T - C1.foom) / 0.1), color: '#ffffff' }, chroma: 0.15 + 0.9 * Math.exp(-(T - C1.foom) / 0.25) })),
+    shot3d('c1-room', C1.trap, C1.shroom, camC),
+    shot3d('c1-shroom', C1.shroom, C1.roof, camD, T => { const h = smooth((T - C1.swirl) / 0.3); return { bloom: { strength: 0.6 + 0.4 * h, threshold: 1.1 }, chroma: 0.12 + 0.6 * h, grade: { vignette: 0.38, saturation: 1.15 + 0.4 * h, tint: '#' + new THREE.Color().setHSL(((T - C1.swirl) * 1.4) % 1, 1, 0.6).getHexString(), tintAmount: 0.28 * h } }; }),   // shrooms：整个画面色相循环（幻觉），不切 2D
+    shot3d('c1-roof', C1.roof, C1.d2, camE),
+    { id: 'c1-eyes2d', t0: C1.d2, t1: C1.pov, transitionIn: { kind: 'cut' }, build() { return {}; },
+      update(_, T) { const r = draw2D(T); oc.position.set(0.04 * r.shake * Math.sin(T * 90), 0.04 * r.shake * Math.cos(T * 77), 10); return { scene: s2, camera: oc, post: { bloom: { strength: 0.5, threshold: 1.2 }, chroma: 0.08 + 0.4 * r.shake, grade: { vignette: 0.32 }, flash: r.flash } }; } },
+    shot3d('c1-pov', C1.pov, C1.hud0, camG, T => ({ grade: { vignette: 0.2, tint: '#ff3040', tintAmount: 0.12 } }), { hide: true, faceOn: false }),
+    shot3d('c1-leap', C1.zero, C1.road, camH, T => ({ flash: { amount: 0.35 * Math.exp(-(T - C1.zero) / 0.1), color: '#ff3040' } })),
+    shot3d('c1-land', C1.road, C1.end, camR, T => ({ chroma: 0.1 + 0.25 * 0.35 + 0.3 * kick(T) })),
+  ];
+
+  // ================================================================ 自检：window.__c1Check() —— 脚滑 / 招牌被她挡 / 唱到时字高 / 画面有没有在动
+  window.__c1Check = ({ fps = 30, t0 = C1.t0, t1 = C1.end } = {}) => {
+    const out = { slide: [], signHit: [], textPx: [], still: [] }, prev = {};
+    const KEYS = ['Head', 'Hips', 'LeftHand', 'RightHand', 'LeftFoot', 'RightFoot', 'LeftToeBase', 'RightToeBase'];
+    let lastMove = t0, lastImg = null;
+    for (let f = Math.round(t0 * fps); f <= Math.round(t1 * fps); f++) {
+      const T = f / fps, sh = shots.find(s => T >= s.t0 && T < s.t1); if (!sh) continue;
+      if (sh.id === 'c1-eyes2d') continue;
+      sh.update(null, T); scene.updateMatrixWorld(true);
+      const rel = T < C1.roof ? box.position.clone().setY(0) : V3(), P = Object.fromEntries(KEYS.map(k => [k, I[k].bone.getWorldPosition(V3()).sub(rel)]));
+      const ground = T < C1.roof ? box.position.y : T < C1.road ? ROOF + 0.25 : R2.frameAt(landD(T)).pos.y;
+      const onRoad = T >= C1.road;
+      const vs = ['LeftToeBase', 'RightToeBase'].filter(k => prev[k] && prev.T === sh.id && P[k].y - ground < 0.1 && prev[k].y - ground < 0.1).map(k => Math.hypot(P[k].x - prev[k].x, P[k].z - prev[k].z) * fps - (onRoad ? vRoad(T) : 0));
+      if (vs.length && Math.min(...vs.map(Math.abs)) > 0.15 && !(T >= C1.zero && T < C1.road)) out.slide.push({ T: +T.toFixed(3), v: +Math.min(...vs.map(Math.abs)).toFixed(2), shot: sh.id });
+      for (const k of KEYS) prev[k] = P[k]; prev.T = sh.id;
+      // 她的屏幕框
+      const ndc = KEYS.map(k => P[k].clone().add(rel).project(cam)), vis = girl.root.visible;
+      const gb = { x0: Math.min(...ndc.map(p => p.x)) - 0.04, x1: Math.max(...ndc.map(p => p.x)) + 0.04, y0: Math.min(...ndc.map(p => p.y)) - 0.05, y1: Math.max(...ndc.map(p => p.y)) + 0.09 };
+      for (const s of allSigns) {
+        let shown = T >= s.at; for (let o = s.g; o && shown; o = o.parent) shown = o.visible;
+        if (!shown) continue;
+        s.g.updateMatrixWorld(true);
+        const cs = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => s.m.localToWorld(V3(a * s.bw / 2, b * s.bh / 2, 0)).project(cam));
+        if (cs.some(p => p.z > 1)) continue;
+        const r = { x0: Math.min(...cs.map(p => p.x)), x1: Math.max(...cs.map(p => p.x)), y0: Math.min(...cs.map(p => p.y)), y1: Math.max(...cs.map(p => p.y)) };
+        const onScr = r.x1 > -1 && r.x0 < 1 && r.y1 > -1 && r.y0 < 1;
+        if (vis && onScr && r.x0 < gb.x1 && gb.x0 < r.x1 && r.y0 < gb.y1 && gb.y0 < r.y1) out.signHit.push({ T: +T.toFixed(2), word: s.text });
+        if (Math.abs(T - (s.at + 0.1)) < 0.5 / fps) out.textPx.push({ word: s.text, T: +T.toFixed(2), textPct: +((r.y1 - r.y0) / 2 * s.th / s.bh * 100).toFixed(1), inFrame: r.x0 > -1 && r.x1 < 1 && r.y0 > -1 && r.y1 < 1 });
+      }
+    }
+    // 合并相邻的被挡帧
+    const merge = a => a.reduce((o, x) => { const l = o[o.length - 1]; if (l && l.word === x.word && x.T - l.to < 0.1) l.to = x.T; else o.push({ word: x.word, from: x.T, to: x.T }); return o; }, []);
+    out.signHit = merge(out.signHit);
+    out.pullPairs = window.__pullPairs; out.drift = window.__lockDrift();
+    return out;
+  };
+  return shots;
+}

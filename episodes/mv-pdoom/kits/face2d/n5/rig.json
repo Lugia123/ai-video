@@ -1,0 +1,57 @@
+{
+ "size": [
+  832,
+  1248
+ ],
+ "group": "n5",
+ "yaw": 33.3,
+ "pitch": 0,
+ "roll": 1.7,
+ "pupils": [
+  [
+   260,
+   413
+  ],
+  [
+   413,
+   406
+  ]
+ ],
+ "mouth_center": [
+  331.0,
+  543.5
+ ],
+ "neck_pivot": [
+  336,
+  669
+ ],
+ "order": [
+  "00-back",
+  "01-face",
+  "02-brows",
+  "eyes/<state>",
+  "mouth/<state>",
+  "03-front"
+ ],
+ "eyes": [
+  "closed",
+  "half",
+  "open"
+ ],
+ "mouth": [
+  "a",
+  "e",
+  "i",
+  "o",
+  "rest",
+  "smileup",
+  "u"
+ ],
+ "expr": [
+  "happy",
+  "sad",
+  "angry",
+  "fear",
+  "determined"
+ ]
+}

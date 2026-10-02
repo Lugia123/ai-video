@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>动捕片段侧视探针（#1030）</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script></head>
+<body><script type="module">
+// ?anim=move__run-jump：页面 t = 片段本地秒；侧视 + 正前上方两个机位左右拼
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims, getAnim } from '../../kits/girl.js';
+const name = new URLSearchParams(location.search).get('anim') || 'move__run-jump';
+const mv = await loadMV({ base: '../..' });
+await loadAnims([name]);
+const girl = await createGirl(mv), m = getAnim(name);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#20242c'); scene.add(girl.root, createGirlLights());
+const grid = new THREE.GridHelper(6, 12, '#888', '#444'); scene.add(grid);
+const cam = new THREE.PerspectiveCamera(30, 16 / 9, 0.05, 100);
+window.__clip = { duration: m.duration, srcPeriod: m.srcPeriod };
+window.__girl = girl; window.__THREE = THREE;
+window.__feet = () => { girl.root.updateMatrixWorld(true); const I = girl.dancer.S.info, r = k => I[k].bone.getWorldPosition(new THREE.Vector3()); const f = v => [+v.y.toFixed(3), +v.z.toFixed(3)]; return [...f(r('LeftToeBase')), ...f(r('RightToeBase')), ...f(r('Hips')), ...f(r('Head'))]; };
+mv.mount(T => {
+  girl.dancer.apply(m.solve(T / m.srcPeriod, girl.dancer)); girl.setSkin('toon', T);
+  if (new URLSearchParams(location.search).get('front')) { cam.position.set(0.6, 0.8, 3.0); cam.lookAt(0, 0.62, 0); } else { cam.position.set(4.6, 0.75, 0.2); cam.lookAt(0, 0.6, 0.2); }
+  mv.stage.render(scene, cam, { bloom: 0 });
+}, { duration: m.duration + 0.1, offset: 0 });
+</script></body></html>

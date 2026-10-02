@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>主舞候选</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; top: 20px; font: 34px 'STM', monospace; color: #F2EDE4; white-space: pre; }
+  #tag b { color: #F4E04D; font-weight: normal; } #tag i { color: #FF2E88; font-style: normal; } #tag u { color: #5FE3C0; text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!-- 主舞候选：seek(k + f) = 第 k 个候选、放到第 f·16 拍（132 BPM 对拍，toon，全身正面偏 3/4）。左上：名字 · 躯干平均/最大前倾 · 低头>20° 占比。 -->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims, loadAnimIndex } from '../girl.js';
+const mv = await loadMV();
+const idx = await loadAnimIndex();
+const named = ['dance__wave1', 'dance__locking2', 'dance__robot2', 'dance__slide-step', 'dance__soul-spin', 'dance__moonwalk'];
+const C = idx.clips.filter(c => c.category === 'dance' && (!c.hunched || named.includes(c.name)))
+  .sort((a, b) => (a.hunched - b.hunched) || a.pose.torsoMean - b.pose.torsoMean);
+const [girl] = await Promise.all([createGirl(mv, { points: 100 }), loadAnims(C.map(c => c.name), { includeBad: true })]);
+const P = mv.music.period, T0 = mv.music.barTime(12);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(PALETTE.ink);
+scene.add(girl.root, createGirlLights());
+const grid = new THREE.GridHelper(8, 32, new THREE.Color(PALETTE.pink).multiplyScalar(0.5), new THREE.Color('#26263a')); scene.add(grid);
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.05, 50);
+const tag = document.getElementById('tag');
+const seqs = C.map(c => [{ beat: Math.round(girl.beatOf(T0)), anim: c.name }]);
+function draw(T) {
+  const x = T - 1000, k = Math.max(0, Math.min(C.length - 1, Math.floor(x))), f = x - k, c = C[k];
+  const t = T0 + f * 16 * P;
+  girl.root.position.set(0, 0, 0);
+  girl.play(seqs[k], t); girl.setSkin('toon', t);
+  camera.position.set(0.8, 0.7, 2.35); camera.lookAt(0, 0.5, 0);
+  const pz = c.pose;
+  tag.innerHTML = `${k + 1}. <b>${c.name.replace('dance__', '')}</b>  ${c.hunched ? '<i>hunched</i>' : '<u>可做主舞</u>'}\n躯干前倾 平均 ${pz.torsoMean.toFixed(0)}° / 最大 ${pz.torsoMax.toFixed(0)}°   低头>20° ${Math.round(pz.down20 * 100)}%\n伸缩 ×${c.stretch}   定格 ${c.stillLongest ?? 0}s`;
+  mv.stage.render(scene, camera, { bloom: 0, grade: { vignette: 0.25 } });
+}
+mv.mount(draw, { offset: 1000, duration: C.length });
+window.__n = C.length;
+</script>
+</body>
+</html>

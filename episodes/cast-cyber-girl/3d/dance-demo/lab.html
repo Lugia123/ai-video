@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>舞步实验台</title>
+<script type="importmap">{"imports": {"three": "../../../../assets/vendor/three/three.module.min.js"}}</script>
+<style>
+  html, body { margin: 0; background: #EFE7D6; font: 14px/1.4 "Avenir Next", "PingFang SC", sans-serif; color: #1E1B18; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<!--
+  舞步自检台：每个舞步一行，列 = 一小节里的 8 个时刻（每半拍），每格正面 + 侧面两个视角。
+  ?moves=step,glowWave  只看某几个；?look=pbr 看原材质；?mirror=1 镜像；?views=front,side,top
+  window.__lab.scan(n) → 每个舞步密集采样 n 次（默认 96 / 小节）跑 dancer.check()，返回问题清单
+-->
+<script>for (const [k, v] of new URLSearchParams(location.search)) if (k.startsWith("__")) globalThis[k] = +v;</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { createDancer, MOVES, MOVE_NAMES, MOVE_LABELS, poseOf, toonify, tailSway, prepareCat, finishCat, CAT_LIMITS } from '../../../../assets/lib/dance3d.js';
+
+const q = new URLSearchParams(location.search);
+const moves = (q.get('moves') || MOVE_NAMES.join(',')).split(',');
+const views = (q.get('views') || 'front,side').split(',');
+const COLS = +(q.get('cols') || 8), STEP = +(q.get('step') || 4 / COLS);
+const CW = +(q.get('cw') || 200), CH = +(q.get('ch') || 260), LABEL = 150, ZOOM = +(q.get('zoom') || 1), TY = +(q.get('ty') || 0.5), U0 = +(q.get('u0') || 0);
+const W = LABEL + COLS * views.length * CW, H = moves.length * CH + 30;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H); renderer.setScissorTest(true);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.append(renderer.domElement);
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#fff6e8', '#b8a890', 1.6));
+const sun = new THREE.DirectionalLight('#fff0d8', 2.2); sun.position.set(1, 2, 2); scene.add(sun);
+const grid = new THREE.GridHelper(2, 20, '#b0a590', '#d5cab5'); scene.add(grid);
+
+const gltf = await new GLTFLoader().loadAsync(q.get('model') || '../tripo-girl/anime+girl+3d+model.glb');
+const girl = gltf.scene; scene.add(girl);
+const isCat = /cat/.test(q.get('model') || '') && q.get('catfix') !== '0';   // 猫：权重平滑 + 关节限位 + 异色块修补
+if (isCat) prepareCat(girl);
+const dancer = createDancer(girl, isCat ? { limits: CAT_LIMITS } : {});
+const look = toonify(girl);
+const tail = tailSway(girl, dancer, { look });
+if (isCat) finishCat(girl, look);
+if (q.get('look') === 'pbr') look.set('pbr');
+const cam = new THREE.PerspectiveCamera(30, CW / CH, 0.01, 50);
+const VIEW = { front: [0, 0.55, 2.6], side: [2.6, 0.55, 0], back: [0, 0.55, -2.6], top: [0.01, 3, 0.4], q34: [1.8, 0.8, 1.8] };
+
+const label = document.createElement('canvas'); label.width = W; label.height = H;
+Object.assign(label.style, { position: 'absolute', left: 0, top: 0 }); document.body.append(label);
+const lg = label.getContext('2d');
+lg.font = '600 15px "PingFang SC", sans-serif'; lg.fillStyle = '#1E1B18';
+
+const mirror = q.get('mirror') === '1';
+moves.forEach((m, r) => {
+  lg.fillText(m, 10, 30 + r * CH + CH / 2 - 8);
+  lg.font = '13px "PingFang SC", sans-serif'; lg.fillText(MOVE_LABELS[m] || '', 10, 30 + r * CH + CH / 2 + 12); lg.font = '600 15px "PingFang SC", sans-serif';
+  for (let c = 0; c < COLS; c++) {
+    const u = U0 + c * STEP;
+    dancer.apply(poseOf(dancer, m, u, { mirror })); tail?.update(u);
+    views.forEach((v, k) => {
+      const x = LABEL + (c * views.length + k) * CW, y = 30 + r * CH;
+      renderer.setViewport(x, H - y - CH, CW, CH); renderer.setScissor(x, H - y - CH, CW, CH);
+      scene.background = new THREE.Color(k % 2 ? '#E6DCC6' : '#EFE7D6');
+      cam.position.set(...VIEW[v].map(x => x / ZOOM)); cam.position.y += TY - 0.5; cam.lookAt(0, TY + (v === 'top' ? -0.5 : 0), 0);
+      renderer.render(scene, cam);
+      if (k === 0) lg.fillText(`${u.toFixed(1)} 拍`, x + 6, y + 16);
+    });
+  }
+});
+views.forEach((v, k) => lg.fillText(v, LABEL + k * CW + 60, 18));
+
+function scan(n = 96, opts = {}) {
+  const out = {};
+  for (const m of moves) {
+    const issues = [];
+    for (let i = 0; i < n; i++) {
+      const u = (i / n) * 4;
+      dancer.apply(poseOf(dancer, m, u, opts)); tail?.update(u);
+      for (const it of [...dancer.check(), ...(tail ? tail.check() : [])]) issues.push({ u: +u.toFixed(3), ...it });
+    }
+    // 聚合：同一类问题只报最严重的一次 + 次数
+    const agg = {};
+    for (const it of issues) { const k = `${it.kind}:${it.a}${it.b ? '×' + it.b : ''}`; if (!agg[k] || it.depth > agg[k].depth) agg[k] = { ...it, count: 0 }; agg[k].count++; }
+    for (const it of issues) agg[`${it.kind}:${it.a}${it.b ? '×' + it.b : ''}`].count;
+    out[m] = Object.values(agg);
+  }
+  return out;
+}
+window.__lab = { tail: tail && tail.verts, tailObj: tail, dancer, scan, poseOf,  radius: () => (dancer.check(), dancer.proxies.radius), S: dancer.S };
+window.__out = true;
+</script>
+</body>
+</html>

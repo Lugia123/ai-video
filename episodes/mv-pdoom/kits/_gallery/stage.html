@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>kits/stage.js 演示：全片共用的演唱会舞台（三套布景变体 + C 位唱跳交替）</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; bottom: 22px; font: 22px 'STM', monospace; color: #F2EDE4; letter-spacing: 0.06em; opacity: 0.85; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  kits/stage.js 的演示（#1051 第二轮）。歌曲 125.69 起 7 小节（12.7 s），三个 stage.shot()，各用一套布景变体，C 位在唱歌和跳舞之间换：
+    ① pillars：冷色竖直光柱跑马 + 8 人镜面阵列。升（跳）→ 低机位仰拍（唱）→ 摇（跳）
+    ② cross：柠黄交叉剪刀光 + 8 人 V 字。推（跳）→ 绕 C 位环绕（唱 → 小节线上混到跳）
+    ③ finale：12 人环绕 + 聚到 C 位再炸开的光束，灯最满。升（跳）→ 俯拍（跳）→ 推近大屏到 2D 特写 → 灯全灭只剩顶光（唱）
+  第一轮的样子（fan 变体：两侧对称 + 扇形光束）见 ?variant=fan。
+  参数：?variant=fan|pillars|cross|finale 全程只用这一套（机位用它自带的 plan）；?n=4|8|12 固定伴舞人数；?cam=… 固定机位；?half=1 半分辨率
+  渲染：node tools/render/render.mjs episodes/mv-pdoom/kits/_gallery --page stage.html --gpu
+-->
+<script type="module">
+import { loadMV } from '../../engine/index.js';
+import { createStage, VARIANTS } from '../stage.js';
+
+const Q = new URLSearchParams(location.search);
+const mv = await loadMV(Q.get('half') ? { width: 960, height: 540 } : {});
+const { music } = mv;
+const BAR = music.period * 4, b0 = music.barAt(125.69 + 0.2).i, T0 = music.barTime(b0), DUR = BAR * 7;
+const stage = await createStage(mv, { dancers: 12, lyrics: [[T0 - 0.2, T0 + DUR]] });
+const N = Q.get('n') ? +Q.get('n') : undefined, CAM = Q.get('cam') ?? undefined, ONE = Q.get('variant');
+const fix = plan => plan.map(p => ({ ...p, ...(N ? { dancers: N } : {}), ...(CAM ? { cam: CAM } : {}) }));
+const at = k => music.barTime(b0 + k);
+const defs = ONE ? [{ variant: ONE, t0: T0, t1: T0 + DUR, ...(CAM || N ? { plan: fix([{ cam: CAM ?? 'wide', bars: 1 }]) } : {}) }] : [
+  { variant: 'pillars', t0: at(0), t1: at(2), plan: fix([
+    { cam: 'crane', beats: 4, lead: 'dance', note: 'pillars · 升 · 8 人镜面阵列 · C 位一起跳' },
+    { cam: 'low', beats: 2, lead: 'sing', note: 'pillars · 低机位仰拍 · C 位唱' },
+    { cam: 'pan', beats: 2, lead: 'dance', note: 'pillars · 摇 · 跳' }]) },
+  { variant: 'cross', t0: at(2), t1: at(4), plan: fix([
+    { cam: 'dolly', beats: 4, lead: 'dance', note: 'cross · 推 · 8 人 V 字 · 跳' },
+    { cam: 'orbit', beats: 4, note: 'cross · 绕 C 位环绕 · 按小节自动唱 ↔ 跳' }]) },
+  { variant: 'finale', t0: at(4), t1: at(7), plan: fix([
+    { cam: 'crane', beats: 4, lead: 'dance', note: 'finale · 升 · 12 人环绕 · 灯最满 · 跳' },
+    { cam: 'top', beats: 2, lead: 'dance', note: 'finale · 俯拍' },
+    { cam: 'screen', beats: 4, lead: 'sing', note: 'finale · 推近大屏 → 2D 唱歌特写' },
+    { cam: 'mid', beats: 2, lead: 'sing', blackout: 1, note: '灯全灭，只剩一束顶光' }]) },
+];
+const tag = document.getElementById('tag');
+if (Q.has('render')) tag.style.display = 'none';   // 渲染时不要调试字
+const shots = defs.map((d, k) => {
+  const shot = stage.shot({ id: `stage-demo-${k}`, ...d }), upd = shot.update;
+  shot.update = (s, T) => { const seg = shot.sched.at(T); tag.textContent = `${d.variant} ${seg.i + 1}/${shot.sched.segs.length} · ${seg.note ?? seg.cam}   T=${T.toFixed(2)}`; return upd(s, T); };
+  return shot;
+});
+window.__stage = { stage, shots, T0, DUR, VARIANTS };
+mv.mount(shots, { offset: T0, duration: DUR });
+</script>
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sledgehammer-15s</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
+  #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; }
+  #gl { display: block; width: 1920px; height: 1080px; }
+  /* 老胶片镜头的暗角：很轻，只压四角 */
+  #vignette { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 62%, rgba(20,10,0,.32) 100%); }
+  #hud { position: fixed; left: 0; right: 0; bottom: 0; height: 36px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
+    background: rgba(0,0,0,.6); color: #ddd; font: 13px/1 ui-monospace, Menlo, monospace; }
+  #hud[hidden] { display: none; }
+  #hud .bar { flex: 1; height: 6px; background: #444; position: relative; cursor: pointer; }
+  #hud .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #ddd; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<div id="stage"><canvas id="gl" width="1920" height="1080"></canvas><div id="vignette"></div></div>
+<div id="hud" hidden><span id="hud-play">▶ 空格播放</span><div class="bar" id="hud-bar"><i></i></div><span id="hud-time"></span></div>
+
+<script type="module">
+/* ============================================================
+ * 15 秒样片：致敬 Sledgehammer / Big Time 的定格黏土质感，题材换成手机时代。
+ *
+ * 定格感怎么来的：
+ *   1. "拍二"：seek(t) 先把 t 量化到 1/12 秒（F = floor(t*12)），30fps 输出里每个画面停 2–3 帧。
+ *   2. 手抖：每个物件、相机、灯光强度每一格都有带种子的微小偏移（hash(F, id)），像动画师每格重新摆了一遍。
+ *   3. 黏土"沸腾"：顶点着色器里按噪声把表面沿法线推出凹凸，噪声相位每格换一次；
+ *      指纹 / 刮痕凹凸贴图的偏移也每格换——表面像被手重新捏过。
+ *   4. 事件对齐到最近的格（round(evt*12)），画面重音与音乐 stab 的误差 ≤ 1/24 秒。
+ *
+ * 镜头（每小节一个，硬切在小节线上）：
+ *   0 头像 + 通知气泡   1 外卖箱火车   2 表情包列队   3 电动滑板车 + 无人机编队
+ *   4 AI 聊天框          5 全员绕圈，14.4s 终止重拍
+ * ============================================================ */
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from './vendor/RoundedBoxGeometry.js';
+import * as M from './music.js';
+
+const W = 1920, H = 1080, FPS = 30, STEP = 12;
+const DURATION = M.DURATION, BAR = M.BAR, BEAT = M.BEAT;
+const RENDER = new URLSearchParams(location.search).get('render') === '1';
+
+/* ---------- 工具 ---------- */
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = p => 1 - (1 - p) ** 3;
+const easeBack = p => { const c = 1.9; return 1 + (c + 1) * (p - 1) ** 3 + c * (p - 1) ** 2; };
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+/** 无状态哈希：(格号, 物件 id, 通道) → [-1, 1)。每格的"手抖"都从这里取，保证 seek 任意顺序结果一样 */
+function jit(f, id, ch = 0) {
+  let h = Math.imul(f + 0x9E37, 0x85EBCA6B) ^ Math.imul(id + 0x3C6E, 0xC2B2AE35) ^ Math.imul(ch + 7, 0x27D4EB2F);
+  h ^= h >>> 15; h = Math.imul(h, 0x2C1B3C6D); h ^= h >>> 12; h = Math.imul(h, 0x297A2D39); h ^= h >>> 15;
+  return ((h >>> 0) / 4294967296) * 2 - 1;
+}
+/** 事件表 → 距最近一次（已发生的）事件多少秒；事件先对齐到格 */
+const q = t => Math.round(t * STEP) / STEP;
+function since(list, t) {
+  let best = Infinity;
+  for (const e of list) { const et = q(e.t ?? e); if (et <= t + 1e-6) best = t - et; else break; }
+  return best;
+}
+/** 事件发生后的"挤压-回弹"：0 → 猛压 → 过冲 → 回稳 */
+const squash = age => age === Infinity ? 0 : Math.exp(-age * 9) * Math.cos(age * 26);
+
+/* ---------- 渲染器 / 场景 ---------- */
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 200);
+
+const hemi = new THREE.HemisphereLight(0xfff4e6, 0x6a4a3a, 1.35);
+scene.add(hemi);
+const key = new THREE.DirectionalLight(0xfff0dc, 2.4);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -14; key.shadow.camera.right = 14; key.shadow.camera.top = 12; key.shadow.camera.bottom = -8;
+key.shadow.camera.near = 1; key.shadow.camera.far = 60;
+key.shadow.bias = -0.0008; key.shadow.radius = 5;
+scene.add(key, key.target);
+const rim = new THREE.DirectionalLight(0xdfe8ff, 0.8);
+rim.position.set(6, 8, -10);
+scene.add(rim);
+
+/* ---------- 黏土材质 ---------- */
+// 指纹、刮痕、小坑：画在 512² 画布上当凹凸贴图，重复平铺
+const fingerTex = (() => {
+  const rnd = mulberry32(8612);
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = '#808080'; g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 900; i++) {           // 小坑 / 小疙瘩
+    const x = rnd() * 512, y = rnd() * 512, r = 1 + rnd() * 5, v = rnd() < 0.5 ? 60 : 190;
+    g.fillStyle = `rgba(${v},${v},${v},${0.15 + rnd() * 0.25})`;
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+  for (let k = 0; k < 14; k++) {            // 指纹：一组同心弧
+    const cx = rnd() * 512, cy = rnd() * 512, a0 = rnd() * Math.PI * 2;
+    for (let r = 4; r < 34; r += 3.2) {
+      g.strokeStyle = `rgba(${rnd() < 0.5 ? 70 : 170},${rnd() < 0.5 ? 70 : 170},${rnd() < 0.5 ? 70 : 170},0.35)`;
+      g.lineWidth = 1.2;
+      g.beginPath(); g.ellipse(cx, cy, r, r * 0.7, a0, 0, Math.PI * 1.3); g.stroke();
+    }
+  }
+  for (let i = 0; i < 70; i++) {            // 刮刀痕
+    const x = rnd() * 512, y = rnd() * 512, a = rnd() * Math.PI, l = 20 + rnd() * 60;
+    g.strokeStyle = `rgba(60,60,60,${0.2 + rnd() * 0.2})`; g.lineWidth = 1 + rnd() * 2;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(2, 2);
+  return t;
+})();
+
+const NOISE_GLSL = `
+uniform float uBoil; uniform float uAmp;
+float h3(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float vnoise(vec3 x){
+  vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h3(i), h3(i + vec3(1,0,0)), f.x), mix(h3(i + vec3(0,1,0)), h3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h3(i + vec3(0,0,1)), h3(i + vec3(1,0,1)), f.x), mix(h3(i + vec3(0,1,1)), h3(i + vec3(1,1,1)), f.x), f.y), f.z);
+}`;
+const boil = { value: 0 };
+const matCache = new Map();
+/** 黏土：粗糙、无金属感；表面有静态的捏痕（低频噪声）+ 每格变化的"沸腾"（高频噪声） */
+function clay(color, amp = 0.03) {
+  const k = `${color}|${amp}`;
+  if (matCache.has(k)) return matCache.get(k);
+  const m = new THREE.MeshStandardMaterial({ color, roughness: 0.72, metalness: 0, bumpMap: fingerTex, bumpScale: 1.6 });
+  m.onBeforeCompile = sh => {
+    sh.uniforms.uBoil = boil;
+    sh.uniforms.uAmp = { value: amp };
+    sh.vertexShader = NOISE_GLSL + "\n" + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      float nLump = vnoise(position * 2.2) - 0.5;
+      float nBoil = vnoise(position * 6.0 + vec3(uBoil, uBoil * 0.7, uBoil * 1.3)) - 0.5;
+      transformed += normal * (nLump * 1.0 + nBoil * 0.45) * uAmp;`);
+  };
+  matCache.set(k, m);
+  return m;
+}
+/** 屏幕 / 发光面：不受光（手机屏、滑板车灯） */
+const glow = color => new THREE.MeshBasicMaterial({ color });
+
+/* ---------- 几何体 ---------- */
+const G = {
+  sphere: new THREE.SphereGeometry(1, 48, 32),
+  box: r => new RoundedBoxGeometry(1, 1, 1, 5, r),
+  cyl: new THREE.CylinderGeometry(1, 1, 1, 32, 4),
+  capsule: new THREE.CapsuleGeometry(1, 1, 10, 24),
+  torus: new THREE.TorusGeometry(1, 0.28, 16, 48),
+};
+G.rbox = G.box(0.14); G.rbox2 = G.box(0.3);
+function mesh(geo, mat, { p = [0, 0, 0], s = [1, 1, 1], r = [0, 0, 0], shadow = true } = {}) {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(...p);
+  if (typeof s === 'number') m.scale.setScalar(s); else m.scale.set(...s);
+  m.rotation.set(...r);
+  m.castShadow = shadow; m.receiveShadow = true;
+  return m;
+}
+function textTexture(lines, { w = 1024, h = 256, bg = null, color = '#1d1a2b', size = 96, weight = 800, align = 'center' } = {}) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  if (bg) { g.fillStyle = bg; g.fillRect(0, 0, w, h); }
+  g.fillStyle = color; g.textBaseline = 'middle'; g.textAlign = align;
+  g.font = `${weight} ${size}px "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Helvetica Neue", sans-serif`;
+  lines.forEach((s, i) => g.fillText(s, align === 'center' ? w / 2 : 40, h / 2 + (i - (lines.length - 1) / 2) * size * 1.2));
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/* ---------- 布景：一张弯成 L 形的无缝背景纸（地面 → 圆角 → 背墙） ---------- */
+function sweep(color) {
+  const geo = new THREE.PlaneGeometry(60, 1, 1, 60);
+  const pos = geo.attributes.position;
+  const R = 5, floorLen = 18, wallH = 30;           // 地面从 z=+floorLen 到 z=0，然后 R 圆角，然后墙
+  const total = floorLen + Math.PI * R / 2 + wallH;
+  for (let i = 0; i < pos.count; i++) {
+    const v = pos.getY(i) + 0.5;                     // 0..1
+    const s = v * total;
+    let y, z;
+    if (s < floorLen) { y = 0; z = floorLen - s; }
+    else if (s < floorLen + Math.PI * R / 2) { const a = (s - floorLen) / R; y = R - R * Math.cos(a); z = -R * Math.sin(a); }
+    else { y = R + (s - floorLen - Math.PI * R / 2); z = -R; }
+    pos.setXYZ(i, pos.getX(i), y, z);
+  }
+  geo.computeVertexNormals();   // 平面的 +y 方向映射到"往里走 / 往上走"，算出来的法线正好朝上、朝镜头
+  const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, roughness: 0.95, bumpMap: fingerTex, bumpScale: 0.6, side: THREE.DoubleSide }));
+  m.receiveShadow = true;
+  return m;
+}
+
+/* ---------- 角色：原型化黏土小人（大眼、团子鼻，没有可辨认的五官特征） ---------- */
+function makeHead(skin, hair) {
+  const g = new THREE.Group();
+  const skull = mesh(G.sphere, clay(skin, 0.05), { s: [1, 1.12, 0.96] });
+  g.add(skull);
+  const eyes = [], pupils = [];
+  for (const sx of [-1, 1]) {
+    const e = mesh(G.sphere, clay('#fbf7ee', 0.01), { p: [0.36 * sx, 0.2, 0.78], s: [0.27, 0.3, 0.18] });
+    const p = mesh(G.sphere, clay('#141018', 0.005), { p: [0.36 * sx, 0.19, 0.93], s: [0.11, 0.12, 0.06] });
+    g.add(e, p); eyes.push(e); pupils.push(p);
+  }
+  g.add(mesh(G.sphere, clay(skin, 0.02), { p: [0, -0.08, 0.98], s: [0.17, 0.2, 0.16] }));
+  const mouth = mesh(G.sphere, clay('#5a1420', 0.01), { p: [0, -0.5, 0.82], s: [0.3, 0.1, 0.1] });
+  g.add(mouth);
+  // 头发：一圈大疙瘩
+  const rnd = mulberry32(skin.length * 97 + hair.length);
+  for (let i = 0; i < 9; i++) {
+    const a = -1.2 + (i / 8) * 2.4;
+    g.add(mesh(G.sphere, clay(hair, 0.06), { p: [Math.sin(a) * 0.72, 0.82 + rnd() * 0.12, Math.cos(a) * 0.35 - 0.25], s: 0.36 + rnd() * 0.1 }));
+  }
+  return { g, eyes, pupils, mouth, skull };
+}
+function makePerson(skin, hair, shirt, pants) {
+  const g = new THREE.Group();
+  const body = mesh(G.capsule, clay(shirt, 0.04), { p: [0, 1.75, 0], s: [0.46, 0.42, 0.4] });
+  g.add(body);
+  const head = makeHead(skin, hair);
+  head.g.position.set(0, 2.85, 0); head.g.scale.setScalar(0.52);
+  g.add(head.g);
+  const limb = (color, x, y, len, rad) => {
+    const pivot = new THREE.Group(); pivot.position.set(x, y, 0);
+    pivot.add(mesh(G.capsule, clay(color, 0.02), { p: [0, -len / 2, 0], s: [rad, len / 2, rad] }));
+    const hand = mesh(G.sphere, clay(color === shirt ? skin : '#26222e', 0.02), { p: [0, -len - 0.05, color === shirt ? 0 : 0.08], s: [rad * 1.3, rad * 1.1, color === shirt ? rad * 1.3 : rad * 2] });
+    pivot.add(hand);
+    g.add(pivot);
+    return pivot;
+  };
+  const armL = limb(shirt, -0.55, 2.2, 0.8, 0.13), armR = limb(shirt, 0.55, 2.2, 0.8, 0.13);
+  const legL = limb(pants, -0.2, 1.15, 0.95, 0.16), legR = limb(pants, 0.2, 1.15, 0.95, 0.16);
+  return { g, body, head, armL, armR, legL, legR };
+}
+
+/* ---------- 物件 ---------- */
+function makePhone(screenColor = '#3b6cff') {
+  const g = new THREE.Group();
+  g.add(mesh(G.rbox, clay('#23202b', 0.015), { s: [0.95, 1.9, 0.16] }));
+  // 屏幕：一张小画布，画几排 app 色块
+  const c = document.createElement('canvas'); c.width = 256; c.height = 512;
+  const x = c.getContext('2d');
+  x.fillStyle = screenColor; x.fillRect(0, 0, 256, 512);
+  const cols = ['#ff5a4e', '#ffd23f', '#22c38e', '#ffffff', '#ff8ad8', '#1a1a2e'];
+  for (let r = 0; r < 5; r++) for (let k = 0; k < 3; k++) {
+    x.fillStyle = cols[(r * 3 + k * 2) % cols.length];
+    x.beginPath(); x.roundRect(28 + k * 76, 60 + r * 84, 52, 52, 14); x.fill();
+  }
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  g.add(mesh(new THREE.PlaneGeometry(0.8, 1.7), new THREE.MeshBasicMaterial({ map: tex }), { p: [0, 0, 0.082], shadow: false }));
+  return g;
+}
+function makeBadge(n) {
+  const g = new THREE.Group();
+  g.add(mesh(G.sphere, clay('#ff2d3a', 0.02), { s: [0.42, 0.42, 0.2] }));
+  g.add(mesh(new THREE.PlaneGeometry(0.62, 0.62), new THREE.MeshBasicMaterial({ map: textTexture([String(n)], { w: 256, h: 256, size: 150, color: '#ffffff' }), transparent: true }), { p: [0, 0, 0.21], shadow: false }));
+  return g;
+}
+function makeDeliveryBox(color = '#12b3a8', stripe = '#ffcf1a') {
+  const g = new THREE.Group();
+  g.add(mesh(G.rbox, clay(color, 0.03), { p: [0, 0.45, 0], s: [1, 0.9, 0.9] }));
+  g.add(mesh(G.rbox, clay(stripe, 0.01), { p: [0, 0.45, 0], s: [1.02, 0.18, 0.92] }));
+  g.add(mesh(G.rbox, clay(color, 0.02), { p: [0, 0.93, 0], s: [1.06, 0.1, 0.96] }));   // 盖子
+  return g;
+}
+function makeWheel(r, rim = '#f2f2f2') {
+  const g = new THREE.Group();
+  g.add(mesh(G.cyl, clay('#1c1a22', 0.01), { s: [r, 0.18, r], r: [Math.PI / 2, 0, 0] }));
+  g.add(mesh(G.sphere, clay(rim, 0.01), { p: [r * 0.5, 0, 0.1], s: [r * 0.22, r * 0.22, 0.05] }));   // 偏心的点，看得出在转
+  return g;
+}
+function makeEmoji(kind) {
+  const g = new THREE.Group();
+  const face = mesh(G.sphere, clay('#ffd21f', 0.05), { s: 0.62 });
+  g.add(face);
+  if (kind === 'heart') {
+    for (const sx of [-1, 1]) g.add(heart('#ff2d3a', [0.22 * sx, 0.12, 0.55], 0.2));
+  } else {
+    for (const sx of [-1, 1]) g.add(mesh(G.sphere, clay('#1b1320', 0.005), { p: [0.2 * sx, 0.14, 0.55], s: kind === 'lol' ? [0.12, 0.04, 0.05] : [0.07, 0.11, 0.05], r: [0, 0, kind === 'lol' ? 0.35 * sx : 0] }));
+  }
+  if (kind === 'lol') for (const sx of [-1, 1]) g.add(mesh(G.sphere, clay('#3aa7ff', 0.005), { p: [0.4 * sx, -0.02, 0.44], s: [0.07, 0.13, 0.06] }));
+  g.add(mesh(G.torus, clay('#1b1320', 0.005), { p: [0, -0.1, 0.53], s: [0.24, 0.24, 0.2], r: [0, 0, Math.PI] }).rotateZ(0));
+  // 嘴只要下半圈：用一块同色补丁盖住上半
+  g.add(mesh(G.sphere, clay('#ffd21f', 0.01), { p: [0, 0.02, 0.55], s: [0.3, 0.14, 0.06] }));
+  return g;
+}
+function heart(color, p, s) {
+  const sh = new THREE.Shape();
+  sh.moveTo(0, -0.9); sh.bezierCurveTo(-1.4, 0, -0.8, 1.1, 0, 0.45); sh.bezierCurveTo(0.8, 1.1, 1.4, 0, 0, -0.9);
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.3, bevelEnabled: true, bevelSize: 0.22, bevelThickness: 0.22, bevelSegments: 6, curveSegments: 24 });
+  geo.center();
+  return mesh(geo, clay(color, 0.03), { p, s });
+}
+function makeScooter() {
+  const g = new THREE.Group();
+  g.add(mesh(G.rbox, clay('#26222e', 0.01), { p: [0, 0.32, 0], s: [1.9, 0.14, 0.42] }));
+  const stem = mesh(G.cyl, clay('#26222e', 0.01), { p: [0.95, 1.25, 0], s: [0.06, 1.9, 0.06], r: [0, 0, -0.12] });
+  g.add(stem);
+  g.add(mesh(G.cyl, clay('#26222e', 0.01), { p: [1.07, 2.2, 0], s: [0.05, 0.9, 0.05], r: [Math.PI / 2, 0, 0] }));
+  g.add(mesh(G.sphere, glow('#fff6c2'), { p: [1.12, 1.9, 0], s: [0.1, 0.1, 0.1], shadow: false }));
+  const w1 = makeWheel(0.26, '#b6ff2e'), w2 = makeWheel(0.26, '#b6ff2e');
+  w1.position.set(-0.85, 0.26, 0); w2.position.set(0.95, 0.26, 0);
+  g.add(w1, w2);
+  return { g, wheels: [w1, w2] };
+}
+function makeDrone(color = '#f4f1ea', cargo = '#ff6a13') {
+  const g = new THREE.Group();
+  g.add(mesh(G.rbox2, clay(color, 0.02), { s: [0.7, 0.24, 0.7] }));
+  const rotors = [];
+  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    g.add(mesh(G.cyl, clay('#26222e', 0.005), { p: [x * 0.36, 0, z * 0.36], s: [0.05, 0.9, 0.05], r: [Math.PI / 2, Math.atan2(x, z) + Math.PI / 2, 0] }));
+    const rot = new THREE.Group(); rot.position.set(x * 0.62, 0.14, z * 0.62);
+    rot.add(mesh(G.rbox, clay('#26222e', 0.005), { s: [0.8, 0.03, 0.1] }));
+    g.add(rot); rotors.push(rot);
+  }
+  g.add(mesh(G.cyl, clay('#26222e', 0.002), { p: [0, -0.4, 0], s: [0.015, 0.6, 0.015] }));
+  const box = makeDeliveryBox(cargo, '#ffffff'); box.scale.setScalar(0.5); box.position.set(0, -1.15, 0);
+  g.add(box);
+  return { g, rotors };
+}
+function makeBubble(w, h, color, lines, tail = 1) {
+  const g = new THREE.Group();
+  g.add(mesh(G.rbox2, clay(color, 0.02), { s: [w, h, 0.35] }));
+  g.add(mesh(G.sphere, clay(color, 0.02), { p: [tail * (w / 2 - 0.25), -h / 2 + 0.02, 0], s: [0.26, 0.26, 0.17] }));
+  let text = null;
+  if (lines) {
+    text = mesh(new THREE.PlaneGeometry(w - 0.3, h - 0.2), new THREE.MeshBasicMaterial({
+      map: textTexture(lines, { w: 1024, h: Math.round(1024 * (h - 0.2) / (w - 0.3)), size: 104 }), transparent: true,
+    }), { p: [0, 0, 0.18], shadow: false });
+    g.add(text);
+  }
+  return { g, text };
+}
+
+/* ============================================================
+ * 镜头搭建
+ * ============================================================ */
+const shots = [];
+function shot(i, backdrop, build) {
+  const group = new THREE.Group();
+  group.add(sweep(backdrop));
+  const api = build(group) || {};
+  group.visible = false;
+  scene.add(group);
+  shots[i] = { group, ...api };
+}
+
+// 0 · 头像特写 + 通知气泡（每个提示音弹一个）
+shot(0, '#2447d6', grp => {
+  const head = makeHead('#ff8a2a', '#1b1d63');
+  head.g.position.set(0, 2.6, 0); head.g.scale.setScalar(1.55);
+  grp.add(head.g);
+  const phone = makePhone('#ffd23f');
+  grp.add(phone);
+  const badges = [3, 12, 48, 99].map(n => { const b = makeBadge(n); grp.add(b); return b; });
+  return { head, phone, badges };
+});
+
+// 1 · 外卖箱火车：车头的"脸"是一台手机
+shot(1, '#ffd23f', grp => {
+  const train = new THREE.Group();
+  grp.add(train);
+  const loco = new THREE.Group();
+  loco.add(mesh(G.rbox, clay('#e8322b', 0.03), { p: [0, 0.75, 0], s: [2.2, 0.9, 1.1] }));
+  loco.add(mesh(G.cyl, clay('#2b59e8', 0.03), { p: [0.35, 1.45, 0], s: [0.55, 1.6, 0.55], r: [0, 0, Math.PI / 2] }));
+  loco.add(mesh(G.cyl, clay('#26222e', 0.02), { p: [0.8, 2.15, 0], s: [0.18, 0.6, 0.18] }));
+  loco.add(mesh(G.rbox, clay('#e8322b', 0.03), { p: [-0.7, 1.75, 0], s: [0.9, 1.3, 1.1] }));
+  const face = makePhone('#22c38e'); face.rotation.y = Math.PI / 2; face.position.set(1.18, 1.45, 0); face.scale.setScalar(0.5);
+  loco.add(face);
+  const wheels = [];
+  for (const x of [-0.7, 0.2, 0.9]) for (const z of [0.6]) { const w = makeWheel(0.34); w.position.set(x, 0.34, z); loco.add(w); wheels.push(w); }
+  train.add(loco);
+  const cars = [];
+  const colors = [['#12b3a8', '#ffcf1a'], ['#7a3cff', '#b6ff2e'], ['#ff6a13', '#ffffff'], ['#12b3a8', '#ff2d3a']];
+  colors.forEach(([c, s], i) => {
+    const car = new THREE.Group();
+    car.add(mesh(G.rbox, clay('#26222e', 0.01), { p: [0, 0.45, 0], s: [1.7, 0.18, 1] }));
+    const box = makeDeliveryBox(c, s); box.position.set(0, 0.54, 0); box.scale.setScalar(1.05);
+    car.add(box);
+    for (const x of [-0.5, 0.5]) { const w = makeWheel(0.26); w.position.set(x, 0.26, 0.55); car.add(w); wheels.push(w); }
+    car.position.x = -2.3 - i * 2.05;
+    train.add(car); cars.push({ car, box });
+  });
+  // 铁轨 + 枕木
+  const track = new THREE.Group();
+  for (const z of [-0.45, 0.45]) track.add(mesh(G.rbox, clay('#6b4a3a', 0.005), { p: [0, 0.05, z], s: [40, 0.08, 0.08] }));
+  for (let i = -20; i <= 20; i++) track.add(mesh(G.rbox, clay('#8a5a3c', 0.01), { p: [i * 0.9, 0.02, 0], s: [0.25, 0.06, 1.4] }));
+  grp.add(track);
+  // 烟团：每个底鼓吐一个
+  const puffs = M.events.kicks.filter(t => t >= BAR && t < 2 * BAR).map(t => {
+    const p = mesh(G.sphere, clay('#fbf7ee', 0.08), { s: 0.4 }); grp.add(p); return { p, t };
+  });
+  return { train, loco, cars, wheels, puffs };
+});
+
+// 2 · 表情包列队（原片里水果跳舞的位置）
+shot(2, '#e0247a', grp => {
+  const kinds = ['smile', 'heart', 'lol', 'smile', 'lol', 'heart'];
+  const marchers = [];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) {
+    const e = makeEmoji(kinds[(r * 5 + c * 2) % kinds.length]);
+    grp.add(e);
+    marchers.push({ e, r, c, id: r * 5 + c });
+  }
+  const hearts = [0, 1, 2].map(i => { const h = heart('#ff2d3a', [0, 0, 0], 0.5); grp.add(h); return h; });
+  return { marchers, hearts };
+});
+
+// 3 · 电动滑板车 + 无人机编队
+shot(3, '#2ec48f', grp => {
+  const person = makePerson('#ffb37a', '#26222e', '#7a3cff', '#1b1d63');
+  const scooter = makeScooter();
+  const rider = new THREE.Group();
+  person.g.position.set(-0.15, 0.4, 0);
+  rider.add(scooter.g, person.g);
+  grp.add(rider);
+  const drones = [0, 1, 2].map(i => { const d = makeDrone('#f4f1ea', ['#ff6a13', '#ffd23f', '#e8322b'][i]); grp.add(d.g); return d; });
+  // 地上一排路桩，给"行进"一个参照
+  const cones = [];
+  for (let i = 0; i < 7; i++) {
+    const c = new THREE.Group();
+    c.add(mesh(new THREE.ConeGeometry(0.28, 0.8, 24, 3), clay('#ff6a13', 0.02), { p: [0, 0.4, 0] }));
+    c.add(mesh(G.cyl, clay('#fbf7ee', 0.005), { p: [0, 0.42, 0], s: [0.19, 0.12, 0.19] }));
+    c.position.set(-9 + i * 3, 0, 2.2); grp.add(c); cones.push(c);
+  }
+  return { person, scooter, rider, drones, cones };
+});
+
+// 4 · AI 聊天框
+shot(4, '#ff6a13', grp => {
+  const person = makePerson('#ffd9a8', '#e8322b', '#2447d6', '#26222e');
+  person.g.position.set(-4.1, 0, 1.2); person.g.scale.setScalar(1.25);
+  grp.add(person.g);
+  const phone = makePhone('#b8a4ff'); phone.scale.setScalar(0.28);
+  person.armR.add(phone); phone.position.set(0, -0.9, 0.25);
+  const b1 = makeBubble(4.6, 1.2, '#fbf7ee', ['今晚吃什么？'], 1);
+  const b2 = makeBubble(4.2, 1.2, '#b8a4ff', null, -1);
+  const b3 = makeBubble(5.4, 1.2, '#b8a4ff', ['帮你点好了 🍜'], -1);
+  const dots = [0, 1, 2].map(i => { const d = mesh(G.sphere, clay('#3a2a7a', 0.01), { s: 0.18 }); b2.g.add(d); d.position.set(-0.6 + i * 0.6, 0, 0.2); return d; });
+  grp.add(b1.g, b2.g, b3.g);
+  return { person, b1, b2, b3, dots };
+});
+
+// 5 · 终场：小人居中跳，所有物件绕着它转
+shot(5, '#5a22c8', grp => {
+  const person = makePerson('#ff8a2a', '#1b1d63', '#ffd23f', '#e8322b');
+  person.g.scale.setScalar(1.15);
+  grp.add(person.g);
+  const ring = [
+    makePhone('#22c38e'), makeDeliveryBox('#12b3a8', '#ffcf1a'), makeEmoji('heart'),
+    makeDrone('#f4f1ea', '#ff2d3a').g, makeBadge(99), makeEmoji('lol'), makeDeliveryBox('#7a3cff', '#b6ff2e'), heart('#ff2d3a', [0, 0, 0], 0.45),
+  ];
+  ring.forEach(o => grp.add(o));
+  const floorMat = grp.children[0].material;
+  return { person, ring, floorMat };
+});
+
+/* ============================================================
+ * 逐镜头的 t → 姿态
+ * 所有函数都只读 (t, f)：t 已量化到 1/12 秒，f 是格号
+ * ============================================================ */
+const beatPhase = t => (t / BEAT) % 1;
+const hop = (t, lift = 1) => { const p = beatPhase(t); return lift * Math.sin(Math.PI * p) ** 0.8; };
+
+/** 每格给物件加一点"手摆"的偏差 */
+function wobble(obj, f, id, amtP = 0.02, amtR = 0.02) {
+  obj.position.x += jit(f, id, 1) * amtP;
+  obj.position.y += jit(f, id, 2) * amtP * 0.6;
+  obj.position.z += jit(f, id, 3) * amtP;
+  obj.rotation.x += jit(f, id, 4) * amtR;
+  obj.rotation.y += jit(f, id, 5) * amtR;
+  obj.rotation.z += jit(f, id, 6) * amtR;
+}
+function camAt(f, pos, look, fov = 32) {
+  camera.position.set(pos[0] + jit(f, 900, 1) * 0.015, pos[1] + jit(f, 900, 2) * 0.012, pos[2]);
+  camera.lookAt(look[0] + jit(f, 900, 3) * 0.01, look[1] + jit(f, 900, 4) * 0.01, look[2]);
+  if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
+}
+function keyLight(f, pos, target = [0, 1, 0]) {
+  key.position.set(...pos); key.target.position.set(...target);
+  // 灯光每格 ±3% 的起伏：定格片里交流电和摄影棚灯泡的那种"呼吸"
+  key.intensity = 2.4 * (1 + jit(f, 901) * 0.03);
+  hemi.intensity = 1.35 * (1 + jit(f, 902) * 0.02);
+}
+function poseHead(h, look = 0, open = 0.1, blinkShut = false) {
+  h.pupils.forEach((p, i) => { p.position.x = (i ? 0.36 : -0.36) + look * 0.1; });
+  h.eyes.forEach(e => { e.scale.y = blinkShut ? 0.05 : 0.3; });
+  h.pupils.forEach(p => { p.visible = !blinkShut; });
+  h.mouth.scale.y = 0.06 + open * 0.3;
+  h.mouth.scale.x = 0.3 - open * 0.08;
+}
+function poseLimbs(p, t, amt = 1, speed = 1) {
+  const ph = (t / BEAT) * Math.PI * speed;
+  p.armL.rotation.z = -0.3 - amt * (0.6 + 0.6 * Math.sin(ph));
+  p.armR.rotation.z = 0.3 + amt * (0.6 + 0.6 * Math.sin(ph + Math.PI));
+  p.legL.rotation.x = amt * 0.35 * Math.sin(ph);
+  p.legR.rotation.x = -amt * 0.35 * Math.sin(ph);
+}
+
+const draw = [
+  // 0 · 头像 + 通知
+  (t, f, S) => {
+    const lt = t;
+    camAt(f, [0, 3.0, 12.5], [0, 2.7, 0], 30);
+    keyLight(f, [-6, 10, 9], [0, 2, 0]);
+    const stab = squash(since(M.events.stabs, t));
+    const h = S.head;
+    h.g.position.set(0, 2.6, 0); h.g.rotation.set(0, 0, 0);
+    // 每个 stab：头被"捏扁再弹起"
+    h.g.scale.set(1.55 * (1 + stab * 0.1), 1.55 * (1 - stab * 0.14), 1.55);
+    const dingIdx = M.events.dings.filter(d => q(d) <= t + 1e-6 && d < BAR).length;
+    // 眼睛跟着最新的气泡跑：左 → 右 → 左 → 右
+    const look = dingIdx === 0 ? 0 : (dingIdx % 2 ? -1 : 1);
+    poseHead(h, look, 0.15 + dingIdx * 0.22, f % 17 === 9);
+    wobble(h.g, f, 1, 0.015, 0.012);
+    // 手机从下方升进画面，第二拍到位
+    const up = easeBack(prog(t, 0.2, 1.1));
+    S.phone.position.set(1.5, lerp(-3, 0.6, up), 2.6);
+    S.phone.rotation.set(-0.15, -0.3 + 0.15 * Math.sin(t * 3), -0.25 + 0.1 * (1 - up));
+    wobble(S.phone, f, 2);
+    // 气泡：每个提示音在头周围弹出一个
+    const spots = [[-2.9, 4.4, 1.2], [2.8, 4.1, 1.1], [-2.6, 1.3, 1.6], [2.7, 1.5, 1.4]];
+    S.badges.forEach((b, i) => {
+      const age = t - q(M.events.dings[i]);
+      b.visible = age >= 0;
+      const s = age >= 0 ? easeBack(clamp(age / 0.25)) * 1.25 : 0;
+      b.scale.setScalar(Math.max(0.001, s));
+      b.position.set(...spots[i]);
+      b.position.y += 0.08 * Math.sin((t + i) * 4);
+      b.rotation.set(0, 0, (i % 2 ? -1 : 1) * 0.15);
+      wobble(b, f, 10 + i, 0.03, 0.04);
+    });
+  },
+
+  // 1 · 外卖箱火车
+  (t, f, S) => {
+    const lt = t - BAR;
+    camAt(f, [-0.5, 2.6, 10.5], [-1.2, 1.2, 0], 34);
+    keyLight(f, [-5, 11, 8], [0, 0, 0]);
+    // 火车按"一格一步"前进：每格固定挪 0.13，拍点上多冲一下
+    const x = -4.2 + lt * 2.6 + 0.12 * squash(since(M.events.kicks, t));
+    S.train.position.set(x, 0, 0);
+    S.wheels.forEach((w, i) => { w.rotation.z = -lt * 2.6 / 0.3; wobble(w, f, 40 + i, 0.004, 0.02); });
+    S.loco.position.y = 0.04 * Math.abs(Math.sin(lt * 14));
+    wobble(S.loco, f, 30, 0.012, 0.012);
+    S.cars.forEach(({ car, box }, i) => {
+      car.position.y = hop(t + i * 0.15, 0.08);
+      // 箱子在 stab 上各自被挤扁
+      const sq = squash(since(M.events.stabs, t - i * 0.08));
+      box.scale.set(1.05 * (1 + sq * 0.12), 1.05 * (1 - sq * 0.2), 1.05);
+      wobble(car, f, 31 + i, 0.015, 0.02);
+    });
+    S.puffs.forEach(({ p, t: pt }, i) => {
+      const age = t - q(pt);
+      p.visible = age >= 0 && age < 1.4;
+      if (!p.visible) return;
+      const chimney = x + 0.8;
+      p.position.set(chimney - age * 1.4, 2.5 + age * 1.3, 0);
+      p.scale.setScalar(0.25 + age * 0.35);
+      wobble(p, f, 60 + i, 0.03, 0.1);
+    });
+  },
+
+  // 2 · 表情包列队
+  (t, f, S) => {
+    const lt = t - 2 * BAR;
+    camAt(f, [0, 5.2, 13], [0, 1.2, 0], 36);
+    keyLight(f, [-4, 12, 9], [0, 0, 0]);
+    S.marchers.forEach(({ e, r, c, id }) => {
+      // 一排排朝镜头走，每排错开半拍起跳
+      const tt = t + (r % 2) * BEAT / 2;
+      const y = 0.62 + hop(tt, 0.9);
+      const land = 1 - clamp(beatPhase(tt) * 6) ;
+      const land2 = clamp((beatPhase(tt) - 0.85) * 6);
+      const sq = Math.max(land, land2) * 0.28;
+      e.position.set((c - 2) * 1.75 + 0.25 * Math.sin(lt * 2.6 + r), y, -4 + r * 1.9 + lt * 0.55);
+      e.scale.set(1 + sq, 1 - sq, 1 + sq);
+      e.rotation.set(0, 0.35 * Math.sin((t / BEAT) * Math.PI + c), 0.12 * Math.sin((t / BEAT) * Math.PI * 2 + r));
+      wobble(e, f, 100 + id, 0.02, 0.04);
+    });
+    // 三颗心在头顶按 stab 往上蹦
+    S.hearts.forEach((h, i) => {
+      const age = since(M.events.stabs, t - i * 0.1);
+      h.position.set((i - 1) * 3.2, 4.2 + 0.6 * Math.exp(-age * 5), -2);
+      const s = 0.5 * (1 + 0.35 * squash(age));
+      h.scale.set(s, s, s);
+      h.rotation.set(0, 0.4 * Math.sin(t * 2 + i), 0);
+      wobble(h, f, 140 + i, 0.03, 0.05);
+    });
+  },
+
+  // 3 · 电动滑板车 + 无人机
+  (t, f, S) => {
+    const lt = t - 3 * BAR;
+    camAt(f, [0, 3.4, 14], [0, 2.0, 0], 34);
+    keyLight(f, [-6, 12, 8], [0, 0, 0]);
+    const x = -8.2 + lt * 5.4;
+    S.rider.position.set(x, 0, 0.3);
+    S.rider.rotation.set(0, 0, 0.02 * Math.sin(lt * 9));
+    S.scooter.wheels.forEach((w, i) => { w.rotation.z = -lt * 5.4 / 0.26; wobble(w, f, 200 + i, 0.003, 0.03); });
+    const p = S.person;
+    // 站姿：一条腿在前，身体随拍子一顿一顿；头在 stab 上"拉长"（原片那种夸张形变）
+    p.legL.rotation.x = 0; p.legR.rotation.x = 0;
+    p.legL.rotation.z = -0.1; p.legR.rotation.z = 0.1;
+    p.armL.rotation.set(-1.25, 0, -0.15); p.armR.rotation.set(-1.25, 0, 0.15);   // 两手前伸握车把
+    p.g.rotation.y = 0.85;                                                       // 身体朝行进方向，脸半侧向镜头
+    p.g.position.y = 0.4 + hop(t, 0.12);
+    const st = squash(since(M.events.stabs, t));
+    p.head.g.scale.set(0.52 * (1 - st * 0.15), 0.52 * (1 + st * 0.35), 0.52);
+    p.head.g.rotation.set(0, -0.5, 0.05 * Math.sin(lt * 6));
+    poseHead(p.head, 1, 0.2 + 0.5 * Math.max(0, st), false);
+    wobble(p.g, f, 210, 0.01, 0.015);
+    // 三架无人机成 V 字从右往左飞，旋翼每格转一大步（定格旋翼的样子）
+    S.drones.forEach((d, i) => {
+      const off = [[0, 0], [1.6, 0.7], [1.6, -0.7]][i];
+      d.g.position.set(7.5 - lt * 5.2 + off[0], 5.2 + off[1] * 0.4 + 0.15 * Math.sin(lt * 5 + i), -1.8 + off[1] * 1.6);
+      d.g.rotation.set(0.12, 0.3, 0.12);
+      d.rotors.forEach((r, k) => { r.rotation.y = f * 1.1 + k; });
+      wobble(d.g, f, 220 + i, 0.03, 0.03);
+    });
+    S.cones.forEach((c, i) => {
+      // 路桩在底鼓上被震得一跳
+      c.position.y = 0.12 * Math.max(0, squash(since(M.events.kicks, t - i * 0.05)));
+      wobble(c, f, 240 + i, 0.01, 0.03);
+    });
+  },
+
+  // 4 · AI 聊天框
+  (t, f, S) => {
+    const lt = t - 4 * BAR;
+    camAt(f, [0.3, 3.6, 14], [0.3, 3.0, 0], 34);
+    keyLight(f, [-6, 12, 9], [0, 2, 0]);
+    const p = S.person;
+    poseLimbs(p, 0, 0);
+    p.armR.rotation.set(-1.1, 0, 0.2);        // 举着手机
+    p.armL.rotation.z = -0.25;
+    const st = squash(since(M.events.stabs, t));
+    p.head.g.rotation.set(-0.25, 0.45, 0);
+    // 等回复时脑袋越来越大（等待焦虑），回复到了"噗"地缩回
+    const answer = q(M.events.dings.filter(d => d >= 4 * BAR)[1]);   // 第二声提示音 = AI 回复到达
+    const swell = t < answer ? 0.52 * (1 + 0.5 * easeOut(prog(t, 4 * BAR + 0.3, answer))) : 0.52 * (1 + 0.25 * Math.exp(-(t - answer) * 8) * Math.cos((t - answer) * 30));
+    p.head.g.scale.set(swell * (1 + st * 0.06), swell * (1 - st * 0.06), swell);
+    poseHead(p.head, 0.8, t < answer ? 0.1 : 0.9, f % 13 === 5);
+    wobble(p.g, f, 300, 0.01, 0.01);
+    // 气泡一个个冒上来，旧的往上推
+    const d0 = q(M.events.dings.find(d => d >= 4 * BAR));
+    const typing = q(4 * BAR + 3 * M.S16);                            // 第一记 stab：AI 开始"打字" 
+    const pops = [d0, typing, answer];
+    const bubbles = [S.b1, S.b2, S.b3];
+    bubbles.forEach((b, i) => {
+      const age = t - pops[i];
+      b.g.visible = age >= 0 && !(i === 1 && t >= answer);   // 打字泡被答案替换
+      b.g.position.set(i === 0 ? -0.4 : 1.8, 1.9, 0.5);
+      b.g.scale.setScalar(Math.max(0.001, easeBack(clamp(age / 0.25))));
+      wobble(b.g, f, 310 + i, 0.02, 0.02);
+    });
+    // 新泡出现时，用户的泡被向上顶一格
+    if (t >= typing) S.b1.g.position.y = 1.9 + 1.65 * easeBack(clamp((t - typing) / 0.25)) + 0.3 * Math.exp(-(t - answer) * 10) * (t >= answer);
+    S.dots.forEach((d, i) => {
+      const ph = ((t - typing) / 0.3 - i * 0.33) % 1;
+      d.position.y = 0.18 * Math.max(0, Math.sin(ph * Math.PI * 2));
+      wobble(d, f, 320 + i, 0.01, 0);
+    });
+  },
+
+  // 5 · 终场
+  (t, f, S) => {
+    const lt = t - 5 * BAR;
+    const hit = q(M.FINAL_HIT);
+    const frozen = t >= hit;
+    // 小节线后镜头慢慢推近；终止重拍后反打成红底定格
+    const push = easeOut(prog(t, 5 * BAR, hit));
+    camAt(f, [0, lerp(4.2, 3.4, push), lerp(17, 12.5, push)], [0, 2.1, 0], 34);
+    keyLight(f, [-6, 12, 9], [0, 1, 0]);
+    S.floorMat.color.set(frozen ? '#ff2d3a' : '#5a22c8');
+    const p = S.person;
+    if (!frozen) {
+      poseLimbs(p, t, 1, 1);
+      p.g.position.y = hop(t, 0.35);
+      p.g.rotation.y = 0.4 * Math.sin((t / BEAT) * Math.PI);
+      poseHead(p.head, Math.sin(t * 5), 0.3, false);
+    } else {
+      // 重拍：双手举起、跳到最高、眼睛瞪圆，然后保持（留一点手抖）
+      p.armL.rotation.z = -2.6; p.armR.rotation.z = 2.6;
+      p.legL.rotation.x = 0.4; p.legR.rotation.x = -0.4;
+      p.g.position.y = 0.55 + 0.1 * Math.exp(-(t - hit) * 10);
+      p.g.rotation.y = 0;
+      poseHead(p.head, 0, 1, false);
+    }
+    const st = squash(since(M.events.stabs, t));
+    p.head.g.scale.set(0.52 * (1 + st * 0.12), 0.52 * (1 - st * 0.12 + (frozen ? 0.25 : 0)), 0.52);
+    wobble(p.g, f, 400, 0.012, 0.012);
+    // 物件绕圈：角度按格步进；重拍时全员向外"炸"一下
+    const blast = frozen ? 1 + 0.35 * easeOut(clamp((t - hit) / 0.2)) : 1;
+    S.ring.forEach((o, i) => {
+      const a = (i / S.ring.length) * Math.PI * 2 + Math.min(t, hit) * 1.3;
+      const rad = 3.6 * blast;
+      o.position.set(Math.cos(a) * rad, 1.6 + 0.9 * Math.sin(a * 2) + hop(t + i * 0.1, 0.4) * (frozen ? 0 : 1), Math.sin(a) * rad * 0.7);
+      o.rotation.set(0, -a + Math.PI / 2, 0.2 * Math.sin(t * 3 + i));
+      const s = 1 + 0.2 * squash(since(M.events.stabs, t - i * 0.03));
+      o.scale.setScalar(s * (o.userData.base ?? 1));
+      wobble(o, f, 410 + i, 0.03, 0.05);
+    });
+  },
+];
+
+/* ---------- seek：t 的纯函数 ---------- */
+// 每次 seek 前把所有物件复位到搭建时的姿态，再由 draw[] 摆这一格——
+// 否则 wobble 之类的"+="会跨帧累积，画面就依赖渲染历史了
+scene.traverse(o => { o.userData.p0 = o.position.clone(); o.userData.r0 = o.rotation.clone(); o.userData.s0 = o.scale.clone(); });
+function restore(root) {
+  root.traverse(o => { o.position.copy(o.userData.p0); o.rotation.copy(o.userData.r0); o.scale.copy(o.userData.s0); });
+}
+function render(tRaw) {
+  const f = Math.floor(clamp(tRaw, 0, DURATION - 1e-6) * STEP + 1e-6);   // 12fps 的格号
+  const t = f / STEP;
+  const idx = Math.min(5, Math.floor(t / BAR + 1e-9));
+  shots.forEach((s, i) => { s.group.visible = i === idx; });
+  restore(shots[idx].group);
+  boil.value = (f % 97) * 1.618;                   // 表面"沸腾"：每格换一次噪声相位
+  fingerTex.offset.set(((f * 37) % 101) / 101, ((f * 53) % 89) / 89);
+  draw[idx](t, f, shots[idx]);
+  renderer.render(scene, camera);
+}
+
+/* ---------- 缩放以适应窗口 ---------- */
+function fit() {
+  const k = Math.min(innerWidth / W, innerHeight / H);
+  const st = document.getElementById('stage');
+  st.style.transform = `scale(${k})`;
+  st.style.left = `${(innerWidth - W * k) / 2}px`;
+  st.style.top = `${(innerHeight - H * k) / 2}px`;
+}
+
+/* ---------- 预览：先离线合成配乐，再跟着音频时钟播放 ---------- */
+async function startPreview() {
+  const hud = document.getElementById('hud'); hud.hidden = false;
+  const actx = new AudioContext();
+  const buf = await M.renderMusic();
+  let playing = false, t = 0, src = null, t0 = 0;
+  const stop = () => { if (src) { src.stop(); src = null; } playing = false; };
+  const play = () => {
+    if (t >= DURATION) t = 0;
+    actx.resume();
+    src = actx.createBufferSource(); src.buffer = buf; src.connect(actx.destination);
+    src.start(0, t); t0 = actx.currentTime - t; playing = true;
+  };
+  const toggle = () => (playing ? stop() : play());
+  const setT = x => { const was = playing; stop(); t = clamp(x, 0, DURATION); if (was) play(); };
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    if (e.code === 'ArrowLeft') setT(t - 2);
+    if (e.code === 'ArrowRight') setT(t + 2);
+  });
+  document.getElementById('stage').addEventListener('click', toggle);
+  document.getElementById('hud-bar').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setT((e.clientX - r.left) / r.width * DURATION);
+  });
+  (function loop() {
+    if (playing) { t = actx.currentTime - t0; if (t >= DURATION) { t = DURATION; stop(); } }
+    render(t);
+    document.getElementById('hud-play').textContent = playing ? '❚❚' : '▶ 空格播放';
+    document.getElementById('hud-time').textContent = `${t.toFixed(2)} / ${DURATION.toFixed(2)}s`;
+    hud.querySelector('.bar i').style.width = `${t / DURATION * 100}%`;
+    requestAnimationFrame(loop);
+  })();
+}
+
+/* ---------- 启动 ---------- */
+fit(); addEventListener('resize', fit);
+await document.fonts.ready;
+// 预编译所有镜头的着色器，免得第一次切镜头时卡住
+shots.forEach(s => { s.group.visible = true; });
+renderer.compile(scene, camera);
+render(0);
+window.__video = {
+  width: W, height: H, fps: FPS, duration: DURATION,
+  seek: render,
+  renderAudio: async () => M.encodeWav(await M.renderMusic()),
+};
+if (!RENDER) startPreview();
+</script>
+</body>
+</html>

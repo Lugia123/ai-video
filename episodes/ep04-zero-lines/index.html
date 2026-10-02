@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ep04 原平台零行 ≠ 零工作</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #EFE7D6; overflow: hidden; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  #hud {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 36px;
+    display: flex; align-items: center; gap: 12px; padding: 0 12px;
+    background: rgba(0,0,0,.6); color: #ddd; font: 13px/1 ui-monospace, Menlo, monospace;
+  }
+  #hud[hidden] { display: none; }
+  #hud .bar { flex: 1; height: 6px; background: #444; position: relative; cursor: pointer; }
+  #hud .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #ddd; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="hud" hidden><span id="hud-play">▶ 空格播放</span><div class="bar" id="hud-bar"><i></i></div><span id="hud-time"></span></div>
+<script type="module">
+/*
+ * ep04《原平台零行 ≠ 零工作》
+ *
+ *   - 全部 Canvas 2D，画面是 t 的纯函数。纸剪 UI 来自 assets/lib/paper-kit.js，讲解员来自 paper-girl.js（切图版纸片女孩，#1027 起替换原来的 box-buddy.js；全片统一 s = 2.0），
+ *     配乐来自 lofi.js（renderAudio 返回 WAV，渲染器与旁白混音）。时间轴/字幕/切点写法与 ep02、ep03 相同。
+ *   - 时间轴全部由 narration/timings.json 推出（按句）。kw(段, '关键词') 定位到句内按字数比例估时刻，
+ *     落在「句末后 0.5s」之内的推到句末 + 0.5s（hold）。镜头切点 cutAfter()：离说完 ≥ 1.0s、离下一句开口 ≥ 0.3s（CUTS 校验）。
+ *   - 开头没有口号和片头：第 0 帧就是一扇纸质终端窗口，0.3–0.9s 被小人拉大，右边和上边露出一圈黑边；系列名只在 s02 之后 1.5s 的无配音字卡上。
+ *   - 黑边的画法：画框（GL 视口）钉在内容区左下角、大小不跟窗口走，所以多出来的右边和上边是黑的（termWin）。
+ *   - 运镜：s01 窗口被拉大；s06 从「设画框」拉远扫过整个项目；s07 横移到 Linux 再横移回 Windows；s12 回到开头那扇窗口。
+ *   - 再抓回来：s04 三张猜测卡依次推翻（~23%）、s06–s07 没人调用 → Linux 那边有人代劳（~44–49%）、s10「不做菜单栏」被否（~74%）、s12 回扣黑边（~91%）。
+ *   - 字幕按句切换，文字与 script.md 逐字一致（window.__debug.SUBS 可核对）。
+ */
+import { createKit, C, F, RAD, clamp, lerp, eo3, ei3, eio, eBack, hash, mulberry32 } from '../../assets/lib/paper-kit.js';
+import { createBuddy as createBuddy0 } from '../../assets/lib/paper-girl.js';
+const BUDDIES = [];   // 自查用（tools/render/pose-stats.mjs）：按创建顺序收集每个讲解员
+const createBuddy = (c, o) => { const b = createBuddy0(c, o); BUDDIES.push(b); return b; };
+/** 讲解员大小：全片统一 s = 2.0（站着约 480px 高，约 45% 画高），基准是 assets/characters/girl-q/motion.mp4 */
+const GS = 2;
+import { renderLofi, encodeWav } from '../../assets/lib/lofi.js';
+
+const W = 1920, H = 1080, FPS = 30;
+const RENDER = new URLSearchParams(location.search).get('render') === '1';
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const K = createKit(ctx);
+const { rr, circ, poly, paper, text, bigType, win, l2s } = K;
+let t = 0;
+
+/* ---------- 时间轴（旁白驱动，按句） ---------- */
+const TL = await (await fetch('narration/timings.json', { cache: 'no-store' })).json();
+const SEG = Object.fromEntries(TL.segments.map(s => [s.id, s]));
+const seg = id => SEG[id] ?? (() => { throw new Error(`timings.json 里没有段落 ${id}`); })();
+for (const s of TL.segments) {
+  let off = 0;
+  s.sents = (s.sentences ?? [{ text: s.text, start: s.start, end: s.end }]).map(x => {
+    const i0 = s.text.indexOf(x.text, off);
+    if (i0 < 0) throw new Error(`${s.id} 的句子对不上段落文本：${x.text}`);
+    off = i0 + x.text.length;
+    return { ...x, i0, i1: off };
+  });
+}
+const SENT_ENDS = TL.segments.flatMap(s => s.sents.map(x => x.end));
+
+/** 每个"字"的朗读权重：汉字 1；全大写缩写按字母数；其它英文词按音节粗估；逗号顿一下，句中冒号停久一点 */
+function units(str) {
+  const out = [];
+  for (const m of str.matchAll(/[A-Za-z]+|[0-9]+|./gsu)) {
+    const s = m[0];
+    let w = 0;
+    if (/^[A-Z]+$/.test(s)) w = s.length;
+    else if (/^[A-Za-z]+$/.test(s)) w = Math.ceil(s.length / 3);
+    else if (/^[0-9]+$/.test(s)) w = s.length;
+    else if (/[一-鿿]/.test(s)) w = 1;
+    else if ('，、'.includes(s)) w = 0.8;
+    else if ('。？！：；'.includes(s)) w = 1.4;
+    out.push([s, w, m.index]);
+  }
+  for (let k = out.length - 1; k >= 0 && !/[一-鿿A-Za-z0-9]/.test(out[k][0]); k--) out[k][1] = 0;
+  return out;
+}
+function timeAt(id, idx) {
+  const s = seg(id);
+  const x = s.sents.find(x => idx < x.i1) ?? s.sents[s.sents.length - 1];
+  const rel = idx - x.i0;
+  let before = 0, total = 0;
+  for (const [, w, i] of units(x.text)) { if (i < rel) before += w; total += w; }
+  return x.start + (x.end - x.start) * (total ? before / total : 0);
+}
+function hold(tt) {
+  for (const e of SENT_ENDS) if (tt > e + 1e-3 && tt < e + 0.5) return e + 0.5;
+  return tt;
+}
+function kw(id, needle, end = false) {
+  const i = seg(id).text.indexOf(needle);
+  if (i < 0) throw new Error(`段落 ${id} 里没有「${needle}」`);
+  return hold(timeAt(id, end ? i + needle.length : i));
+}
+const sent = (id, k) => seg(id).sents[k - 1];
+const CUT_AFTER = 1.0, CUT_BEFORE = 0.3;
+function cutAfter(id) {
+  const i = TL.segments.findIndex(s => s.id === id), s = TL.segments[i], n = TL.segments[i + 1];
+  const room = n ? n.start - s.end - CUT_AFTER - CUT_BEFORE : 0;
+  return s.end + CUT_AFTER + Math.max(0, room) / 2;
+}
+
+/* ---------- 字幕：按句切换，文字与旁白逐字一致；长句在最靠中间的逗号处断开 ---------- */
+const SUB_FONT = `600 46px ${F.zh}`, SUB_Y = 1012, SUB_MAX_W = 1760, SUB_MAX_CH = 26;
+function splitLong(p) {
+  if (Array.from(p).length <= SUB_MAX_CH) return [p];
+  const cuts = [...p.matchAll(/[，、：；]/g)].map(m => m.index + 1).filter(c => c < p.length);
+  if (!cuts.length) return [p];
+  const mid = p.length / 2, c = cuts.reduce((a, b) => (Math.abs(b - mid) < Math.abs(a - mid) ? b : a));
+  return [...splitLong(p.slice(0, c)), ...splitLong(p.slice(c))];
+}
+const SUBS = [];
+for (const s of TL.segments) {
+  s.sents.forEach((x, k) => {
+    const chunks = splitLong(x.text);
+    let idx = x.i0;
+    const starts = chunks.map(c => { const tt = timeAt(s.id, idx); idx += c.length; return tt; });
+    const next = s.sents[k + 1]?.start ?? TL.segments[TL.segments.indexOf(s) + 1]?.start ?? Infinity;
+    chunks.forEach((c, i) => SUBS.push({ id: s.id, text: c, t0: starts[i], t1: i + 1 < chunks.length ? starts[i + 1] : Math.min(x.end + 0.3, next - 0.02) }));
+  });
+}
+function drawSubtitle() {
+  const s = SUBS.find(s => t >= s.t0 && t < s.t1);
+  if (!s) return;
+  const a = clamp((t - s.t0) / 0.12) * (1 - clamp((t - (s.t1 - 0.1)) / 0.1));
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.font = SUB_FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(245,239,226,0.92)'; ctx.lineWidth = 14; ctx.strokeText(s.text, 960, SUB_Y);
+  ctx.fillStyle = C.ink; ctx.fillText(s.text, 960, SUB_Y);
+  ctx.restore();
+}
+
+/* ---------- 共用小件 ---------- */
+const ZH = F.zh;
+function withCam(cx, cy, z, fn) { ctx.save(); ctx.translate(960, 540); ctx.scale(z, z); ctx.translate(-cx, -cy); fn(); ctx.restore(); }
+function crayonLine(x0, y0, x1, y1, p, w = 12, col = C.red) {
+  if (p <= 0) return;
+  const x = lerp(x0, x1, p), y = lerp(y0, y1, p);
+  ctx.save(); ctx.lineCap = 'round';
+  ctx.strokeStyle = col; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x, y); ctx.stroke();
+  ctx.globalAlpha *= 0.45; ctx.lineWidth = w * 0.45; ctx.strokeStyle = '#FFF4E8';
+  ctx.beginPath(); ctx.moveTo(x0 + 3, y0 - 3); ctx.lineTo(x + 3, y - 3); ctx.stroke();
+  ctx.restore();
+}
+function inkCircle(cx, cy, rx, ry, p, seed, col = C.red) {
+  if (p <= 0) return;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate((hash(seed, 1) * 6) * RAD);
+  ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  ctx.beginPath();
+  const a0 = -2.2 + hash(seed, 2) * 0.4, span = Math.PI * 2.15 * p;
+  for (let i = 0; i <= 40; i++) {
+    const a = a0 + span * i / 40, wob = 1 + 0.05 * Math.sin(a * 3 + seed);
+    const x = Math.cos(a) * rx * wob, y = Math.sin(a) * ry * wob;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke(); ctx.restore();
+}
+function pill(x, y, label, col, seed, size = 30, o = {}) {
+  ctx.font = `${o.weight ?? 600} ${size}px ${o.font ?? ZH}`;
+  const w = ctx.measureText(label).width + size * 1.2, h = size * 1.6;
+  paper(rr(x, y, w, h, h / 2, seed), [x, y, w, h], { fill: col, lift: 0.4, seed, inkW: 2.4 });
+  text(label, x + w / 2, y + h / 2 + 1, size, { align: 'center', base: 'middle', font: o.font ?? ZH, weight: o.weight ?? 600, color: o.color });
+  return w;
+}
+function pillW(label, size = 30, font = ZH, weight = 600) { ctx.font = `${weight} ${size}px ${font}`; return ctx.measureText(label).width + size * 1.2; }
+function codeLine(s, x, y, size, col) {
+  ctx.font = `500 ${size}px ${F.code}`; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = col ?? C.ink; ctx.fillText(s, x, y);
+}
+function greenCheck(x, y, t0, seed, r = 38) {
+  const ok = eBack(clamp((t - t0) / 0.25));
+  if (ok <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(ok * r / 38, ok * r / 38);
+  paper(circ(0, 0, 38, seed), [-38, -38, 76, 76], { fill: C.green, lift: 0.8, seed, inkW: 2.4 });
+  ctx.strokeStyle = C.card; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-16, 1); ctx.lineTo(-4, 14); ctx.lineTo(17, -12); ctx.stroke();
+  ctx.restore();
+}
+function stamp(label, x, y, tt, rot = -8, col = C.red, size = 44) {
+  const sp = eBack(clamp((t - tt) / 0.25));
+  if (sp <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot * RAD); ctx.scale(sp, sp);
+  ctx.font = `600 ${size}px ${ZH}`;
+  const sw = ctx.measureText(label).width + size;
+  ctx.fillStyle = 'rgba(255,252,245,0.85)'; ctx.fillRect(-sw / 2, -size * 0.86, sw, size * 1.6);
+  ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.strokeRect(-sw / 2, -size * 0.86, sw, size * 1.6);
+  text(label, 0, 0, size, { align: 'center', base: 'middle', font: ZH, weight: 600, color: col });
+  ctx.restore();
+}
+function note(s, x, y, size, t0, o = {}) {
+  const a = clamp((t - t0) / 0.3);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a;
+  text(s, x, y + (1 - eo3(a)) * 12, size, { font: ZH, weight: 600, color: C.mute, ...o });
+  ctx.restore();
+}
+function dashed(x0, y0, x1, y1, col = C.mute, w = 3, dash = [14, 10]) {
+  ctx.save(); ctx.setLineDash(dash); ctx.strokeStyle = col; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.restore();
+}
+/** 箭头：从 (x, y) 朝 dir（1 上 / -1 下）长 len */
+function arrow(x, y, dir, len, col, p = 1) {
+  if (p <= 0) return;
+  const L = len * eo3(p), y1 = y - dir * L;
+  ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 12; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y1 + dir * 20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x - 26, y1 + dir * 34); ctx.lineTo(x + 26, y1 + dir * 34); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+/** 纸柱子：底边中心 (x, base)，高 h */
+function bar(x, base, w, h, col, seed) {
+  if (h <= 1) return;
+  paper(rr(x - w / 2, base - h, w, h, 8, seed, 0.9), [x - w / 2, base - h, w, h], { fill: col, lift: 1, seed, inkW: 2.6 });
+}
+
+/* ================================================================
+ * 时刻表（全部从 timings.json 推出）
+ * ================================================================ */
+// 读到没定义的时刻直接报错（防止某个时刻被误并进注释、动作悄悄不出现）
+const T = new Proxy({}, { get(o, k) { if (typeof k === 'string' && k !== 'toJSON' && !(k in o)) throw new Error(`时刻 T.${k} 没有定义`); return o[k]; } });
+for (const s of TL.segments) T[s.id] = s;
+T.cut = Object.fromEntries(TL.segments.map(s => [s.id, cutAfter(s.id)]));
+T.card0 = T.s02.end + 1.0; T.card1 = T.card0 + 1.5;              // s02 说完 1.0s 后 1.5s 无配音系列字卡
+T.end0 = T.s12.end + 2.8; T.end1 = TL.duration;                // 最后一句说完画面停 2.8s，再接结尾字卡到片尾
+// s01：前 1 秒窗口就被拉大、黑边露出（front load，不等旁白说到）
+T.grow0 = 0.3; T.grow1 = 0.9;
+T.edge = kw('s01', '右边和上边'); T.line1 = kw('s01', '一行从来没人写过');
+// s02
+T.zero = kw('s02', '一行代码都不用写'); T.neq = hold(sent('s02', 2).start);
+// s03
+T.polter = Math.min(kw('s03', 'Polter'), T.card1 + 0.2); T.three = kw('s03', '连猜了三次'); T.wrong3 = kw('s03', '三次都猜错');
+// s04
+T.g1 = kw('s04', '先猜'); T.g1t = kw('s04', '一试'); T.g1x = kw('s04', '不是');
+T.g2 = kw('s04', '再猜'); T.g2ok = kw('s04', '改完居然好了'); T.g2x = kw('s04', '碰巧');
+T.g3 = kw('s04', '又猜'); T.g3t = kw('s04', '一查'); T.g3ok = kw('s04', '尺寸全对'); T.g3x = kw('s04', '尺寸全对', true) + 0.3;
+// s05
+T.print = kw('s05', '打了出来'); T.frame = kw('s05', '画框，就是'); T.gpu = kw('s05', '告诉显卡');
+T.stuck = hold(sent('s05', 3).start); T.still = kw('s05', '卡着没动');
+// s06
+T.hunt = hold(sent('s06', 1).start); T.whole = kw('s06', '整个项目里'); T.none = kw('s06', '一次都没人用过');
+// s07
+T.why = kw('s07', '那为什么'); T.pan0 = T.cut.s06 + 0.1; T.pan1 = kw('s07', 'Linux', true);
+T.gtk = kw('s07', '界面工具包'); T.every = kw('s07', '每一帧');
+T.back0 = kw('s07', '换到 Windows'); T.back1 = T.back0 + 1.0; T.nobody = kw('s07', '就没人管了');
+// s08
+T.noIf = kw('s08', '没加'); T.shared = kw('s08', '两边共用'); T.self = kw('s08', '自己把画框设好');
+// s09
+T.more = Math.min(kw('s09', '不止一件'), T.cut.s08 + 0.3); T.menu = kw('s09', '比如主菜单'); T.n103 = kw('s09', '一百多个');
+T.xib = kw('s09', '界面图纸'); T.noCode = kw('s09', '一行代码都没写');
+// s10
+T.plan = kw('s10', '原本打算'); T.noBar = kw('s10', '干脆不做菜单栏'); T.veto = kw('s10', '当面否了'); T.ask = kw('s10', '一个从没人教过'); T.btn = kw('s10', '这些命令');
+// s11
+T.list = kw('s11', '把原来零行'); T.whyZ = kw('s11', '为什么是零'); T.sort = hold(sent('s11', 2).start); T.someone = kw('s11', '还是有人替你做了');
+// s12
+T.back = kw('s12', '回到那圈黑边'); T.fill = kw('s12', '而在'); T.fill1 = kw('s12', '那一行');
+
+/* ---------- 终端窗口：画框（视口）钉在内容区左下角，没跟上窗口大小时右边和上边露黑 ---------- */
+const TB = K.TB, BLACK = '#1C1916';
+/** (x, y, w, h)：窗口外框；vw, vh：画框大小（null = 跟窗口一样大）；o.frame：画出虚线画框 */
+function termWin(x, y, w, h, vw, vh, o = {}) {
+  win({ x, y, w, h, title: o.title ?? 'Polter', seed: o.seed ?? 11, rot: o.rot ?? 0, t0: o.t0, s: o.s }, (iw, ih) => {
+    const fw = Math.min(iw - 24, vw ?? iw), fh = Math.min(ih - 20, vh ?? ih);
+    ctx.fillStyle = BLACK; ctx.fillRect(12, 8, iw - 24, ih - 20);           // 整块内容区先涂黑
+    const fx = 12, fy = ih - 12 - (vh == null ? ih - 20 : fh), FW = vw == null ? iw - 24 : fw, FH = vh == null ? ih - 20 : fh;
+    ctx.fillStyle = '#FBF6EA'; ctx.fillRect(fx, fy, FW, FH);               // 画框里是正常的终端画面
+    ctx.save(); ctx.beginPath(); ctx.rect(fx, fy, FW, FH); ctx.clip();
+    const lines = Math.floor((FH - 30) / 46);
+    for (let k = 0; k < lines; k++) {
+      const yy = fy + 42 + k * 46;
+      ctx.font = `600 ${26 * (o.fs ?? 1)}px ${F.code}`; ctx.fillStyle = C.green; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      if (k % 3 === 0) ctx.fillText('$', fx + 22, yy);
+      ctx.fillStyle = k % 3 === 0 ? 'rgba(30,27,24,0.55)' : 'rgba(30,27,24,0.25)';
+      ctx.fillRect(fx + (k % 3 === 0 ? 52 : 22), yy - 16, Math.min(FW - 80, 160 + 260 * (0.5 + 0.5 * hash(k, o.seed ?? 11))), 14);
+    }
+    ctx.restore();
+    if (o.frame > 0) {
+      ctx.save(); ctx.globalAlpha *= o.frame; ctx.setLineDash([16, 10]); ctx.lineDashOffset = -t * 30;
+      ctx.strokeStyle = C.red; ctx.lineWidth = 5; ctx.strokeRect(fx + 3, fy + 3, FW - 6, FH - 6); ctx.restore();
+    }
+  });
+}
+/** 放大镜：t0–t1 之间沿 pts 来回扫 */
+function lens(pts, t0, t1, r = 90, up = false) {
+  const a = clamp((t - t0) / 0.3) * (1 - clamp((t - t1) / 0.3));
+  if (a <= 0) return;
+  const u = 0.5 - 0.5 * Math.cos((t - t0) * 1.9), [x0, y0] = pts[0], [x1, y1] = pts[1];
+  const x = lerp(x0, x1, u), y = lerp(y0, y1, u) + Math.sin((t - t0) * 3.1) * 20;
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.fillStyle = 'rgba(255,252,245,0.28)'; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 11; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineCap = 'round'; ctx.lineWidth = 24; const sy = up ? -1 : 1; ctx.beginPath(); ctx.moveTo(x + r * 0.72, y + sy * r * 0.72); ctx.lineTo(x + r * 1.5, y + sy * r * 1.5); ctx.stroke();   // 贴近字幕带时把柄朝上
+  ctx.restore();
+}
+/** 窗口大小在两个矩形之间插值 */
+const lerpRect = (a, b, p) => a.map((v, i) => lerp(v, b[i], p));
+/** 空的虚线代码行（「从来没人写过的那一行」）；fill>0 时被填上 */
+function missingLine(x, y, w, a, fill = 0) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a;
+  if (fill > 0) {
+    paper(rr(x, y, w, 70, 10, 19), [x, y, w, 70], { fill: C.mustard, lift: 0.8 * fill, seed: 19, inkW: 2.4 });
+    ctx.globalAlpha *= clamp(fill * 2);
+    text('设好画框', x + 70, y + 47, 40, { font: ZH, weight: 700 });
+  } else {
+    ctx.setLineDash([14, 10]); ctx.lineDashOffset = -t * 30; ctx.strokeStyle = C.red; ctx.lineWidth = 4; ctx.strokeRect(x, y, w, 70);
+    if (Math.floor(t * 2.5) % 2 === 0) { ctx.fillStyle = C.ink; ctx.fillRect(x + 60, y + 16, 4, 40); }
+    text('？', x + w - 50, y + 40 + Math.sin(t * 5) * 6, 48, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.red });
+  }
+  codeLine(`${fill > 0 ? '+' : ' '}`, x + 22, y + 48, 40, C.green);
+  ctx.restore();
+}
+
+/* ---------- 镜头 1（s01）：窗口一放大，右边和上边露出一圈黑边 ---------- */
+const HOOK_A = [420, 250, 880, 520], HOOK_B = [130, 110, 1250, 720];     // 窗口靠左，右边留给讲解员
+const HOOK_VW = HOOK_A[2] - 24, HOOK_VH = HOOK_A[3] - TB - 20;       // 画框 = 放大前的内容区
+const buddy1 = createBuddy(ctx, {
+  path: [[0, 1640, 935, GS]],                 // 问号离画面右缘 ≥ 60px
+  acts: [
+    { type: 'point', t0: 0, t1: T.grow1 + 0.3, at: [1300, 500], hand: 'l' },   // 开场指着窗口
+    { type: 'startle', t0: T.grow1 + 0.3 },                                    // 窗口一放大，黑边露出来
+    { type: 'question', t0: T.grow1 + 3.4, t1: T.line1 },                      // 「右边和上边……」直到查到那一行
+  ],
+});
+function hookRect(tt) { return lerpRect(HOOK_A, HOOK_B, eBack(clamp((tt - T.grow0) / (T.grow1 - T.grow0)))); }
+function shotHook() {
+  const z = lerp(1, 1.05, eio(clamp((t - 2) / 8)));
+  ctx.save(); ctx.translate(960, 500); ctx.scale(z, z); ctx.translate(-960, -500);
+  const [x, y, w, h] = hookRect(t);
+  termWin(x, y, w, h, HOOK_VW, HOOK_VH, { seed: 11 });
+  // 「右边和上边」：两道红括号指着黑边
+  const ea = clamp((t - T.edge) / 0.3);
+  if (ea > 0) {
+    ctx.save(); ctx.globalAlpha = ea; ctx.strokeStyle = C.red; ctx.lineWidth = 7; ctx.lineCap = 'round';
+    const [bx, by, bw, bh] = HOOK_B;
+    ctx.beginPath(); ctx.moveTo(bx + bw + 24, by + 90); ctx.lineTo(bx + bw + 40, by + 90); ctx.lineTo(bx + bw + 40, by + bh - 20); ctx.lineTo(bx + bw + 24, by + bh - 20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx + 20, by - 18); ctx.lineTo(bx + 20, by - 34); ctx.lineTo(bx + bw - 20, by - 34); ctx.lineTo(bx + bw - 20, by - 18); ctx.stroke();
+    ctx.restore();
+  }
+  lens([[1130, 300], [600, 320]], hold(sent('s01', 2).start), T.line1 + 0.2);
+  lens([[540, 903], [1160, 903]], T.line1 + 0.4, T.cut.s01, 56, true);
+  missingLine(460, 868, 800, clamp((t - T.line1) / 0.3));
+  buddy1.draw(t);
+  ctx.restore();
+}
+
+/* ---------- 镜头 2（s02）：左 Linux 放大干干净净（0 行），右 Windows 一圈黑；零行 ≠ 零工作 ---------- */
+const buddy2 = createBuddy(ctx, {
+  path: [[0, 960, 730, GS]],
+  acts: [
+    { type: 'point', t0: T.zero, t1: T.neq, at: [430, 400], hand: 'l' },   // 「一行代码都不用写」
+    { type: 'shake', t0: T.neq, t1: T.neq + 1.6 },                         // 「零行 ≠ 零工作」
+  ],
+});
+function shotCompare() {
+  const p = eo3(clamp((t - T.cut.s01 - 0.3) / 0.5));
+  const A = [120, 190, 600, 360], B = [60, 150, 740, 440];           // 两扇窗各往外挪 20，中间 320 宽留给她
+  const [x, y, w, h] = lerpRect(A, B, p);
+  termWin(x, y, w, h, null, null, { title: 'Linux', seed: 21, t0: T.cut.s01 });
+  const [x2, y2, w2, h2] = lerpRect([1200, 190, 600, 360], [1120, 150, 740, 440], p);
+  termWin(x2, y2, w2, h2, 600 - 24, 360 - TB - 20, { title: 'Windows', seed: 22, t0: T.cut.s01 });
+  const za = eBack(clamp((t - T.zero) / 0.3));
+  if (za > 0) { ctx.save(); ctx.translate(430, 660); ctx.scale(za, za); const pw = pillW('这件事：0 行', 42); pill(-pw / 2, -34, '这件事：0 行', C.mint, 23, 42); ctx.restore(); }
+  bigType('零行 ≠ 零工作', 960, 850, 120, T.neq, { align: 'center', font: ZH, weight: 700, stagger: 0.05 });
+  buddy2.draw(t);
+}
+
+/* ---------- 系列字卡（无配音，1.5s） ---------- */
+function shotCard() {
+  const p = eo3(clamp((t - T.card0) / 0.25)), out = ei3(clamp((t - (T.card1 - 0.22)) / 0.22));
+  ctx.save(); ctx.translate(960 + (1 - p) * -500 + out * 600, 540); ctx.rotate(-1.2 * RAD);
+  ctx.globalAlpha = clamp(p * 3) * (1 - out);
+  paper(rr(-760, -150, 1520, 300, 16, 141), [-760, -150, 1520, 300], { fill: C.card, lift: 1.6, seed: 141 });
+  text('《移植不是翻译》', 0, -60, 44, { align: 'center', base: 'middle', font: ZH, weight: 600, color: C.mute });
+  text('第 4 集 · 原平台零行 ≠ 零工作', 0, 40, 84, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+/* ---------- 镜头 3（s03）：Polter 的 Windows 版碰上这圈黑边；三张猜测卡扣在桌上 ---------- */
+const GUESS = [
+  { title: '猜 ①', lines: ['窗口得先', '显示出来'] },
+  { title: '猜 ②', lines: ['一开始就按', '最终大小建好'] },
+  { title: '猜 ③', lines: ['画布没跟着', '变大'] },
+];
+const buddy3 = createBuddy(ctx, {
+  path: [[0, 1560, 950, GS], [T.card1 + 0.3, 1560, 950, GS], [T.three - 0.2, 1185, 950, GS]],   // 从右边走到窗口和猜测卡之间
+  acts: [
+    { type: 'point', t0: T.three - 0.5, t1: T.wrong3 + 0.3, at: [1630, 500] },   // 走到位直接指「连猜了三次」
+    { type: 'droop', t0: T.wrong3 + 0.3, t1: T.cut.s03 },                         // 「三次都猜错」
+  ],
+});
+function guessBack(x, y, k, a) {
+  if (a <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(hash(k, 3) * 3 * RAD); ctx.scale(eBack(a), eBack(a));
+  paper(rr(-260, -80, 520, 160, 12, 31 + k), [-260, -80, 520, 160], { fill: C.sand, lift: 1, seed: 31 + k, inkW: 2.4 });
+  text(GUESS[k].title, -200, 14, 48, { base: 'middle', font: ZH, weight: 700 });
+  text('？', 170, 14, 70, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.mute });
+  ctx.restore();
+}
+function shotThree() {
+  const pa = clamp((t - T.polter) / 0.3);
+  termWin(70, 170, 950, 600, 950 - 24 - 250, 600 - TB - 20 - 150, { seed: 11, t0: T.card1 });
+  if (pa > 0) { ctx.save(); ctx.globalAlpha = pa; const pw = pillW('Polter · Windows 版', 36, F.ui); pill(545 - pw / 2, 100, 'Polter · Windows 版', C.sky, 32, 36, { font: F.ui }); ctx.restore(); }
+  lens([[840, 320], [280, 330]], T.card1 + 0.4, T.three + 0.3);
+  GUESS.forEach((g, k) => guessBack(1630, 280 + k * 220, k, clamp((t - T.three - k * 0.25) / 0.3)));
+  if (t > T.wrong3) GUESS.forEach((g, k) => { const p = clamp((t - T.wrong3 - k * 0.2) / 0.25); if (p > 0) { ctx.save(); ctx.globalAlpha = 0.9; crayonLine(1410, 250 + k * 220, 1850, 310 + k * 220, p, 10); ctx.restore(); } });
+  buddy3.draw(t);
+}
+
+/* ---------- 镜头 4（s04）：三张卡翻开，一张张被推翻 ---------- */
+const buddy4 = createBuddy(ctx, {
+  path: [[0, 1750, 950, GS]],
+  acts: [
+    { type: 'shake', t0: T.g1x, t1: T.g1x + 1.6 },             // 猜 ①：不是
+    { type: 'thumbs', t0: T.g2ok, t1: T.g2x, hand: 'l' },       // 猜 ②：改完居然好了
+    { type: 'droop', t0: T.g2x, t1: T.g2x + 1.9 },             // ……只是碰巧
+    { type: 'question', t0: T.g3t, t1: T.cut.s04 },            // 猜 ③：尺寸全对，还是不行
+  ],
+});
+function bigX(x, y, t0, r = 60) {
+  crayonLine(x - r, y - r, x + r, y + r, clamp((t - t0) / 0.2), 14);
+  crayonLine(x + r, y - r, x - r, y + r, clamp((t - t0 - 0.15) / 0.2), 14);
+}
+const GX = [280, 790, 1300];                // 三张卡的中线（收窄左移，右边留给讲解员）
+function shotGuess() {
+  const xs = GX, y0 = 170, cw = 470, chh = 600;
+  GUESS.forEach((g, k) => {
+    const t0 = [T.g1, T.g2, T.g3][k];
+    const a = clamp((t - T.cut.s03 - k * 0.12) / 0.3), f = clamp((t - t0) / 0.3);
+    if (a <= 0) return;
+    const x = xs[k];
+    ctx.save(); ctx.translate(x, y0 + chh / 2); ctx.rotate(hash(k, 4) * 2 * RAD);
+    ctx.scale((f < 0.5 ? Math.cos(f * Math.PI) : -Math.cos(f * Math.PI)) || 0.02, 1);
+    ctx.globalAlpha = a;
+    const open = f >= 0.5;
+    paper(rr(-cw / 2, -chh / 2, cw, chh, 14, 41 + k), [-cw / 2, -chh / 2, cw, chh], { fill: open ? C.card : C.sand, lift: 1, seed: 41 + k });
+    text(g.title, 0, -chh / 2 + 80, 52, { align: 'center', base: 'middle', font: ZH, weight: 700, color: open ? C.mute : C.ink });
+    if (open) g.lines.forEach((l, i) => text(l, 0, -chh / 2 + 180 + i * 70, 54, { align: 'center', base: 'middle', font: ZH, weight: 700 }));
+    else text('？', 0, 20, 120, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.mute });
+    ctx.restore();
+  });
+  // 卡片下半截：各自怎么被推翻的
+  const cy = y0 + 440;
+  // ①：换个条件一试（开关）→ 不是
+  const s1 = clamp((t - T.g1t) / 0.25);
+  if (s1 > 0) {
+    ctx.save(); ctx.globalAlpha = s1;
+    paper(rr(GX[0] - 80, cy - 30, 160, 60, 30, 51), [GX[0] - 80, cy - 30, 160, 60], { fill: C.faint, lift: 0.4, seed: 51, inkW: 2.2 });
+    const kx = lerp(GX[0] - 50, GX[0] + 50, eio(clamp((t - T.g1t - 0.1) / 0.3)));
+    paper(circ(kx, cy, 24, 52), [kx - 24, cy - 24, 48, 48], { fill: C.card, lift: 0.6, seed: 52, inkW: 2.2 });
+    ctx.restore();
+  }
+  bigX(GX[0], cy + 20, T.g1x);
+  // ②：卡里一扇小窗口按最终大小建出来（反复）→ 改完居然好了（绿勾一直跳）→ 碰巧
+  const wa = clamp((t - T.g2 - 0.3) / 0.3) * (1 - clamp((t - T.g2ok) / 0.3));
+  if (wa > 0) {
+    const k = eBack(((t - T.g2 - 0.3) * 0.9) % 1), mw = lerp(60, 200, clamp(k)), mh = mw * 0.6;
+    ctx.save(); ctx.globalAlpha = wa; ctx.fillStyle = C.sky; ctx.strokeStyle = C.ink; ctx.lineWidth = 3;
+    ctx.fillRect(GX[1] - mw / 2, cy - mh / 2, mw, mh); ctx.strokeRect(GX[1] - mw / 2, cy - mh / 2, mw, mh); ctx.restore();
+  }
+  if (t > T.g2ok && t < T.g2x) { ctx.save(); const b = 1 + 0.15 * Math.sin((t - T.g2ok) * 6); ctx.translate(GX[1] - 60, cy); ctx.scale(b, b); ctx.translate(-(GX[1] - 60), -cy); greenCheck(GX[1] - 60, cy, T.g2ok, 53, 34); ctx.restore(); }
+  else greenCheck(GX[1] - 60, cy, T.g2ok, 53, 34);
+  const s2 = clamp((t - T.g2x) / 0.25);
+  if (s2 > 0) { stamp('碰巧', GX[1], cy - 90, T.g2x, -8, C.orange, 44); }
+  bigX(GX[1], cy + 20, T.g2x + 0.5);
+  // ③：一查（尺子）→ 尺寸全对 → 还是不对
+  const s3 = clamp((t - T.g3t) / 0.25);
+  if (s3 > 0) {
+    ctx.save(); ctx.globalAlpha = s3; ctx.translate(GX[2], cy - 10); ctx.rotate(-4 * RAD);
+    paper(rr(-170, -26, 340, 52, 4, 54), [-170, -26, 340, 52], { fill: C.mustard, lift: 0.6, seed: 54, inkW: 2.2 });
+    ctx.fillStyle = C.ink; for (let k = 0; k <= 16; k++) ctx.fillRect(-160 + k * 20, -26, 3, k % 4 ? 14 : 24);
+    ctx.restore();
+  }
+  note('尺寸全对', GX[2], cy + 80, 40, T.g3ok, { align: 'center', color: C.green });
+  bigX(GX[2], cy + 20, T.g3x);
+  buddy4.draw(t);
+}
+
+/* ---------- 镜头 5（s05）：把画框打出来 —— 窗口怎么变，画框都卡着没动 ---------- */
+const buddy5 = createBuddy(ctx, {
+  path: [[0, 1690, 950, GS]],
+  acts: [
+    { type: 'point', t0: T.print, t1: T.stuck, at: tt => (tt < T.gpu ? [900, 420] : [1330, 250]), hand: 'l' },   // 「把画框打了出来」→「告诉显卡」
+    { type: 'startle', t0: T.still },                                                                           // 「一直卡着没动」
+  ],
+});
+function shotFrame() {
+  // 窗口：前两句保持放大；第三句开始在大小之间来回拉，画框不动
+  const osc = t > T.stuck ? 0.5 - 0.5 * Math.cos((t - T.stuck) * 2.6) : 1;
+  const A = [110, 230, 760, 440], B = [80, 130, 1040, 600];
+  const [x, y, w, h] = lerpRect(A, B, osc);
+  termWin(x, y, w, h, 760 - 24, 440 - TB - 20, { seed: 11, t0: T.cut.s04, frame: clamp((t - T.print) / 0.3) });
+  const fa = clamp((t - T.print - 0.2) / 0.3);
+  if (fa > 0) { ctx.save(); ctx.globalAlpha = fa; const pw = pillW('画框', 44); pill(1180, 560 - 36, '画框', '#FBE3DC', 55, 44, { color: C.red }); ctx.restore(); }
+  // 显卡：往画框里画
+  const ga = eBack(clamp((t - T.gpu) / 0.3));
+  if (ga > 0) {
+    ctx.save(); ctx.translate(1330, 250); ctx.scale(ga, ga);
+    paper(rr(-120, -70, 240, 140, 12, 56), [-120, -70, 240, 140], { fill: C.green, lift: 1, seed: 56, inkW: 2.4 });
+    ctx.fillStyle = 'rgba(255,252,245,0.5)'; for (let k = 0; k < 5; k++) ctx.fillRect(-100 + k * 44, 50, 26, 20);
+    text('显卡', 0, -4, 48, { align: 'center', base: 'middle', font: ZH, weight: 700, color: C.card });
+    ctx.restore();
+    crayonLine(1200, 300, 940, 400, clamp((t - T.gpu - 0.3) / 0.4), 8, C.green);
+  }
+  // 日志：放大前后同一个数
+  const la = clamp((t - T.still) / 0.3);
+  if (la > 0) {
+    ctx.save(); ctx.globalAlpha = la; ctx.translate(150, 790); ctx.rotate(-1 * RAD);
+    paper(rr(0, 0, 600, 140, 8, 57), [0, 0, 600, 140], { fill: '#2A2623', lift: 1, seed: 57, inkW: 2.2 });
+    text('放大前', 24, 52, 26, { font: ZH, weight: 600, color: '#B8AE9C' });
+    codeLine('viewport=(0,0,1000,670)', 130, 52, 26, '#F3E9D2');
+    text('放大后', 24, 104, 26, { font: ZH, weight: 600, color: '#B8AE9C' });
+    codeLine('viewport=(0,0,1000,670)', 130, 104, 26, '#F08A74');
+    ctx.restore();
+  }
+  buddy5.draw(t);
+}
+
+/* ---------- 镜头 6（s06）：满项目找谁调用了「设画框」—— 一个都没有（运镜：扫过文件堆） ---------- */
+const FILES = (() => { const a = [], r = mulberry32(606); for (let row = 0; row < 4; row++) for (let col = 0; col < 9; col++) a.push({ row, col, x: 510 + col * 165 + (r() - 0.5) * 10, y: 190 + row * 150 + (r() - 0.5) * 16, rot: (r() - 0.5) * 8, seed: 600 + row * 9 + col }); return a; })();
+const TARGET = FILES.find(f => f.row === 1 && f.col === 4);
+const buddy6 = createBuddy(ctx, {
+  path: [[0, 210, 950, GS]],                  // 一直站在左边；镜头贴近文件时不画她，拉远后淡入（见 shotHunt）   // 镜头拉远后才走进来，不压在放大的文件上
+  acts: [
+    { type: 'startle', t0: T.none + 0.1 },   // 「一次都没人用过」
+  ],
+});
+function shotHunt() {
+  const u = eio(clamp((t - T.cut.s05) / (T.whole + 0.8 - T.cut.s05)));
+  withCam(lerp(TARGET.x, 960, u), lerp(TARGET.y + 40, 520, u), lerp(1.8, 1, u), () => {
+    const scan = lerp(0, FILES.length, clamp((t - T.whole) / (T.none - T.whole)));
+    FILES.forEach((f, i) => {
+      if (f === TARGET) return;
+      ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot * RAD);
+      paper(rr(-80, -55, 160, 110, 6, f.seed, 0.6), [-80, -55, 160, 110], { fill: C.card, lift: 0.5, seed: f.seed, inkW: 2 });
+      ctx.fillStyle = C.faint; for (let k = 0; k < 3; k++) ctx.fillRect(-60, -30 + k * 24, 70 + 40 * hash(f.seed, k), 10);
+      if (i < scan) text('—', 50, 34, 34, { align: 'center', base: 'middle', font: F.ui, weight: 700, color: C.mute });
+      ctx.restore();
+    });
+    ctx.save(); ctx.translate(TARGET.x, TARGET.y); ctx.rotate(-2 * RAD);
+    paper(rr(-100, -65, 200, 130, 8, 690), [-100, -65, 200, 130], { fill: C.mustard, lift: 1.4, seed: 690, inkW: 2.6 });
+    text('设画框', 0, 4, 42, { align: 'center', base: 'middle', font: ZH, weight: 800 });
+    ctx.restore();
+    // 扫描光圈
+    if (t > T.whole && t < T.none + 0.3) {
+      const f = FILES[Math.min(FILES.length - 1, Math.floor(scan))];
+      ctx.save(); ctx.strokeStyle = C.blue; ctx.lineWidth = 5; ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.arc(f.x, f.y, 90, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    }
+  });
+  const ca = eBack(clamp((t - T.none) / 0.3));
+  if (ca > 0) { ctx.save(); ctx.translate(1300, 860); ctx.scale(ca, ca); const pw = pillW('用到它的地方：0', 52); pill(-pw / 2, -42, '用到它的地方：0', '#FBE3DC', 61, 52, { color: C.red }); ctx.restore(); }
+  buddy6.draw(t, { alpha: clamp((t - T.whole - 0.2) / 0.4) });   // 镜头拉远后淡入，不压在放大的文件上
+}
+
+/* ---------- 镜头 7（s07）：横移到 Linux —— 界面工具包每一帧替你设画框；横移回 Windows：没人 ---------- */
+const LX = -1920;   // Linux 窗口在世界坐标里的偏移（Windows 那扇在原位）
+function helper(x, y, a, empty = false) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y);
+  if (empty) {
+    ctx.setLineDash([12, 9]); ctx.strokeStyle = C.mute; ctx.lineWidth = 4; ctx.strokeRect(-150, -60, 300, 120);
+    text('？', 0, 6, 70, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.mute });
+  } else {
+    paper(rr(-150, -60, 300, 120, 14, 71), [-150, -60, 300, 120], { fill: C.sky, lift: 1.2, seed: 71, inkW: 2.4 });
+    text('界面工具包', 0, -6, 44, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+    text('GTK', 0, 38, 26, { align: 'center', base: 'middle', font: F.ui, weight: 700, color: C.blue });
+  }
+  ctx.restore();
+}
+const buddy7 = createBuddy(ctx, {
+  path: [[0, 1560, 950, GS], [T.pan0, 1560, 950, GS], [T.pan1, 1560 + LX, 950, GS], [T.back0, 1560 + LX, 950, GS], [T.back1, 1560, 950, GS]],
+  acts: [
+    { type: 'question', t0: T.pan1 - 0.07, t1: T.pan1 + 3.0 },                              // 走到 Linux 那边直接摊手：「那为什么在 Linux 上没事？」
+    { type: 'point', t0: T.gtk, t1: T.back0 + 0.1, at: [LX + 1450, 300], hand: 'l' },        // 「界面工具包」每一帧替你设；指完直接接走路
+    { type: 'shake', t0: T.back1 - 0.08, t1: T.nobody + 1.0 },                              // 走回 Windows：「就没人管了」
+  ],
+});
+function shotLinux() {
+  const go = eio(clamp((t - T.pan0) / (T.pan1 - T.pan0))), ret = eio(clamp((t - T.back0) / (T.back1 - T.back0)));
+  const camX = 960 + LX * go - LX * ret;
+  withCam(camX, 540, 1, () => {
+    // Windows：黑边窗口 + 右上方空位
+    termWin(110, 170, 1080, 640, 800 - 24, 480 - TB - 20, { seed: 11 });
+    helper(1480, 300, t > T.back0 ? clamp((t - T.back1 + 0.2) / 0.3) : 0, true);
+    // Linux：窗口在两种大小之间变，工具包每一帧把画框拉到跟窗口一样大
+    const osc = 0.5 - 0.5 * Math.cos(Math.max(0, t - T.pan1) * 2.6);
+    const [x, y, w, h] = lerpRect([LX + 150, 250, 800, 480], [LX + 110, 170, 1080, 640], 1 - osc);
+    termWin(x, y, w, h, null, null, { title: 'Linux', seed: 21, frame: clamp((t - T.every) / 0.3) });
+    helper(LX + 1480, 300, clamp((t - T.gtk) / 0.3));
+    if (t > T.every) {
+      // 每一帧：小手一拉（虚线从工具包连到画框角）
+      const ph = ((t - T.every) * 2.6) % 1;
+      ctx.save(); ctx.globalAlpha = 0.8; crayonLine(LX + 1340, 330, x + w - 20, y + 90, clamp(ph * 2), 6, C.blue); ctx.restore();
+      note('每一帧', LX + 1480, 430, 40, T.every + 0.2, { align: 'center', color: C.blue });
+    }
+    buddy7.draw(t);
+  });
+}
+
+/* ---------- 镜头 8（s08）：不加「如果是 Windows」，共用的画图代码自己设好画框 ---------- */
+const CODE8 = { x: 330, y: 110, w: 1260, h: 380, title: '两边共用的画图代码', seed: 81, rot: -0.3, titleFont: ZH };
+const buddy8 = createBuddy(ctx, {
+  path: [[0, 170, 950, GS]],
+  acts: [
+    { type: 'shake', t0: T.noIf, t1: T.noIf + 1.5 },                    // 「没加『如果是 Windows』」
+    { type: 'thumbs', t0: T.self + 0.6, t1: T.cut.s08, hand: 'r' },      // 「自己把画框设好」
+  ],
+});
+function shotFix() {
+  // 先：画面正中一张大便签「if Windows { … }」，「没加」时被划掉，随后揉小飞走
+  const out0 = T.noIf + 0.9, out1 = Math.min(T.noIf + 1.6, T.shared - 0.4);
+  const sa = eBack(clamp((t - T.cut.s07) / 0.35)), out = eio(clamp((t - out0) / (out1 - out0)));
+  if (sa > 0 && out < 1) {
+    ctx.save(); ctx.globalAlpha = 1 - out; ctx.translate(960 - out * 500, 450 + out * 380); ctx.rotate((-3 - out * 50) * RAD); ctx.scale(sa * (1 - out * 0.7), sa * (1 - out * 0.7));
+    paper(rr(-380, -220, 760, 440, 10, 82, 0.8), [-380, -220, 760, 440], { fill: C.pink, lift: 1.4, seed: 82, inkW: 2.6 });
+    codeLine('if Windows {', -310, -70, 66, C.blue);
+    codeLine('  …', -310, 30, 66, C.mute);
+    codeLine('}', -310, 130, 66, C.blue);
+    crayonLine(-350, -190, 350, 190, clamp((t - T.noIf) / 0.3), 16);
+    crayonLine(350, -190, -350, 190, clamp((t - T.noIf - 0.2) / 0.3), 16);
+    ctx.restore();
+  }
+  // 后：便签飞走之后，中间换成共用的画图代码 + 两扇窗口；「自己把画框设好」时加一行，两扇窗一起放大都没黑边
+  const t8 = out0 + 0.35;                                       // 便签还在缩走时就开始进场，中间不留空纸
+  win({ ...CODE8, t0: t8 }, (w) => {
+    for (let k = 0; k < 4; k++) { ctx.fillStyle = C.faint; ctx.fillRect(50, 40 + k * 54, 300 + 420 * (0.5 + 0.5 * hash(k, 81)), 18); }
+    const la = eBack(clamp((t - T.self) / 0.3));
+    if (la > 0) {
+      ctx.save(); ctx.globalAlpha = clamp(la);
+      paper(rr(36, 246, w - 72, 60, 8, 83), [36, 246, w - 72, 60], { fill: C.mint, lift: 0.6, seed: 83, inkW: 2 });
+      text('+ 设好画框', 60, 288, 40, { font: ZH, weight: 700, color: C.green }); ctx.restore();
+    }
+  });
+  const g = eBack(clamp((t - T.self - 0.4) / 0.5));
+  const fixed = t > T.self + 0.2;
+  [[400, 'Linux', 21], [1020, 'Windows', 22]].forEach(([x0, name, seed]) => {
+    const [x, y, w, h] = lerpRect([x0 + 40, 580, 420, 250], [x0, 550, 500, 300], g);
+    termWin(x, y, w, h, fixed ? null : 420 - 24, fixed ? null : 250 - TB - 20, { title: name, seed, t0: t8 + 0.2, fs: 0.8 });
+  });
+  buddy8.draw(t);
+}
+
+/* ---------- 镜头 9（s09）：主菜单 —— 一百多个菜单项，画在界面图纸上，一行代码都没写 ---------- */
+const buddy9 = createBuddy(ctx, {
+  path: [[0, 1705, 950, GS]],
+  acts: [
+    { type: 'startle', t0: T.n103 + 0.6 },                                           // 「一百多个菜单项」
+    { type: 'point', t0: T.noCode, t1: T.cut.s09, at: [1350, 520], hand: 'l' },      // 「一行代码都没写」
+  ],
+});
+function shotMenu() {
+  bigType('不止一件', 960, 520, 130, T.more, { align: 'center', font: ZH, weight: 700, stagger: 0.06, out: T.menu - 0.3 });
+  if (t < T.menu - 0.3) { buddy9.draw(t); return; }
+  // 界面图纸（蓝格子纸）
+  const ba = clamp((t - T.menu + 0.3) / 0.3);
+  ctx.save(); ctx.globalAlpha = ba; ctx.translate(140, 130); ctx.rotate(-0.6 * RAD);
+  paper(rr(0, 0, 980, 760, 10, 91), [0, 0, 980, 760], { fill: '#DCE8F2', lift: 1, seed: 91 });
+  ctx.strokeStyle = 'rgba(62,111,176,0.18)'; ctx.lineWidth = 1.5;
+  for (let x = 20; x < 980; x += 40) { ctx.beginPath(); ctx.moveTo(x, 10); ctx.lineTo(x, 750); ctx.stroke(); }
+  for (let y = 20; y < 760; y += 40) { ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(970, y); ctx.stroke(); }
+  // 菜单栏 + 三列展开的菜单项
+  paper(rr(30, 30, 920, 56, 6, 92), [30, 30, 920, 56], { fill: C.card, lift: 0.4, seed: 92, inkW: 2 });
+  for (let k = 0; k < 6; k++) { ctx.fillStyle = 'rgba(30,27,24,0.4)'; ctx.fillRect(60 + k * 145, 52, 80, 12); }
+  const shown = Math.round(103 * clamp((t - T.n103) / 1.4));
+  for (let i = 0; i < 36; i++) {
+    const col = Math.floor(i / 12), row = i % 12;
+    if (i >= Math.ceil(shown * 36 / 103)) break;
+    const x = 60 + col * 300, y = 110 + row * 50;
+    paper(rr(x, y, 270, 42, 4, 900 + i, 0.4), [x, y, 270, 42], { fill: C.card, lift: 0.2, seed: 900 + i, inkW: 1.4 });
+    ctx.fillStyle = 'rgba(30,27,24,0.3)'; ctx.fillRect(x + 18, y + 16, 90 + 90 * (0.5 + 0.5 * hash(i, 9)), 10);
+  }
+  ctx.restore();
+  note('界面图纸', 630, 105, 40, T.xib, { align: 'center', color: C.blue });
+  // 右：计数
+  const na = clamp((t - T.n103) / 0.3);
+  if (na > 0) {
+    ctx.save(); ctx.globalAlpha = na;
+    text(`${shown}`, 1350, 330, 170, { align: 'center', base: 'alphabetic', font: F.big, weight: 800 });
+    text('个菜单项', 1350, 410, 50, { align: 'center', font: ZH, weight: 700 });
+    ctx.restore();
+  }
+  const za = eBack(clamp((t - T.noCode) / 0.3));
+  if (za > 0) { ctx.save(); ctx.translate(1350, 570); ctx.scale(za, za); const pw = pillW('代码：0 行', 56); pill(-pw / 2, -45, '代码：0 行', '#FBE3DC', 93, 56, { color: C.red }); ctx.restore(); }
+  buddy9.draw(t);
+}
+
+/* ---------- 镜头 10（s10）：「Windows：不做菜单栏」被当面否了 —— 没人教过的人，怎么找到这些命令？ ---------- */
+const buddy10 = createBuddy(ctx, {
+  path: [[0, 250, 950, GS]],
+  acts: [
+    { type: 'question', t0: T.ask, t1: T.btn + 0.2 },                        // 「没人教过的人，怎么找到这些命令？」
+    { type: 'point', t0: T.btn + 0.2, t1: T.cut.s10, at: [1400, 760], hand: 'r' },   // 菜单按钮
+  ],
+});
+function shotVeto() {
+  const pa = clamp((t - T.cut.s09) / 0.3);
+  if (pa > 0) {
+    ctx.save(); ctx.globalAlpha = pa; ctx.translate(960, 230); ctx.rotate(-1.5 * RAD);
+    paper(rr(-440, -80, 880, 160, 10, 101), [-440, -80, 880, 160], { fill: C.card, lift: 1.1, seed: 101 });
+    text('Windows：不做菜单栏', 0, 6, 64, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+    crayonLine(-410, 20, 410, -10, clamp((t - T.veto) / 0.3), 14);
+    ctx.restore();
+  }
+  const ma = clamp((t - T.cut.s09 - 0.2) / 0.3) * (1 - clamp((t - T.veto) / 0.3));
+  if (ma > 0) {
+    ctx.save(); ctx.globalAlpha = ma;
+    win({ x: 610, y: 400, w: 700, h: 260, title: 'Windows', seed: 106 }, (w) => {
+      paper(rr(20, 12, w - 40, 50, 6, 107), [20, 12, w - 40, 50], { fill: C.sand, lift: 0.3, seed: 107, inkW: 1.8 });
+      for (let k = 0; k < 5; k++) {
+        const f = eio(clamp((t - T.noBar - k * 0.25) / 0.5));
+        ctx.save(); ctx.globalAlpha *= 1 - f; ctx.fillStyle = 'rgba(30,27,24,0.45)'; ctx.fillRect(45 + k * 120, 30 - f * 90, 80, 14); ctx.restore();
+      }
+      ctx.fillStyle = C.faint; for (let k = 0; k < 2; k++) ctx.fillRect(40, 100 + k * 40, 300 + 150 * k, 14);
+    });
+    ctx.restore();
+  }
+  bigType('没人教过的人，', 960, 480, 80, T.ask, { align: 'center', font: ZH, weight: 700, stagger: 0.04 });
+  bigType('怎么找到这些命令？', 960, 600, 80, T.ask + 0.8, { align: 'center', font: ZH, weight: 700, stagger: 0.04 });
+  // 右下：Windows 标签条左边的菜单按钮
+  const wa = clamp((t - T.btn) / 0.3);
+  if (wa > 0) {
+    win({ x: 1180, y: 700, w: 620, h: 220, title: 'Windows', seed: 102, t0: T.btn }, (w) => {
+      paper(rr(20, 16, 70, 50, 8, 103), [20, 16, 70, 50], { fill: C.mustard, lift: 0.8, seed: 103, inkW: 2.2 });
+      ctx.fillStyle = C.ink; for (let k = 0; k < 3; k++) ctx.fillRect(38, 29 + k * 11, 34, 5);
+      for (let k = 0; k < 3; k++) paper(rr(110 + k * 160, 16, 150, 50, 8, 104 + k), [110 + k * 160, 16, 150, 50], { fill: k ? C.sand : C.card, lift: 0.4, seed: 104 + k, inkW: 2 });
+      inkCircle(55, 41, 60, 44, clamp((t - T.btn - 0.4) / 0.4), 105);
+    });
+  }
+  buddy10.draw(t);
+}
+
+/* ---------- 镜头 11（s11）：列出原来零行的功能，逐条问「为什么是零」，再分两栏 ---------- */
+const ITEMS = ['设画框', '主菜单', '……'];
+const buddy11 = createBuddy(ctx, {
+  path: [[0, 1300, 950, GS], [T.list, 1300, 950, GS], [T.whyZ, 975, 950, GS]],
+  acts: [
+    { type: 'point', t0: T.whyZ - 0.1, t1: T.sort + 0.1, at: [450, 400], hand: 'l' },       // 走到位直接指「为什么是零？」
+    { type: 'point', t0: T.sort + 0.1, t1: T.someone + 1.5, at: [1500, 400], hand: 'r' },   // 分两栏：「还是有人替你做了」
+  ],
+});
+function shotList() {
+  win({ x: 100, y: 160, w: 700, h: 620, title: '原来 0 行的功能', seed: 111, rot: -0.6, t0: T.cut.s10, titleFont: ZH }, () => {
+    ITEMS.forEach((s, k) => {
+      const a = clamp((t - T.list - k * 0.25) / 0.3);
+      if (a <= 0) return;
+      const y = 90 + k * 150;
+      const moved = k < 2 && t > T.someone + 0.2 + k * 0.2;
+      ctx.save(); ctx.globalAlpha = a * (moved ? 0.3 : 1);
+      text(s, 50, y, 54, { font: ZH, weight: 700 });
+      if (k < 2) { const b = 1 + 0.25 * Math.max(0, Math.sin((t - T.list - 0.8 - k * 0.9) * 3.5)) * (t < T.whyZ ? 1 : 0); ctx.save(); ctx.translate(360, y - 14); ctx.scale(b, b); text('0 行', -30, 14, 40, { font: ZH, weight: 600, color: C.mute }); ctx.restore(); }
+      ctx.restore();
+      if (k < 2) note('为什么是零？', 460, y + Math.sin((t - T.whyZ) * 4 + k) * 5 * (t > T.whyZ ? 1 : 0), 36, T.whyZ + k * 0.25, { color: C.red });
+    });
+  });
+  // 右：两栏
+  [['真不用做', 1130, C.card], ['有人替你做了', 1535, '#E6F3E8']].forEach(([label, x, fill], k) => {
+    const a = eBack(clamp((t - T.sort - k * 0.2) / 0.3));
+    if (a <= 0) return;
+    ctx.save(); ctx.translate(x + 180, 470); ctx.scale(a, a);
+    paper(rr(-190, -300, 380, 600, 14, 112 + k), [-190, -300, 380, 600], { fill, lift: 1, seed: 112 + k });
+    text(label, 0, -230, 46, { align: 'center', font: ZH, weight: 700, color: k ? C.green : C.ink });
+    ctx.restore();
+  });
+  // 两条都分进「有人替你做了」
+  ITEMS.slice(0, 2).forEach((s, k) => {
+    const p = eio(clamp((t - T.someone - 0.2 - k * 0.2) / 0.5));
+    if (p <= 0) return;
+    const x = lerp(170, 1615, p), y = lerp(250 + k * 150, 360 + k * 130, p);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(hash(k, 11) * 4 * RAD);
+    paper(rr(-10, -44, 220, 70, 8, 115 + k), [-10, -44, 220, 70], { fill: C.mustard, lift: 1, seed: 115 + k, inkW: 2 });
+    text(s, 100, -8, 40, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+    ctx.restore();
+  });
+  buddy11.draw(t);
+}
+
+/* ---------- 镜头 12（s12）：回到那圈黑边 —— 那一行被填上，黑边没了 ---------- */
+const buddy12 = createBuddy(ctx, {
+  path: [[0, 1690, 935, GS]],
+  acts: [
+    { type: 'point', t0: T.cut.s11, t1: T.back + 0.9, at: [1300, 500], hand: 'l' },   // 「回到那圈黑边」
+    { type: 'thumbs', t0: T.fill1 + 0.3, t1: T.end0 + 0.3, hand: 'r' },                // 那一行被填上
+  ],
+});
+function shotBack() {
+  const g = eBack(clamp((t - T.back) / 0.6));
+  const [x, y, w, h] = lerpRect(HOOK_A, HOOK_B, g);
+  const fixed = t > T.fill1 + 0.2;
+  termWin(x, y, w, h, fixed ? null : HOOK_VW, fixed ? null : HOOK_VH, { seed: 11 });
+  lens([[1130, 300], [600, 320]], T.back + 0.8, T.fill - 0.1);
+  lens([[540, 903], [1160, 903]], T.fill, T.fill1 + 0.2, 56, true);
+  missingLine(460, 868, 800, clamp((t - T.cut.s11) / 0.3), clamp((t - T.fill1) / 0.3));
+  buddy12.draw(t);
+}
+
+/* ---------- 结尾字卡 ---------- */
+function shotEnd() {
+  const p = eo3(clamp((t - T.end0) / 0.2));
+  ctx.save(); ctx.globalAlpha = p;
+  const w = pillW('下一集', 34);
+  pill(960 - w / 2, 380, '下一集', C.mustard, 99, 34);
+  text('可移植性分层', 960, 560, 72, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+/* ---------- 镜头表：切点在段间静音里，离上一句说完 ≥ 1.0s、离下一句开口 ≥ 0.3s（下面 CUTS 校验） ---------- */
+const SHOTS = [
+  { id: 'hook', t0: 0, draw: shotHook },
+  { id: 'compare', t0: T.cut.s01, draw: shotCompare },
+  { id: 'card', t0: T.card0, draw: shotCard },
+  { id: 'three', t0: T.card1, draw: shotThree },
+  { id: 'guess', t0: T.cut.s03, draw: shotGuess },
+  { id: 'frame', t0: T.cut.s04, draw: shotFrame },
+  { id: 'hunt', t0: T.cut.s05, draw: shotHunt },
+  { id: 'linux', t0: T.cut.s06, draw: shotLinux },
+  { id: 'fix', t0: T.cut.s07, draw: shotFix },
+  { id: 'menu', t0: T.cut.s08, draw: shotMenu },
+  { id: 'veto', t0: T.cut.s09, draw: shotVeto },
+  { id: 'list', t0: T.cut.s10, draw: shotList },
+  { id: 'back', t0: T.cut.s11, draw: shotBack },
+  { id: 'end', t0: T.end0, draw: shotEnd },
+];
+SHOTS.forEach((s, i) => { s.t1 = SHOTS[i + 1]?.t0 ?? Infinity; });
+const SENTS = TL.segments.flatMap(s => s.sents);
+const CUTS = SHOTS.slice(1).map(s => {
+  const prevEnd = Math.max(...SENTS.filter(x => x.end <= s.t0).map(x => x.end));
+  const inSent = SENTS.find(x => x.start < s.t0 && s.t0 < x.end);
+  const next = SENTS.find(x => x.start >= s.t0);
+  const c = { id: s.id, t: +s.t0.toFixed(3), afterEnd: +(s.t0 - prevEnd).toFixed(3), beforeStart: next ? +(next.start - s.t0).toFixed(3) : null };
+  if (inSent || c.afterEnd < CUT_AFTER - 1e-6 || (next && c.beforeStart < CUT_BEFORE - 1e-6)) throw new Error(`切点 ${s.id} 不满足节奏参数：${JSON.stringify(c)}`);
+  return c;
+});
+if (TL.duration - T.end0 < 2.5 - 1e-6) throw new Error('结尾字卡不足 2.5s');
+
+// 交互音效（和画面同一张时刻表）
+const SFX = [
+  { t: T.grow0, kind: 'whoosh' }, { t: T.grow1, kind: 'boing' }, { t: T.edge, kind: 'click' }, { t: T.line1, kind: 'pop' },
+  { t: T.zero, kind: 'pop' }, { t: T.neq, kind: 'ding' },
+  { t: T.card0, kind: 'whoosh' },
+  { t: T.three, kind: 'pop' }, { t: T.wrong3, kind: 'snip' },
+  { t: T.g1, kind: 'whoosh' }, { t: T.g1t, kind: 'click' }, { t: T.g1x, kind: 'snip' },
+  { t: T.g2, kind: 'whoosh' }, { t: T.g2ok, kind: 'ding' }, { t: T.g2x, kind: 'boing' },
+  { t: T.g3, kind: 'whoosh' }, { t: T.g3ok, kind: 'ding' }, { t: T.g3x, kind: 'snip' },
+  { t: T.print, kind: 'pop' }, { t: T.gpu, kind: 'pop' }, { t: T.still, kind: 'click' },
+  { t: T.whole, kind: 'whoosh' }, { t: T.none, kind: 'boing' },
+  { t: T.pan0, kind: 'whoosh' }, { t: T.gtk, kind: 'pop' }, { t: T.back0, kind: 'whoosh' },
+  { t: T.noIf, kind: 'snip' }, { t: T.self, kind: 'ding' },
+  { t: T.more, kind: 'pop' }, { t: T.n103, kind: 'whoosh' }, { t: T.noCode, kind: 'click' },
+  { t: T.veto, kind: 'snip' }, { t: T.ask, kind: 'pop' }, { t: T.btn + 0.4, kind: 'click' },
+  { t: T.list, kind: 'pop' }, { t: T.sort, kind: 'whoosh' }, { t: T.someone + 0.3, kind: 'pop' },
+  { t: T.back, kind: 'whoosh' }, { t: T.fill1, kind: 'ding' },
+];
+/* ---------- seek：t 的纯函数 ---------- */
+function render(tt) {
+  t = Math.max(0, Math.min(TL.duration, tt));
+  K.setTime(t);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  K.drawBG();
+  const shot = SHOTS.find(s => t >= s.t0 && t < s.t1) ?? SHOTS[SHOTS.length - 1];
+  const since = t - shot.t0;
+  const z = shot.t0 > 0 ? 1 + 0.015 * Math.exp(-since * 12) : 1;
+  ctx.save();
+  ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
+  shot.draw();
+  ctx.restore();
+  drawSubtitle();
+}
+
+/* ---------- 配乐 ---------- */
+let musicBuf = null;
+const music = async () => (musicBuf ??= await renderLofi({
+  duration: TL.duration,
+  speech: TL.segments.map(s => [s.start, s.end]),
+  speechDb: TL.speech_mean_db ?? -21,
+  bright: [[0, 3.0], [T.card0, T.card1], [T.end0, TL.duration]],
+  sfx: SFX,
+}));
+/* ---------- 预览：空格播放（旁白 + 配乐），← → 跳 2 秒 ---------- */
+function startPreview() {
+  const hud = document.getElementById('hud'); hud.hidden = false;
+  let actx = null, narr = null, srcs = [], playing = false, tt = 0, t0 = 0;
+  const stop = () => { srcs.forEach(s => s.stop()); srcs = []; playing = false; };
+  const play = async () => {
+    actx ??= new AudioContext();
+    narr ??= await actx.decodeAudioData(await (await fetch('narration/narration.mp3')).arrayBuffer());
+    const mb = await music();
+    if (tt >= TL.duration) tt = 0;
+    srcs = [narr, mb].map(b => { const s = actx.createBufferSource(); s.buffer = b; s.connect(actx.destination); s.start(0, tt); return s; });
+    t0 = actx.currentTime - tt; playing = true;
+  };
+  const toggle = () => (playing ? (tt = actx.currentTime - t0, stop()) : play());
+  const jump = d => { const was = playing; if (playing) { tt = actx.currentTime - t0; stop(); } tt = clamp(tt + d, 0, TL.duration); if (was) play(); };
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    if (e.code === 'ArrowLeft') jump(-2);
+    if (e.code === 'ArrowRight') jump(2);
+  });
+  document.getElementById('hud-bar').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    jump((e.clientX - r.left) / r.width * TL.duration - (playing ? actx.currentTime - t0 : tt));
+  });
+  (function loop() {
+    if (playing) { tt = actx.currentTime - t0; if (tt >= TL.duration) { tt = TL.duration; stop(); } }
+    render(tt);
+    document.getElementById('hud-play').textContent = playing ? '❚❚' : '▶ 空格播放';
+    document.getElementById('hud-time').textContent = `${tt.toFixed(2)} / ${TL.duration.toFixed(2)}s`;
+    hud.querySelector('.bar i').style.width = `${tt / TL.duration * 100}%`;
+    requestAnimationFrame(loop);
+  })();
+}
+
+await document.fonts.load(`600 46px ${F.zh}`, '原平台零行不等于零工作');
+await document.fonts.load(`800 100px ${F.big}`);
+await document.fonts.load(`600 30px ${F.ui}`);
+await document.fonts.load(`500 30px ${F.code}`);
+ctx.font = SUB_FONT;
+for (const s of SUBS) s.width = Math.round(ctx.measureText(s.text).width);
+render(0);
+window.__debug = { buddies: BUDDIES, SUBS, SHOTS: SHOTS.map(s => ({ id: s.id, t0: s.t0, t1: s.t1 })), CUTS, T, SUB_MAX_W, SEGS: TL.segments.map(s => ({ id: s.id, start: s.start, end: s.end })) };
+window.__video = {
+  width: W, height: H, fps: FPS, duration: TL.duration,
+  seek: render,
+  renderAudio: async () => encodeWav(await music()),
+};
+if (!RENDER) startPreview();
+</script>
+</body>
+</html>

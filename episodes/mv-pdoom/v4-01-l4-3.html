@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) v4-01 loss 句第二轮小样 3（9.3–13.3 s，960×540）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// #1019：9.52–13.16 换成不出现她的小样；9.3–9.52 和 13.16 之后是整段里现成的镜筒（眼睛特写 / 像素墙），看衔接用
+import { loadMV } from './engine/index.js';
+import { makeV401Final } from './shots/v4-01-final.js';
+import { makeL4 } from './fresh/redo-loss/B/l4.js';
+
+const mv = await loadMV({ width: 960, height: 540 });
+const shots = await makeV401Final(mv, { line3: 'predict', box: false });   // 'predict' 只是为了让 13.16 的像素墙是正的；9.52–13.16 被下面的镜头盖掉
+const barrel = shots.find(s => s.id === 'barrel');
+shots.push(await makeL4(mv, 3), { ...barrel, id: 'barrel-wall', t0: 13.16 });
+mv.mount(shots, { offset: 9.3, duration: 4.0 });
+</script>
+</body>
+</html>

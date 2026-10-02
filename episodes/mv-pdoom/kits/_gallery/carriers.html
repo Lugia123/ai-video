@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>carriers 画廊：融合式歌词载体</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// 歌曲 89.0–115.5 连续一段（实时预览带音乐），每种载体跑一句真实歌词：
+//   tiles 89.0 Gato… · chatBubble 95.47 P(doom)/paperclips · plate 98.82 Killswitch · floorWords 100.72 nowhere left to go
+//   fuse 102.46 lit the fuse · ledSign 105.96 Orthogonality · fogMirror 109.3 Just transformers · constellation 113.34 disobey
+import * as THREE from 'three';
+import { loadMV, PALETTE as PAL } from '../../engine/index.js';
+import { initType3D } from '../type3d.js';
+import { createUI2D } from '../ui2d.js';
+import * as C from '../carriers.js';
+import { createCity } from '../world.js';
+
+const mv = await loadMV();
+await initType3D();
+const ui = await createUI2D(mv);
+const line = p => mv.lyrics.lines.find(l => l.start > 85 && l.text.toLowerCase().startsWith(p.toLowerCase()));
+const lerp = (a, b, p) => a + (b - a) * p, clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const T0 = 89.0, T1 = 115.5;
+const mk = (id, t0, t1, caption, build) => ({ id, t0, t1, caption, build });
+const lights = s => { s.add(new THREE.HemisphereLight('#ffffff', '#303040', 1.1)); const d = new THREE.DirectionalLight('#ffffff', 1.2); d.position.set(3, 8, 5); s.add(d); };
+
+const CH = [
+  mk('tiles', 89.0, 95.47, 'tiles · 方格逐格字「Gato, please don\'t let me go」', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#0b0b14'); lights(scene);
+    const city = createCity({ seed: 3, n: 17 }); city.group.scale.setScalar(2.4); city.group.position.y = -26; scene.add(city.group);
+    const fx = C.tiles({ line: line('Gato'), n: 7, cell: 2.4 });
+    scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(40, 16 / 9, 0.1, 400);
+    return { scene, update(T) { city.update(T, { draw: 1, extrude: 1, light: 1 }); fx.update(T); const k = (T - 89) / 6.5; cam.position.set(lerp(-4, 3, k), 10.5, 10.5); cam.lookAt(0, -1, 0.5); return cam; } };
+  }),
+  mk('bubble', 95.47, 98.82, 'chatBubble · 3D 空间里的聊天气泡板', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color(PAL.ink);
+    const a = line("I'm upping my P(doom),"), b = line('as paperclips');
+    const fx = C.chatBubble({ ui, width: 20, height: 11.25, msgs: [{ from: 'them', words: a.words, typingFrom: 95.1 }, { from: 'me', words: b.words }] });
+    fx.group.rotation.y = -0.25; scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(30, 16 / 9, 0.1, 200);
+    return { scene, update(T) { fx.update(T); const k = (T - 95.47) / 3.35; cam.position.set(lerp(-5, 2, k), 1, 36); cam.lookAt(0, 0, 0); return cam; } };
+  }),
+  mk('plate', 98.82, 100.72, 'plate · 按钮旁的铭牌刻字「Killswitch guy\'s on PTO」', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#15101a'); lights(scene);
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.8, 1.6, 48), new THREE.MeshStandardMaterial({ color: '#d0203a', roughness: 0.35, emissive: '#400010' }));
+    btn.rotation.x = Math.PI / 2; btn.position.set(0, 3.2, 0); scene.add(btn);
+    const fx = C.plate({ line: line('Killswitch'), maxW: 20, maxH: 3.2, maxSize: 2.4 });
+    fx.group.position.y = -3.4; scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(30, 16 / 9, 0.1, 200);
+    return { scene, update(T) { fx.update(T); const k = (T - 98.82) / 1.9; cam.position.set(lerp(-4, 3, k), 1.5, 30); cam.lookAt(0, 0, 0); return cam; } };
+  }),
+  mk('floor', 100.72, 102.46, 'floorWords · 被踩亮的地面字「Now there\'s nowhere left to go」', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#07070d');
+    const grid = new THREE.GridHelper(80, 80, PAL.pink, '#2a2a38'); grid.position.y = -0.01; scene.add(grid);
+    const fx = C.floorWords({ line: line('Now there'), size: 2.4 });
+    scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(40, 16 / 9, 0.1, 200);
+    const steps = fx.steps, ws = line('Now there').words;
+    const walker = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(1.3, 1.3, 1.3) })); scene.add(walker);
+    return { scene, update(T) {
+      fx.update(T);
+      // 一颗亮球代替她的脚：按词时间从一个落脚点跳到下一个
+      let i = 0; for (let k = 0; k < ws.length; k++) if (T >= ws[k].start) i = k;
+      const nx = Math.min(ws.length - 1, i + 1), p = clamp((T - ws[i].start) / Math.max(0.1, ws[nx].start - ws[i].start));
+      const x = lerp(steps[i][0], steps[nx][0], p), y = 0.5 + 2 * Math.sin(Math.PI * p) * (nx !== i ? 1 : 0);
+      walker.position.set(T < ws[0].start ? steps[0][0] - 4 : x, y, 0);
+      cam.position.set(x - 2, 9, 13); cam.lookAt(x + 3, 0, 0); return cam;
+    } };
+  }),
+  mk('fuse', 102.46, 105.96, 'fuse · 沿引信逐词点燃「Too late now, we lit the fuse」', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#0a0a10');
+    const fx = C.fuse({ line: line('Too late') });
+    scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(30, 16 / 9, 0.1, 200);
+    return { scene, update(T) { fx.update(T); const k = (T - 102.46) / 3.5; cam.position.set(lerp(-3, 3, k), 2, 34); cam.lookAt(0, -1, 0); return cam; } };
+  }),
+  mk('led', 105.96, 109.3, 'ledSign · 楼体 LED 跑马灯「Orthogonality thesis blues」', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#050814'); lights(scene);
+    const city = createCity({ seed: 9, n: 13 }); city.group.scale.setScalar(2.6); city.group.position.set(0, -8, -30); scene.add(city.group);
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(24, 30, 6), new THREE.MeshStandardMaterial({ color: '#141824', roughness: 0.7 })); tower.position.set(0, -2, -3.2); scene.add(tower);
+    const fx = C.ledSign({ line: line('Orthogonality'), cols: 110, rows: 18, pitch: 0.2, color: PAL.blue });
+    fx.group.position.set(0, 2, 0); scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(34, 16 / 9, 0.1, 300);
+    return { scene, update(T) { city.update(T, { draw: 1, extrude: 1, light: 1 }); fx.update(T); const k = (T - 105.96) / 3.34; cam.position.set(lerp(-9, -5, k), lerp(-4, -2, k), 26); cam.lookAt(0, 2, 0); return cam; } };
+  }),
+  mk('mirror', 109.3, 113.34, 'fogMirror · 镜面雾气字「Just transformers all the way!」', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#10141a'); lights(scene);
+    const fx = C.fogMirror({ line: line('“Just') ?? line('"Just') ?? mv.lyrics.lines.find(l => /transformers/.test(l.text)), width: 20, height: 11.25 });
+    scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(30, 16 / 9, 0.1, 200);
+    return { scene, update(T) { fx.update(T); const k = (T - 109.3) / 4; cam.position.set(lerp(3, -2, k), 0.5, 34); cam.lookAt(0, 0, 0); return cam; } };
+  }),
+  mk('stars', 113.34, 115.5, 'constellation · 星座连线「Till you learned to disobey」', () => {
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#05050b');
+    const fx = C.constellation({ line: line('Till you'), maxW: 30, maxH: 10, maxSize: 5.5 });
+    scene.add(fx.group);
+    const cam = new THREE.PerspectiveCamera(30, 16 / 9, 0.1, 200);
+    return { scene, update(T) { fx.update(T); const k = (T - 113.34) / 2.2; cam.position.set(0, 0, 40 - 4 * k); cam.lookAt(0, 0, 0); return cam; } };
+  }),
+];
+const built = new Map();
+mv.mount(T => {
+  const ch = CH.find(c => T >= c.t0 && T < c.t1) ?? CH[CH.length - 1];
+  if (!built.has(ch.id)) built.set(ch.id, ch.build());
+  const b = built.get(ch.id);
+  const cam = b.update(T);
+  mv.stage.render(b.scene, cam, { bloom: { strength: 0.9, threshold: 1 }, grade: { vignette: 0.25 } });
+}, { offset: T0, duration: T1 - T0 });
+window.__video.chapters = CH.map(c => {
+  const d = c.t1 - c.t0;
+  return { id: c.id, t0: c.t0 - T0, t1: c.t1 - T0, caption: `${c.caption} · ${c.t0}–${c.t1}s`, sheet: [0.3, 0.62, 0.95].map(f => +(c.t0 - T0 + d * f).toFixed(3)) };
+});
+</script>
+</body>
+</html>

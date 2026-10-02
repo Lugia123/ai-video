@@ -1,0 +1,32 @@
+{
+ "about": "#942 2D 特写头部包：slots[pitch][yaw] → 目录（rig.json 有实测 yaw / pitch）。负角没单独生成的 = 正角水平镜像（-mirror）。情绪只在 0° / ±30°（expr/）。层顺序见 rig.json order。",
+ "slots": {
+  "level": {
+   "0": "z0",
+   "15": "p10",
+   "30": "n5",
+   "45": "h_p45",
+   "-15": "n10",
+   "-30": "n5-mirror",
+   "-45": "h_p45-mirror"
+  },
+  "down": {
+   "0": "h2_p0_pd",
+   "15": "h_p0_pd-mirror",
+   "30": "h_p45_pd",
+   "45": "h2_p45_pd",
+   "-15": "h_p0_pd",
+   "-30": "h_p45_pd-mirror",
+   "-45": "h2_p45_pd-mirror"
+  },
+  "up": {
+   "0": "h_p0_pu",
+   "15": "h2_p15_pu",
+   "30": "h_p30_pu",
+   "45": "h2_p45_pu",
+   "-15": "h2_p15_pu-mirror",
+   "-30": "h_p30_pu-mirror",
+   "-45": "h2_p45_pu-mirror"
+  }
+ }
+}

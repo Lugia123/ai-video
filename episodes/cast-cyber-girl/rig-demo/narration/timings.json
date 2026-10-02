@@ -1,0 +1,31 @@
+{
+  "segments": [
+    {
+      "id": "s01",
+      "text": "嗨，我是今天的主讲。接下来，我们一起把这个问题拆开看看。",
+      "start": 0.8,
+      "end": 6.468,
+      "sentences": [
+        {
+          "text": "嗨，我是今天的主讲。",
+          "start": 0.8,
+          "end": 3.227
+        },
+        {
+          "text": "接下来，我们一起把这个问题拆开看看。",
+          "start": 3.677,
+          "end": 6.468
+        }
+      ]
+    }
+  ],
+  "duration": 7.068,
+  "voice": "Maia",
+  "rate": "+0%",
+  "pause": 0.4,
+  "sentence_pause": 0.45,
+  "question_extra": 0.0,
+  "gaps": {},
+  "engine": "qwen",
+  "speech_mean_db": -21.5
+}

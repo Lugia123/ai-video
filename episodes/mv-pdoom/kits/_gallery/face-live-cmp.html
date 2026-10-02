@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>实时脸对照</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 24px; top: 18px; font: 34px 'STM', monospace; color: #F4E04D; white-space: pre; text-shadow: 0 0 6px #000; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  旧脸（旧 2K 模型 + 原贴图）vs 新脸（4K 模型 + 实时 2D 脸 girl.face）对照：seek(k) 画第 k 格。
+  机位 5 种（正面 / 3/4 / 侧面 / 低头 20° / 仰头 15°）× 景别 3 种（脸占画高 12 / 20 / 30%）× 修前 / 修后。toon 皮肤 + 正常打光，静止站姿。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights } from '../girl.js';
+const mv = await loadMV();
+const [before, after] = await Promise.all([createGirl(mv, { points: 100, model: 'legacy', face: 'original' }), createGirl(mv, { points: 100 })]);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#1c1c26');
+scene.add(createGirlLights());
+const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.02, 50);
+const tag = document.getElementById('tag');
+const ANG = [['正面', 0, 0], ['3/4', 40, 0], ['侧面', 82, 0], ['低头 20°', 12, 20], ['仰头 15°', 12, -15]];
+const SIZE = [0.12, 0.2, 0.3];
+const V = [];
+for (const a of ANG) for (const f of SIZE) for (const [g, nm] of [[before, '旧脸'], [after, '新脸']]) V.push({ a, f, g, nm });
+function draw(T) {
+  const k = Math.max(0, Math.min(V.length - 1, Math.floor(T - 1000 + 1e-6))), { a: [an, yaw, pitch], f, g, nm } = V[k];
+  scene.remove(before.root); scene.remove(after.root); scene.add(g.root);
+  g.root.position.set(0, 0, 0);
+  g.pose(() => ({ neck: [pitch * 0.4, 0, 0], head: [pitch * 0.6, 0, 0] }));
+  g.setSkin('toon', 0);
+  g.root.updateMatrixWorld(true);
+  const h = g.headPosition(new THREE.Vector3()), dist = 0.115 / f / (2 * Math.tan(14 * Math.PI / 180)), y = yaw * Math.PI / 180;
+  camera.position.set(h.x + Math.sin(y) * dist, h.y + 0.03, h.z + Math.cos(y) * dist);
+  camera.lookAt(h.x, h.y + 0.03, h.z); camera.updateMatrixWorld();
+  if (g.face) g.face.update(0.1, { expression: 'neutral', blink: false, camera });   // 偏航淡出按真实机位算（侧面自动回到 3D 原脸）
+  tag.textContent = `${an} · 脸占画高 ${Math.round(f * 100)}% · ${nm}`;
+  mv.stage.render(scene, camera, { bloom: 0, grade: { vignette: 0.1 } });
+}
+mv.mount(draw, { offset: 1000, duration: V.length });
+window.__n = V.length;
+</script>
+</body>
+</html>

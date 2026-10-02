@@ -1,0 +1,36 @@
+{
+  "models": [
+    {
+      "path": "cat/bluegray+cat.glb",
+      "bytes": 4137668
+    },
+    {
+      "path": "cat/calico+cat.glb",
+      "bytes": 4264912
+    },
+    {
+      "path": "cat/orange+cat.glb",
+      "bytes": 4145900
+    },
+    {
+      "path": "cat/tuxedo+cat.glb",
+      "bytes": 4219648
+    },
+    {
+      "path": "cat/white+cat.glb",
+      "bytes": 4286268
+    },
+    {
+      "path": "tripo-girl/anime+girl+3d+model.glb",
+      "bytes": 9567640
+    },
+    {
+      "path": "_test/test-rigged.glb",
+      "bytes": 30560
+    },
+    {
+      "path": "_test/test-static.glb",
+      "bytes": 181124
+    }
+  ]
+}

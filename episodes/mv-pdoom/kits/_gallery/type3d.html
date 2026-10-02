@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>type3d 字效画廊</title>
+<script type="importmap">
+{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { initType3D, FX, PAL } from '../type3d.js';
+
+// 画廊把 13 段不相邻的歌曲窗口首尾相接：页面时间 t ≠ 歌曲时间，每段自己换算（chapter.songAt）。
+// 所以用 engine 的「函数式 mount」（offset 0，时间就是画廊时间），并关掉音轨（整首歌对不上画廊时间）。
+const mv = await loadMV();
+await initType3D();
+const lyr = { find: p => mv.lyrics.lines.find(l => l.text.toLowerCase().startsWith(p.toLowerCase())) };
+
+// 每种字效配一句真实歌词；窗口 = 句前 pre 秒 … 句后 post 秒（歌曲时间），画廊里首尾相接
+const W = (fx, prefix, bg, o = {}) => ({ fx, prefix, bg, pre: 0.5, post: 1.6, ...o });
+const CH = [
+  W('slam', "I'm upping my P(doom)", PAL.pink, { post: 2.0, opts: { scales: { 3: 1.25 } } }),
+  W('burst', "'cause the future", PAL.ink, { post: 1.8, sheet: l => [l.words.at(-1).start + 0.2, l.words.at(-1).start + 0.62, l.words.at(-1).start + 0.95] }),
+  W('wall', 'Trapped in the Chinese', PAL.ink, { post: 2.2 }),
+  W('outline', 'with a bag of shrooms', PAL.ink, { post: 2.0, bloom: 0.6, opts: { glow: 1.5 } }),
+  W('hud', 'with your shinigami', PAL.ink, { post: 1.2, bloom: 0.5, opts: { glow: 1.6 } }),
+  W('curve', 'There was a sudden drop', PAL.ink, { post: 1.5, bloom: 0.4 }),
+  W('singularity', 'But now the singularity', PAL.ink, { post: 2.4 }),
+  W('reform', 'I feel my atoms', PAL.ink, { post: 1.2, bloom: 0.5, opts: { glow: 1.4 } }),
+  W('flip', 'One E thirty', PAL.pink, { post: 1.4, rows: true }),
+  W('stamp', "Now von Neumann", PAL.paper, { post: 1.4 }),
+  W('typewriter', 'Without a single CDR', PAL.ink, { post: 1.2 }),
+  W('mask', 'From masked pre-training', PAL.paper, { post: 2.0 }),
+  W('whisper', 'What did Ilya see', PAL.ink, { post: 1.4 }),
+];
+
+function flipRows(line) {
+  const w = line.words;
+  const mid = (a, f) => a.start + (a.end - a.start) * f;
+  return [
+    { text: '1E30', cell: [3.6, 5.0], y: 2.5, spinFrom: w[0].start,
+      lockTimes: [w[0].start + 0.12, w[1].start + 0.12, w[2].start + 0.12, mid(w[2], 0.6)] },
+    { text: 'FLOPS/SEC', cell: [1.7, 2.4], y: -2.7,
+      lockTimes: [...'FLOPS'].map((_, j) => w[3].start + 0.26 + j * 0.05).concat([w[4].start + 0.26], [...'SEC'].map((_, j) => w[5].start + 0.26 + j * 0.06)) },
+  ];
+}
+
+let t0 = 0;
+const shots = CH.map(c => {
+  const line = lyr.find(c.prefix);
+  if (!line) throw new Error(`找不到歌词：${c.prefix}`);
+  const from = line.start - c.pre, to = line.end + c.post;
+  const len = to - from;
+  const s0 = t0;
+  t0 += len;
+  const song = t => from + (t - s0);
+  const g = tt => +(s0 + (tt - from)).toFixed(3);
+  const dur = line.end - line.start;
+  return {
+    id: c.fx, t0: s0, t1: t0, songAt: song,
+    caption: `${c.fx} · “${line.text}” · ${line.start.toFixed(2)}–${line.end.toFixed(2)}s`,
+    sheet: (c.sheet ? c.sheet(line) : [line.start + dur * 0.3, line.start + dur * 0.8, line.end + Math.min(1.0, c.post - 0.2)]).map(g),
+    build() {
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(c.bg);
+      const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.1, 400);
+      const opts = { line, bg: c.bg, ...(c.opts ?? {}) };
+      if (c.rows) opts.rows = flipRows(line);
+      const fx = FX[c.fx](opts);
+      scene.add(fx.group);
+      return { scene, camera, fx };
+    },
+    update(st, t) {
+      const ts = song(t);
+      st.fx.update(ts);
+      const k = t - s0;
+      st.camera.position.set(Math.sin(k * 0.35) * 1.2, Math.sin(k * 0.23) * 0.5, 40 - k * 0.25);
+      st.camera.lookAt(0, 0, 0);
+      return { scene: st.scene, camera: st.camera, post: { bloom: c.bloom ?? 0.25 } };
+    },
+  };
+});
+
+const total = t0;
+const cache = new Map();
+mv.mount(t => {
+  const sh = shots.find(x => t >= x.t0 && t < x.t1) ?? shots[shots.length - 1];
+  if (!cache.has(sh.id)) cache.set(sh.id, sh.build());
+  const { scene, camera, post } = sh.update(cache.get(sh.id), t);
+  mv.stage.render(scene, camera, post);
+}, { duration: total });
+window.__video.music = null;   // 画廊时间不是歌曲时间，不配音轨
+window.__video.chapters = shots.map(x => ({ id: x.id, t0: x.t0, t1: x.t1, sheet: x.sheet, caption: x.caption }));
+</script>
+</body>
+</html>

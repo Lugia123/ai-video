@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>I'm Upping My P(doom)</title>
+<script type="importmap">{ "imports": { "three": "./../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!-- 整首歌 0–156.65 s：按歌曲时间把 7 段镜头串成一张表交给 engine。
+     普通打开：点击 / 空格带音乐播放，?t=秒 跳到任意位置（歌曲时间）；?render=1 只等 seek（tools/render 默认渲这一页 → out/final.mp4）。
+     girl / holo / type3d 只初始化一次，各段共享（各段自己摆位置、缩放、换皮肤）。还没交付的段放占位镜头。 -->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from './engine/index.js';
+import { initType3D, FX } from './kits/type3d.js';
+import { createGirl } from './kits/girl.js';
+import { createHolo } from './kits/hologram.js';
+import { loadFont } from './kits/vfx.js';
+import { makeV1 } from './shots/v1.js';
+import { makeC1 } from './shots/c1.js';
+import { makeV2 } from './shots/v2.js';
+import { makeC2 } from './shots/c2.js';
+import { makeV3 } from './shots/v3.js';
+import { makeBR } from './shots/br.js';
+
+const SEGMENTS = [   // [名字, 起, 止]（歌曲时间）
+  ['v1', 0, 22.1], ['c1', 22.1, 38.4], ['v2', 38.4, 58.4], ['c2', 58.4, 74.8],
+  ['v3', 74.8, 94.8], ['c3', 94.8, 109.3], ['br', 109.3, 123.9], ['c4', 123.9, 156.65],
+];
+const DURATION = 156.65;
+
+const mv = await loadMV();
+const [, girl, holo] = await Promise.all([
+  initType3D(), createGirl(mv), createHolo(mv, { height: 1.6, base: false }), loadFont('Anton'), loadFont('Share Tech Mono'),
+]);
+
+// 还没交付的段：动态导入，失败就用占位镜头（字卡 + 当前歌词，打字机逐词），保证整曲能播能渲
+async function optional(name, file, make) {
+  try { const mod = await import(file); return await make(mod); }
+  catch (e) { console.warn(`${name} 未就绪，用占位：`, e.message); return null; }
+}
+function placeholder(name, t0, t1) {
+  const lines = mv.lyrics.lines.filter(l => l.start < t1 && l.end > t0);
+  return [{
+    id: `${name}-placeholder`, t0, t1, transitionIn: { kind: 'cut' },
+    build() {
+      const scene = new THREE.Scene(); scene.background = new THREE.Color('#15121e');
+      const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.1, 400); camera.position.z = 40;
+      const tag = FX.typewriter({ text: `${name.toUpperCase()} · 制作中`, start: t0, end: t0 + 0.5, color: PALETTE.lemon, maxW: 20, maxH: 2, maxSize: 1.6, font: 'mono' });
+      tag.group.position.y = 8; scene.add(tag.group);
+      const fxs = lines.map(l => { const f = FX.typewriter({ line: l, color: PALETTE.paper, maxW: 30, maxH: 6, maxSize: 2.4, upper: true, font: 'mono' }); scene.add(f.group); return { f, l }; });
+      return { scene, camera, tag, fxs };
+    },
+    update(S, T) {
+      S.tag.update(T);
+      S.fxs.forEach(({ f, l }) => { f.group.visible = T >= l.start - 0.05 && (T < l.end + 0.3 || l === lines.at(-1)); f.update(T); });
+      return { scene: S.scene, camera: S.camera, post: {} };
+    },
+  }];
+}
+
+const parts = {
+  v1: await makeV1(mv, { girl, holo }),
+  c1: makeC1(mv, { girl, holo }).shots,
+  v2: makeV2(mv, { girl, holo }).shots,
+  c2: await makeC2(mv, { girl }),
+  v3: makeV3(mv, { girl }).shots,
+  c3: await optional('c3', './shots/c3.js', async m => (await m.makeC3(mv, { girl, holo })).shots),
+  br: makeBR(mv, { girl }).shots,
+  c4: await optional('c4', './shots/c4.js', async m => { const r = await m.makeC4(mv, { girl, holo }); return Array.isArray(r) ? r : r.shots; }),
+};
+// 每段只取落在自己区间里的镜头（段尾镜头的 t1 常会多给一点，不影响：下一段第一个镜头 t0 到了就切）
+const shots = [];
+for (const [name, t0, t1] of SEGMENTS) {
+  const list = parts[name] ?? placeholder(name, t0, t1);
+  for (const s of list) if (s.t0 >= t0 - 1e-3 && s.t0 < t1 - 1e-3) shots.push(s);
+}
+// 共享对象复位：girl / holo 被各段挪来挪去（换父节点、位置、缩放、可见性）。每个镜头 update 前先复位到干净状态，
+// 画面只取决于当前 t，不取决于这个页面之前渲过哪一段（渲染器分块并行，历史各不相同）。
+function resetShared() {
+  girl.root.visible = true; girl.root.position.set(0, 0, 0); girl.root.rotation.set(0, 0, 0); girl.root.scale.setScalar(1);
+  holo.mesh.visible = true; holo.mesh.position.set(0, 0, 0); holo.mesh.rotation.set(0, 0, 0); holo.mesh.scale.setScalar(1);
+}
+for (const s of shots) { const up = s.update; s.update = (st, t, ctx) => { resetShared(); return up.call(s, st, t, ctx); }; }
+window.__segments = SEGMENTS.map(([n, a, b]) => ({ name: n, t0: a, t1: b, ready: !!parts[n] }));
+window.__shots = shots.map(s => ({ id: s.id, t0: +s.t0.toFixed(3), tr: s.transitionIn?.kind ?? 'cut' }));
+mv.mount(shots, { offset: 0, duration: DURATION });
+</script>
+</body>
+</html>

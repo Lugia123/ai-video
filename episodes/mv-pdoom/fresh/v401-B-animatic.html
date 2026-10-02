@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>v401 B「2001」animatic</title>
+<style> html, body { margin: 0; background: #0A0A10; overflow: hidden; } canvas { display: block; } </style>
+<script type="importmap">{ "imports": { "three": "../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+// 方案 B「2001」样片（W3 #949）：歌曲 0–7.72 s（前奏 → I see sparks of AGI in your eyes → Your circuits make me nervous）。
+// 只借《2001》的构图 / 调度：一点透视、左右对称、白色舱室 + 一种颜色（霓粉）的灯 + 一只柠黄圆眼；不复制原片画面、不用原片音乐。
+//
+// 她怎么进这个 3D 世界（核心问题）：
+//   · 她的脸只用整张关键画（cast-cyber-girl/closeup/final/*.png），口型 / 眨眼 = 整张换图（不分层叠画 → 不会有眼 / 嘴错位）。
+//     白底在载入时从四边泛洪抠掉（眼白、高光在内部不会被抠），边缘羽化 1 px。
+//   · 她的 2D 画面只以「在这个世界里说得通」的方式出现：
+//       ① HAL 的鱼眼视角：她（2D 纸片）站在真实的 3D 舱室里，被舱室的粉光从背后勾边，整幅画面（她 + 舱室）一起过鱼眼镜头畸变 → 读成「监控画面」；
+//       ② HAL 镜头里的倒影：她的画被凸面镜片反射（球面畸变 + 暗玻璃 + 镜片高光 + 里面的柠黄芯透出来）。
+//   · 3D 的她只出现在对称大全景里：背影、小、不给脸（脸 ≤ 画高 3%）。
+//
+// 镜头（歌曲时间）：
+//   0.00  舱室苏醒：对称白色长廊，粉色灯带从近到远一格格亮起（第一拍 0.238 起），1.15 拍上长廊尽头的柠黄眼睛亮起
+//   1.41  HAL 鱼眼 POV：她凑近镜头打量，唱 I see sparks of（整张换图对口型）；sparks 2.74 镜头里迸一串火花 / 光斑
+//   3.68  HAL 眼特写：A-G-I 三个音节各点亮一层镜片环；镜片里她的倒影慢慢显出来
+//   5.26  eyes：推到镜片上，倒影占满镜头：眨眼 → 笑（脸红）；Your circuits…（5.88 起，倒影里对口型）
+//   6.60  对称大全景：她的 3D 背影站在长廊中线上，正对尽头的眼；nervous 7.04 灯带跟着底鼓闪两下，眼睛收缩一下
+import * as THREE from 'three';
+import { loadMV } from '../engine/index.js';
+import { createGirl, createGirlLights } from '../kits/girl.js';
+import { PALETTE as PAL } from '../engine/palette.js';
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const smooth = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const eOut = p => 1 - (1 - clamp(p)) ** 3;
+const eIO = p => { p = clamp(p); return p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2; };
+const col = c => new THREE.Color(c);
+const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+
+const mv = await loadMV();
+const renderer = mv.stage.renderer;
+const BEAT = mv.audio?.beat_period ?? 0.4545;
+
+// ================================================================ 她：整张关键画 + 抠白底
+const IMG_DIR = new URL('../../cast-cyber-girl/closeup/final/', import.meta.url);
+const NAMES = ['neutral', 'smile', 'surprised', 'eyes-closed', 'eyes-half', 'mouth-a', 'mouth-e', 'mouth-i', 'mouth-o', 'mouth-u'];
+async function keyed(name) {
+  const img = new Image(); img.src = new URL(`${name}.png`, IMG_DIR).href; await img.decode();
+  const w = img.width, h = img.height, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d'); g.drawImage(img, 0, 0);
+  const id = g.getImageData(0, 0, w, h), d = id.data, bg = new Uint8Array(w * h), st = [];
+  const isBg = i => { const r = d[i * 4], gg = d[i * 4 + 1], b = d[i * 4 + 2]; return Math.min(r, gg, b) > 222 && Math.max(r, gg, b) - Math.min(r, gg, b) < 26; };
+  for (let x = 0; x < w; x++) { st.push(x, (h - 1) * w + x); } for (let y = 0; y < h; y++) { st.push(y * w, y * w + w - 1); }
+  while (st.length) { const i = st.pop(); if (bg[i] || !isBg(i)) continue; bg[i] = 1; const x = i % w, y = (i / w) | 0; if (x > 0) st.push(i - 1); if (x < w - 1) st.push(i + 1); if (y > 0) st.push(i - w); if (y < h - 1) st.push(i + w); }
+  // 羽化：背景邻接的主体像素给半透明
+  for (let i = 0; i < w * h; i++) {
+    if (bg[i]) { d[i * 4 + 3] = 0; continue; }
+    const x = i % w, y = (i / w) | 0; let n = 0;
+    for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < w * h && Math.abs((j % w) - x) <= 1 && bg[j]) n++;
+    if (n) d[i * 4 + 3] = 255 - n * 40;
+  }
+  g.putImageData(id, 0, 0);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  return tex;
+}
+const TEX = Object.fromEntries(await Promise.all(NAMES.map(async n => [n, await keyed(n)])));
+
+// 口型表：lyrics.json 逐词时间 → 元音（整张换图）；词间闭嘴 = neutral
+const L0 = mv.lyrics.lines[0].words, L1 = mv.lyrics.lines[1].words;
+const VOW = { I: 'a', see: 'i', sparks: 'a', of: 'o', in: 'i', your: 'u', eyes: 'a', Your: 'u', circuits: 'u', make: 'e', me: 'i', 'nervous,': 'u' };
+const SYL = [];
+for (const w of [...L0, ...L1]) {
+  if (w.w === 'AGI') { const s = w.start, e = w.end, k = (e - s) / 3; ['e', 'i', 'a'].forEach((v, i) => SYL.push([s + i * k, s + (i + 1) * k, v])); continue; }
+  SYL.push([w.start, w.end, VOW[w.w] ?? 'a']);
+}
+const BLINKS = [2.05, 5.3];           // 眨眼（避开张嘴的词）
+function faceAt(T, { mood = 'neutral' } = {}) {
+  for (const b of BLINKS) if (T >= b && T < b + 0.12) return 'eyes-closed';
+  for (const [a, b, v] of SYL) if (T >= a && T < b) return (T - a) < 0.72 * (b - a) ? `mouth-${v}` : mood;
+  return mood;
+}
+
+// ================================================================ 舱室（程序化，对称）
+const HW = 2.0, HH = 3.0, BAY = 2.4, NB = 10, LEN = BAY * NB;          // 半宽、高、每格长、格数；长廊从 z=0 向 -z 延伸
+const room = new THREE.Scene();
+room.background = col('#07070c');
+const white = new THREE.MeshLambertMaterial({ color: col('#f2eee8') });
+const offW = new THREE.MeshLambertMaterial({ color: col('#dcd7d0') });
+const floorM = new THREE.MeshLambertMaterial({ color: col('#cfc9c2') });
+const amb = new THREE.AmbientLight('#ffffff', 0.55); room.add(amb);
+const bays = [];
+for (let i = 0; i < NB; i++) {
+  const z0 = -i * BAY, zc = z0 - BAY / 2, g = new THREE.Group(); room.add(g);
+  // 墙 / 顶 / 地：每格一段（接缝处是肋条）
+  const wallL = new THREE.Mesh(new THREE.PlaneGeometry(BAY, HH), white); wallL.position.set(-HW, HH / 2, zc); wallL.rotation.y = Math.PI / 2; g.add(wallL);
+  const wallR = wallL.clone(); wallR.position.x = HW; wallR.rotation.y = -Math.PI / 2; g.add(wallR);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2, BAY), offW); ceil.position.set(0, HH, zc); ceil.rotation.x = Math.PI / 2; g.add(ceil);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2, BAY), floorM); floor.position.set(0, 0, zc); floor.rotation.x = -Math.PI / 2; g.add(floor);
+  // 肋条（门框式）：顶 + 两侧，略凸出
+  const rib = new THREE.Group(); rib.position.z = z0 - 0.02; g.add(rib);
+  const rb = (w, h, x, y) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.18), offW); m.position.set(x, y, 0); rib.add(m); };
+  rb(HW * 2, 0.22, 0, HH - 0.11); rb(0.22, HH, -HW + 0.11, HH / 2); rb(0.22, HH, HW - 0.11, HH / 2);
+  // 灯：顶上一块长灯板 + 两条地脚灯带（霓粉），亮时自发光 + 点光
+  const lampM = new THREE.MeshBasicMaterial({ color: col('#3a3438') }), stripM = new THREE.MeshBasicMaterial({ color: col('#3a3438') });
+  const lamp = new THREE.Mesh(new THREE.PlaneGeometry(1.4, BAY * 0.7), lampM); lamp.position.set(0, HH - 0.01, zc); lamp.rotation.x = Math.PI / 2; g.add(lamp);
+  for (const s of [-1, 1]) { const st = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, BAY * 0.86), stripM); st.position.set(s * (HW - 0.05), 0.05, zc); g.add(st); }
+  const pl = new THREE.PointLight(col('#ff9cc8'), 0, 6, 1.8); pl.position.set(0, HH - 0.4, zc); room.add(pl);
+  bays.push({ i, zc, lampM, stripM, pl });
+}
+// 尽头的墙 + HAL 眼
+const endWall = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2, HH), white); endWall.position.set(0, HH / 2, -LEN); room.add(endWall);
+// 入口那头也封上（HAL 往回看时不是黑洞）：白墙 + 一扇关着的圆角舱门轮廓
+const entry = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2, HH), white); entry.position.set(0, HH / 2, 2.4); entry.rotation.y = Math.PI; room.add(entry);
+const door = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 2.3), offW); door.position.set(0, 1.15, 2.39); door.rotation.y = Math.PI; room.add(door);
+for (let i = 0; i < 1; i++) { const z0 = 2.4, zc = 1.2; const wl = new THREE.Mesh(new THREE.PlaneGeometry(2.4, HH), white); wl.position.set(-HW, HH / 2, zc); wl.rotation.y = Math.PI / 2; room.add(wl); const wr = wl.clone(); wr.position.x = HW; wr.rotation.y = -Math.PI / 2; room.add(wr); const cl = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2, 2.4), offW); cl.position.set(0, HH, zc); cl.rotation.x = Math.PI / 2; room.add(cl); const fl = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2, 2.4), floorM); fl.position.set(0, 0, zc); fl.rotation.x = -Math.PI / 2; room.add(fl); }
+const panel = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.5, 0.08), new THREE.MeshLambertMaterial({ color: col('#e8e4de') })); panel.position.set(0, 1.6, -LEN + 0.04); room.add(panel);
+const EYE_Y = 1.72, EYE_Z = -LEN + 0.1, EYE_R = 0.26;
+const lensU = {
+  uRing: { value: new THREE.Vector3() }, uCore: { value: 0 }, uRefl: { value: 0 }, uFace: { value: TEX.neutral }, uT: { value: 0 },
+  uLemon: { value: col(PAL.lemon) }, uPink: { value: col(PAL.pink) }, uReflScale: { value: 1 },
+};
+const lens = new THREE.Mesh(new THREE.CircleGeometry(EYE_R, 96), new THREE.ShaderMaterial({
+  uniforms: lensU,
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: /* glsl */`
+    uniform vec3 uRing, uLemon, uPink; uniform float uCore, uRefl, uT, uReflScale; uniform sampler2D uFace; varying vec2 vUv;
+    void main(){
+      vec2 p = vUv * 2.0 - 1.0; float r = length(p), a = atan(p.y, p.x);
+      vec3 c;
+      if (r > 0.8) {                                       // 金属外圈：拉丝 + 一侧高光
+        float br = 0.42 + 0.3 * cos(a - 2.2) + 0.05 * sin(a * 90.0);
+        c = vec3(br) * vec3(1.0, 0.98, 0.96);
+        c *= smoothstep(1.0, 0.97, r) * (0.75 + 0.25 * smoothstep(0.8, 0.86, r));
+      } else {
+        vec2 q = p / 0.8; float rq = length(q);
+        c = vec3(0.012, 0.01, 0.016) + vec3(0.03) * (1.0 - rq);       // 深色玻璃
+        // 三层镜片环（A / G / I）
+        float r1 = exp(-pow((rq - 0.78) / 0.02, 2.0)), r2 = exp(-pow((rq - 0.55) / 0.018, 2.0)), r3 = exp(-pow((rq - 0.34) / 0.016, 2.0));
+        c += vec3(0.12) * (r1 + r2 + r3);
+        c += uLemon * (r1 * uRing.x + r2 * uRing.y + r3 * uRing.z) * 2.2 * (1.0 - 0.7 * uRefl);
+        // 柠黄芯 + 往外晕
+        float core = smoothstep(0.2, 0.0, rq);
+        c += uLemon * (core * 3.4 + exp(-rq * 5.0) * 0.9) * uCore;
+        c += vec3(1.0, 0.55, 0.2) * smoothstep(0.07, 0.0, rq) * uCore * 2.0;
+        // 她的倒影：凸面镜（球面压缩 + 左右镜像），粉色玻璃染一点
+        vec2 s = q * (1.0 - 0.28 * rq * rq) / uReflScale;
+        vec2 fu = vec2(0.5 - s.x * 0.44, 0.63 + s.y * 0.44 * 0.6667);
+        vec4 f = texture2D(uFace, fu);
+        float inside = step(0.0, fu.x) * step(fu.x, 1.0) * step(0.0, fu.y) * step(fu.y, 1.0);
+        vec3 fc = f.rgb * mix(vec3(1.0), vec3(1.0, 0.82, 0.9), 0.35);
+        c = mix(c, fc * 0.9 + c * 0.25, f.a * uRefl * inside * smoothstep(1.0, 0.88, rq));
+        // 镜片高光（舱室灯板在球面上的反射）
+        vec2 h1 = q - vec2(-0.32, 0.42); float hl = smoothstep(0.2, 0.0, length(h1 * vec2(1.0, 2.2))) ;
+        vec2 h2 = q - vec2(0.36, -0.46); float hl2 = smoothstep(0.1, 0.0, length(h2 * vec2(1.0, 1.8)));
+        c += vec3(1.0, 0.92, 0.96) * (hl * 0.55 + hl2 * 0.25);
+      }
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+}));
+lens.position.set(0, EYE_Y, EYE_Z); room.add(lens);
+// 眼睛的光：照亮尽头的墙
+const eyeLight = new THREE.PointLight(col(PAL.lemon), 0, 3.5, 2); eyeLight.position.set(0, EYE_Y, EYE_Z + 0.6); room.add(eyeLight);
+const flareTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.2, 'rgba(255,255,255,0.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c); })();
+const flare = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map: flareTex, color: col(PAL.lemon), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+flare.position.set(0, EYE_Y, EYE_Z + 0.03); room.add(flare);
+
+// 她的 2D 纸片（HAL 视角里站在舱室中）：粉色背光勾边
+const plateU = { map: { value: TEX.neutral }, uRim: { value: 0.0 }, uPink: { value: col(PAL.pink) }, uExpo: { value: 1 } };
+const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.832, 1.248), new THREE.ShaderMaterial({
+  uniforms: plateU, transparent: true, depthWrite: false,
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: /* glsl */`
+    uniform sampler2D map; uniform float uRim, uExpo; uniform vec3 uPink; varying vec2 vUv;
+    void main(){
+      vec4 t = texture2D(map, vUv);
+      // 背光：取 alpha 在周围的空缺，边缘 = 背光溢出
+      float e = 0.0; vec2 d = vec2(0.012, 0.008);
+      e += 1.0 - texture2D(map, vUv + vec2(d.x, 0.0)).a; e += 1.0 - texture2D(map, vUv - vec2(d.x, 0.0)).a;
+      e += 1.0 - texture2D(map, vUv + vec2(0.0, d.y)).a; e += 1.0 - texture2D(map, vUv - vec2(0.0, d.y)).a;
+      vec3 c = t.rgb * uExpo * mix(vec3(1.0), vec3(1.0, 0.93, 0.95), 0.5) + uPink * clamp(e * 0.5, 0.0, 1.0) * uRim * 1.6;
+      gl_FragColor = vec4(c, t.a);
+    }`,
+}));
+room.add(plate);
+
+// 3D 的她（只做大全景背影）
+const girl = await createGirl(mv);
+girl.root.scale.setScalar(1.65); girl.root.visible = false; room.add(girl.root);
+const gl = createGirlLights({ key: 1.0, rim: 1.2, fill: 0.5 }); gl.visible = false; room.add(gl);
+gl.traverse(o => { if (o.isLight) { o.color.set('#ffffff'); if (o.position.x) o.position.x = 0; } });   // 对称：灯都放中线、白光（不然一侧墙被染色）
+
+// ================================================================ 鱼眼（HAL 的视角）：舱室 + 她 → RT → 桶形畸变 + 圆形暗角 + 色散
+const rt = new THREE.WebGLRenderTarget(1920, 1080, { samples: 4, type: THREE.HalfFloatType });
+const fishU = { tSrc: { value: rt.texture }, uK: { value: 0.55 }, uT: { value: 0 }, uFlash: { value: 0 } };
+const fishScene = new THREE.Scene(), fishCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+fishScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  uniforms: fishU, depthTest: false, depthWrite: false,
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+  fragmentShader: /* glsl */`
+    uniform sampler2D tSrc; uniform float uK, uT, uFlash; varying vec2 vUv;
+    void main(){
+      vec2 p = (vUv - 0.5) * vec2(1.7778, 1.0);
+      float r = length(p), R = 0.62;                                      // 镜头圆（直径 = 1.24 画高，上下被裁）
+      float k = uK;
+      vec2 s = p * (1.0 - k + k * (r * r) / (R * R) * 0.9) ;               // 中心放大、边缘压缩
+      vec3 c;
+      float ca = 0.004 + 0.012 * r * r;
+      c.r = texture2D(tSrc, s * (1.0 + ca) / vec2(1.7778, 1.0) + 0.5).r;
+      c.g = texture2D(tSrc, s / vec2(1.7778, 1.0) + 0.5).g;
+      c.b = texture2D(tSrc, s * (1.0 - ca) / vec2(1.7778, 1.0) + 0.5).b;
+      c *= smoothstep(R, R - 0.1, r) * (0.8 + 0.2 * (1.0 - r / R));    // 圆形暗角
+      c += vec3(1.0, 0.95, 0.6) * uFlash * exp(-r * 3.0);
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+})));
+
+// ================================================================ 灯的时间表
+const BAY_ON = i => 0.238 + i * 0.092;              // 第一拍起，从近到远每 92 ms 亮一格，第 10 格 ≈ 1.07
+const EYE_ON = 0.238 + 2 * BEAT;                    // 1.147：第三拍上眼睛亮
+const tA = L0.find(w => w.w === 'AGI').start, tAGI = [tA, tA + (L0.find(w => w.w === 'AGI').end - tA) / 3, tA + 2 * (L0.find(w => w.w === 'AGI').end - tA) / 3];
+const tSparks = L0.find(w => w.w === 'sparks').start, tEyes = L0.find(w => w.w === 'eyes').start, tNerv = L1.find(w => w.w.startsWith('nervous')).start;
+function lights(T) {
+  const flick = T > tNerv ? (Math.floor((T - tNerv) / 0.06) % 3 === 1 && T < tNerv + 0.36 ? 0.25 : 1) * (1 - 0.3 * Math.exp(-(T - tNerv) * 6)) : 1;
+  for (const b of bays) {
+    const k = T - BAY_ON(b.i), on = k < 0 ? 0 : (k < 0.05 ? 1.6 : 1) * flick;       // 通电一瞬过亮
+    b.lampM.color.set(on ? PAL.pink : '#3a3438').multiplyScalar(on ? 1.8 * on : 1);
+    b.stripM.color.set(on ? PAL.pink : '#3a3438').multiplyScalar(on ? 2.2 * on : 1);
+    b.pl.intensity = 1.6 * on;
+  }
+  amb.intensity = lerp(0.25, 1.25, smooth((T - 0.238) / 1.0));
+  const ke = T - EYE_ON, eye = ke < 0 ? 0 : smooth(ke / 0.25) * (1 + 0.6 * Math.exp(-ke * 5));
+  const nerv = T > tNerv ? 1 + 0.8 * Math.exp(-(T - tNerv) * 7) : 1;
+  lensU.uCore.value = eye * nerv; eyeLight.intensity = 1.2 * eye * nerv;
+  flare.material.opacity = 0.7 * eye * nerv; flare.scale.setScalar(0.8 + 0.35 * eye);
+  lensU.uRing.value.set(...tAGI.map(t => T >= t ? 1 + 0.8 * Math.exp(-(T - t) * 8) : 0));
+  lensU.uT.value = T;
+}
+
+// ================================================================ 镜头
+const cam = new THREE.PerspectiveCamera(50, 16 / 9, 0.02, 200);
+const shots = [];
+const post = (T, x = {}) => ({ bloom: { strength: 0.85, threshold: 0.95, radius: 0.8 }, grade: { vignette: 0.28, ...x.grade }, chroma: 0.05, ...x });
+function hidePOV() { plate.visible = false; lensU.uRefl.value = 0; girl.root.visible = false; gl.visible = false; }
+
+// 0.00 舱室苏醒：长廊入口中线，缓慢推近（对称、一点透视）
+shots.push({ id: 'wake', t0: 0, t1: 1.407, build: () => ({}), update(S, T) {
+  hidePOV(); lights(T);
+  flare.scale.setScalar(2.2 + 1.2 * lensU.uCore.value); flare.material.opacity = Math.min(1, lensU.uCore.value);   // 远景里眼要读得出：光晕放大
+  cam.fov = lerp(44, 36, eIO(T / 1.41)); cam.position.set(0, 1.62, 1.5 - 0.5 * eIO(T / 1.41)); cam.up.set(0, 1, 0); cam.lookAt(0, 1.62, -LEN); cam.updateProjectionMatrix();
+  return { scene: room, camera: cam, post: post(T) };
+} });
+
+// 1.41 HAL 鱼眼 POV：相机在镜头位置往回看；她的纸片在镜头前，凑近 → 退一点；舱室在她身后
+shots.push({ id: 'pov', t0: 1.407, t1: tA, build: () => ({}), update(S, T) {
+  lights(T); lensU.uRefl.value = 0; girl.root.visible = false; gl.visible = false;
+  const u = (T - 1.407) / (tA - 1.407);
+  plate.visible = true; plateU.map.value = TEX[faceAt(T, { mood: 'neutral' })]; plateU.uRim.value = 1; plateU.uExpo.value = 1.0;
+  const dist = lerp(1.35, 0.78, eIO(clamp(u * 1.4))) + 0.06 * Math.sin(T * 2.1);
+  plate.position.set(0.05 * Math.sin(T * 1.3), EYE_Y - 0.36 + 0.02 * Math.sin(T * 2.7), EYE_Z + dist); plate.rotation.set(0, Math.PI, 0.03 * Math.sin(T * 1.7));
+  plate.scale.setScalar(1);
+  cam.fov = 70; cam.position.set(0, EYE_Y, EYE_Z + 0.02); cam.up.set(0, 1, 0); cam.lookAt(0, EYE_Y - 0.05, 0); cam.updateProjectionMatrix();
+  // 先把 3D 画进 RT，再过鱼眼
+  const prev = renderer.getRenderTarget(); renderer.setRenderTarget(rt); renderer.setClearColor(col('#07070c'), 1); renderer.clear(); renderer.render(room, cam); renderer.setRenderTarget(prev);
+  fishU.uT.value = T; fishU.uFlash.value = T > tSparks ? 0.35 * Math.exp(-(T - tSparks) * 6) : 0;
+  return { scene: fishScene, camera: fishCam, post: post(T, { chroma: 0.08 + (T > tSparks ? 0.4 * Math.exp(-(T - tSparks) * 5) : 0) }) };
+} });
+
+// 3.68 HAL 眼特写：A-G-I 三层环；倒影慢慢显出来
+shots.push({ id: 'eye', t0: tA, t1: tEyes, build: () => ({}), update(S, T) {
+  lights(T); plate.visible = false; girl.root.visible = false; gl.visible = false;
+  const u = (T - tA) / (tEyes - tA);
+  lensU.uFace.value = TEX[faceAt(T, { mood: 'neutral' })]; lensU.uRefl.value = lerp(0.12, 0.55, smooth(u)); lensU.uReflScale.value = 1.25;
+  flare.material.opacity *= 0.3; eyeLight.intensity *= 0.4;
+  cam.fov = 32; const z = lerp(1.35, 1.0, eIO(u)); cam.position.set(0, EYE_Y, EYE_Z + z); cam.up.set(0, 1, 0); cam.lookAt(0, EYE_Y, EYE_Z); cam.updateProjectionMatrix();
+  return { scene: room, camera: cam, post: post(T, { bloom: { strength: 0.6, threshold: 1.2, radius: 0.7 } }) };
+} });
+
+// 5.26 eyes：推到镜片上，倒影占满；眨眼 → 笑（脸红）；Your circuits… 倒影里对口型
+shots.push({ id: 'reflection', t0: tEyes, t1: 6.6, build: () => ({}), update(S, T) {
+  lights(T); plate.visible = false; girl.root.visible = false; gl.visible = false;
+  const mood = T < tEyes + 0.45 ? 'surprised' : T < 5.88 ? 'smile' : 'neutral';
+  lensU.uFace.value = TEX[faceAt(T, { mood })]; lensU.uRefl.value = 0.9; lensU.uReflScale.value = lerp(1.0, 0.86, eIO((T - tEyes) / 1.3));
+  lensU.uCore.value *= 0.25; eyeLight.intensity *= 0.3; flare.material.opacity *= 0.2;                                        // 芯压暗，别冲掉她的脸
+  cam.fov = 30; const z = lerp(0.62, 0.5, eIO((T - tEyes) / 1.34)); cam.position.set(0, EYE_Y, EYE_Z + z); cam.up.set(0, 1, 0); cam.lookAt(0, EYE_Y, EYE_Z); cam.updateProjectionMatrix();
+  return { scene: room, camera: cam, post: post(T, { bloom: { strength: 0.45, threshold: 1.3, radius: 0.6 } }) };
+} });
+
+// 6.60 对称大全景：她的 3D 背影在中线上，正对尽头的眼；nervous 灯闪
+shots.push({ id: 'wide', t0: 6.6, t1: 7.72, build: () => ({}), update(S, T) {
+  lights(T); plate.visible = false; lensU.uRefl.value = 0;
+  girl.root.visible = true; gl.visible = true; girl.root.position.set(0, 0, -5.5); girl.root.rotation.set(0, Math.PI, 0);
+  girl.setSkin('toon', T);
+  const u = mv.music.beatAt ? (b => b.i + clamp(b.phase))(mv.music.beatAt(T)) : T / BEAT;
+  girl.pose('idle', u);
+  const back = T > tNerv ? 0.12 * eOut((T - tNerv) / 0.4) : 0;     // nervous：往后缩半步
+  girl.root.position.z = -5.5 + back;
+  flare.scale.setScalar(2.4); flare.material.opacity = Math.min(1, lensU.uCore.value * 0.9);
+  cam.fov = 40; cam.position.set(0, 2.25, 1.2 - 0.25 * eIO((T - 6.6) / 1.12)); cam.up.set(0, 1, 0); cam.lookAt(0, 1.55, -LEN);   // 机位抬高：她的头在眼睛下面，眼睛露出来 cam.updateProjectionMatrix();
+  return { scene: room, camera: cam, post: post(T) };
+} });
+
+const video = mv.mount(shots, { offset: 0, duration: 7.72 });
+video.music = 'music.mp3';          // render.mjs 按集目录解析（页面在 fresh/ 下，engine 给的是相对页面的 ../music.mp3）
+</script>
+</body>
+</html>

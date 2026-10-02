@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>4K 原脸 + 标定点（调试）</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0">
+<!-- #931 调试：4K 模型原脸正面正交特写，叠 calib.json 的标定点（黄）和替换区域（粉）。seek(0) 打光 toon，seek(1) 纯底色贴图。 -->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV } from '../../engine/index.js';
+import { createGirl, createGirlLights } from '../girl.js';
+const mv = await loadMV({ base: '../..' });
+const girl = await createGirl(mv, { points: 100, face: 'original' });
+const calib = await fetch('../../../../tools/face-bake/calib.json').then(r => r.json());
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#303038');
+scene.add(girl.root, createGirlLights());
+girl.pose(() => ({})); girl.setSkin('toon', 0);
+const Qp = new URLSearchParams(location.search), cx = 0, cy = +(Qp.get('cy') || 0.892), hw = +(Qp.get('hw') || 0.075);
+const camera = new THREE.OrthographicCamera(-hw * 16 / 9, hw * 16 / 9, hw, -hw, 0.01, 10);
+camera.position.set(cx, cy, 2); camera.lookAt(cx, cy, 0);
+const dots = new THREE.Group(); scene.add(dots);
+for (const l of calib.landmarks) { const m = new THREE.Mesh(new THREE.CircleGeometry(0.0012, 12), new THREE.MeshBasicMaterial({ color: '#ffe000', depthTest: false })); m.position.set(l.p3[0], l.p3[1], 1); m.renderOrder = 9; dots.add(m); }
+const poly = calib.region.polygon.map(p => new THREE.Vector3(p[0], p[1], 1));
+const ln = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(poly), new THREE.LineBasicMaterial({ color: '#ff2e88', depthTest: false })); ln.renderOrder = 9; scene.add(ln);
+const toon = girl.mesh.material, basic = new THREE.MeshBasicMaterial({ map: toon.map ?? girl.materials.toon.map });
+window.__girl = girl; window.__maps = { toonMap: !!toon.map, size: (toon.map ?? girl.materials.toon.map)?.image?.width };
+function draw(t) {
+  girl.mesh.material = t >= 1 ? basic : toon;
+  if (girl.hull) girl.hull.visible = t < 1;
+  mv.stage.render(scene, camera, { bloom: 0, grade: { vignette: 0 } });
+}
+mv.mount(draw, { offset: 0, duration: 2 });
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>猫咪安全动作范围扫描</title>
+<script type="importmap">{"imports": {"three": "../../../../assets/vendor/three/three.module.min.js"}}</script>
+<style>html, body { margin: 0; background: #fff; }</style>
+</head>
+<body>
+<!--
+  一次只动一个关节参数，其余保持放松站姿，量两样东西：
+    fold  = 4 个视角里看到的「网格背面」像素和（衣服折进身体 / 穿插时背面会翻出来），减去放松站姿的基线
+    proxy = 胶囊代理自检的问题（穿插、反关节）
+  参数：
+    abduct   上臂外展角（度，0 = 垂直贴身，90 = 水平，180 = 举过头），手臂伸直
+    cross    手越过身体中线的量（臂长单位，0 = 手在肩正前方，正 = 往身体另一侧）
+    squat    胯下沉（腿长单位）
+    twist    上身扭转（度，三节脊柱平分）
+    bend     上身前屈（度）
+  ?cat=orange&fix=smooth  window.__out = { cat, fix, sweeps: { name: [{ v, fold, proxy }] } }
+-->
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { createDancer, toonify, tailSway, smoothSkinWeights, addShaderPatch } from '../../../../assets/lib/dance3d.js';
+
+const q = new URLSearchParams(location.search);
+const cat = q.get('cat') || 'orange', fix = new Set((q.get('fix') || '').split(',').filter(Boolean));
+const R = 200;
+const renderer = new THREE.WebGLRenderer({ antialias: false });
+renderer.setPixelRatio(1); renderer.setSize(R, R);
+const rt = new THREE.WebGLRenderTarget(R, R);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#fff');
+const model = (await new GLTFLoader().loadAsync(`../cat/${cat}+cat.glb`)).scene; scene.add(model);
+let mesh; model.traverse(o => { if (o.isSkinnedMesh) mesh = o; });
+if (fix.has('smooth')) smoothSkinWeights(mesh, model);
+const dancer = createDancer(model);
+const tail = tailSway(model, dancer);
+const dbg = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+addShaderPatch(dbg, { key: 'dbg-backface', fragment: [['#include <dithering_fragment>', '  gl_FragColor = gl_FrontFacing ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(1.0, 0.0, 0.0, 1.0);']] });
+tail?.patch(dbg);
+model.traverse(o => { if (o.isMesh) o.material = dbg; });
+const cam = new THREE.PerspectiveCamera(32, 1, 0.01, 20);
+const VIEWS = [[0, 0.55, 2.2, 0.5], [1.6, 0.5, 1.4, 0.5], [0, 0.6, -2.2, 0.5], [1.0, 0.1, 1.0, 0.6], [-1.6, 0.5, 1.4, 0.5]];
+const buf = new Uint8Array(R * R * 4);
+function fold() {
+  let n = 0;
+  for (const [x, y, z, ty] of VIEWS) {
+    cam.position.set(x, y, z); cam.lookAt(0, ty, 0);
+    renderer.setRenderTarget(rt); renderer.render(scene, cam); renderer.readRenderTargetPixels(rt, 0, 0, R, R, buf);
+    for (let i = 0; i < buf.length; i += 4) if (buf[i] > 200 && buf[i + 1] < 60) n++;
+  }
+  return n;
+}
+const { solver } = dancer;
+const S = dancer.S, A = S.armLen;
+// 直臂外展：手目标 = 肩 + 臂长 ×（冠状面里从正下方转 a 度）× 0.97
+const armAt = (a, side) => { const sx = side === 'L' ? 1 : -1, r = a * Math.PI / 180; return { pos: [sx * Math.sin(r) * 0.97, -Math.cos(r) * 0.97, 0.05], pole: [sx * 0.2, -0.2, -1], grip: 0.3 }; };
+const SPECS = {
+  abduct: v => ({ handL: armAt(v, 'L'), handR: armAt(v, 'R') }),
+  cross: v => ({ handL: { pos: [-v, -0.35, 0.75], pole: [1, -0.5, -0.3] }, handR: armAt(25, 'R') }),   // 只动左手，右手放松
+  squat: v => ({ hips: { y: -v, z: -0.25 * v, rot: [35 * v, 0, 0] }, spine: [40 * v, 0, 0], footL: { pole: [0.35, 0, 1] }, footR: { pole: [-0.35, 0, 1] },
+    handL: { pos: [0.4, -0.45, 0.6], pole: [0.6, -0.5, -0.6] }, handR: { pos: [-0.4, -0.45, 0.6], pole: [-0.6, -0.5, -0.6] } }),   // 蹲时手在身前（舞步里就是这样）
+  twist: v => ({ spine: [0, v / 3, 0], chest: [0, v / 3, 0], upperChest: [0, v / 3, 0] }),
+  bend: v => ({ spine: [v / 3, 0, 0], chest: [v / 3, 0, 0], upperChest: [v / 3, 0, 0] }),
+};
+const RANGES = { abduct: [0, 10, 20, 30, 40, 60, 90, 120, 150, 170], cross: [-0.3, -0.15, 0, 0.1, 0.2, 0.3, 0.45, 0.6], squat: [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4], twist: [0, 15, 30, 45, 60, 75], bend: [-20, 0, 15, 30, 45, 60] };
+const { normalizeSpecExport } = await import('../../../../assets/lib/dance3d.js');
+const out = { cat, fix: [...fix], sweeps: {} };
+dancer.apply(solver.solve(normalizeSpecExport({ handL: armAt(25, 'L'), handR: armAt(25, 'R') })));
+tail?.update(0);
+out.base = fold();
+for (const [name, vals] of Object.entries(RANGES)) {
+  out.sweeps[name] = vals.map(v => {
+    dancer.apply(solver.solve(normalizeSpecExport(SPECS[name](v))));
+    const f = fold();
+    return { v, fold: f, excess: f - out.base, proxy: [...dancer.check(), ...(tail ? tail.check() : [])].map(i => `${i.kind}:${i.a}${i.b ? '×' + i.b : ''}(${i.depth})`) };
+  });
+}
+window.__out = out;
+</script>
+</body>
+</html>

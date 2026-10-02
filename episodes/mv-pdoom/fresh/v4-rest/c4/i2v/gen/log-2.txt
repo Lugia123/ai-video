@@ -1,0 +1,14 @@
+job d7fb11b63e3a  wan i2v 512x768 33帧
+  01:11:16 queued
+  01:11:31 running
+  01:12:16 done
+episodes/mv-pdoom/fresh/v4-rest/c4/i2v/gen/turn-draft-s1.mp4  512x768 33帧@16fps (2.0s)  seed=1  生成 44.6s（排队 15.7s）  整卡显存峰值 20164 MiB  模型 wan2.2 i2v A14B fp8 + lightx2v4
+job f5fb343458de  wan i2v 512x768 33帧
+  01:12:22 queued
+  01:12:52 running
+  01:13:32 done
+episodes/mv-pdoom/fresh/v4-rest/c4/i2v/gen/turn-draft-s2.mp4  512x768 33帧@16fps (2.0s)  seed=2  生成 42.6s（排队 30.6s）  整卡显存峰值 20804 MiB  模型 wan2.2 i2v A14B fp8 + lightx2v4
+job 391e1ea0b526  wan i2v 512x768 17帧
+  01:13:39 running
+  01:13:59 done
+episodes/mv-pdoom/fresh/v4-rest/c4/i2v/gen/wink-draft-s1.mp4  512x768 17帧@16fps (1.0s)  seed=1  生成 24.6s（排队 0.2s）  整卡显存峰值 20772 MiB  模型 wan2.2 i2v A14B fp8 + lightx2v4

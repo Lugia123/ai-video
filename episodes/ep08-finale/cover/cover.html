@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ep08 封面</title>
+<style>
+  html, body { margin: 0; background: #EFE7D6; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+/*
+ * ep08 封面：兑现开场画面——搭到一半的纸架子轰然塌掉（红色「？」块碎开），方块小人在废墟边举着「先试这个」。
+ *   ?ratio=4x3  → 1440×1080（横版）
+ *   ?ratio=16x9 → 1920×1080（宽版：左标题、右主画面）
+ *   ?ratio=9x16 → 1080×1920（竖版：上标题、中间塌架子、下小人）
+ * 导出：node tools/cover/cover.mjs episodes/ep02-spike-first
+ * 页面画完后置 window.__coverReady = true。
+ */
+import { createKit, C, F, RAD, clamp, lerp, eo3, eBack, hash, mulberry32 } from '../../../assets/lib/paper-kit.js';
+import { createBuddy } from '../../../assets/lib/paper-girl.js';   // 纸片女孩 s=2.0（原方块小人版封面见 _boxbuddy/）
+
+const RATIO = new URLSearchParams(location.search).get('ratio') ?? '4x3';
+const V = RATIO === '9x16', WIDE = RATIO === '16x9';
+const W = V ? 1080 : WIDE ? 1920 : 1440, H = V ? 1920 : 1080;
+const cv = document.getElementById('c');
+cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d');
+const K = createKit(ctx, { W, H, bgSeed: 808, creases: V ? [[-10, 1180, 1090, 1230]] : WIDE ? [[-10, 610, 1930, 650]] : [[-10, 610, 1450, 650]] });
+const { rr, circ, paper, text, poly } = K;
+const ZH = F.zh;
+
+/* ---------- 主标题：纸剪字——白纸描边 + 投影 + 错位色版；数字用红/绿强调 ---------- */
+const fontOf = (p, size) => p.num ? `800 ${size * 1.12}px ${F.big}` : `600 ${size}px ${ZH}`;
+function paperType(parts, x, y, size, align) {
+  const widths = parts.map(p => { ctx.font = fontOf(p, size); return ctx.measureText(p.s).width; });
+  const total = widths.reduce((a, b) => a + b, 0);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const x0 = cx;
+  ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+  // 1. 整行白纸底（带投影），2. 错位色版，3. 墨色字
+  for (const pass of [0, 1, 2]) {
+    cx = x0;
+    parts.forEach((p, i) => {
+      ctx.font = fontOf(p, size);
+      if (pass === 0) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(70,48,25,0.38)'; ctx.shadowBlur = 14; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 10;
+        ctx.strokeStyle = C.card; ctx.lineWidth = size * 0.2; ctx.strokeText(p.s, cx, y);
+        ctx.restore();
+      } else if (pass === 1) {
+        ctx.fillStyle = p.col && p.col !== C.mute ? C.ink : C.mustard;
+        ctx.fillText(p.s, cx + size * 0.04, y + size * 0.04);
+      } else {
+        ctx.fillStyle = p.col ?? C.ink; ctx.fillText(p.s, cx, y);
+      }
+      cx += widths[i];
+    });
+  }
+  ctx.restore();
+  return { x0, x1: x0 + total };
+}
+
+/* ---------- 系列标签：斜贴的纸胶带 ---------- */
+function tape(o) {
+  const label = '移植不是翻译 · 终章';
+  ctx.font = `600 34px ${ZH}`;
+  const w = ctx.measureText(label).width + 70, h = 64;
+  ctx.save(); ctx.translate(o.x + w / 2, o.y + h / 2); ctx.rotate(o.rot * RAD);
+  // 胶带两端锯齿
+  const p = new Path2D(), r = mulberry32(77);
+  p.moveTo(-w / 2, -h / 2);
+  p.lineTo(w / 2, -h / 2);
+  for (let k = 0; k <= 8; k++) p.lineTo(w / 2 + (k % 2 ? -7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.lineTo(-w / 2, h / 2);
+  for (let k = 8; k >= 0; k--) p.lineTo(-w / 2 + (k % 2 ? 7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.closePath();
+  paper(p, [-w / 2, -h / 2, w, h], { fill: 'rgba(240,180,60,0.88)', lift: 0.5, seed: 141, ink: false });
+  text(label, 0, 2, 34, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+const t = 99;
+function note() {}
+const CARDS = ['编译通过', '测试全绿', '原平台 0 行'];
+function reportCard(i, x, y, s, stampP, crackP) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.rotate((i - 1) * 1.5 * RAD);
+  paper(rr(-230, -160, 460, 320, 16, 581 + i), [-230, -160, 460, 320], { fill: C.card, lift: 1.3, seed: 581 + i });
+  text('报告', -190, -108, 28, { font: ZH, weight: 700, color: C.mute });
+  ctx.fillStyle = C.faint; ctx.fillRect(-190, -90, 380, 3);
+  text(CARDS[i], 0, -30, 56, { align: 'center', base: 'middle', font: ZH, weight: 800 });
+  if (stampP > 0) {
+    const k = eBack(clamp(stampP));
+    ctx.save(); ctx.translate(40, 80); ctx.rotate(-9 * RAD); ctx.scale(lerp(1.6, 1, k), lerp(1.6, 1, k)); ctx.globalAlpha *= clamp(stampP * 4);
+    ctx.strokeStyle = C.green; ctx.lineWidth = 6; ctx.strokeRect(-120, -42, 240, 84);
+    text('好了   ✓', 0, 2, 50, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.green });
+    if (crackP > 0) {
+      const pts = [[22, -52], [40, -24], [24, -2], [48, 20], [34, 52]];
+      const n = 1 + Math.floor(clamp(crackP) * (pts.length - 1));
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      for (const [w, col] of [[11, C.ink], [6, C.red]]) {
+        ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath();
+        pts.slice(0, n + 1).forEach(([px, py], j) => (j ? ctx.lineTo(px, py) : ctx.moveTo(px, py))); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+
+const L = V ? {
+  title: [{ x: 540, y: 300, align: 'center', size: 132 }, { x: 540, y: 470, align: 'center', size: 132 }],
+  cards: [[300, 760, 0.8], [720, 990, 0.8], [300, 1220, 0.8]], buddy: { x: 780, y: 1880, s: 2.0 }, slip: [740, 1225],
+  tape: { x: 30, y: 60, rot: -4 },
+} : WIDE ? {
+  title: [{ x: 90, y: 230, align: 'left', size: 150 }, { x: 96, y: 410, align: 'left', size: 150 }],
+  cards: [[300, 740, 0.78], [720, 780, 0.78], [1140, 740, 0.78]], buddy: { x: 1650, y: 1040, s: 2.0 }, slip: [1510, 440],
+  tape: { x: 1490, y: 40, rot: 5 },
+} : {
+  title: [{ x: 70, y: 210, align: 'left', size: 140 }, { x: 76, y: 380, align: 'left', size: 140 }],
+  cards: [[200, 700, 0.62], [510, 740, 0.62], [820, 700, 0.62]], buddy: { x: 1180, y: 1040, s: 2.0 }, slip: [1090, 450],
+  tape: { x: 1060, y: 40, rot: 5 },
+};
+const TITLE = [
+  [{ s: '三句' }, { s: '“好了”', col: C.green }, { s: '，' }],
+  [{ s: '都可能是' }, { s: '假的', col: C.red }],
+];
+const buddy = createBuddy(ctx, {
+  path: [[0, L.buddy.x, L.buddy.y, L.buddy.s]],
+  acts: [{ type: 'question', t0: 0, t1: 99 }],
+});
+function slip(x, y, s, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot * RAD); ctx.scale(s, s);
+  paper(rr(-150, -52, 300, 104, 8, 171), [-150, -52, 300, 104], { fill: C.mustard, lift: 1.6, seed: 171, inkW: 2.8 });
+  text('连线在哪？', 0, 3, 50, { align: 'center', base: 'middle', font: ZH, weight: 700 });
+  ctx.restore();
+}
+await document.fonts.load(`600 150px ${ZH}`, '三句“好了”，都可能是假的移植不是翻译终章报告编译通过测试全绿原平台行连线在哪？');
+K.setTime(0);
+K.drawBG();
+tape(L.tape);
+L.cards.forEach(([x, y, s], i) => reportCard(i, x, y, s, 1, 1));
+buddy.draw(3.3);
+slip(L.slip[0], L.slip[1], V ? 1.1 : 0.95, -6);
+TITLE.forEach((parts, i) => paperType(parts, L.title[i].x, L.title[i].y, L.title[i].size, L.title[i].align));
+ctx.font = `600 ${L.title[0].size}px ${ZH}`;
+const m = ctx.measureText('都可能是假的');
+window.__coverInfo = { W, H, titleInkH: Math.round(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent), minH: Math.round(H * (V ? 0.06 : 0.09)) };
+window.__coverReady = true;
+</script>
+</body>
+</html>

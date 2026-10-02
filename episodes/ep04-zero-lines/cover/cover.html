@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ep04 封面</title>
+<style>
+  html, body { margin: 0; background: #EFE7D6; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+/*
+ * ep04 封面：兑现开场画面——搭到一半的纸架子轰然塌掉（红色「？」块碎开），方块小人在废墟边举着「先试这个」。
+ *   ?ratio=4x3  → 1440×1080（横版）
+ *   ?ratio=16x9 → 1920×1080（宽版：左栏标题三行，右栏黑边窗口 + 缺的那行 + 小人）
+ *   ?ratio=9x16 → 1080×1920（竖版：上标题三行、下黑边窗口 + 小人）
+ * 导出：node tools/cover/cover.mjs episodes/ep04-zero-lines
+ * 页面画完后置 window.__coverReady = true。
+ */
+import { createKit, C, F, RAD, mulberry32 } from '../../../assets/lib/paper-kit.js';
+import { createBuddy } from '../../../assets/lib/paper-girl.js';   // 纸片女孩，统一 s = 2.0
+
+const RATIO = new URLSearchParams(location.search).get('ratio') ?? '4x3';
+const V = RATIO === '9x16', WIDE = RATIO === '16x9';
+const W = V ? 1080 : WIDE ? 1920 : 1440, H = V ? 1920 : 1080;
+const cv = document.getElementById('c');
+cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d');
+const K = createKit(ctx, { W, H, bgSeed: 303, creases: V ? [[-10, 1180, 1090, 1230]] : WIDE ? [[-10, 610, 1930, 660]] : [[-10, 610, 1450, 650]] });
+const { rr, paper, text, poly } = K;
+const ZH = F.zh;
+
+/* ---------- 版式 ---------- */
+const L = V ? {
+  title: [{ x: 540, y: 300, align: 'center', size: 100 }, { x: 540, y: 430, align: 'center', size: 100 }, { x: 540, y: 620, align: 'center', size: 160 }],
+  win: { x: 70, y: 790, w: 940, h: 550, vw: 600, vh: 320 },
+  buddy: { x: 210, y: 1890, s: 2 },
+  line: { x: 430, y: 1560, w: 580 },
+  zero: { x: 180, y: 735, rot: -6 },
+  tape: { x: 30, y: 60, rot: -4 },
+} : WIDE ? {
+  title: [{ x: 80, y: 370, align: 'left', size: 100 }, { x: 80, y: 500, align: 'left', size: 100 }, { x: 74, y: 700, align: 'left', size: 160 }],
+  win: { x: 920, y: 230, w: 660, h: 560, vw: 420, vh: 330 },
+  buddy: { x: 1750, y: 985, s: 2 },
+  line: { x: 950, y: 840, w: 500 },
+  zero: { x: 975, y: 225, rot: -8 },
+  tape: { x: 1540, y: 40, rot: 5 },
+} : {
+  title: [{ x: 70, y: 175, align: 'left', size: 92 }, { x: 64, y: 350, align: 'left', size: 160 }],
+  win: { x: 560, y: 420, w: 800, h: 520, vw: 500, vh: 300 },
+  buddy: { x: 290, y: 1035, s: 2 },
+  line: { x: 600, y: 968, w: 560 },
+  zero: { x: 560, y: 430, rot: -8 },
+  tape: { x: 1060, y: 40, rot: 5 },
+};
+const TITLE = V || WIDE ? [
+  [{ s: '一行代码都不用写' }],
+  [{ s: '的功能，' }],
+  [{ s: '搬家后' }, { s: '最坑', col: C.red }],
+] : [
+  [{ s: '一行代码都不用写的功能，' }],
+  [{ s: '搬家后' }, { s: '最坑', col: C.red }],
+];
+/** 终端窗口：画框钉在左下角，右边和上边露黑 */
+function termWin(o) {
+  K.win({ x: o.x, y: o.y, w: o.w, h: o.h, title: 'Polter', seed: 11 }, (iw, ih) => {
+    ctx.fillStyle = '#1C1916'; ctx.fillRect(12, 8, iw - 24, ih - 20);
+    const fx = 12, fy = ih - 12 - o.vh;
+    ctx.fillStyle = '#FBF6EA'; ctx.fillRect(fx, fy, o.vw, o.vh);
+    for (let k = 0; k < Math.floor((o.vh - 30) / 46); k++) {
+      const yy = fy + 42 + k * 46;
+      if (k % 3 === 0) text('$', fx + 22, yy, 26, { font: F.code, weight: 600, color: C.green });
+      ctx.fillStyle = k % 3 === 0 ? 'rgba(30,27,24,0.55)' : 'rgba(30,27,24,0.25)';
+      ctx.fillRect(fx + (k % 3 === 0 ? 52 : 22), yy - 16, Math.min(o.vw - 80, 160 + 130 * (1 + Math.sin(k * 2.3))), 14);
+    }
+  });
+}
+function missingLine(o) {
+  ctx.save(); ctx.setLineDash([14, 10]); ctx.strokeStyle = C.red; ctx.lineWidth = 5; ctx.strokeRect(o.x, o.y, o.w, 70); ctx.restore();
+  text('？', o.x + o.w / 2, o.y + 38, 50, { align: 'center', base: 'middle', font: ZH, weight: 800, color: C.red });
+}
+function zeroSlip(o) {
+  ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.rot * RAD);
+  paper(rr(-110, -50, 220, 100, 8, 21), [-110, -50, 220, 100], { fill: C.mint, lift: 1.4, seed: 21, inkW: 2.6 });
+  text('0 行', 0, 4, 58, { align: 'center', base: 'middle', font: ZH, weight: 800 });
+  ctx.restore();
+}
+const buddy = createBuddy(ctx, {
+  path: [[0, L.buddy.x, L.buddy.y, L.buddy.s]],
+  acts: [{ type: 'look', t0: 0, t1: 99, at: [L.line.x + L.line.w / 2, L.line.y + 200] }, { type: 'question', t0: 0, t1: 99 }],
+});
+
+/* ---------- 主标题：纸剪字——白纸描边 + 投影 + 错位色版；数字用红/绿强调 ---------- */
+const fontOf = (p, size) => p.num ? `800 ${size * 1.12}px ${F.big}` : `600 ${size}px ${ZH}`;
+function paperType(parts, x, y, size, align) {
+  const widths = parts.map(p => { ctx.font = fontOf(p, size); return ctx.measureText(p.s).width; });
+  const total = widths.reduce((a, b) => a + b, 0);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const x0 = cx;
+  ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+  // 1. 整行白纸底（带投影），2. 错位色版，3. 墨色字
+  for (const pass of [0, 1, 2]) {
+    cx = x0;
+    parts.forEach((p, i) => {
+      ctx.font = fontOf(p, size);
+      if (pass === 0) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(70,48,25,0.38)'; ctx.shadowBlur = 14; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 10;
+        ctx.strokeStyle = C.card; ctx.lineWidth = size * 0.2; ctx.strokeText(p.s, cx, y);
+        ctx.restore();
+      } else if (pass === 1) {
+        ctx.fillStyle = p.col && p.col !== C.mute ? C.ink : C.mustard;
+        ctx.fillText(p.s, cx + size * 0.04, y + size * 0.04);
+      } else {
+        ctx.fillStyle = p.col ?? C.ink; ctx.fillText(p.s, cx, y);
+      }
+      cx += widths[i];
+    });
+  }
+  ctx.restore();
+  return { x0, x1: x0 + total };
+}
+
+/* ---------- 系列标签：斜贴的纸胶带 ---------- */
+function tape(o) {
+  const label = '移植不是翻译 · 04';
+  ctx.font = `600 34px ${ZH}`;
+  const w = ctx.measureText(label).width + 70, h = 64;
+  ctx.save(); ctx.translate(o.x + w / 2, o.y + h / 2); ctx.rotate(o.rot * RAD);
+  // 胶带两端锯齿
+  const p = new Path2D(), r = mulberry32(77);
+  p.moveTo(-w / 2, -h / 2);
+  p.lineTo(w / 2, -h / 2);
+  for (let k = 0; k <= 8; k++) p.lineTo(w / 2 + (k % 2 ? -7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.lineTo(-w / 2, h / 2);
+  for (let k = 8; k >= 0; k--) p.lineTo(-w / 2 + (k % 2 ? 7 : 0) + (r() - 0.5) * 3, -h / 2 + h * k / 8);
+  p.closePath();
+  paper(p, [-w / 2, -h / 2, w, h], { fill: 'rgba(240,180,60,0.88)', lift: 0.5, seed: 141, ink: false });
+  text(label, 0, 2, 34, { align: 'center', base: 'middle', font: ZH, weight: 600 });
+  ctx.restore();
+}
+
+await document.fonts.load(`600 150px ${ZH}`, '一行代码都不用写的功能，搬家后最坑移植是翻译');
+await document.fonts.load(`800 150px ${F.big}`);
+K.setTime(0);
+K.drawBG();
+tape(L.tape);
+termWin(L.win);
+missingLine(L.line);
+zeroSlip(L.zero);
+buddy.draw(3.3);
+TITLE.forEach((parts, i) => paperType(parts, L.title[i].x, L.title[i].y, L.title[i].size, L.title[i].align));
+ctx.font = `600 ${L.title[L.title.length - 1].size}px ${ZH}`;
+const m = ctx.measureText('搬家后最坑');
+window.__coverInfo = { W, H, titleInkH: Math.round(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent), minH: Math.round(H * (V ? 0.06 : 0.09)) };
+window.__coverReady = true;
+</script>
+</body>
+</html>

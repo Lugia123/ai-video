@@ -1,0 +1,18 @@
+<!doctype html><script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { restoreBindPose } from '../girl.js';
+const g = await new GLTFLoader().loadAsync('../../../cast-cyber-girl/3d/' + (new URLSearchParams(location.search).get('glb') || 'tripo-girl/anime+girl+3d+model.glb'));
+let mesh; g.scene.traverse(o => { if (o.isMesh) mesh = o; });
+await restoreBindPose(mesh);
+mesh.material = new THREE.MeshBasicMaterial({ map: mesh.material.map, side: THREE.DoubleSide });
+const R = new THREE.WebGLRenderer({ preserveDrawingBuffer: true }); R.setSize(1200, 1200); document.body.append(R.domElement);
+const s = new THREE.Scene(); s.background = new THREE.Color('#ffffff'); s.add(g.scene);
+// 正交：x ∈ [-0.12, 0.12]，y ∈ [0.78, 1.02]（头骨 0.88）
+const cam = new THREE.OrthographicCamera(-0.12, 0.12, 1.02, 0.78, 0.01, 10); cam.position.set(0, 0, 2); cam.lookAt(0, 0, 0);
+cam.updateProjectionMatrix();
+// 另一台：从正面看但 lookAt 保持 y；上面参数已经是绝对 y（camera 在 y=0，所以视窗上下是 0.78–1.02）
+R.render(s, cam);
+window.__video = { width: 1200, height: 1200, fps: 30, duration: 1, seek() {} };
+</script>

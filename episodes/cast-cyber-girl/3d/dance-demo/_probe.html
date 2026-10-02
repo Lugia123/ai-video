@@ -1,0 +1,31 @@
+<!doctype html><meta charset="utf-8">
+<script type="importmap">{"imports": {"three": "../../../../assets/vendor/three/three.module.min.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { measureSkeleton } from '../../../../assets/lib/dance3d.js';
+const g = await new GLTFLoader().loadAsync(`../cat/orange+cat.glb`);
+const s = g.scene, S = measureSkeleton(s);
+let mesh; s.traverse(o => { if (o.isSkinnedMesh) mesh = o; });
+const geo = mesh.geometry, pos = geo.attributes.position, idx = geo.index, n = pos.count;
+// union-find 按位置焊接后的连通岛
+const key = i => [pos.getX(i), pos.getY(i), pos.getZ(i)].map(v => Math.round(v * 1e4)).join(',');
+const first = new Map(), par = new Int32Array(n).map((_, i) => i);
+const f = i => { while (par[i] !== i) { par[i] = par[par[i]]; i = par[i]; } return i; };
+const u = (a, b) => { a = f(a); b = f(b); if (a !== b) par[a] = b; };
+for (let i = 0; i < n; i++) { const k = key(i); if (first.has(k)) u(i, first.get(k)); else first.set(k, i); }
+for (let i = 0; i < idx.count; i += 3) { u(idx.getX(i), idx.getX(i + 1)); u(idx.getX(i), idx.getX(i + 2)); }
+const isl = new Map(); const v = new THREE.Vector3();
+const toCan = new THREE.Matrix4().copy(s.matrixWorld).invert().multiply(mesh.matrixWorld);
+const bn = mesh.skeleton.bones.map(b => b.name.replace('mixamorig', ''));
+for (let i = 0; i < n; i++) { const r = f(i); if (!isl.has(r)) isl.set(r, { n: 0, min: [9,9,9], max: [-9,-9,-9], bones: {} });
+  const I = isl.get(r); I.n++; v.fromBufferAttribute(pos, i).applyMatrix4(toCan).applyQuaternion(S.Kinv);
+  v.toArray().forEach((x, j) => { I.min[j] = Math.min(I.min[j], x); I.max[j] = Math.max(I.max[j], x); });
+  let best = 0, bw = 0; for (let j = 0; j < 4; j++) { const w = geo.attributes.skinWeight.getComponent(i, j); if (w > bw) { bw = w; best = geo.attributes.skinIndex.getComponent(i, j); } }
+  I.bones[bn[best]] = (I.bones[bn[best]] || 0) + 1; }
+// 身后区域的顶点主导骨
+const behind = {}; let cnt = 0;
+for (let i = 0; i < n; i++) { v.fromBufferAttribute(pos, i).applyMatrix4(toCan).applyQuaternion(S.Kinv);
+  if (v.z < -0.02 && Math.abs(v.x) < 0.06) { cnt++; let best = 0, bw = 0; for (let j = 0; j < 4; j++) { const w = geo.attributes.skinWeight.getComponent(i, j); if (w > bw) { bw = w; best = geo.attributes.skinIndex.getComponent(i, j); } } behind[bn[best]] = (behind[bn[best]] || 0) + 1; } }
+window.__out = { islands: [...isl.values()].filter(I => I.n > 50).map(I => ({ ...I, min: I.min.map(x => +x.toFixed(3)), max: I.max.map(x => +x.toFixed(3)) })), behind, cnt, hipsZ: S.info.Hips.P.z };
+</script>

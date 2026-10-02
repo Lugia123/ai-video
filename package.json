@@ -1,0 +1,12 @@
+{
+  "name": "ai-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node tools/render/render.mjs"
+  },
+  "devDependencies": {
+    "@dimforge/rapier3d-compat": "^0.21.0",
+    "playwright": "1.62.0"
+  }
+}

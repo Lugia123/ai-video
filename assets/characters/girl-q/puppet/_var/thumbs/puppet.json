@@ -1,0 +1,160 @@
+{
+ "src": "../../tpose.png",
+ "canvas": [
+  1280,
+  832
+ ],
+ "joints": {
+  "neck": [
+   638,
+   372
+  ],
+  "waist": [
+   638,
+   517
+  ],
+  "shoulder_l": [
+   575,
+   428
+  ],
+  "elbow_l": [
+   505,
+   428
+  ],
+  "wrist_l": [
+   430,
+   428
+  ],
+  "hand_l": [
+   352,
+   428
+  ],
+  "shoulder_r": [
+   701,
+   428
+  ],
+  "elbow_r": [
+   771,
+   428
+  ],
+  "wrist_r": [
+   846,
+   428
+  ],
+  "hand_r": [
+   926,
+   428
+  ],
+  "hip_l": [
+   596,
+   630
+  ],
+  "foot_l": [
+   556,
+   795
+  ],
+  "hip_r": [
+   680,
+   630
+  ],
+  "foot_r": [
+   722,
+   795
+  ]
+ },
+ "note": "origin=部件 PNG 左上角在原画布的位置；pivot=关节枢轴（原画布坐标），pivot_local=相对部件 PNG；角度正值=屏幕上顺时针；世界变换 = 父变换 · T(pivot) · R(θ) · T(-pivot)；按 z 从小到大画。_l/_r=画面左/右。",
+ "parts": [
+  {
+   "name": "arm_lo_l",
+   "file": "arm_lo_l.png",
+   "parent": "arm_up_l",
+   "z": 5,
+   "origin": [
+    363,
+    329
+   ],
+   "disc": 28,
+   "size": [
+    172,
+    140
+   ],
+   "pivot": [
+    505.0,
+    428.0
+   ],
+   "pivot_local": [
+    142.0,
+    99.0
+   ]
+  },
+  {
+   "name": "arm_lo_r",
+   "file": "arm_lo_r.png",
+   "parent": "arm_up_r",
+   "z": 5,
+   "origin": [
+    742,
+    329
+   ],
+   "disc": 28,
+   "size": [
+    186,
+    145
+   ],
+   "pivot": [
+    771.0,
+    428.0
+   ],
+   "pivot_local": [
+    29.0,
+    99.0
+   ]
+  },
+  {
+   "name": "arm_up_l",
+   "file": "arm_up_l.png",
+   "parent": "torso",
+   "z": 6,
+   "origin": [
+    504,
+    387
+   ],
+   "disc": 30,
+   "size": [
+    103,
+    76
+   ],
+   "pivot": [
+    575.0,
+    428.0
+   ],
+   "pivot_local": [
+    71.0,
+    41.0
+   ]
+  },
+  {
+   "name": "arm_up_r",
+   "file": "arm_up_r.png",
+   "parent": "torso",
+   "z": 6,
+   "origin": [
+    670,
+    387
+   ],
+   "disc": 30,
+   "size": [
+    103,
+    76
+   ],
+   "pivot": [
+    701.0,
+    428.0
+   ],
+   "pivot_local": [
+    31.0,
+    41.0
+   ]
+  }
+ ]
+}

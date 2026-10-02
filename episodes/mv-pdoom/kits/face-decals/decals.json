@@ -1,0 +1,153 @@
+{
+ "skin": [
+  253.0,
+  227.0,
+  201.0
+ ],
+ "parts": {
+  "eyeL": {
+   "x": 251,
+   "y": 376,
+   "w": 120,
+   "h": 88,
+   "anchor": [
+    319,
+    422
+   ],
+   "states": {
+    "open": {
+     "file": "eyeL-open.png"
+    },
+    "closed": {
+     "file": "eyeL-closed.png"
+    },
+    "half": {
+     "file": "eyeL-half.png"
+    },
+    "wink": {
+     "file": "eyeL-wink.png"
+    },
+    "smile": {
+     "file": "eyeL-smile.png"
+    },
+    "surprised": {
+     "file": "eyeL-surprised.png"
+    }
+   }
+  },
+  "eyeR": {
+   "x": 443,
+   "y": 374,
+   "w": 124,
+   "h": 88,
+   "anchor": [
+    499,
+    415
+   ],
+   "states": {
+    "open": {
+     "file": "eyeR-open.png"
+    },
+    "closed": {
+     "file": "eyeR-closed.png"
+    },
+    "half": {
+     "file": "eyeR-half.png"
+    },
+    "wink": {
+     "file": "eyeR-wink.png"
+    },
+    "smile": {
+     "file": "eyeR-smile.png"
+    },
+    "surprised": {
+     "file": "eyeR-surprised.png"
+    }
+   }
+  },
+  "browL": {
+   "x": 240,
+   "y": 347,
+   "w": 120,
+   "h": 38,
+   "anchor": [
+    319,
+    422
+   ],
+   "states": {
+    "02-head": {
+     "file": "browL-02-head.png"
+    }
+   }
+  },
+  "browR": {
+   "x": 452,
+   "y": 342,
+   "w": 120,
+   "h": 38,
+   "anchor": [
+    499,
+    415
+   ],
+   "states": {
+    "02-head": {
+     "file": "browR-02-head.png"
+    }
+   }
+  },
+  "mouth": {
+   "x": 339,
+   "y": 523,
+   "w": 152,
+   "h": 120,
+   "anchor": null,
+   "states": {
+    "rest": {
+     "top": 552,
+     "bottom": 584,
+     "file": "mouth-rest.png"
+    },
+    "a": {
+     "top": 535,
+     "bottom": 614,
+     "file": "mouth-a.png"
+    },
+    "i": {
+     "top": 552,
+     "bottom": 574,
+     "file": "mouth-i.png"
+    },
+    "u": {
+     "top": 551,
+     "bottom": 580,
+     "file": "mouth-u.png"
+    },
+    "e": {
+     "top": 542,
+     "bottom": 605,
+     "file": "mouth-e.png"
+    },
+    "o": {
+     "top": 533,
+     "bottom": 622,
+     "file": "mouth-o.png"
+    },
+    "smile": {
+     "top": 532,
+     "bottom": 605,
+     "file": "mouth-smile.png"
+    },
+    "surprised": {
+     "top": 548,
+     "bottom": 603,
+     "file": "mouth-surprised.png"
+    },
+    "smileup": {
+     "top": 535,
+     "bottom": 584,
+     "file": "mouth-smileup.png"
+    }
+   }
+  }
+ }
+}

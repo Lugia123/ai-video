@@ -1,0 +1,17 @@
+{
+ "note": "通用舞姿（5 只猫共用同一骨骼名）。角度单位度，正值=屏幕顺时针；root=[dx,dy] 整体平移（原图像素）。_l/_r=画面左/右。",
+ "poses": {
+  "双手举高": {"root": [0, 0], "pelvis": 0, "torso": 0, "head": 0,
+            "arm_up_l": 62, "arm_lo_l": 30, "arm_up_r": -62, "arm_lo_r": -30,
+            "prop_l": -10, "prop_r": 10, "thigh_l": 4, "shin_l": -2, "thigh_r": -4, "shin_r": 2, "tail": 12},
+  "左摆": {"root": [-18, 4], "pelvis": 6, "torso": -12, "head": -10,
+         "arm_up_l": -55, "arm_lo_l": -25, "arm_up_r": -120, "arm_lo_r": -35,
+         "prop_l": 20, "prop_r": 30, "thigh_l": 10, "shin_l": -4, "thigh_r": -2, "shin_r": 0, "tail": 25},
+  "右摆": {"root": [18, 4], "pelvis": -6, "torso": 12, "head": 10,
+         "arm_up_l": 120, "arm_lo_l": 35, "arm_up_r": 55, "arm_lo_r": 25,
+         "prop_l": -30, "prop_r": -20, "thigh_l": 2, "shin_l": 0, "thigh_r": -10, "shin_r": 4, "tail": -15},
+  "蹲跳": {"root": [0, 70], "pelvis": 0, "torso": 4, "head": -6,
+         "arm_up_l": -40, "arm_lo_l": 95, "arm_up_r": 40, "arm_lo_r": -95,
+         "prop_l": 0, "prop_r": 0, "thigh_l": 42, "shin_l": -58, "thigh_r": -42, "shin_r": 58, "tail": 30}
+ }
+}

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>mathart.js 画廊</title>
+<style> html, body { margin: 0; background: #0A0A10; overflow: hidden; } canvas { display: block; } </style>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { mountGallery } from './world-gallery.js';
+import * as MA from '../mathart.js';
+import { PAL } from '../world.js';
+
+const INK = new THREE.Color(PAL.ink);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const cam = (fov = 35) => new THREE.PerspectiveCamera(fov, 16 / 9, 0.05, 400);
+const scn = (...o) => { const s = new THREE.Scene(); s.background = INK; o.forEach(x => s.add(x)); return s; };
+const front = (z = 12, fov = 35) => { const c = cam(fov); c.position.set(0, 0, z); c.lookAt(0, 0, 0); return c; };
+const flat = () => { const c = cam(40); c.position.set(0, 0, 4.5 / Math.tan(THREE.MathUtils.degToRad(20))); return c; };
+const beat = (mv, T) => mv.music.beatPulse(T, { decay: 0.12 });
+const post = (s = 0.9, th = 0.9) => ({ bloom: { strength: s, threshold: th } });
+const flatSeg = (name, make, upd) => ({ name, dur: 5, build() { const o = make(); return { o, scene: scn(o.mesh), camera: flat() }; }, update(s, lt, u, mv) { upd(s.o, lt, u, mv); return { scene: s.scene, camera: s.camera, post: post(0.7, 1.0) }; } });
+
+const segments = [
+  { name: '傅里叶本轮 · 画出舞姿剪影', dur: 6,
+    build() { const f = MA.createFourier({ terms: 48 }); return { f, scene: scn(f.group), camera: front(9) }; },
+    update(s, lt, u) { s.f.update(lt, { p: smooth(u / 0.9) }); return { scene: s.scene, camera: s.camera, post: post(0.9, 0.9) }; } },
+  { name: '玫瑰线 r=cos(kθ) 叠加', dur: 5,
+    build() { const r = MA.createRoses({ count: 48 }); return { r, scene: scn(r.lines), camera: front(11) }; },
+    update(s, lt, u, mv) { s.r.update(lt, { open: 0.6 + 0.4 * smooth(u * 3), spin: 0.25, sweep: 0.12, beat: beat(mv, lt) }); return { scene: s.scene, camera: s.camera, post: post(1.0, 0.8) }; } },
+  { name: '损失曲面 + 梯度下降', dur: 6,
+    build() { const l = MA.createLossSurface(); return { l, scene: scn(l.group), camera: cam(38) }; },
+    update(s, lt, u) {
+      s.l.update(lt, { p: smooth((u - 0.1) / 0.8) });
+      const a = 0.7 + u * 0.5; s.camera.position.set(Math.cos(a) * 9, 5.5 - u, Math.sin(a) * 9); s.camera.lookAt(0, -0.6, 0);
+      return { scene: s.scene, camera: s.camera, post: post(0.9, 0.9) };
+    } },
+  flatSeg('曼德博集合 · 一路放大', () => MA.createMandelbrot(), (o, lt, u) => o.update(lt, { zoom: 3.8 * smooth(u), spin: u * 0.6 })),
+  flatSeg('复变函数域着色', () => MA.createDomainColoring(), (o, lt, u, mv) => o.update(lt, { beat: beat(mv, lt) })),
+  { name: '奇异吸引子 Clifford · 一百万点', dur: 5,
+    build() { const a = MA.createAttractor({ type: 'clifford' }); return { a, scene: scn(a.points), camera: front(9) }; },
+    update(s, lt) { s.a.update(lt * 3, {}); return { scene: s.scene, camera: s.camera, post: post(0.8, 0.9) }; } },
+  { name: '奇异吸引子 de Jong', dur: 5,
+    build() { const a = MA.createAttractor({ type: 'dejong', scale: 1.7 }); return { a, scene: scn(a.points), camera: front(9) }; },
+    update(s, lt) { s.a.update(lt * 3, {}); return { scene: s.scene, camera: s.camera, post: post(0.8, 0.9) }; } },
+  { name: '李萨如 · 频率比 1 → 9/7', dur: 5,
+    build() { const l = MA.createLissajous(); return { l, scene: scn(l.lines), camera: front(12) }; },
+    update(s, lt, u) { s.l.update(lt, { ratio: 1 + (9 / 7 - 1) * smooth(u) + 0.001, spread: 1, speed: 0.4 }); return { scene: s.scene, camera: s.camera, post: post(0.9, 0.85) }; } },
+  { name: '斐波那契叶序', dur: 5,
+    build() { const p = MA.createPhyllotaxis({ n: 3000 }); return { p, scene: scn(p.points), camera: front(10) }; },
+    update(s, lt, u) { s.p.update(lt, { grow: smooth(u / 0.7), spin: 0.15 }); return { scene: s.scene, camera: s.camera, post: post(0.8, 0.9) }; } },
+  { name: '环面纽结 (p,q) 变形', dur: 5,
+    build() { const k = MA.createTorusKnot({ p: 2, q: 3 }); return { k, scene: scn(k.lines), camera: cam(35) }; },
+    update(s, lt, u) {
+      const q = 3 + 2 * smooth((u - 0.3) / 0.5);          // (2,3) → (2,5)
+      s.k.update(lt, { p: 2, q, twist: 3 }); s.camera.position.set(0, 5, 9); s.camera.lookAt(0, 0, 0);
+      return { scene: s.scene, camera: s.camera, post: post(0.9, 0.85) };
+    } },
+  { name: '对数螺线汇聚', dur: 5,
+    build() { const l = MA.createLogSpirals(); return { l, scene: scn(l.lines), camera: front(10) }; },
+    update(s, lt) { s.l.update(lt, { flow: -1 }); return { scene: s.scene, camera: s.camera, post: post(1.0, 0.8) }; } },
+  { name: '莫比乌斯带 · 走一圈上下颠倒', dur: 6,
+    build() {
+      const m = MA.createMobius(); const walker = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.28, 4, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color(PAL.paper).multiplyScalar(1.4), toneMapped: false })); body.position.y = 0.22; walker.add(body);
+      return { m, walker, scene: scn(m.mesh, walker), camera: cam(36) };
+    },
+    update(s, lt, u) {
+      s.m.update(lt, { flow: 0.6 });
+      const f = s.m.frame(u * Math.PI * 2 * 1.02, 0);          // 走一整圈
+      s.walker.position.copy(f.pos);
+      const m4 = new THREE.Matrix4().makeBasis(new THREE.Vector3().crossVectors(f.normal, f.forward), f.normal, f.forward);
+      s.walker.quaternion.setFromRotationMatrix(m4);
+      s.camera.position.set(Math.cos(0.9) * 7, 4.2, Math.sin(0.9) * 7); s.camera.lookAt(0, 0, 0);
+      return { scene: s.scene, camera: s.camera, post: post(0.9, 0.85) };
+    } },
+  { name: '洛伦兹吸引子 · 两条轨迹分岔', dur: 6,
+    build() { const l = MA.createLorenz(); return { l, scene: scn(l.group), camera: cam(35) }; },
+    update(s, lt, u) { s.l.update(lt, { p: 0.08 + 0.9 * u, tail: 0.12 }); s.camera.position.set(Math.sin(lt * 0.2) * 7, 1, Math.cos(lt * 0.2) * 7); s.camera.lookAt(0, 0, 0); return { scene: s.scene, camera: s.camera, post: post(0.9, 0.85) }; } },
+  { name: '希尔伯特曲线 · 逐步点燃', dur: 5,
+    build() { const h = MA.createHilbert({ order: 6 }); return { h, scene: scn(h.group), camera: front(9.5) }; },
+    update(s, lt, u) { s.h.update(lt, { p: u * 0.98 }); return { scene: s.scene, camera: s.camera, post: post(0.9, 0.85) }; } },
+  { name: '门格海绵 · 逐级挖空', dur: 6,
+    build() { const m = MA.createMenger(); return { m, scene: scn(m.mesh), camera: front(7.5) }; },
+    update(s, lt, u) { s.m.update(lt, { level: 3 * smooth((u - 0.05) / 0.85), spin: 0.35 }); return { scene: s.scene, camera: s.camera, post: post(0.7, 0.9) }; } },
+  flatSeg('朱利亚集合 · 参数沿圆走', () => MA.createJulia(), (o, lt) => o.update(lt, {})),
+  flatSeg('克拉德尼驻波 · 频谱驱动', () => MA.createChladni(), (o, lt, u, mv) => o.update(lt, MA.chladniFromMusic(mv, lt))),
+  { name: '万花尺 · 内/外摆线叠加', dur: 5,
+    build() { const s = MA.createSpirograph(); return { s, scene: scn(s.lines), camera: front(11) }; },
+    update(s, lt, u) { s.s.update(lt, { reveal: smooth(u / 0.85), spin: 0.1 }); return { scene: s.scene, camera: s.camera, post: post(0.9, 0.85) }; } },
+  { name: '二维波动方程 · LED 点阵', dur: 5,
+    build() { const w = MA.createWave2D(); const c = cam(40); c.position.set(0, 6, 10); c.lookAt(0, 0, 0); return { w, scene: scn(w.points), camera: c }; },
+    update(s, lt, u, mv) {
+      const bs = mv.audio.beats.filter(b => b >= 0 && b < 5).slice(0, 8);
+      s.w.update(lt, { sources: bs.map((b, i) => [Math.cos(i * 2.1) * 2.5 * (i % 2), Math.sin(i * 2.1) * 2.5 * (i % 2), b * 0.6, 1.2]) });
+      return { scene: s.scene, camera: s.camera, post: post(0.9, 0.85) };
+    } },
+];
+await mountGallery(segments);
+</script>
+</body>
+</html>

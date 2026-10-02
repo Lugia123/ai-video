@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>crew：单人 / 整列卡农 / 镜面房间</title>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  @font-face { font-family: 'STM'; src: url('../../../../assets/fonts/sharetechmono/ShareTechMono-Regular.ttf'); }
+  #tag { position: fixed; left: 28px; bottom: 22px; font: 24px 'STM', monospace; color: #F2EDE4; letter-spacing: 0.06em; opacity: 0.85; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="tag"></div>
+<!--
+  同一段真实舞蹈（副歌 1，歌曲 22.055–36.6 s，8 小节）连跳三遍（engine mount 的 repeat = 3，音乐同一段放三遍）：
+    第 1 遍 单人 · 第 2 遍 3×5 整列，后排比前排晚 1 拍（卡农），列与列左右镜像交替 · 第 3 遍 镜面房间（侧镜 + 前后镜，镜像沿纵深和两侧无限排开）
+  动作 = Mixamo 动捕（body-wave → raise-roof → jazz-around → kick-step：看脸的小节落在手不挡脸的 body-wave / kick-step 上；index.json 里不 hunched（挺胸抬头）、16 拍里没有定格段、对拍伸缩 ≤ 1.25 的，每段 2 小节，交叉淡入 0.25 s，片段第一帧落在小节头上）。
+  运镜按小节切：全身 → 脸 → 全身（远/绕）→ 手 → 全身（低机位）→ 脚 → 全身 → 脸。预览时数字键 1/2/3 切第几遍。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { loadMV, PALETTE } from '../../engine/index.js';
+import { createGirl, createGirlLights, loadAnims, createFormation, mirrorRoom } from '../girl.js';
+
+const mv = await loadMV();
+const { music } = mv;
+const BAR0 = 12, T0 = music.barTime(BAR0), BAR = music.period * 4, DUR = BAR * 8;
+const SEQ = [
+  // 看脸的两个小节（第 2、第 8 小节）落在手不挡脸的 body-wave / kick-step 上；raise-roof / jazz-around 手常在头边，放在全身 / 手 / 脚的小节
+  { bar: BAR0 - 1, anim: 'dance__body-wave' },
+  { bar: BAR0 + 2, anim: 'dance__raise-roof' },
+  { bar: BAR0 + 4, anim: 'dance__jazz-around' },
+  { bar: BAR0 + 6, anim: 'dance__kick-step' },
+];
+const [girl] = await Promise.all([createGirl(mv), loadAnims(SEQ.map(e => e.anim))]);
+const crew = await createFormation(mv, girl, { rows: 3, cols: 5, spacing: [1.4, 1.5], canon: 1, mirror: true });   // 张臂不碰邻座
+const room = mirrorRoom(girl, { halfWidth: 1.55, back: 1.3, front: 3.8, nx: 3, nz: 5 });
+
+// 三个场景共用灯和地面样式，各自一个 Scene（她在每遍里被挪进当前场景）
+function baseScene() {
+  const s = new THREE.Scene(); s.background = new THREE.Color(PALETTE.ink);
+  s.add(createGirlLights());
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshStandardMaterial({ color: '#0d0d14', roughness: 0.85, metalness: 0.1 }));   // 粗糙地面：金属地面在某些环绕角度会把轮廓灯反成一大片亮斑
+  floor.rotation.x = -Math.PI / 2; s.add(floor);
+  return s;
+}
+const scenes = [baseScene(), baseScene(), baseScene()];
+const grid = new THREE.GridHelper(12, 48, new THREE.Color(PALETTE.pink).multiplyScalar(0.5), new THREE.Color('#22223a')); grid.position.y = 0.002;
+scenes[0].add(grid); scenes[1].add(grid.clone()); scenes[1].fog = new THREE.Fog(PALETTE.ink, 6, 14);
+scenes[1].add(crew.group); scenes[2].add(room.group);
+const spot = new THREE.Mesh(new THREE.CircleGeometry(0.6, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(PALETTE.mint).multiplyScalar(0.16), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+spot.rotation.x = -Math.PI / 2; spot.position.y = 0.004;
+const spots = scenes.map(s => { const m = spot.clone(); s.add(m); return m; });
+
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.05, 200);
+const tag = document.getElementById('tag');
+const NAMES = ['单人', '3×5 整列 · 后排晚 1 拍 · 左右镜像交替', '镜面房间'];
+const SHOTS = ['全身', '脸', '全身 · 远', '手', '全身 · 低机位', '脚', '全身 · 绕', '脸'];
+const v = new THREE.Vector3(), w = new THREE.Vector3();
+const bone = k => girl.dancer.S.info[k].bone.getWorldPosition(new THREE.Vector3());
+
+function draw(T, pass) {
+  const scene = scenes[pass];
+  scene.add(girl.root);
+  girl.root.position.set(0, 0, 0); girl.root.rotation.set(0, 0, 0);
+  girl.play(SEQ, T);
+  girl.setSkin('toon', T);
+  if (pass === 1) crew.update(T, { seq: SEQ });
+  if (pass === 2) room.update(T);
+  const b = Math.floor((T - T0) / BAR), u = (T - T0) / BAR - b, kind = ((b % 8) + 8) % 8;
+  const wide = pass === 1 ? 2.1 : 1;   // 整列的全身镜头拉远一些，把三排都带进来
+  camera.fov = 30; camera.up.set(0, 1, 0);
+  switch (kind) {
+    case 0: case 4: case 6: case 2: {
+      let a = kind === 6 ? -0.9 + 1.2 * u : kind === 2 ? 0.5 - 0.3 * u : kind === 4 ? -0.25 : 0.15 - 0.2 * u;
+      let R = (kind === 2 ? 4.4 : 3.4) * wide;
+      if (pass === 2) { a = Math.max(-0.3, Math.min(0.3, a)); R = kind === 2 ? 3.3 : 3.0; }   // 镜面房间：相机必须在房间里（侧镜 x=±1.55，身后的镜子 z=3.8）
+      const h = kind === 4 ? 0.25 : pass === 1 ? 2.6 + (kind === 2 ? 0.8 : 0) : 0.85 + (wide - 1) * 0.5;   // 整列：抬高俯看，三排都看得见
+      camera.position.set(Math.sin(a) * R, h, Math.cos(a) * R);
+      camera.lookAt(0, kind === 4 ? 0.75 : pass === 1 ? 0.3 : 0.55 + (wide - 1) * 0.15, pass === 1 ? -1.5 : 0);
+      break;
+    }
+    // 头肩特写：脸（下巴到发际 0.115）占画高 ≈ 20% —— 贴图里脸只有约 144 px，再近就糊（face-diag 的景别测试）
+    case 1: case 7: { const h = bone('Head'); camera.fov = 28; camera.position.set(h.x + 0.3 - 0.22 * u, h.y + 0.02, h.z + 1.12); camera.lookAt(h.x, h.y - 0.1, h.z); break; }
+    case 3: { const l = bone('LeftHand'), r = bone('RightHand'); v.copy(l).add(r).multiplyScalar(0.5); camera.fov = 30; camera.position.set(v.x + 0.4, v.y + 0.1, v.z + 0.8); camera.lookAt(v.x, v.y, v.z); break; }
+    case 5: { const l = bone('LeftFoot'), r = bone('RightFoot'); v.copy(l).add(r).multiplyScalar(0.5); camera.fov = 34; camera.position.set(v.x + 0.55 * Math.sin(u), 0.22, v.z + 1.05); camera.lookAt(v.x, 0.1, v.z); break; }
+  }
+  camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+  girl.face?.update(T, { expression: 'smile', blink: 'auto', camera });   // 4K + 实时 2D 脸：跟着副歌唱、眨眼；整列 / 镜像共用同一张脸画布
+  spots[pass].visible = camera.position.y > 0.5;   // 低机位时光斑会被侧着看成一根亮柱，藏掉
+  tag.textContent = `第 ${pass + 1} 遍 · ${NAMES[pass]}   bar ${b + 1}/8 · ${SHOTS[kind]}`;
+  const kick = music.pulse('kick', T, { decay: 0.12 });
+  mv.stage.render(scene, camera, { bloom: { strength: 0.6, threshold: 1.4 }, chroma: 0.15 + 0.3 * kick, grade: { vignette: 0.35 } });
+}
+
+mv.mount(draw, { offset: T0, duration: DUR, repeat: 3 });
+window.__still = (minMove = 0.08) => girl.stillness(T => girl.play(SEQ, T), T0, T0 + DUR, { minMove });
+</script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>3D 角色查看器</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="importmap">{"imports": {"three": "../../../assets/vendor/three/three.module.min.js"}}</script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { display: flex; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--ui); }
+  aside { width: 260px; flex: none; padding: 18px 16px; overflow-y: auto; background: var(--card); border-right: 1.5px solid var(--faint); }
+  h1 { margin: 0 0 14px; font-size: 17px; letter-spacing: .02em; }
+  section { padding: 12px 0; border-top: 1px dashed var(--faint); }
+  section[hidden] { display: none; }
+  .label { display: block; margin-bottom: 6px; color: var(--mute); font-size: 12px; font-weight: 600; }
+  select, button { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1.5px solid var(--ink); border-radius: 8px; padding: 6px 8px; }
+  button { cursor: pointer; font-weight: 600; box-shadow: 2px 2px 0 var(--ink); }
+  button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  button.primary { background: var(--mustard); }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row + .row { margin-top: 8px; }
+  .seg { display: flex; border: 1.5px solid var(--ink); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; box-shadow: none; background: var(--bg); font-weight: 500; }
+  .seg button + button { border-left: 1.5px solid var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+  label.check { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--red); width: 16px; height: 16px; margin: 0; }
+  input[type=range] { flex: 1; min-width: 0; margin: 0; accent-color: var(--red); }
+  #play { width: 64px; flex: none; }
+  #speedVal { width: 46px; flex: none; text-align: right; font-family: var(--code); font-size: 12px; }
+  .hint { margin-top: 14px; color: var(--mute); font-size: 12px; }
+  main { position: relative; flex: 1; min-width: 0; }
+  canvas { display: block; }
+  #stats { position: absolute; right: 14px; bottom: 14px; padding: 8px 12px; background: var(--card); border: 1.5px solid var(--ink); border-radius: 8px;
+           font: 12px/1.6 var(--code); white-space: pre; box-shadow: 2px 2px 0 var(--ink); }
+  #stats:empty { display: none; }
+  #status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 10px 16px; background: var(--card); border: 1.5px solid var(--ink); border-radius: 8px; }
+  #status:empty { display: none; }
+  #status.err { color: var(--red); }
+</style>
+</head>
+<body>
+<aside>
+  <h1>3D 角色查看器</h1>
+  <section style="border-top:0; padding-top:0">
+    <span class="label">模型（models.json）</span>
+    <select id="model"></select>
+  </section>
+  <section>
+    <span class="label">背景</span>
+    <div class="seg" id="bg">
+      <button data-v="solid" aria-pressed="true">纯色</button>
+      <button data-v="paper" aria-pressed="false">纸纹</button>
+    </div>
+    <div class="row" style="margin-top:10px"><label class="check"><input type="checkbox" id="shadow" checked>地面阴影</label></div>
+  </section>
+  <section id="animBox" hidden>
+    <span class="label">动画片段</span>
+    <select id="clip"></select>
+    <div class="row" style="margin-top:8px">
+      <button id="play">暂停</button>
+      <input type="range" id="speed" min="0" max="2" step="0.05" value="1">
+      <span id="speedVal">1.00×</span>
+    </div>
+  </section>
+  <section id="skelBox" hidden>
+    <label class="check"><input type="checkbox" id="skel">显示骨骼</label>
+  </section>
+  <section>
+    <button id="shot" class="primary">截图</button>
+    <div class="hint">左键拖动旋转 · 滚轮缩放 · 右键平移<br>双击画面：重新居中</div>
+  </section>
+</aside>
+<main id="stage">
+  <div id="status"></div>
+  <div id="stats"></div>
+</main>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from '../../../assets/vendor/three/examples/jsm/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from '../../../assets/vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
+import { OrbitControls } from '../../../assets/vendor/three/examples/jsm/controls/OrbitControls.js';
+import { RoomEnvironment } from '../../../assets/vendor/three/examples/jsm/environments/RoomEnvironment.js';
+import { C, F, mulberry32 } from '../../../assets/lib/paper-kit.js';
+
+const root = document.documentElement.style;
+for (const [k, v] of Object.entries({ ...C, ...F })) root.setProperty('--' + k, v);
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+
+// ---------- 场景 ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+stage.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.35;
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 1000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// 三点布光：主光（投影）、补光、轮廓光 + 天空/地面环境
+scene.add(new THREE.HemisphereLight(0xFFFCF5, 0xB8AC96, 0.6));
+const key = new THREE.DirectionalLight(0xFFF4E2, 2.4);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.bias = -0.0005;
+key.shadow.normalBias = 0.02;
+const fill = new THREE.DirectionalLight(0xDDE8F5, 0.8);
+const rim = new THREE.DirectionalLight(0xFFFFFF, 1.6);
+scene.add(key, key.target, fill, rim);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ opacity: 0.22 }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// 背景：纯色 / 纸纹（种子噪声，一次生成）
+const solidBg = new THREE.Color(C.bg);
+const paperBg = (() => {
+  const s = 512, cv = document.createElement('canvas'); cv.width = cv.height = s;
+  const g = cv.getContext('2d'), img = g.createImageData(s, s), rnd = mulberry32(7);
+  const base = new THREE.Color(C.bg);
+  for (let i = 0; i < s * s; i++) {
+    const n = (rnd() - 0.5) * 16 + (rnd() < 0.015 ? -18 : 0);
+    img.data[i * 4] = base.r * 255 + n; img.data[i * 4 + 1] = base.g * 255 + n; img.data[i * 4 + 2] = base.b * 255 + n; img.data[i * 4 + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  const vg = g.createRadialGradient(s / 2, s / 2, s * 0.2, s / 2, s / 2, s * 0.75);
+  vg.addColorStop(0, 'rgba(255,252,245,0.25)'); vg.addColorStop(1, 'rgba(120,100,70,0.18)');
+  g.fillStyle = vg; g.fillRect(0, 0, s, s);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+scene.background = solidBg;
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+// ---------- 加载 ----------
+const draco = new DRACOLoader().setDecoderPath('../../../assets/vendor/three/examples/jsm/libs/draco/gltf/');
+const loader = new GLTFLoader().setDRACOLoader(draco).setMeshoptDecoder(MeshoptDecoder);
+const clock = new THREE.Clock();
+let current = null;   // { obj, mixer, actions, helper, fit }
+let loadSeq = 0;
+
+function status(msg, err) { $('status').textContent = msg || ''; $('status').classList.toggle('err', !!err); }
+
+function disposeCurrent() {
+  if (!current) return;
+  current.mixer?.stopAllAction();
+  if (current.helper) { scene.remove(current.helper); current.helper.dispose(); }
+  scene.remove(current.obj);
+  current.obj.traverse(o => {
+    if (!o.isMesh) return;
+    o.geometry.dispose();
+    for (const m of [o.material].flat()) { for (const v of Object.values(m)) if (v?.isTexture) v.dispose(); m.dispose(); }
+  });
+  current = null;
+}
+
+function fitView(obj) {
+  // 按当前姿态的包围盒：水平居中、脚底落在 y=0，相机距离由包围球算出
+  // 有动画时把当前片段采样 9 帧取并集，摆到最大幅度也不出框
+  obj.position.set(0, 0, 0); obj.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  const act = current?.obj === obj ? current.action : null;
+  if (act) {
+    const t0 = act.time, d = act.getClip().duration;
+    for (let k = 0; k <= 8; k++) {
+      act.time = d * k / 8; current.mixer.update(0); obj.updateMatrixWorld(true);
+      box.union(new THREE.Box3().setFromObject(obj, true));
+    }
+    act.time = t0; current.mixer.update(0); obj.updateMatrixWorld(true);
+  } else box.setFromObject(obj, true);
+  const c = box.getCenter(new THREE.Vector3());
+  obj.position.set(-c.x, -box.min.y, -c.z); obj.updateMatrixWorld(true);
+  const size = box.getSize(new THREE.Vector3());
+  const r = Math.max(size.length() / 2, 1e-3);
+  const target = new THREE.Vector3(0, size.y / 2, 0);
+  const fov = THREE.MathUtils.degToRad(camera.fov);
+  const dist = r / Math.sin(Math.min(fov, fov * camera.aspect) / 2) * 1.15;
+  const dir = new THREE.Vector3(0.35, 0.18, 1).normalize();
+  camera.position.copy(target).addScaledVector(dir, dist);
+  camera.near = dist / 100; camera.far = dist * 100; camera.updateProjectionMatrix();
+  controls.target.copy(target); controls.minDistance = r * 0.2; controls.maxDistance = dist * 8; controls.update();
+
+  const L = r * 4;
+  key.position.set(r * 1.6, r * 2.6, r * 2.0).add(target); key.target.position.copy(target);
+  fill.position.set(-r * 2.2, r * 1.0, r * 1.2).add(target);
+  rim.position.set(-r * 0.8, r * 1.8, -r * 2.4).add(target);
+  const sc = key.shadow.camera;
+  sc.left = sc.bottom = -r * 1.3; sc.right = sc.top = r * 1.3; sc.near = r * 0.1; sc.far = L * 2; sc.updateProjectionMatrix();
+  ground.scale.setScalar(r * 8);
+}
+
+function describe(obj, bytes) {
+  let tris = 0; const texs = new Map();
+  obj.traverse(o => {
+    if (!o.isMesh) return;
+    const g = o.geometry;
+    tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
+    for (const m of [o.material].flat()) for (const v of Object.values(m))
+      if (v?.isTexture && v.image) texs.set(v.image, `${v.image.width}×${v.image.height}`);
+  });
+  const counts = {};
+  for (const s of texs.values()) counts[s] = (counts[s] || 0) + 1;
+  const texLine = Object.entries(counts).map(([s, n]) => n > 1 ? `${s}×${n}` : s).join(', ') || '无';
+  const mb = bytes >= 1e6 ? (bytes / 1048576).toFixed(1) + ' MB' : (bytes / 1024).toFixed(0) + ' KB';
+  return `面数  ${Math.round(tris).toLocaleString()}\n贴图  ${texLine}\n文件  ${mb}`;
+}
+
+async function load(path) {
+  const seq = ++loadSeq;
+  status('加载中…');
+  $('stats').textContent = '';
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`${res.status} ${path}`);
+  const buf = await res.arrayBuffer();
+  const gltf = await loader.parseAsync(buf, path.replace(/[^/]*$/, ''));
+  if (seq !== loadSeq) return;
+  disposeCurrent();
+  const obj = gltf.scene;
+  let hasSkin = false;
+  obj.traverse(o => {
+    if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
+    if (o.isSkinnedMesh) hasSkin = true;
+  });
+  scene.add(obj);
+  current = { obj, clips: gltf.animations };
+
+  // 动画
+  $('animBox').hidden = !gltf.animations.length;
+  $('clip').innerHTML = '';
+  if (gltf.animations.length) {
+    current.mixer = new THREE.AnimationMixer(obj);
+    gltf.animations.forEach((c, i) => $('clip').add(new Option(`${c.name || '片段 ' + (i + 1)}（${c.duration.toFixed(1)}s）`, i)));
+    playClip(0);
+  }
+  // 骨骼
+  $('skelBox').hidden = !hasSkin;
+  if (hasSkin) {
+    current.helper = new THREE.SkeletonHelper(obj);
+    current.helper.material.depthTest = false; current.helper.material.linewidth = 2;
+    current.helper.visible = $('skel').checked;
+    scene.add(current.helper);
+  }
+  fitView(obj);
+  $('stats').textContent = describe(obj, buf.byteLength);
+  status('');
+  return { animations: gltf.animations.map(c => c.name), skinned: hasSkin };
+}
+
+function playClip(i) {
+  const { mixer, clips } = current;
+  mixer.stopAllAction();
+  current.action = mixer.clipAction(clips[i]).play();
+  mixer.timeScale = paused ? 0 : +$('speed').value;
+}
+
+// ---------- 控件 ----------
+let paused = false;
+$('clip').onchange = e => playClip(+e.target.value);
+$('play').onclick = () => {
+  paused = !paused; $('play').textContent = paused ? '播放' : '暂停';
+  if (current?.mixer) current.mixer.timeScale = paused ? 0 : +$('speed').value;
+};
+$('speed').oninput = e => {
+  $('speedVal').textContent = (+e.target.value).toFixed(2) + '×';
+  if (current?.mixer && !paused) current.mixer.timeScale = +e.target.value;
+};
+$('skel').onchange = e => { if (current?.helper) current.helper.visible = e.target.checked; };
+$('shadow').onchange = e => { ground.visible = e.target.checked; };
+for (const b of $('bg').querySelectorAll('button')) b.onclick = () => {
+  for (const x of $('bg').querySelectorAll('button')) x.setAttribute('aria-pressed', x === b);
+  scene.background = b.dataset.v === 'paper' ? paperBg : solidBg;
+};
+renderer.domElement.ondblclick = () => current && fitView(current.obj);
+$('shot').onclick = () => {
+  renderer.render(scene, camera);
+  const a = document.createElement('a');
+  const name = ($('model').value || 'model').split('/').slice(-2).join('-').replace(/\.glb$/i, '');
+  a.download = `${name}-${new Date().toISOString().slice(0, 19).replace(/-|:/g, '').replace('T', '-')}.png`;
+  a.href = renderer.domElement.toDataURL('image/png');
+  a.click();
+};
+
+function select(path) {
+  const p = load(path).catch(err => { console.error(err); status('加载失败：' + err.message, true); throw err; });
+  const u = new URL(location); u.searchParams.set('model', path); history.replaceState(null, '', u);
+  return p;
+}
+$('model').onchange = e => select(e.target.value);
+
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+  current?.mixer?.update(dt);
+  controls.update();
+  renderer.render(scene, camera);
+});
+
+// ---------- 清单 ----------
+try {
+  const { models } = await (await fetch('models.json', { cache: 'no-store' })).json();
+  for (const m of models) $('model').add(new Option(m.path, m.path));
+  if (!models.length) status('models.json 里没有模型：先跑 python3 tools/dt/list-models.py', true);
+  else {
+    const want = new URLSearchParams(location.search).get('model');
+    $('model').value = models.some(m => m.path === want) ? want : models[0].path;
+    select($('model').value).catch(() => {});
+  }
+} catch (err) {
+  console.error(err);
+  status('读不到 models.json：先跑 python3 tools/dt/list-models.py', true);
+}
+
+// 给自动化检查用
+window.__viewer = { load: path => { $('model').value = path; return select(path); }, scene, camera, controls, get current() { return current; } };
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>mv-pdoom v4 · 桥段</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body style="margin:0;background:#000">
+<!-- v4 桥段，歌曲时间 109.3–123.9 s：每拍在 2D 界面和 3D 立体版之间翻。镜头在 shots/v4-06.js。普通打开点击 / 空格带音乐播放，?render=1 只等 seek。 -->
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { initType3D } from './kits/type3d.js';
+import { createUI2D } from './kits/ui2d.js';
+import { createGirl } from './kits/girl.js';
+import { makeV406 } from './shots/v4-06.js';
+
+const mv = await loadMV();
+const [, ui, girl] = await Promise.all([initType3D(), createUI2D(mv), createGirl(mv).catch(e => { console.warn('girl.js 载入失败，不放人影：', e.message); return null; })]);
+const { shots, cuts } = await makeV406(mv, { ui, girl });
+window.__cuts = cuts;
+mv.mount(shots, { offset: 109.3, duration: 14.6 });
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>3D 少女按拍跳舞</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+<style>
+  html, body { margin: 0; height: 100%; background: #EFE7D6; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<!--
+  演示：《I'm Upping My P(doom)》22.0–30.0 s（副歌 1 开头），Tripo 少女（Mixamo 骨架）按拍跳 5 种舞步，
+  5 只猫（同一套骨架，比例不同，动作按骨长自动缩放）排在两侧和身后伴舞：后排晚半拍（卡农），左右镜像交替；尾巴用顶点着色器摆。
+  动作全部来自 assets/lib/dance3d.js（程序化舞步 + 编舞表）；舞台用 MV 引擎的 createStage（选择性 bloom + 暖调）。
+  ?look=pbr 看原 PBR 材质（默认卡通）；预览时按 T 切换；点击 / 空格 播放。
+  window.__demo.scan() → 6 个角色逐帧（30 fps）跑穿模 / 反关节 / 尾巴自检，含舞步交界的混合帧。
+-->
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../../../../assets/vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { createStage } from '../../../mv-pdoom/engine/stage.js';
+import { createMusic } from '../../../mv-pdoom/engine/music.js';
+import { mountVideo } from '../../../mv-pdoom/engine/index.js';
+import { mulberry32 } from '../../../../assets/lib/paper-kit.js';
+import { createDancer, createChoreo, beatClock, toonify, tailSway, MOVE_LABELS } from '../../../../assets/lib/dance3d.js';
+
+const SONG_T0 = 22.0, DURATION = 8.0;
+const q = new URLSearchParams(location.search);
+const M = createMusic(await (await fetch('../../../mv-pdoom/data/audio.json')).json());
+
+// ---------- 舞台 ----------
+const stage = createStage({
+  fov: 30, background: '#EFE7D6', lights: false,
+  post: { bloom: { strength: 1.25, threshold: 0.35, radius: 1.2 }, grade: { exposure: 1.02, warmth: 0.45, lift: 0.04, saturation: 1.04, vignette: 0.18 } },
+});
+const { scene, camera, renderer } = stage;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+// 纸纹暖色背景（种子噪声 + 纤维 + 暗角，一次生成）
+scene.background = (() => {
+  const w = 1920, h = 1080, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d'), rnd = mulberry32(11);
+  const grd = g.createRadialGradient(w * 0.5, h * 0.42, h * 0.1, w * 0.5, h * 0.5, h * 1.05);
+  grd.addColorStop(0, '#F6EEDD'); grd.addColorStop(0.6, '#EEE3CC'); grd.addColorStop(1, '#DCCDAF');
+  g.fillStyle = grd; g.fillRect(0, 0, w, h);
+  const img = g.getImageData(0, 0, w, h), d = img.data;
+  for (let i = 0; i < w * h; i++) { const n = (rnd() - 0.5) * 10; d[i * 4] += n; d[i * 4 + 1] += n; d[i * 4 + 2] += n * 0.9; }
+  g.putImageData(img, 0, 0);
+  g.globalAlpha = 0.06; g.strokeStyle = '#8a7556'; g.lineWidth = 1;
+  for (let i = 0; i < 900; i++) {   // 纸纤维
+    const x = rnd() * w, y = rnd() * h, a = rnd() * Math.PI, L = 6 + rnd() * 18;
+    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a) * L * 0.5 + (rnd() - 0.5) * 4, y + Math.sin(a) * L * 0.5, x + Math.cos(a) * L, y + Math.sin(a) * L); g.stroke();
+  }
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+
+// 灯：暖顶光 + 暖主光（投影）+ 冷轮廓光
+scene.add(new THREE.HemisphereLight('#fff3e0', '#c9b596', 1.7));
+const key = new THREE.DirectionalLight('#fff0d6', 2.3);
+key.position.set(1.2, 3.0, 1.8); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 6; key.shadow.bias = -0.0004; key.shadow.normalBias = 0.01;
+Object.assign(key.shadow.camera, { left: -2.2, right: 2.2, top: 2.0, bottom: -1.6, near: 0.5, far: 10 });
+scene.add(key, key.target);
+const rim = new THREE.DirectionalLight('#d8ecff', 1.1); rim.position.set(-2, 1.5, -2.5); scene.add(rim);
+
+// 地面：投影（ShadowMaterial）+ 脚下一团柔和的接触暗影
+const ground = new THREE.Mesh(new THREE.CircleGeometry(5, 64), new THREE.ShadowMaterial({ color: '#5a4630', opacity: 0.28 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+const blobTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  gr.addColorStop(0, 'rgba(90,70,48,0.34)'); gr.addColorStop(0.5, 'rgba(90,70,48,0.12)'); gr.addColorStop(1, 'rgba(90,70,48,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+})();
+function makeBlob() {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.001; scene.add(m); return m;
+}
+
+// ---------- 角色 ----------
+const loader = new GLTFLoader();
+// 荧光棒：代码画的胶囊，顶点色粉 → 青渐变，自发光进 bloom；下面一截深色握柄
+function makeStick() {
+  const len = 0.17, r = 0.0075, grp = new THREE.Group();
+  const geo = new THREE.CapsuleGeometry(r, len, 6, 16);
+  const pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
+  const A = new THREE.Color('#ff4fb8'), B = new THREE.Color('#3ff2ff'), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const p = THREE.MathUtils.clamp((pos.getY(i) + len / 2 + r) / (len + 2 * r), 0, 1);
+    c.copy(A).lerp(B, p).multiplyScalar(1.6); col.set([c.r, c.g, c.b], i * 3);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const tube = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }));
+  tube.position.y = len * 0.28; tube.layers.enable(1);   // BLOOM_LAYER
+  const grip = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.25, r * 1.25, 0.035, 16), new THREE.MeshToonMaterial({ color: '#2b2340' }));
+  grip.position.y = -len * 0.28;
+  grp.add(tube, grip);
+  return grp;
+}
+
+const clock = beatClock(M);
+const B0 = Math.round(clock.beats(22.055));   // 副歌 1 第一个重拍
+const ROUTINE = [
+  { beat: B0 - 8, move: 'glowWave' },                 // 前一小节就在挥，开场第一帧手已经举着
+  { beat: B0 + 4, move: 'sideClap' },
+  { beat: B0 + 8, move: 'discoPoint' },
+  { beat: B0 + 12, move: 'squatJump' },
+  { beat: B0 + 16, move: 'bodyRoll' },
+];
+const routineFor = ({ delay = 0, mirror = false, intensity = 1 }) =>
+  createChoreo(ROUTINE.map(e => ({ ...e, beat: e.beat + delay, mirror, intensity })), { clock, blend: 0.5 });
+
+// 队形：少女在中间靠前；两只猫在两侧同一排，三只在后排（晚半拍）。左右镜像交替
+const CAST = [
+  { name: 'girl', url: '../tripo-girl/anime+girl+3d+model.glb', pos: [0, 0, 0.3], height: null, delay: 0, mirror: false },
+  { name: 'orange', url: '../cat/orange+cat.glb', pos: [-0.95, 0, 0.05], height: 0.78, delay: 0, mirror: true },
+  { name: 'white', url: '../cat/white+cat.glb', pos: [0.95, 0, 0.05], height: 0.78, delay: 0, mirror: false },
+  { name: 'calico', url: '../cat/calico+cat.glb', pos: [-0.62, 0, -0.9], height: 0.74, delay: 0.5, mirror: false },
+  { name: 'tuxedo', url: '../cat/tuxedo+cat.glb', pos: [0, 0, -1.1], height: 0.74, delay: 0.5, mirror: true },
+  { name: 'bluegray', url: '../cat/bluegray+cat.glb', pos: [0.62, 0, -0.9], height: 0.74, delay: 0.5, mirror: false },
+];
+const dancers = [];
+for (const c of CAST) {
+  const model = (await loader.loadAsync(c.url)).scene;
+  model.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; o.frustumCulled = false; } });
+  const holder = new THREE.Group(); holder.add(model);
+  if (c.height) { const h = new THREE.Box3().setFromObject(model, true).getSize(new THREE.Vector3()).y; holder.scale.setScalar(c.height / h); }
+  holder.position.set(...c.pos);
+  scene.add(holder); holder.updateMatrixWorld(true);
+  const dancer = createDancer(model, { rootGroup: holder });
+  const look = toonify(model, { outline: { color: '#3a2433', width: 0.0032 } });
+  if (q.get('look') === 'pbr') look.set('pbr');
+  const tail = tailSway(model, dancer, { look });
+  // T 字静止时右手指 −X、掌心朝下：握拳的轴大致沿角色前后方向。offset 以臂长为单位（自动按猫 / 人的臂长缩放）
+  dancer.attach(makeStick(), 'RightHand', { offset: [-0.17, -0.07, 0.02], axis: [-0.15, 0.35, 1] });
+  dancers.push({ ...c, model, holder, dancer, look, tail, choreo: routineFor(c), blob: makeBlob(), baseY: holder.position.y });
+}
+const girl = dancers[0];
+const choreo = girl.choreo;
+
+// ---------- 相机：缓慢环绕 ----------
+const ease = p => 0.5 - 0.5 * Math.cos(Math.PI * p);
+function placeCamera(t) {
+  const p = ease(t / DURATION);
+  const ang = THREE.MathUtils.degToRad(-42 + 30 * p), R = 4.25 - 0.35 * p, y = 0.95 - 0.12 * p;
+  const cx = 0, cz = -0.25;
+  camera.position.set(cx + Math.sin(ang) * R, y, cz + Math.cos(ang) * R);
+  camera.lookAt(cx, 0.52, cz);
+}
+
+function draw(t) {
+  const T = SONG_T0 + t;
+  for (const d of dancers) {
+    d.dancer.apply(d.choreo.at(T, d.dancer));
+    d.tail?.update(clock.beats(T) - d.delay);
+    // 接触暗影跟着胯的水平位置走，跳起时变淡变大
+    const hp = d.dancer.S.info.Hips.bone.getWorldPosition(new THREE.Vector3());
+    const lift = d.holder.position.y - d.baseY, k = d.holder.scale.x;
+    d.blob.position.set(hp.x, 0.001, hp.z); d.blob.scale.setScalar((0.62 + lift * 1.2) * k); d.blob.material.opacity = 1 - Math.min(0.7, lift * 4);
+  }
+  placeCamera(t);
+  stage.render(t);
+}
+
+document.body.append(stage.canvas);
+mountVideo({ canvas: stage.canvas, duration: DURATION, draw, music: '../../../mv-pdoom/music.mp3', musicOffset: SONG_T0 });
+addEventListener('keydown', e => { if (e.code === 'KeyT') for (const d of dancers) d.look.set(d.look.mode === 'toon' ? 'pbr' : 'toon'); });
+
+// 自检：逐帧跑 dancer.check()，并列出每段舞步
+window.__demo = {
+  dancers,
+  schedule: () => choreo.list.map(e => ({ move: e.move, label: MOVE_LABELS[e.move], t: +(clock.timeOf(e.start) - SONG_T0).toFixed(3) })),
+  scan(fps = 30) {
+    const out = [];
+    for (let f = 0; f <= DURATION * fps; f++) {
+      const T = SONG_T0 + f / fps;
+      for (const d of dancers) {
+        d.dancer.apply(d.choreo.at(T, d.dancer)); d.tail?.update(clock.beats(T) - d.delay);
+        const cur = d.choreo.current(T).move;
+        for (const it of [...d.dancer.check(), ...(d.tail ? d.tail.check() : [])]) out.push({ frame: f, who: d.name, move: cur, ...it });
+      }
+    }
+    return out;
+  },
+};
+</script>
+</body>
+</html>

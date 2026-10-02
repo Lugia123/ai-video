@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>P(doom) 主歌 3 + 预副歌 3 v4（74.78–94.78 s）</title>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import { loadMV } from './engine/index.js';
+import { makeV3V4, V3T } from './shots/v3-v4.js';   // #1053 分镜：fresh/v4-rest/v3/plan.md（第四版）
+
+const half = false;     // 渲染器不传查询串，所以低分辨率单独一页（v3-v4-half.html）
+const mv = await loadMV(half ? { width: 960, height: 540 } : {});
+const shots = await makeV3V4(mv);
+// 全分辨率成片：起点取 74.80（= final 的第 2244 帧；副歌 2 到第 2243 帧为止），终点 95.40（= 第 2862 帧，不含），共 618 帧，每一帧都落在 final 的帧格上。
+// 74.78–74.80 那 0.02 s 不到一帧，不渲；v3-v4-half.html 仍从 74.78 起。
+mv.mount(shots, { offset: 74.8, duration: V3T.end - 74.8 });
+</script>
+</body>
+</html>

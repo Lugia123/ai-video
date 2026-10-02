@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>world.js 画廊</title>
+<style>
+  html, body { margin: 0; background: #0A0A10; overflow: hidden; }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "../../../../assets/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { mountGallery } from './world-gallery.js';
+import { createCity, createVoxelGround, createRingTunnel, createPaperclips, createGpuField, createShoggoth, createEye } from '../world.js';
+
+const INK = new THREE.Color(0x0A0A10);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const cam = (fov = 40) => new THREE.PerspectiveCamera(fov, 16 / 9, 0.1, 400);
+function scn(...objs) { const s = new THREE.Scene(); s.background = INK; objs.forEach(o => s.add(o)); return s; }
+function orbit(c, r, h, a, target = [0, 0, 0]) { c.position.set(Math.cos(a) * r + target[0], h, Math.sin(a) * r + target[2]); c.lookAt(...target); }
+
+// 城市三段共用一座城
+let city;
+const getCity = () => (city ??= createCity({ seed: 7, n: 17 }));
+
+const segments = [
+  { name: 'city · 蓝图逐笔画出', dur: 6,
+    build() { const c = getCity(); return { scene: scn(c.group), camera: cam(38) }; },
+    update(s, lt, u) {
+      getCity().update(lt, { draw: smooth(u * 1.1), extrude: 0, light: 0 });
+      s.scene.add(getCity().group);
+      orbit(s.camera, 12 - u * 1.5, 11 - u * 1.5, -1.2 + u * 0.35);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.9, threshold: 0.75 } } };
+    } },
+  { name: 'city · 白模逐层挤出', dur: 6,
+    build() { return { scene: scn(), camera: cam(36) }; },
+    update(s, lt, u) {
+      const c = getCity(); s.scene.add(c.group);
+      c.update(lt, { draw: 1, extrude: smooth(u * 1.08), light: 0 });
+      s.scene.background = new THREE.Color(0x0A0A10);
+      orbit(s.camera, 16, 7.5 - u * 1.5, -0.85 + u * 0.5, [0, 1.2, 0]);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.7, threshold: 0.9 } } };
+    } },
+  { name: 'city · 夜城点灯', dur: 6,
+    build() { return { scene: scn(), camera: cam(34) }; },
+    update(s, lt, u) {
+      const c = getCity(); s.scene.add(c.group);
+      c.update(lt, { draw: 1, extrude: 1, light: smooth(u * 1.15) });
+      orbit(s.camera, 19 - u * 3, 6.5 - u * 2, -0.35 + u * 0.45, [0, 1.4, 0]);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 1.1, threshold: 0.7, radius: 0.6 } } };
+    } },
+  { name: 'voxel · 方块冲击波', dur: 6,
+    build() { const v = createVoxelGround({ n: 56 }); return { v, scene: scn(v.mesh), camera: cam(42) }; },
+    update(s, lt, u) {
+      s.v.update(lt, { amp: 0.4, speed: 2, pulses: [{ t0: 0.4, amp: 3 }, { t0: 2.6, amp: 2.4 }, { t0: 4.3, amp: 2 }] });
+      orbit(s.camera, 34, 19, 0.9 + u * 0.3);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 1.0, threshold: 0.7 } } };
+    } },
+  { name: 'voxel · 塌成引力井', dur: 6,
+    build() { const v = createVoxelGround({ n: 56 }); return { v, scene: scn(v.mesh), camera: cam(42) }; },
+    update(s, lt, u) {
+      s.v.update(lt, { amp: 0.25 * (1 - u), speed: 2, well: smooth((u - 0.05) / 0.85) });
+      orbit(s.camera, 30 - u * 6, 22 + u * 2, 0.6 + u * 0.6, [0, -3 * u, 0]);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 1.0, threshold: 0.7 } } };
+    } },
+  { name: 'tunnel · 同心环隧道', dur: 5,
+    build() { const r = createRingTunnel({ count: 40 }); const c = cam(70); c.position.set(0, 0, 0); c.lookAt(0, 0, -1); return { r, scene: scn(r.mesh), camera: c }; },
+    update(s, lt, u) {
+      // 越来越快：travel = ∫speed
+      const travel = 8 * lt + 3 * lt * lt;
+      const beat = Math.pow(1 - ((lt / 0.4545) % 1), 4);
+      s.r.update(lt, { travel, bend: 0.7, spin: 0.25, pulse: beat * 0.6 });
+      s.camera.rotation.z = Math.sin(lt * 0.6) * 0.15;
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.8, threshold: 0.8 } } };
+    } },
+  { name: 'paperclips · 一万枚雪崩', dur: 7,
+    build() { const p = createPaperclips({ count: 10000 }); return { p, scene: scn(p.mesh), camera: cam(40) }; },
+    update(s, lt, u) {
+      s.p.update(lt, { t0: 0.2, dur: 5.6, height: 3.4, radius: 7 });
+      s.camera.position.set(Math.sin(u * 0.6) * 3, 3 + u * 1.2, 13 - u * 3.5);
+      s.camera.lookAt(0, 1.2 + u * 1.2, 0);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 0.5, threshold: 0.95 } } };
+    } },
+  { name: 'gpu field · LED 麦浪', dur: 6,
+    build() { const g = createGpuField(); return { g, scene: scn(g.mesh), camera: cam(38) }; },
+    update(s, lt, u) {
+      s.g.update(lt, { speed: 1, gust: 1 });
+      s.camera.position.set(-4 + u * 6, 7 + u * 0.8, 5);
+      s.camera.lookAt(2 + u * 6, 0, -24);
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 1.1, threshold: 0.7, radius: 0.6 } } };
+    } },
+  { name: 'shoggoth · 面具与线团', dur: 7,
+    build() { const g = createShoggoth(); const c = cam(40); c.position.set(0, 0, 13); c.lookAt(0, 0, 0); return { g, scene: scn(g.group), camera: c }; },
+    update(s, lt, u) {
+      s.g.update(lt, { writhe: 1, mask: smooth(u * 5), scan: smooth((u - 0.3) / 0.55) });
+      s.g.group.rotation.y = 0;
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 1.0, threshold: 0.7 } } };
+    } },
+  { name: 'eye · 程序化巨眼', dur: 7,
+    build() { const e = createEye({ width: 8 }); const c = cam(35); c.position.set(0, 0, 7.2); return { e, scene: scn(e.mesh), camera: c }; },
+    update(s, lt, u) {
+      const open = smooth(u / 0.3) * (1 - 0.95 * Math.exp(-(((u - 0.72) / 0.03) ** 2)));
+      const pupil = 0.35 + 0.45 * smooth((u - 0.4) / 0.15) - 0.55 * smooth((u - 0.8) / 0.1);
+      s.e.update(lt, { open, pupil: clamp(pupil), look: [Math.sin(lt * 0.8) * 0.4, 0.1], spin: 1, sparks: smooth((u - 0.45) / 0.1) });
+      s.camera.position.z = 7.2 - u * 1.2;
+      return { scene: s.scene, camera: s.camera, post: { bloom: { strength: 1.0, threshold: 0.7 } } };
+    } },
+];
+
+await mountGallery(segments);
+</script>
+</body>
+</html>

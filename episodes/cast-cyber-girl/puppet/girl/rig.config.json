@@ -1,0 +1,319 @@
+{
+ "src": "../../turnaround/final/front-tpose.png",
+ "note": "坐标为原图像素；_l/_r 指画面左/右",
+ "plates": {
+  "nohair": {
+   "prompt": "把这个女孩的长头发改短：长发全部去掉，只保留到耳朵以下一点的齐耳短发和刘海，原来被长发遮住的肩膀、粉色外套的肩部和两侧、袖子全部完整画出来。脸、刘海、护目镜、耳环、衣服、手臂、短裤、腿、鞋、T字姿势、位置大小、画风、白色背景全部保持完全不变。",
+   "seed": 5,
+   "align_rows": [
+    [
+     0,
+     300
+    ],
+    [
+     540,
+     1248
+    ]
+   ]
+  },
+  "noarms": {
+   "from": "nohair",
+   "prompt": "删除这个女孩的左右两条手臂：两条粉色长袖连同两只手全部擦掉，那里变成白色背景。外套在肩膀处收成圆润的肩线（像被截去手臂的人台模特）。头、头发、脸、外套身体、短裤、腿、鞋的位置大小完全不变，画风线条不变。",
+   "seed": 21,
+   "align_rows": [
+    [
+     0,
+     330
+    ],
+    [
+     540,
+     1248
+    ]
+   ]
+  },
+  "grip": {
+   "prompt": "把这个女孩的两只手都改成握紧的拳头，每只拳头里竖直握着一根荧光棒：圆柱形，上半段粉色发光、下半段蓝色发光，荧光棒和水平的手臂垂直，从拳头的上方和下方各伸出一截，荧光棒比较短：整根长度只有前臂长度的一半左右，粗细和手指差不多，发光柔和。手臂的位置和长度、袖子、身体、头、脸、头发、短裤、腿、鞋、画风、线条、白色背景全部保持完全不变。",
+   "seed": 9,
+   "align_rows": [
+    [
+     0,
+     340
+    ],
+    [
+     460,
+     1248
+    ]
+   ],
+   "halo": true
+  }
+ },
+ "joints": {
+  "neck": [
+   416,
+   336
+  ],
+  "waist": [
+   416,
+   532
+  ],
+  "shoulder_l": [
+   336,
+   390
+  ],
+  "elbow_l": [
+   215,
+   392
+  ],
+  "wrist_l": [
+   96,
+   390
+  ],
+  "hand_l": [
+   10,
+   388
+  ],
+  "shoulder_r": [
+   496,
+   390
+  ],
+  "elbow_r": [
+   617,
+   392
+  ],
+  "wrist_r": [
+   740,
+   388
+  ],
+  "hand_r": [
+   824,
+   386
+  ],
+  "hip_l": [
+   372,
+   645
+  ],
+  "knee_l": [
+   352,
+   880
+  ],
+  "foot_l": [
+   325,
+   1208
+  ],
+  "hip_r": [
+   462,
+   645
+  ],
+  "knee_r": [
+   468,
+   880
+  ],
+  "foot_r": [
+   495,
+   1208
+  ],
+  "grip_l": [
+   60,
+   389
+  ],
+  "grip_r": [
+   775,
+   387
+  ]
+ },
+ "overlays": {
+  "dir": "../../closeup/layers",
+  "parent": "head",
+  "M": [
+   [
+    0.2889,
+    0,
+    289.56
+   ],
+   [
+    0,
+    0.2889,
+    148.67
+   ]
+  ],
+  "groups": {
+   "eyes": {
+    "z": 8.1,
+    "default": "open",
+    "scale": 0.93,
+    "center": [
+     408,
+     270
+    ]
+   },
+   "mouth": {
+    "z": 8.2,
+    "default": "rest"
+   }
+  }
+ },
+ "parts": [
+  {
+   "name": "hair_back",
+   "parent": "head",
+   "pivot": "neck",
+   "z": -1,
+   "select": "hair & (y>250) & (y<560) & (x>285) & (x<545)"
+  },
+  {
+   "name": "shin_l",
+   "parent": "thigh_l",
+   "pivot": "knee_l",
+   "z": 1,
+   "bone": [
+    "knee_l",
+    "foot_l"
+   ],
+   "r": 62,
+   "end": true,
+   "disc": 34
+  },
+  {
+   "name": "shin_r",
+   "parent": "thigh_r",
+   "pivot": "knee_r",
+   "z": 1,
+   "bone": [
+    "knee_r",
+    "foot_r"
+   ],
+   "r": 62,
+   "end": true,
+   "disc": 34
+  },
+  {
+   "name": "thigh_l",
+   "parent": "pelvis",
+   "pivot": "hip_l",
+   "z": 2,
+   "bone": [
+    "hip_l",
+    "knee_l"
+   ],
+   "r": 66,
+   "disc": 46
+  },
+  {
+   "name": "thigh_r",
+   "parent": "pelvis",
+   "pivot": "hip_r",
+   "z": 2,
+   "bone": [
+    "hip_r",
+    "knee_r"
+   ],
+   "r": 66,
+   "disc": 46
+  },
+  {
+   "name": "pelvis",
+   "parent": null,
+   "pivot": "waist",
+   "z": 3,
+   "trunk": [
+    510,
+    700
+   ]
+  },
+  {
+   "name": "torso",
+   "parent": "pelvis",
+   "pivot": "waist",
+   "z": 4,
+   "source": "noarms",
+   "trunk": [
+    300,
+    532
+   ],
+   "rule": "((y>=338)|(abs(x-416)<40)) & (x>=320) & (x<=512)"
+  },
+  {
+   "name": "arm_lo_l",
+   "parent": "arm_up_l",
+   "pivot": "elbow_l",
+   "z": 6,
+   "source": "grip",
+   "bone": [
+    "elbow_l",
+    "hand_l"
+   ],
+   "r": 50,
+   "end": true,
+   "disc": 36,
+   "box": [
+    0,
+    170,
+    166,
+    610
+   ]
+  },
+  {
+   "name": "arm_lo_r",
+   "parent": "arm_up_r",
+   "pivot": "elbow_r",
+   "z": 6,
+   "source": "grip",
+   "bone": [
+    "elbow_r",
+    "hand_r"
+   ],
+   "r": 50,
+   "end": true,
+   "disc": 36,
+   "box": [
+    670,
+    168,
+    832,
+    608
+   ]
+  },
+  {
+   "name": "arm_up_l",
+   "parent": "torso",
+   "pivot": "shoulder_l",
+   "z": 7,
+   "source": "nohair",
+   "bone": [
+    "shoulder_l",
+    "elbow_l"
+   ],
+   "r": 50,
+   "disc": 34
+  },
+  {
+   "name": "arm_up_r",
+   "parent": "torso",
+   "pivot": "shoulder_r",
+   "z": 7,
+   "source": "nohair",
+   "bone": [
+    "shoulder_r",
+    "elbow_r"
+   ],
+   "r": 50,
+   "disc": 34
+  },
+  {
+   "name": "head",
+   "parent": "torso",
+   "pivot": "neck",
+   "z": 8,
+   "trunk": [
+    0,
+    346
+   ]
+  },
+  {
+   "name": "hair_front",
+   "parent": "head",
+   "pivot": "neck",
+   "z": 8.5,
+   "select": "hair & (y>205) & (y<272) & (x>350) & (x<470)"
+  }
+ ]
+}
