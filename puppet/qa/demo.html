@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>集成演示</title>
+<style>
+  html, body { margin: 0; background: #111; overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #F3F8FB; }
+  #c, #host { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  #host { overflow: hidden; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas><div id="host"></div></div>
+<script type="module">
+// 集成演示：puppet 的讲解员（引擎画的头 + 姿势库）+ 表情预设，放在一起。
+// 画面是 t 的纯函数。?dpr=2；?fx=a|b|c|d 换姿势切换的手感。
+// 分镜见 BEATS：待机说话 → 掌心示意 → 抵下巴配问号 → 摊手配无语 → 捂嘴配被吓到 → 举手吃惊 → 叉腰得意 → 握拳认真 → 挥手开心。
+import { createHost } from '../host/index.js';
+import { EMOTES, emotePreset, presetHost, drawPreset, mixPreset, anchorsFromHost, inLayer } from '../emotes/chibi-emotes.js';
+
+const Q = new URLSearchParams(location.search), W = 1920, H = 1080, FPS = 30, DPR = Number(Q.get('dpr')) || 1;
+const FONT = '"PingFang SC", "Heiti SC", "Microsoft YaHei", sans-serif', INK = '#1E2A4A';
+const PACK = new URL('../' + (Q.get('pack') || 'characters/beret-girl/'), location.href).href;
+
+// 每一拍：[时长, 预设名 | null, 左边卡片上的字, 这一拍说的话 | null, 姿势（不写就用预设建议的）]
+const BEATS = (() => { let t = 0; return [
+  [5.2, null, '待机 · 朝内容说话', ['头、姿势、表情，第一次放在一起。', '转头、眨眼、口型都在。']],
+  [3.2, null, '掌心示意 · 看这里', ['比如，看这里。'], 'presentL'],
+  [3.4, 'question', '抵下巴 + 问号', null],
+  [3.4, 'speechless', '摊手 + 无语', null],
+  [3.2, 'shocked', '捂嘴 + 被吓到', null],
+  [2.8, 'exclaim', '举手 + 感叹号', null, 'surprise'],      // 「感叹号」预设建议的动作在 kit 里叫 surprise
+  [3.0, 'smug', '叉腰 + 得意', null],
+  [3.0, 'serious', '握拳 + 认真', null, 'fist'],
+  [3.5, 'happy', '挥手 + 开心', ['就先到这儿。']],                 // 「开心」预设建议的动作就是 wave
+].map(([len, name, label, say, pose]) => { const b = [t, t + len, name, label, say, pose]; t += len; return b; }); })();
+const DURATION = BEATS.at(-1)[1], FADE = 0.22, LOOK = [560, 520];
+// 假的旁白时间表：只给口型和分句点头用（这段片子没有声音）
+const sentences = BEATS.flatMap(([a, b, , , say]) => (say || []).map((text, i, all) => { const span = (b - a - 0.9) / all.length; return { text, start: a + 0.5 + i * span, end: a + 0.5 + (i + 1) * span - 0.5 }; }));
+const timings = { duration: DURATION, segments: [{ sentences }] };
+
+const c = document.getElementById('c'), bg = c.getContext('2d');
+c.width = W * DPR; c.height = H * DPR;
+const host = await createHost({ mount: document.getElementById('host'), timings, W, H, ground: 1010, size: 900, dpr: DPR, pack: PACK, ...(Q.get('fx') ? { swapFx: Q.get('fx') } : {}) });
+// 姿势自己声明「嘴被手挡住」（poses.json 的 hideMouth）时，表情预设也不画嘴
+const PRESET = Object.fromEntries(BEATS.filter(b => b[2]).map(b => { const q = emotePreset(b[2]); if (host.poseInfo[q.pose]?.hideMouth) q.mouth = null; return [b[2], q]; }));
+
+// 贴脸层：坐标按 face 矩形 [609, 463, …] 量的静态锚点，透视交给头（这个角色特有的数，待改成读数据包的挂点）
+const FL = host.faceLayer, fl = FL.getContext('2d'), TL = host.topLayer, tl = TL.getContext('2d'), BL = host.backLayer, bl = BL.getContext('2d');
+const FO = [609 - FL.rect[0], 463 - FL.rect[1]], fp = (x, y) => ({ x: x + FO[0], y: y + FO[1] });
+const FA = { head: fp(469, 597), eyeL: fp(274, 605), eyeR: fp(654, 603), mouth: fp(461, 756), cheekL: fp(211, 727), cheekR: fp(721, 727), brow: fp(469, 420), top: fp(469, 0) };
+
+function beatAt(t) { return BEATS.find(b => t < b[1]) || BEATS.at(-1); }
+// 这一刻的预设、漫符的动画相位 p、脸和姿势的强度 w
+function emoteAt(t) {
+  const [a, b, name] = beatAt(t), q = name ? PRESET[name] : null, lt = t - a, len = b - a;
+  if (!q) return { q: null, p: 0, w: 0 };
+  const m = lt < FADE ? mixPreset(null, q, 0.5 + 0.5 * lt / FADE) : lt > len - FADE ? mixPreset(q, null, 0.5 * (lt - (len - FADE)) / FADE) : { p: 0.5, w: 1 };
+  return { q, p: m.p, w: m.w };
+}
+// 这一刻讲解员的状态。姿势整拍都保持（权重 1），拍与拍之间直接换，不经过待机——
+// 原来姿势跟着表情的强度淡入淡出，两拍之间会闪回待机 0.2 秒，等于 0.2 秒内换两次姿势（回归检查「换姿势间隔」查出来的）。
+function stateAt(t) {
+  const { q, w } = emoteAt(t), b = beatAt(t), name = b[2], pose = b[5] ?? q?.pose;
+  const s = q ? presetHost(q, w, { rig: true }) : {};
+  delete s.pose; if (pose && pose !== 'idle') s.pose = { [pose]: 1 };
+  if (name === 'happy') { s.expr = { happy: 0.6 * w }; s.talk = true; }
+  return { x: 1330, look: LOOK, attend: 'auto', ...s, talk: s.talk ?? !q };
+}
+host.direct(stateAt);
+
+function text(g, str, x, y, size, o = {}) { g.font = `${o.weight || 600} ${size}px ${FONT}`; g.fillStyle = o.color || INK; g.textAlign = o.align || 'left'; g.textBaseline = 'middle'; g.fillText(str, x, y); }
+function card(t) {
+  const g = bg; g.setTransform(DPR, 0, 0, DPR, 0, 0); g.fillStyle = '#F3F8FB'; g.fillRect(0, 0, W, H);
+  // 左边的「内容」：一张卡片，写这一拍在演什么；下面一排小格是进度
+  g.fillStyle = '#FFFFFF'; g.strokeStyle = '#D5E3EC'; g.lineWidth = 3; g.beginPath(); g.roundRect(110, 250, 780, 520, 28); g.fill(); g.stroke();
+  const b = beatAt(t), i = BEATS.indexOf(b);
+  text(g, 'puppet · 集成演示', 160, 320, 34, { color: '#5A6B86', weight: 500 });
+  text(g, b[3], 160, 440, 68);
+  const say = sentences.find(s => t >= s.start - 0.3 && t <= s.end + 1);
+  if (say) text(g, say.text, 160, 570, 40, { color: '#1FA2C9', weight: 500 });
+  BEATS.forEach((_, k) => { g.fillStyle = k === i ? '#1FA2C9' : k < i ? '#9CC9DC' : '#DCE8EF'; g.beginPath(); g.roundRect(160 + k * 76, 690, 64, 14, 7); g.fill(); });
+}
+function seek(t) {
+  card(t);
+  const { q, p } = emoteAt(t), live = q && p > 0 && p < 1, has = layer => live && (q.symbols || []).some(sy => inLayer(Array.isArray(sy) ? sy[0] : sy, layer));
+  fl.setTransform(FL.scale, 0, 0, FL.scale, 0, 0); fl.clearRect(0, 0, FL.rect[2], FL.rect[3]); fl.globalAlpha = 1;
+  if (live) drawPreset(fl, q, FA, p, t, { layer: 'face', rig: true });
+  host.faceLayerEmpty = !live; host.faceLayerDirty = true; host.topLayerEmpty = true; host.backLayerEmpty = true;
+  host.draw(t);                                           // 先画一遍拿这一帧的挂点
+  const A = anchorsFromHost(host.anchors()), o = { boundsFade: true, bounds: { x: 900, y: 0, w: 1020, h: H } };
+  let again = false;
+  for (const [L, g, key] of [[TL, tl, 'top'], [BL, bl, 'back']]) {
+    g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H); g.globalAlpha = 1;
+    if (has(key)) { drawPreset(g, q, A, p, t, { ...o, layer: key }); host[key + 'LayerEmpty'] = false; again = true; }
+  }
+  if (again) host.draw(t);
+}
+seek(0);
+window.__video = { width: W, height: H, fps: FPS, duration: DURATION, seek };
+window.__debug = { hostScript: stateAt, hostAnchors: () => host.anchors(), hostBBox: () => host.bbox(), host };   // 回归检查用
+if (Q.get('render') !== '1') { let t0; const loop = now => { t0 ??= now; seek(((now - t0) / 1000) % DURATION); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+ "_note": "空脸库：所有片段 faceBlank。",
+ "poses": {
+  "idle": {
+   "faceBlank": true
+  }
+ },
+ "clips": {
+  "*": {
+   "faceBlank": true
+  }
+ }
+}

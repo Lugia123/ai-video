@@ -1,0 +1,20858 @@
+// 由 clips/sync.py 从 clips.json 生成，别手改。file:// 打开页面时靠它加载片段库。
+window.__clipLibrary = {
+ "character": "beret-girl",
+ "version": 1,
+ "canvas": {
+  "w": 832,
+  "h": 1104
+ },
+ "anchor": {
+  "x": 416,
+  "y": 999,
+  "note": "脚底中点；呼吸绕这一点缩放"
+ },
+ "breath": {
+  "amp": 0.006,
+  "period": 3.6
+ },
+ "rest": "idle",
+ "moveSeconds": 0.8,
+ "poses": {
+  "idle": {
+   "label": "归位（待机）",
+   "frame": "frames/idle.png",
+   "bbox": [183, 137, 649, 1000],
+   "margin": [183, 137, 183, 104],
+   "patches": {
+    "align": {
+     "scale": 0.3403,
+     "rotate_deg": -0.45,
+     "translate": [
+      43.2,
+      79.9
+     ],
+     "matches": 84,
+     "inliers": 60,
+     "residual_px": 0.79
+    },
+    "mouth": {
+     "closed": {
+      "file": "patches/idle/mouth_closed.png",
+      "rect": [371, 470, 81, 57],
+      "color_shift_rgb": [
+       4.0,
+       8.0,
+       11.0
+      ],
+      "skin_samples": 992,
+      "occluded_px": 0
+     },
+     "small": {
+      "file": "patches/idle/mouth_small.png",
+      "rect": [371, 470, 81, 57],
+      "color_shift_rgb": [
+       4.0,
+       8.0,
+       11.0
+      ],
+      "skin_samples": 992,
+      "occluded_px": 0
+     },
+     "big": {
+      "file": "patches/idle/mouth_big.png",
+      "rect": [371, 470, 81, 57],
+      "color_shift_rgb": [
+       4.0,
+       8.0,
+       11.0
+      ],
+      "skin_samples": 992,
+      "occluded_px": 0
+     },
+     "smile": {
+      "file": "patches/idle/mouth_smile.png",
+      "rect": [371, 470, 81, 57],
+      "color_shift_rgb": [
+       4.0,
+       8.0,
+       11.0
+      ],
+      "skin_samples": 992,
+      "occluded_px": 0
+     }
+    },
+    "blink": {
+     "file": "patches/idle/blink.png",
+     "rect": [283, 383, 258, 100],
+     "color_shift_rgb": [
+      3.0,
+      5.0,
+      7.0
+     ],
+     "skin_samples": 2044,
+     "occluded_px": 0
+    },
+    "clean": {
+     "file": "patches/idle/clean.png",
+     "rect": [283, 355, 258, 172],
+     "color_shift_rgb": [
+      4.0,
+      6.0,
+      9.0
+     ],
+     "skin_samples": 3223,
+     "occluded_px": 0
+    },
+    "face": {
+     "angry": {
+      "blush": {
+       "file": "patches/idle/face_angry_blush.png",
+       "rect": [300, 446, 224, 83],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_angry_eyes.png",
+       "rect": [297, 383, 232, 98],
+       "color_shift_rgb": [
+        -1.1,
+        7.0,
+        11.3
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_angry_mouth.png",
+       "rect": [363, 464, 102, 63],
+       "color_shift_rgb": [
+        -0.0,
+        6.8,
+        10.3
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_angry_brow.png",
+       "rect": [326, 371, 179, 36],
+       "color_shift_rgb": [
+        -1.2,
+        4.2,
+        8.4
+       ]
+      }
+     },
+     "awkward": {
+      "blush": {
+       "file": "patches/idle/face_awkward_blush.png",
+       "rect": [300, 446, 224, 83],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_awkward_eyes.png",
+       "rect": [297, 383, 232, 95],
+       "color_shift_rgb": [
+        -1.8,
+        6.0,
+        8.3
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_awkward_mouth.png",
+       "rect": [371, 470, 81, 57],
+       "color_shift_rgb": [
+        -0.7,
+        5.4,
+        7.5
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_awkward_brow.png",
+       "rect": [318, 380, 181, 22],
+       "color_shift_rgb": [
+        -1.9,
+        3.2,
+        6.2
+       ]
+      }
+     },
+     "doubt": {
+      "blush": {
+       "file": "patches/idle/face_doubt_blush.png",
+       "rect": [300, 446, 224, 83],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_doubt_eyes.png",
+       "rect": [297, 382, 232, 98],
+       "color_shift_rgb": [
+        -1.3,
+        5.9,
+        9.1
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_doubt_mouth.png",
+       "rect": [371, 470, 81, 57],
+       "color_shift_rgb": [
+        0.0,
+        6.0,
+        9.7
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_doubt_brow.png",
+       "rect": [326, 373, 170, 27],
+       "color_shift_rgb": [
+        -1.7,
+        4.0,
+        8.0
+       ]
+      }
+     },
+     "flat": {
+      "blush": {
+       "file": "patches/idle/face_flat_blush.png",
+       "rect": [300, 446, 224, 83],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_flat_eyes.png",
+       "rect": [297, 382, 232, 99],
+       "color_shift_rgb": [
+        -0.9,
+        8.3,
+        11.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_flat_mouth.png",
+       "rect": [371, 470, 81, 57],
+       "color_shift_rgb": [
+        0.0,
+        5.6,
+        9.6
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_flat_brow.png",
+       "rect": [314, 377, 197, 21],
+       "color_shift_rgb": [
+        -1.0,
+        3.4,
+        7.3
+       ]
+      }
+     },
+     "happy": {
+      "eyes": {
+       "file": "patches/idle/face_happy_eyes.png",
+       "rect": [297, 382, 232, 98],
+       "color_shift_rgb": [
+        -1.9,
+        7.0,
+        9.2
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_happy_mouth.png",
+       "rect": [370, 458, 87, 73],
+       "color_shift_rgb": [
+        -0.7,
+        6.0,
+        8.4
+       ]
+      }
+     },
+     "love": {
+      "blush": {
+       "file": "patches/idle/face_love_blush.png",
+       "rect": [300, 446, 224, 83],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_love_eyes.png",
+       "rect": [297, 383, 232, 102],
+       "color_shift_rgb": [
+        -1.3,
+        7.0,
+        10.2
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_love_mouth.png",
+       "rect": [371, 470, 81, 57],
+       "color_shift_rgb": [
+        -0.9,
+        8.0,
+        11.0
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_love_brow.png",
+       "rect": [317, 355, 175, 15],
+       "color_shift_rgb": [
+        -2.2,
+        1.0,
+        3.5
+       ]
+      }
+     },
+     "squeeze": {
+      "blush": {
+       "file": "patches/idle/face_squeeze_blush.png",
+       "rect": [300, 446, 224, 83],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_squeeze_eyes.png",
+       "rect": [297, 385, 232, 95],
+       "color_shift_rgb": [
+        -1.0,
+        6.0,
+        8.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_squeeze_mouth.png",
+       "rect": [371, 470, 81, 57],
+       "color_shift_rgb": [
+        -0.0,
+        5.1,
+        7.0
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_squeeze_brow.png",
+       "rect": [335, 385, 154, 29],
+       "color_shift_rgb": [
+        -0.7,
+        3.9,
+        6.3
+       ]
+      }
+     },
+     "surprise": {
+      "blush": {
+       "file": "patches/idle/face_surprise_blush.png",
+       "rect": [300, 446, 224, 83],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_surprise_eyes.png",
+       "rect": [297, 384, 232, 96],
+       "color_shift_rgb": [
+        -1.1,
+        5.5,
+        8.2
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_surprise_mouth.png",
+       "rect": [371, 470, 81, 57],
+       "color_shift_rgb": [
+        -0.1,
+        5.6,
+        8.0
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_surprise_brow.png",
+       "rect": [314, 361, 189, 24],
+       "color_shift_rgb": [
+        -1.7,
+        4.1,
+        7.8
+       ]
+      }
+     }
+    },
+    "eyeSkin": {
+     "file": "patches/idle/eye_skin.png",
+     "rect": [298, 380, 230, 105]
+    },
+    "browErase": {
+     "file": "patches/idle/brow_erase.png",
+     "rect": [183, 137, 466, 863],
+     "source": "noBrow"
+    },
+    "faceClips": {
+     "surprise25": {
+      "fps": 16.0,
+      "label": "正常 → 惊讶 → 正常（25 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/00_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/00_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/00_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          6.5,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/00_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          0.1,
+          4.6,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/01_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/01_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.9,
+          6.4,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/01_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/01_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.8,
+          7.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/02_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/02_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.8,
+          6.7,
+          9.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/02_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/02_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/03_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/03_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.7,
+          6.7,
+          9.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/03_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.7,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/03_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/04_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/04_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.9,
+          6.9,
+          9.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/04_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.7,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/04_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          8.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/05_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/05_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.5,
+          6.9,
+          9.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/05_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/05_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.1,
+          5.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/06_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/06_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          0.7,
+          6.9,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/06_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          10.4
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/06_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.3,
+          5.0,
+          9.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/07_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/07_eyes.png",
+         "rect": [297, 383, 232, 101],
+         "color_shift_rgb": [
+          0.9,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/07_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.7
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/07_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          9.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/08_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/08_eyes.png",
+         "rect": [297, 384, 232, 100],
+         "color_shift_rgb": [
+          1.0,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/08_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/08_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          0.5,
+          5.0,
+          8.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/09_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/09_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          0.7,
+          7.0,
+          9.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/09_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.1,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/09_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          8.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/10_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/10_eyes.png",
+         "rect": [297, 383, 232, 99],
+         "color_shift_rgb": [
+          0.7,
+          7.0,
+          9.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/10_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.1,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/10_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.2,
+          4.8,
+          8.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/11_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/11_eyes.png",
+         "rect": [297, 383, 232, 99],
+         "color_shift_rgb": [
+          0.4,
+          7.0,
+          9.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/11_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/11_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -1.0,
+          4.7,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/12_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/12_eyes.png",
+         "rect": [297, 384, 232, 99],
+         "color_shift_rgb": [
+          0.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/12_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/12_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.7,
+          4.1,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/13_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/13_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          0.5,
+          6.9,
+          9.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/13_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/13_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.7,
+          4.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/14_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/14_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          0.5,
+          6.7,
+          9.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/14_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/14_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.6,
+          4.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/15_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/15_eyes.png",
+         "rect": [297, 385, 232, 99],
+         "color_shift_rgb": [
+          0.0,
+          6.1,
+          8.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/15_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.7
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/15_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -1.0,
+          3.7,
+          7.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/16_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/16_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          0.0,
+          6.0,
+          8.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/16_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          6.9,
+          9.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/16_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.7,
+          3.7,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/17_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/17_eyes.png",
+         "rect": [297, 382, 232, 100],
+         "color_shift_rgb": [
+          0.0,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/17_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          6.7,
+          9.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/17_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.2,
+          3.4,
+          6.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/18_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/18_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          0.0,
+          5.9,
+          7.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/18_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          6.5,
+          9.2
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/18_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.1,
+          3.8,
+          6.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/19_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/19_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.3,
+          5.9,
+          7.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/19_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          6.6,
+          9.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/19_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          0.1,
+          3.6,
+          6.3
+         ]
+        }
+       },
+       {
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/20_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.3,
+          5.9,
+          7.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/20_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          2.0,
+          6.6,
+          9.4
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/20_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          0.1,
+          4.0,
+          6.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/21_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/21_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          1.4,
+          6.2,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/21_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          3.2,
+          8.0,
+          10.2
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/21_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          1.0,
+          4.6,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/22_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/22_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          2.0,
+          6.4,
+          8.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/22_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          6.0,
+          8.0,
+          11.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/22_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          1.0,
+          4.6,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/23_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/23_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          8.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/23_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          6.0,
+          8.0,
+          11.9
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/23_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          1.7,
+          5.0,
+          7.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise25/24_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise25/24_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          3.1,
+          7.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise25/24_mouth.png",
+         "rect": [371, 467, 81, 60],
+         "color_shift_rgb": [
+          7.0,
+          8.4,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise25/24_brow.png",
+         "rect": [289, 336, 248, 70],
+         "color_shift_rgb": [
+          1.9,
+          5.0,
+          7.3
+         ]
+        }
+       }
+      ]
+     },
+     "surprise49": {
+      "fps": 16.0,
+      "label": "正常 → 惊讶 → 正常（49 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/00_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/00_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          1.5,
+          6.9,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/00_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          9.9
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/00_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          1.0,
+          5.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/01_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/01_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          1.1,
+          6.9,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/01_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/01_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          0.5,
+          5.0,
+          8.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/02_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/02_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.9,
+          6.5,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/02_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.4
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/02_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          8.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/03_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/03_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.9,
+          6.5,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/03_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          2.1,
+          7.0,
+          9.8
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/03_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.9,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/04_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/04_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.8,
+          6.6,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/04_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/04_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/05_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/05_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.4,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/05_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.8,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/05_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          7.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/06_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/06_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          0.2,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/06_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/06_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.7,
+          7.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/07_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/07_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          0.2,
+          5.8,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/07_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/07_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          0.0,
+          4.9,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/08_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/08_eyes.png",
+         "rect": [297, 382, 232, 100],
+         "color_shift_rgb": [
+          0.2,
+          6.0,
+          8.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/08_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/08_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/09_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/09_eyes.png",
+         "rect": [297, 382, 232, 100],
+         "color_shift_rgb": [
+          0.3,
+          5.9,
+          8.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/09_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/09_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          0.0,
+          4.6,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/10_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/10_eyes.png",
+         "rect": [297, 382, 232, 100],
+         "color_shift_rgb": [
+          0.0,
+          6.0,
+          8.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/10_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/10_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.1,
+          4.4,
+          8.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/11_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/11_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          0.0,
+          6.0,
+          8.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/11_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.8
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/11_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.1,
+          4.3,
+          8.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/12_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/12_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/12_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.3,
+          6.0,
+          9.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/12_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.7,
+          3.7,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/13_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/13_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/13_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/13_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.6,
+          3.7,
+          6.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/14_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/14_eyes.png",
+         "rect": [297, 383, 232, 99],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/14_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/14_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.8,
+          4.0,
+          6.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/15_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/15_eyes.png",
+         "rect": [297, 385, 232, 97],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/15_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/15_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.5,
+          4.0,
+          7.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/16_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/16_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/16_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/16_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.4,
+          4.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/17_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/17_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/17_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/17_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          7.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/18_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/18_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          -0.0,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/18_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/18_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.4,
+          4.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/19_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/19_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/19_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/19_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.5,
+          4.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/20_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/20_eyes.png",
+         "rect": [297, 383, 232, 101],
+         "color_shift_rgb": [
+          -0.1,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/20_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/20_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.2,
+          4.0,
+          7.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/21_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/21_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/21_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/21_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/22_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/22_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          -0.0,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/22_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/22_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.2,
+          4.0,
+          7.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/23_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/23_eyes.png",
+         "rect": [297, 384, 232, 100],
+         "color_shift_rgb": [
+          -0.1,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/23_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/23_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.3,
+          4.0,
+          7.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/24_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/24_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.1,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/24_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/24_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.3,
+          4.0,
+          7.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/25_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/25_eyes.png",
+         "rect": [297, 385, 232, 97],
+         "color_shift_rgb": [
+          -0.0,
+          5.6,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/25_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/25_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/26_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/26_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/26_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/26_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          7.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/27_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/27_eyes.png",
+         "rect": [297, 382, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/27_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/27_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.2,
+          4.0,
+          7.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/28_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/28_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/28_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/28_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.3,
+          4.0,
+          7.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/29_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/29_eyes.png",
+         "rect": [297, 383, 232, 99],
+         "color_shift_rgb": [
+          -0.0,
+          5.4,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/29_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/29_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.1,
+          3.9,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/30_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/30_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.1,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/30_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/30_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.3,
+          4.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/31_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/31_eyes.png",
+         "rect": [297, 384, 232, 100],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/31_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/31_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          7.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/32_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/32_eyes.png",
+         "rect": [297, 383, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/32_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/32_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.2,
+          4.0,
+          7.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/33_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/33_eyes.png",
+         "rect": [297, 383, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/33_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/33_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.0,
+          3.9,
+          7.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/34_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/34_eyes.png",
+         "rect": [297, 383, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          7.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/34_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/34_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.1,
+          3.2,
+          6.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/35_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/35_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.3,
+          5.0,
+          7.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/35_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/35_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.7,
+          2.7,
+          5.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/36_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/36_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          -0.5,
+          5.0,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/36_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/36_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -1.0,
+          1.5,
+          4.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/37_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/37_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          -0.3,
+          5.0,
+          6.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/37_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/37_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.8,
+          1.8,
+          4.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/38_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/38_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.4,
+          5.0,
+          6.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/38_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/38_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.1,
+          4.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/39_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/39_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.4,
+          5.0,
+          6.5
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/39_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/39_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.2,
+          4.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/40_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/40_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.3,
+          5.0,
+          6.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/40_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/40_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.2,
+          4.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/41_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/41_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.1,
+          5.0,
+          6.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/41_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/41_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.6,
+          2.6,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/42_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/42_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.1,
+          5.0,
+          6.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/42_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/42_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.7,
+          3.0,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/43_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/43_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          6.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/43_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.8
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/43_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.4,
+          3.1,
+          5.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/44_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/44_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          6.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/44_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/44_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          -0.5,
+          3.0,
+          5.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/45_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/45_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          2.7,
+          6.4,
+          8.5
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/45_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          5.0,
+          7.0,
+          11.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/45_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          2.0,
+          4.8,
+          7.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/46_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/46_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          4.0,
+          7.2,
+          9.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/46_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          7.0,
+          8.2,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/46_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          3.0,
+          5.4,
+          8.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/47_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/47_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          9.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/47_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          7.8,
+          9.0,
+          11.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/47_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          3.6,
+          6.0,
+          8.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/surprise49/48_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/surprise49/48_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          5.8,
+          8.9,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/surprise49/48_mouth.png",
+         "rect": [371, 470, 81, 57],
+         "color_shift_rgb": [
+          8.0,
+          10.0,
+          11.7
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/surprise49/48_brow.png",
+         "rect": [288, 336, 248, 70],
+         "color_shift_rgb": [
+          4.7,
+          7.0,
+          9.0
+         ]
+        }
+       }
+      ]
+     },
+     "happy25": {
+      "fps": 16.0,
+      "label": "正常 → 大笑 → 正常（25 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/00_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/00_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.8,
+          5.6,
+          7.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/00_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.8,
+          6.0,
+          8.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/00_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          6.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/01_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/01_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/01_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/01_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          0.0,
+          4.1,
+          7.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/02_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/02_eyes.png",
+         "rect": [297, 381, 232, 96],
+         "color_shift_rgb": [
+          0.2,
+          6.0,
+          8.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/02_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.9,
+          6.8,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/02_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.1,
+          4.0,
+          6.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/03_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/03_eyes.png",
+         "rect": [297, 381, 232, 96],
+         "color_shift_rgb": [
+          0.1,
+          6.4,
+          8.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/03_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/03_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.6,
+          3.2,
+          5.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/04_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/04_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          0.4,
+          6.4,
+          8.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/04_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          2.0,
+          6.8,
+          9.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/04_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.0,
+          4.0,
+          6.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/05_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/05_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          0.2,
+          6.0,
+          8.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/05_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.6,
+          6.3,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/05_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/06_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/06_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          0.3,
+          6.0,
+          8.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/06_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.4,
+          6.0,
+          8.2
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/06_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          0.1,
+          4.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/07_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/07_eyes.png",
+         "rect": [298, 381, 231, 102],
+         "color_shift_rgb": [
+          0.1,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/07_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/07_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/08_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/08_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          0.4,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/08_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.4,
+          6.0,
+          8.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/08_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          0.1,
+          3.1,
+          5.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/09_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/09_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -0.0,
+          5.4,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/09_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          5.8,
+          7.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/09_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.4,
+          3.1,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/10_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/10_eyes.png",
+         "rect": [297, 381, 232, 102],
+         "color_shift_rgb": [
+          -0.0,
+          5.9,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/10_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/10_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.5,
+          3.7,
+          5.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/11_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/11_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          7.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/11_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/11_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.6,
+          3.9,
+          5.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/12_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/12_eyes.png",
+         "rect": [297, 381, 232, 102],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/12_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.1,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/12_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.0,
+          3.3,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/13_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/13_eyes.png",
+         "rect": [299, 381, 230, 101],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/13_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          5.6,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/13_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.5,
+          3.0,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/14_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/14_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -0.0,
+          5.2,
+          7.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/14_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          5.5,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/14_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.0,
+          3.0,
+          5.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/15_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/15_eyes.png",
+         "rect": [297, 381, 232, 102],
+         "color_shift_rgb": [
+          -0.0,
+          5.1,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/15_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          5.6,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/15_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.1,
+          3.0,
+          5.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/16_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/16_eyes.png",
+         "rect": [297, 381, 232, 102],
+         "color_shift_rgb": [
+          -0.0,
+          5.9,
+          7.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/16_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          5.8,
+          7.4
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/16_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.6,
+          3.1,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/17_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/17_eyes.png",
+         "rect": [297, 381, 232, 102],
+         "color_shift_rgb": [
+          -0.0,
+          5.7,
+          7.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/17_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/17_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.8,
+          3.9,
+          6.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/18_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/18_eyes.png",
+         "rect": [297, 381, 232, 102],
+         "color_shift_rgb": [
+          -0.1,
+          5.3,
+          7.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/18_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/18_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/19_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/19_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          7.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/19_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          7.9
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/19_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          -0.2,
+          3.9,
+          6.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/20_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/20_eyes.png",
+         "rect": [297, 381, 232, 101],
+         "color_shift_rgb": [
+          0.1,
+          5.0,
+          7.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/20_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          1.5,
+          5.9,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/20_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          0.0,
+          3.8,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/21_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/21_eyes.png",
+         "rect": [297, 381, 232, 100],
+         "color_shift_rgb": [
+          1.2,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/21_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          3.3,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/21_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          0.8,
+          4.2,
+          6.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/22_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/22_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          2.4,
+          6.1,
+          8.5
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/22_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          6.0,
+          8.0,
+          11.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/22_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          1.5,
+          4.6,
+          7.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/23_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/23_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          2.7,
+          6.9,
+          8.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/23_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          6.0,
+          8.0,
+          11.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/23_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          1.5,
+          5.0,
+          7.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy25/24_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy25/24_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          3.4,
+          7.0,
+          9.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy25/24_mouth.png",
+         "rect": [364, 460, 101, 76],
+         "color_shift_rgb": [
+          6.1,
+          8.0,
+          11.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy25/24_brow.png",
+         "rect": [285, 336, 252, 70],
+         "color_shift_rgb": [
+          2.1,
+          5.4,
+          8.2
+         ]
+        }
+       }
+      ]
+     },
+     "happy49": {
+      "fps": 16.0,
+      "label": "正常 → 大笑 → 正常（49 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/00_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/00_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          1.3,
+          6.5,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/00_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/00_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          1.0,
+          5.2,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/01_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/01_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          1.0,
+          6.5,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/01_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/01_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          0.3,
+          5.0,
+          8.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/02_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/02_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.7,
+          6.3,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/02_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/02_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          8.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/03_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/03_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          0.7,
+          6.2,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/03_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.4
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/03_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          8.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/04_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/04_eyes.png",
+         "rect": [297, 381, 232, 99],
+         "color_shift_rgb": [
+          0.7,
+          6.1,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/04_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          2.0,
+          7.0,
+          9.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/04_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -0.0,
+          5.0,
+          8.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/05_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/05_eyes.png",
+         "rect": [297, 381, 232, 98],
+         "color_shift_rgb": [
+          -0.0,
+          6.0,
+          8.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/05_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          1.0,
+          6.0,
+          8.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/05_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -0.4,
+          4.3,
+          8.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/06_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/06_eyes.png",
+         "rect": [297, 381, 232, 91],
+         "color_shift_rgb": [
+          -0.5,
+          5.0,
+          6.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/06_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          1.0,
+          5.2,
+          7.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/06_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.1,
+          4.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/07_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/07_eyes.png",
+         "rect": [297, 381, 232, 91],
+         "color_shift_rgb": [
+          -0.3,
+          5.2,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/07_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          1.0,
+          5.0,
+          7.2
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/07_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          3.0,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/08_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/08_eyes.png",
+         "rect": [297, 382, 232, 95],
+         "color_shift_rgb": [
+          -0.1,
+          5.0,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/08_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          1.0,
+          5.0,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/08_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -0.8,
+          2.7,
+          5.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/09_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/09_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          -0.7,
+          4.8,
+          6.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/09_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.6,
+          5.0,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/09_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          3.0,
+          5.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/10_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/10_eyes.png",
+         "rect": [297, 383, 232, 100],
+         "color_shift_rgb": [
+          -1.0,
+          4.2,
+          6.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/10_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.7,
+          4.9,
+          6.8
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/10_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.4,
+          2.4,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/11_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/11_eyes.png",
+         "rect": [297, 385, 232, 99],
+         "color_shift_rgb": [
+          -0.5,
+          4.7,
+          6.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/11_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.7,
+          4.8,
+          6.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/11_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.3,
+          4.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/12_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/12_eyes.png",
+         "rect": [297, 385, 232, 99],
+         "color_shift_rgb": [
+          -0.2,
+          4.9,
+          7.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/12_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.8,
+          4.9,
+          6.8
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/12_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          3.0,
+          5.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/13_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/13_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          6.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/13_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.2,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/13_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.6,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/14_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/14_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.5
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/14_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/14_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.4,
+          2.1,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/15_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/15_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/15_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/15_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.7,
+          2.0,
+          3.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/16_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/16_eyes.png",
+         "rect": [297, 384, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/16_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/16_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.7,
+          2.0,
+          3.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/17_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/17_eyes.png",
+         "rect": [297, 385, 232, 98],
+         "color_shift_rgb": [
+          -1.0,
+          3.3,
+          5.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/17_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/17_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -2.0,
+          1.9,
+          3.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/18_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/18_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.5
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/18_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.4
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/18_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.0,
+          3.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/19_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/19_eyes.png",
+         "rect": [297, 384, 232, 100],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/19_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.9,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/19_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.4,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/20_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/20_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/20_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.4,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/20_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.3,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/21_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/21_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/21_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/21_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.1,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/22_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/22_eyes.png",
+         "rect": [297, 386, 232, 98],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/22_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/22_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.0,
+          3.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/23_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/23_eyes.png",
+         "rect": [298, 383, 231, 101],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/23_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/23_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.3,
+          2.0,
+          3.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/24_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/24_eyes.png",
+         "rect": [297, 381, 232, 103],
+         "color_shift_rgb": [
+          -1.0,
+          4.1,
+          5.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/24_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.3,
+          6.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/24_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.6,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/25_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/25_eyes.png",
+         "rect": [297, 383, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/25_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/25_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.0,
+          3.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/26_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/26_eyes.png",
+         "rect": [297, 384, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/26_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/26_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.0,
+          3.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/27_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/27_eyes.png",
+         "rect": [297, 383, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/27_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/27_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.4,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/28_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/28_eyes.png",
+         "rect": [297, 382, 232, 100],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/28_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/28_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.8,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/29_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/29_eyes.png",
+         "rect": [297, 385, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/29_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/29_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.0,
+          3.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/30_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/30_eyes.png",
+         "rect": [297, 383, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/30_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/30_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.0,
+          3.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/31_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/31_eyes.png",
+         "rect": [297, 384, 232, 100],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          6.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/31_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.6,
+          6.6
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/31_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.1,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/32_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/32_eyes.png",
+         "rect": [298, 386, 231, 98],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.5
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/32_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.4
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/32_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.3,
+          2.0,
+          3.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/33_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/33_eyes.png",
+         "rect": [297, 385, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/33_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.1
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/33_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.8,
+          2.0,
+          3.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/34_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/34_eyes.png",
+         "rect": [297, 385, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          6.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/34_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.0,
+          6.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/34_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.5,
+          1.6,
+          3.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/35_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/35_eyes.png",
+         "rect": [297, 385, 232, 99],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          6.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/35_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          4.3,
+          6.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/35_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.6,
+          2.0,
+          4.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/36_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/36_eyes.png",
+         "rect": [297, 382, 232, 100],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          6.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/36_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.4,
+          4.4,
+          6.7
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/36_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.4,
+          2.0,
+          4.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/37_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/37_eyes.png",
+         "rect": [297, 382, 232, 100],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/37_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          6.9
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/37_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.2,
+          1.8,
+          4.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/38_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/38_eyes.png",
+         "rect": [297, 382, 232, 99],
+         "color_shift_rgb": [
+          -0.9,
+          4.0,
+          5.5
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/38_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          6.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/38_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          1.9,
+          4.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/39_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/39_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/39_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          6.7
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/39_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.0,
+          4.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/40_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/40_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.9,
+          4.0,
+          5.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/40_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.1,
+          5.0,
+          7.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/40_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.4,
+          4.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/41_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/41_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/41_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          6.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/41_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.5,
+          4.5
+         ]
+        }
+       },
+       {
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/42_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/42_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          6.2
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/42_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.2,
+          4.8
+         ]
+        }
+       },
+       {
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/43_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -1.0,
+          4.0,
+          5.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/43_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          6.2
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/43_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.1,
+          2.0,
+          4.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/44_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/44_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          -0.8,
+          4.0,
+          5.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/44_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          0.0,
+          5.0,
+          6.3
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/44_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          -1.0,
+          2.2,
+          4.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/45_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/45_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          2.4,
+          6.2,
+          7.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/45_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          6.0,
+          7.8,
+          9.5
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/45_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          0.9,
+          4.5,
+          6.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/46_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/46_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          3.9,
+          7.0,
+          8.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/46_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          7.0,
+          9.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/46_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          2.2,
+          5.3,
+          7.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/47_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/47_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          9.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/47_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          8.0,
+          10.0,
+          11.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/47_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          3.1,
+          6.0,
+          8.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/idle/faceclip/happy49/48_blush.png",
+         "rect": [300, 446, 224, 83],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/idle/faceclip/happy49/48_eyes.png",
+         "rect": [297, 382, 232, 98],
+         "color_shift_rgb": [
+          5.7,
+          8.8,
+          9.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/idle/faceclip/happy49/48_mouth.png",
+         "rect": [363, 458, 101, 77],
+         "color_shift_rgb": [
+          8.2,
+          10.4,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/idle/faceclip/happy49/48_brow.png",
+         "rect": [286, 336, 251, 70],
+         "color_shift_rgb": [
+          4.3,
+          7.0,
+          9.0
+         ]
+        }
+       }
+      ]
+     }
+    }
+   },
+   "noBrow": {
+    "frame": "frames/idle_nobrow.png",
+    "brow_bbox": [300, 365, 527, 405],
+    "found_shift": [
+     [
+      -1,
+      0
+     ],
+     [
+      -3,
+      0
+     ]
+    ]
+   },
+   "browOk": true,
+   "browRead": {
+    "line_px": 0.0,
+    "note": "归位帧恒为可换"
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "think": {
+   "label": "思考（幅度最大处，第 23 帧）",
+   "frame": "frames/think_loop/23.png",
+   "bbox": [174, 132, 636, 1002],
+   "margin": [174, 132, 196, 102],
+   "patches": {
+    "align": {
+     "scale": 0.3405,
+     "rotate_deg": -3.09,
+     "translate": [
+      17.9,
+      100.4
+     ],
+     "matches": 84,
+     "inliers": 58,
+     "residual_px": 0.93
+    },
+    "mouth": {
+     "closed": {
+      "file": "patches/think/mouth_closed.png",
+      "rect": [363, 472, 82, 58],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       14.0
+      ],
+      "skin_samples": 844,
+      "occluded_px": 720
+     },
+     "small": {
+      "file": "patches/think/mouth_small.png",
+      "rect": [363, 472, 82, 58],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       14.0
+      ],
+      "skin_samples": 844,
+      "occluded_px": 720
+     },
+     "big": {
+      "file": "patches/think/mouth_big.png",
+      "rect": [363, 472, 82, 58],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       14.0
+      ],
+      "skin_samples": 844,
+      "occluded_px": 720
+     },
+     "smile": {
+      "file": "patches/think/mouth_smile.png",
+      "rect": [363, 472, 82, 58],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       14.0
+      ],
+      "skin_samples": 844,
+      "occluded_px": 720
+     }
+    },
+    "blink": {
+     "file": "patches/think/blink.png",
+     "rect": [273, 383, 258, 106],
+     "color_shift_rgb": [
+      6.0,
+      7.0,
+      11.0
+     ],
+     "skin_samples": 2006,
+     "occluded_px": 172
+    },
+    "clean": {
+     "file": "patches/think/clean.png",
+     "rect": [273, 355, 258, 175],
+     "color_shift_rgb": [
+      6.0,
+      7.0,
+      12.0
+     ],
+     "skin_samples": 3017,
+     "occluded_px": 2027
+    },
+    "face": {
+     "angry": {
+      "blush": {
+       "file": "patches/think/face_angry_blush.png",
+       "rect": [292, 444, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_angry_eyes.png",
+       "rect": [287, 383, 232, 105],
+       "color_shift_rgb": [
+        1.8,
+        8.4,
+        13.3
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_angry_mouth.png",
+       "rect": [356, 466, 103, 64],
+       "color_shift_rgb": [
+        2.1,
+        8.2,
+        13.0
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_angry_brow.png",
+       "rect": [314, 370, 179, 41],
+       "color_shift_rgb": [
+        2.2,
+        7.0,
+        12.0
+       ]
+      }
+     },
+     "awkward": {
+      "blush": {
+       "file": "patches/think/face_awkward_blush.png",
+       "rect": [292, 444, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_awkward_eyes.png",
+       "rect": [287, 384, 232, 100],
+       "color_shift_rgb": [
+        1.1,
+        7.4,
+        10.4
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_awkward_mouth.png",
+       "rect": [363, 472, 82, 58],
+       "color_shift_rgb": [
+        1.9,
+        6.8,
+        10.0
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_awkward_brow.png",
+       "rect": [306, 384, 181, 25],
+       "color_shift_rgb": [
+        1.6,
+        6.1,
+        10.3
+       ]
+      }
+     },
+     "doubt": {
+      "blush": {
+       "file": "patches/think/face_doubt_blush.png",
+       "rect": [292, 444, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_doubt_eyes.png",
+       "rect": [287, 382, 232, 102],
+       "color_shift_rgb": [
+        1.5,
+        7.2,
+        12.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_doubt_mouth.png",
+       "rect": [363, 472, 82, 58],
+       "color_shift_rgb": [
+        2.6,
+        7.1,
+        12.1
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_doubt_brow.png",
+       "rect": [314, 373, 170, 32],
+       "color_shift_rgb": [
+        2.0,
+        6.9,
+        12.0
+       ]
+      }
+     },
+     "flat": {
+      "blush": {
+       "file": "patches/think/face_flat_blush.png",
+       "rect": [292, 444, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_flat_eyes.png",
+       "rect": [287, 383, 232, 104],
+       "color_shift_rgb": [
+        2.0,
+        10.2,
+        13.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_flat_mouth.png",
+       "rect": [363, 472, 82, 58],
+       "color_shift_rgb": [
+        2.7,
+        7.0,
+        12.0
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_flat_brow.png",
+       "rect": [303, 379, 197, 26],
+       "color_shift_rgb": [
+        2.5,
+        6.1,
+        10.8
+       ]
+      }
+     },
+     "happy": {
+      "eyes": {
+       "file": "patches/think/face_happy_eyes.png",
+       "rect": [287, 383, 232, 102],
+       "color_shift_rgb": [
+        1.2,
+        8.3,
+        11.6
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_happy_mouth.png",
+       "rect": [362, 460, 88, 72],
+       "color_shift_rgb": [
+        2.0,
+        7.4,
+        11.2
+       ]
+      }
+     },
+     "love": {
+      "blush": {
+       "file": "patches/think/face_love_blush.png",
+       "rect": [292, 444, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_love_eyes.png",
+       "rect": [287, 384, 232, 107],
+       "color_shift_rgb": [
+        1.8,
+        9.3,
+        13.5
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_love_mouth.png",
+       "rect": [363, 472, 82, 58],
+       "color_shift_rgb": [
+        1.7,
+        16.4,
+        18.1
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_love_brow.png",
+       "rect": [304, 356, 175, 21],
+       "color_shift_rgb": [
+        1.0,
+        3.7,
+        7.8
+       ]
+      }
+     },
+     "squeeze": {
+      "blush": {
+       "file": "patches/think/face_squeeze_blush.png",
+       "rect": [292, 444, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_squeeze_eyes.png",
+       "rect": [287, 385, 232, 102],
+       "color_shift_rgb": [
+        2.0,
+        7.4,
+        10.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_squeeze_mouth.png",
+       "rect": [363, 472, 82, 58],
+       "color_shift_rgb": [
+        2.6,
+        6.4,
+        9.8
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_squeeze_brow.png",
+       "rect": [324, 385, 153, 33],
+       "color_shift_rgb": [
+        2.7,
+        6.3,
+        10.0
+       ]
+      }
+     },
+     "surprise": {
+      "blush": {
+       "file": "patches/think/face_surprise_blush.png",
+       "rect": [292, 444, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_surprise_eyes.png",
+       "rect": [287, 386, 232, 100],
+       "color_shift_rgb": [
+        1.8,
+        7.0,
+        10.8
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_surprise_mouth.png",
+       "rect": [363, 472, 82, 58],
+       "color_shift_rgb": [
+        2.1,
+        6.9,
+        10.3
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_surprise_brow.png",
+       "rect": [301, 360, 189, 31],
+       "color_shift_rgb": [
+        1.9,
+        6.4,
+        11.7
+       ]
+      }
+     }
+    },
+    "eyeSkin": {
+     "file": "patches/think/eye_skin.png",
+     "rect": [288, 381, 231, 110]
+    },
+    "browErase": {
+     "file": "patches/think/brow_erase.png",
+     "rect": [180, 160, 441, 842],
+     "source": "noBrow"
+    },
+    "faceClips": {
+     "surprise25": {
+      "fps": 16.0,
+      "label": "正常 → 惊讶 → 正常（25 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/00_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/00_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.9,
+          8.0,
+          11.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/00_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          4.2,
+          8.0,
+          11.9
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/00_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          4.0,
+          8.0,
+          11.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/01_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/01_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.6,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/01_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.1,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/01_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.5,
+          8.0,
+          12.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/02_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/02_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          3.5,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/02_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.1,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/02_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.4,
+          8.0,
+          12.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/03_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/03_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.5,
+          8.1,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/03_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.3,
+          12.1
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/03_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.4,
+          8.0,
+          12.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/04_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/04_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.7,
+          8.1,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/04_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.4,
+          12.1
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/04_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.6,
+          8.1,
+          12.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/05_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/05_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.3,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/05_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.2,
+          12.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/05_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.1,
+          8.2,
+          13.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/06_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/06_eyes.png",
+         "rect": [287, 383, 232, 104],
+         "color_shift_rgb": [
+          3.2,
+          8.0,
+          12.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/06_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.1,
+          12.9
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/06_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          13.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/07_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/07_eyes.png",
+         "rect": [287, 385, 232, 104],
+         "color_shift_rgb": [
+          3.3,
+          8.0,
+          12.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/07_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.6,
+          12.9
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/07_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.4,
+          8.0,
+          13.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/08_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/08_eyes.png",
+         "rect": [287, 386, 232, 105],
+         "color_shift_rgb": [
+          3.9,
+          8.1,
+          12.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/08_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.5,
+          12.7
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/08_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          4.0,
+          8.2,
+          13.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/09_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/09_eyes.png",
+         "rect": [287, 385, 232, 105],
+         "color_shift_rgb": [
+          3.2,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/09_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.1
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/09_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.2,
+          8.0,
+          13.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/10_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/10_eyes.png",
+         "rect": [287, 385, 232, 104],
+         "color_shift_rgb": [
+          3.3,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/10_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.1
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/10_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.3,
+          8.0,
+          13.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/11_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/11_eyes.png",
+         "rect": [287, 385, 232, 103],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/11_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/11_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          2.9,
+          8.0,
+          12.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/12_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/12_eyes.png",
+         "rect": [287, 386, 232, 104],
+         "color_shift_rgb": [
+          3.1,
+          8.1,
+          12.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/12_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.2,
+          12.5
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/12_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          2.9,
+          7.8,
+          13.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/13_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/13_eyes.png",
+         "rect": [287, 386, 232, 104],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/13_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/13_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.1,
+          12.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/14_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/14_eyes.png",
+         "rect": [287, 385, 232, 105],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/14_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/14_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.1,
+          7.0,
+          12.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/15_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/15_eyes.png",
+         "rect": [287, 385, 232, 106],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          11.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/15_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          4.8,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/15_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/16_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/16_eyes.png",
+         "rect": [287, 383, 232, 106],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          11.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/16_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          4.5,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/16_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/17_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/17_eyes.png",
+         "rect": [287, 383, 232, 104],
+         "color_shift_rgb": [
+          3.0,
+          7.8,
+          11.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/17_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          4.1,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/17_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.5,
+          7.1,
+          11.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/18_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/18_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.0,
+          7.9,
+          10.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/18_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          4.0,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/18_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.6,
+          7.5,
+          10.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/19_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/19_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.0,
+          7.8,
+          10.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/19_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          4.2,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/19_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.9,
+          7.1,
+          11.0
+         ]
+        }
+       },
+       {
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/20_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.0,
+          7.9,
+          10.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/20_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          4.1,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/20_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          3.8,
+          7.6,
+          10.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/21_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/21_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          4.0,
+          8.4,
+          11.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/21_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          6.0,
+          9.0,
+          13.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/21_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          4.4,
+          8.0,
+          11.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/22_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/22_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          5.0,
+          8.5,
+          11.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/22_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          8.0,
+          9.0,
+          14.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/22_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          4.4,
+          8.0,
+          11.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/23_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/23_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          6.0,
+          9.0,
+          12.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/23_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          9.0,
+          9.2,
+          14.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/23_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          5.0,
+          8.5,
+          12.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise25/24_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise25/24_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          6.1,
+          9.0,
+          12.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise25/24_mouth.png",
+         "rect": [363, 470, 82, 60],
+         "color_shift_rgb": [
+          9.0,
+          10.0,
+          14.6
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise25/24_brow.png",
+         "rect": [278, 334, 248, 81],
+         "color_shift_rgb": [
+          5.2,
+          8.5,
+          12.0
+         ]
+        }
+       }
+      ]
+     },
+     "surprise49": {
+      "fps": 16.0,
+      "label": "正常 → 惊讶 → 正常（49 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/00_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/00_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          4.4,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/00_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          5.0,
+          8.2,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/00_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          4.6,
+          8.3,
+          12.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/01_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/01_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          4.0,
+          8.1,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/01_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          5.0,
+          8.2,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/01_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          4.0,
+          8.4,
+          12.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/02_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/02_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.6,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/02_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.9,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/02_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.6,
+          8.1,
+          12.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/03_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/03_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.6,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/03_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/03_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.5,
+          8.0,
+          12.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/04_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/04_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.6,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/04_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/04_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.5,
+          8.1,
+          12.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/05_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/05_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.2,
+          7.3,
+          10.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/05_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.3,
+          10.1
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/05_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.4,
+          7.5,
+          11.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/06_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/06_eyes.png",
+         "rect": [287, 382, 232, 101],
+         "color_shift_rgb": [
+          2.9,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/06_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/06_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.1,
+          11.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/07_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/07_eyes.png",
+         "rect": [287, 382, 232, 101],
+         "color_shift_rgb": [
+          2.9,
+          7.0,
+          10.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/07_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/07_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.1,
+          7.2,
+          12.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/08_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/08_eyes.png",
+         "rect": [287, 382, 232, 100],
+         "color_shift_rgb": [
+          2.9,
+          7.0,
+          10.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/08_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/08_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.4,
+          7.3,
+          13.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/09_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/09_eyes.png",
+         "rect": [287, 382, 232, 98],
+         "color_shift_rgb": [
+          3.0,
+          7.1,
+          11.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/09_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/09_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.5,
+          7.0,
+          12.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/10_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/10_eyes.png",
+         "rect": [287, 382, 232, 100],
+         "color_shift_rgb": [
+          2.7,
+          7.2,
+          10.6
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/10_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/10_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.4,
+          12.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/11_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/11_eyes.png",
+         "rect": [287, 382, 232, 100],
+         "color_shift_rgb": [
+          2.8,
+          7.3,
+          10.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/11_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.9
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/11_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.1,
+          12.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/12_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/12_eyes.png",
+         "rect": [287, 383, 232, 100],
+         "color_shift_rgb": [
+          2.7,
+          7.3,
+          11.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/12_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.4,
+          11.3
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/12_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/13_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/13_eyes.png",
+         "rect": [287, 383, 232, 100],
+         "color_shift_rgb": [
+          2.7,
+          7.0,
+          10.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/13_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/13_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/14_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/14_eyes.png",
+         "rect": [287, 385, 232, 103],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/14_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/14_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/15_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/15_eyes.png",
+         "rect": [287, 385, 232, 103],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/15_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/15_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          12.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/16_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/16_eyes.png",
+         "rect": [287, 385, 232, 103],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/16_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/16_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/17_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/17_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/17_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/17_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.0,
+          11.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/18_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/18_eyes.png",
+         "rect": [287, 385, 232, 103],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/18_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/18_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.0,
+          11.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/19_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/19_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.4,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/19_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/19_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/20_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/20_eyes.png",
+         "rect": [287, 385, 232, 104],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/20_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/20_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.3,
+          7.0,
+          12.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/21_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/21_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/21_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/21_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.0,
+          12.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/22_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/22_eyes.png",
+         "rect": [287, 383, 232, 105],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/22_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/22_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.4,
+          7.0,
+          12.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/23_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/23_eyes.png",
+         "rect": [287, 385, 232, 105],
+         "color_shift_rgb": [
+          2.4,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/23_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/23_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.0,
+          12.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/24_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/24_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.4,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/24_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/24_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/25_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/25_eyes.png",
+         "rect": [287, 385, 232, 102],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/25_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/25_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.7,
+          7.0,
+          12.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/26_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/26_eyes.png",
+         "rect": [287, 381, 232, 104],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/26_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/26_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.0,
+          11.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/27_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/27_eyes.png",
+         "rect": [287, 382, 232, 106],
+         "color_shift_rgb": [
+          2.4,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/27_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/27_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.3,
+          7.0,
+          12.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/28_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/28_eyes.png",
+         "rect": [287, 381, 232, 104],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/28_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/28_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/29_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/29_eyes.png",
+         "rect": [287, 385, 232, 102],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/29_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/29_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.4,
+          7.0,
+          11.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/30_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/30_eyes.png",
+         "rect": [287, 381, 232, 104],
+         "color_shift_rgb": [
+          2.4,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/30_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/30_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          11.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/31_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/31_eyes.png",
+         "rect": [287, 385, 232, 105],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/31_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/31_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.3,
+          7.0,
+          12.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/32_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/32_eyes.png",
+         "rect": [287, 383, 232, 107],
+         "color_shift_rgb": [
+          2.4,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/32_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/32_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.0,
+          11.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/33_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/33_eyes.png",
+         "rect": [287, 383, 232, 107],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/33_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/33_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.8,
+          7.0,
+          12.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/34_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/34_eyes.png",
+         "rect": [287, 383, 232, 106],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/34_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/34_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.3,
+          6.7,
+          10.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/35_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/35_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/35_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/35_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/36_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/36_eyes.png",
+         "rect": [287, 383, 232, 104],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/36_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/36_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          5.6,
+          9.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/37_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/37_eyes.png",
+         "rect": [287, 383, 232, 104],
+         "color_shift_rgb": [
+          2.7,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/37_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/37_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          5.9,
+          9.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/38_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/38_eyes.png",
+         "rect": [287, 382, 232, 105],
+         "color_shift_rgb": [
+          2.4,
+          7.0,
+          9.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/38_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/38_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/39_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/39_eyes.png",
+         "rect": [287, 383, 232, 104],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/39_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/39_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          9.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/40_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/40_eyes.png",
+         "rect": [287, 382, 232, 105],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          9.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/40_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/40_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/41_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/41_eyes.png",
+         "rect": [287, 382, 232, 104],
+         "color_shift_rgb": [
+          2.8,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/41_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/41_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/42_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/42_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.7,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/42_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/42_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.3,
+          9.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/43_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/43_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          2.9,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/43_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/43_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.1,
+          6.6,
+          9.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/44_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/44_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          2.8,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/44_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/44_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          3.1,
+          6.4,
+          9.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/45_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/45_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          5.9,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/45_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          8.0,
+          8.7,
+          13.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/45_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          5.5,
+          8.0,
+          11.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/46_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/46_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          7.0,
+          9.1,
+          12.2
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/46_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          9.0,
+          10.0,
+          13.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/46_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          6.7,
+          9.0,
+          12.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/47_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/47_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          7.9,
+          10.0,
+          12.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/47_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          10.0,
+          10.9,
+          13.3
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/47_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          7.0,
+          9.4,
+          12.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/surprise49/48_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/surprise49/48_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          8.4,
+          10.8,
+          13.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/surprise49/48_mouth.png",
+         "rect": [363, 472, 82, 59],
+         "color_shift_rgb": [
+          10.8,
+          11.0,
+          14.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/surprise49/48_brow.png",
+         "rect": [277, 334, 247, 81],
+         "color_shift_rgb": [
+          8.0,
+          10.1,
+          13.1
+         ]
+        }
+       }
+      ]
+     },
+     "happy25": {
+      "fps": 16.0,
+      "label": "正常 → 大笑 → 正常（25 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/00_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/00_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.6,
+          7.2,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/00_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.8,
+          10.4
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/00_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.8,
+          7.2,
+          10.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/01_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/01_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.8,
+          8.0,
+          11.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/01_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.5,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/01_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.7,
+          7.9,
+          11.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/02_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/02_eyes.png",
+         "rect": [287, 381, 232, 104],
+         "color_shift_rgb": [
+          3.1,
+          8.0,
+          11.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/02_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          8.0,
+          11.8
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/02_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.5,
+          7.0,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/03_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/03_eyes.png",
+         "rect": [287, 381, 232, 102],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          11.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/03_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/03_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.1,
+          6.8,
+          9.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/04_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/04_eyes.png",
+         "rect": [288, 381, 231, 99],
+         "color_shift_rgb": [
+          3.2,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/04_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.1,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/04_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.8,
+          7.0,
+          10.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/05_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/05_eyes.png",
+         "rect": [288, 381, 231, 99],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          10.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/05_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          8.0,
+          11.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/05_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          4.0,
+          7.4,
+          10.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/06_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/06_eyes.png",
+         "rect": [288, 381, 231, 100],
+         "color_shift_rgb": [
+          3.1,
+          8.0,
+          11.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/06_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.4,
+          10.9
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/06_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          4.0,
+          7.7,
+          11.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/07_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/07_eyes.png",
+         "rect": [289, 381, 230, 100],
+         "color_shift_rgb": [
+          3.0,
+          8.0,
+          10.7
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/07_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.3,
+          10.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/07_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          4.0,
+          7.4,
+          10.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/08_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/08_eyes.png",
+         "rect": [287, 381, 232, 104],
+         "color_shift_rgb": [
+          3.3,
+          8.0,
+          10.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/08_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.8,
+          11.1
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/08_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/09_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/09_eyes.png",
+         "rect": [287, 381, 232, 110],
+         "color_shift_rgb": [
+          3.0,
+          7.2,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/09_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/09_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.6,
+          7.0,
+          9.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/10_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/10_eyes.png",
+         "rect": [287, 381, 232, 109],
+         "color_shift_rgb": [
+          3.0,
+          7.3,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/10_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/10_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.3,
+          7.0,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/11_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/11_eyes.png",
+         "rect": [287, 381, 232, 101],
+         "color_shift_rgb": [
+          2.9,
+          7.3,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/11_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.4,
+          10.3
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/11_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.9,
+          9.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/12_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/12_eyes.png",
+         "rect": [287, 381, 232, 109],
+         "color_shift_rgb": [
+          3.0,
+          7.3,
+          10.1
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/12_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.1,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/12_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.9,
+          7.0,
+          9.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/13_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/13_eyes.png",
+         "rect": [290, 381, 229, 100],
+         "color_shift_rgb": [
+          2.9,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/13_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          3.8,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/13_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.3,
+          6.9,
+          9.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/14_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/14_eyes.png",
+         "rect": [287, 381, 232, 110],
+         "color_shift_rgb": [
+          2.9,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/14_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          3.9,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/14_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.9,
+          6.8,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/15_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/15_eyes.png",
+         "rect": [288, 381, 231, 100],
+         "color_shift_rgb": [
+          2.8,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/15_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          3.9,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/15_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.6,
+          6.4,
+          9.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/16_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/16_eyes.png",
+         "rect": [288, 381, 231, 101],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/16_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/16_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.3,
+          7.0,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/17_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/17_eyes.png",
+         "rect": [288, 381, 231, 101],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/17_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          3.9,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/17_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          2.8,
+          7.0,
+          10.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/18_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/18_eyes.png",
+         "rect": [288, 381, 231, 101],
+         "color_shift_rgb": [
+          2.5,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/18_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/18_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          2.3,
+          7.0,
+          11.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/19_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/19_eyes.png",
+         "rect": [287, 381, 232, 100],
+         "color_shift_rgb": [
+          2.9,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/19_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/19_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.2,
+          7.0,
+          10.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/20_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/20_eyes.png",
+         "rect": [287, 382, 232, 98],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/20_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/20_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          3.8,
+          7.0,
+          10.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/21_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/21_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          4.1,
+          8.0,
+          11.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/21_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          6.0,
+          8.0,
+          12.4
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/21_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          4.3,
+          7.8,
+          11.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/22_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/22_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          5.7,
+          8.2,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/22_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          8.0,
+          9.0,
+          13.7
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/22_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          11.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/23_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/23_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          5.8,
+          9.0,
+          12.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/23_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          8.6,
+          9.0,
+          14.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/23_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          5.0,
+          8.4,
+          12.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy25/24_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy25/24_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          6.3,
+          9.0,
+          13.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy25/24_mouth.png",
+         "rect": [357, 462, 101, 74],
+         "color_shift_rgb": [
+          9.0,
+          9.4,
+          14.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy25/24_brow.png",
+         "rect": [274, 334, 252, 81],
+         "color_shift_rgb": [
+          5.8,
+          9.0,
+          12.6
+         ]
+        }
+       }
+      ]
+     },
+     "happy49": {
+      "fps": 16.0,
+      "label": "正常 → 大笑 → 正常（49 帧）",
+      "frames": [
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/00_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/00_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          4.2,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/00_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          5.0,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/00_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          4.8,
+          8.4,
+          12.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/01_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/01_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.9,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/01_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          4.7,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/01_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          4.0,
+          8.4,
+          12.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/02_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/02_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.5,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/02_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          4.3,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/02_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.4,
+          8.3,
+          12.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/03_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/03_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          3.4,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/03_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          4.4,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/03_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.4,
+          8.1,
+          12.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/04_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/04_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          3.4,
+          8.0,
+          12.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/04_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          4.6,
+          8.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/04_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.3,
+          8.0,
+          12.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/05_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/05_eyes.png",
+         "rect": [287, 382, 232, 101],
+         "color_shift_rgb": [
+          2.9,
+          7.2,
+          10.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/05_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          4.0,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/05_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.5,
+          12.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/06_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/06_eyes.png",
+         "rect": [287, 381, 232, 90],
+         "color_shift_rgb": [
+          2.6,
+          6.9,
+          9.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/06_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.4,
+          7.0,
+          10.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/06_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          5.8,
+          8.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/07_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/07_eyes.png",
+         "rect": [287, 381, 232, 89],
+         "color_shift_rgb": [
+          2.6,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/07_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.2,
+          6.8,
+          9.9
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/07_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.5,
+          9.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/08_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/08_eyes.png",
+         "rect": [287, 382, 232, 94],
+         "color_shift_rgb": [
+          2.9,
+          6.9,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/08_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.3,
+          6.6,
+          9.6
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/08_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          5.9,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/09_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/09_eyes.png",
+         "rect": [288, 383, 231, 96],
+         "color_shift_rgb": [
+          2.3,
+          6.7,
+          9.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/09_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/09_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.8,
+          6.0,
+          9.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/10_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/10_eyes.png",
+         "rect": [287, 383, 232, 102],
+         "color_shift_rgb": [
+          2.1,
+          6.4,
+          9.4
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/10_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.1,
+          9.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/10_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.3,
+          6.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/11_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/11_eyes.png",
+         "rect": [287, 387, 232, 102],
+         "color_shift_rgb": [
+          2.4,
+          6.7,
+          9.3
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/11_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.1,
+          9.2
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/11_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.2,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/12_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/12_eyes.png",
+         "rect": [287, 387, 232, 104],
+         "color_shift_rgb": [
+          2.8,
+          7.0,
+          10.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/12_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.1,
+          6.1,
+          9.5
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/12_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          7.0,
+          10.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/13_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/13_eyes.png",
+         "rect": [287, 381, 232, 107],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/13_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/13_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.6,
+          6.0,
+          8.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/14_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/14_eyes.png",
+         "rect": [287, 382, 232, 106],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/14_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/14_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.5,
+          6.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/15_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/15_eyes.png",
+         "rect": [287, 382, 232, 108],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/15_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/15_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          7.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/16_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/16_eyes.png",
+         "rect": [287, 386, 232, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/16_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/16_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.6,
+          6.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/17_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/17_eyes.png",
+         "rect": [288, 387, 231, 103],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/17_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/17_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/18_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/18_eyes.png",
+         "rect": [287, 381, 232, 109],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/18_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/18_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.7,
+          6.0,
+          7.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/19_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/19_eyes.png",
+         "rect": [287, 386, 232, 103],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/19_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/19_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/20_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/20_eyes.png",
+         "rect": [287, 381, 232, 108],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/20_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/20_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/21_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/21_eyes.png",
+         "rect": [287, 381, 232, 107],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/21_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/21_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.5,
+          6.0,
+          7.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/22_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/22_eyes.png",
+         "rect": [288, 388, 231, 103],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/22_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/22_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/23_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/23_eyes.png",
+         "rect": [288, 385, 231, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/23_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/23_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.6,
+          6.0,
+          7.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/24_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/24_eyes.png",
+         "rect": [287, 381, 232, 107],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/24_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/24_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/25_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/25_eyes.png",
+         "rect": [287, 384, 232, 105],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/25_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/25_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          7.5
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/26_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/26_eyes.png",
+         "rect": [287, 386, 232, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/26_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/26_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          7.3
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/27_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/27_eyes.png",
+         "rect": [287, 384, 232, 105],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/27_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/27_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          7.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/28_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/28_eyes.png",
+         "rect": [287, 384, 232, 105],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/28_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/28_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/29_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/29_eyes.png",
+         "rect": [287, 387, 232, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/29_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/29_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          7.2
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/30_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/30_eyes.png",
+         "rect": [287, 385, 232, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/30_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/30_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          7.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/31_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/31_eyes.png",
+         "rect": [287, 386, 232, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/31_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/31_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          8.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/32_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/32_eyes.png",
+         "rect": [288, 387, 231, 101],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/32_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/32_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.8,
+          6.0,
+          7.4
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/33_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/33_eyes.png",
+         "rect": [288, 387, 231, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/33_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          5.9,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/33_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.4,
+          6.0,
+          8.1
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/34_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/34_eyes.png",
+         "rect": [288, 388, 231, 103],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/34_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/34_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.6,
+          5.4,
+          8.6
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/35_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/35_eyes.png",
+         "rect": [288, 387, 231, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/35_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/35_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.2,
+          6.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/36_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/36_eyes.png",
+         "rect": [287, 383, 232, 105],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/36_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/36_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.6,
+          6.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/37_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/37_eyes.png",
+         "rect": [287, 383, 232, 104],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/37_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/37_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.4,
+          5.4,
+          8.8
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/38_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/38_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/38_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/38_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.9,
+          5.6,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/39_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/39_eyes.png",
+         "rect": [287, 383, 232, 102],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/39_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/39_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.6,
+          5.8,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/40_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/40_eyes.png",
+         "rect": [287, 383, 232, 100],
+         "color_shift_rgb": [
+          2.3,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/40_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/40_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.9,
+          6.0,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/41_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/41_eyes.png",
+         "rect": [287, 382, 232, 102],
+         "color_shift_rgb": [
+          2.0,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/41_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/41_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.5,
+          5.9,
+          9.0
+         ]
+        }
+       },
+       {
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/42_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/42_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/42_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.5,
+          5.8,
+          9.0
+         ]
+        }
+       },
+       {
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/43_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.1,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/43_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/43_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.5,
+          5.6,
+          9.0
+         ]
+        }
+       },
+       {
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/44_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          2.2,
+          6.0,
+          9.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/44_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          3.0,
+          6.0,
+          9.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/44_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          2.6,
+          5.7,
+          9.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/45_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/45_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          5.4,
+          8.1,
+          10.9
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/45_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          8.0,
+          9.0,
+          12.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/45_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          4.4,
+          8.0,
+          11.0
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/46_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/46_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          6.8,
+          9.0,
+          11.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/46_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          9.4,
+          10.0,
+          13.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/46_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          5.9,
+          8.9,
+          11.9
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/47_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/47_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          7.8,
+          10.0,
+          12.8
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/47_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          10.1,
+          11.0,
+          14.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/47_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          6.6,
+          9.4,
+          12.7
+         ]
+        }
+       },
+       {
+        "blush": {
+         "file": "patches/think/faceclip/happy49/48_blush.png",
+         "rect": [292, 444, 225, 91],
+         "blend": "multiply"
+        },
+        "eyes": {
+         "file": "patches/think/faceclip/happy49/48_eyes.png",
+         "rect": [287, 382, 232, 103],
+         "color_shift_rgb": [
+          8.5,
+          11.0,
+          13.0
+         ]
+        },
+        "mouth": {
+         "file": "patches/think/faceclip/happy49/48_mouth.png",
+         "rect": [356, 460, 101, 76],
+         "color_shift_rgb": [
+          11.0,
+          12.0,
+          14.0
+         ]
+        },
+        "brow": {
+         "file": "patches/think/faceclip/happy49/48_brow.png",
+         "rect": [275, 334, 251, 81],
+         "color_shift_rgb": [
+          7.7,
+          10.1,
+          13.4
+         ]
+        }
+       }
+      ]
+     }
+    }
+   },
+   "browOk": false,
+   "browRead": {
+    "line_px": 1.56,
+    "doubled": 0.203,
+    "shift_px": 0.92,
+    "region_px": 30931
+   },
+   "facePaste": true,
+   "browSwap": true,
+   "faceBlank": false,
+   "faceClass": 1,
+   "attrManual": [
+    "browSwap"
+   ]
+  },
+  "wave": {
+   "label": "挥手（幅度最大处，第 37 帧）",
+   "frame": "frames/wave_loop/37.png",
+   "bbox": [168, 130, 694, 1002],
+   "margin": [168, 130, 138, 102],
+   "patches": {
+    "align": {
+     "scale": 0.3394,
+     "rotate_deg": -5.52,
+     "translate": [
+      0.7,
+      115.3
+     ],
+     "matches": 85,
+     "inliers": 42,
+     "residual_px": 0.88
+    },
+    "mouth": {
+     "closed": {
+      "file": "patches/wave/mouth_closed.png",
+      "rect": [361, 468, 82, 59],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       13.4
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 15
+     },
+     "small": {
+      "file": "patches/wave/mouth_small.png",
+      "rect": [361, 468, 82, 59],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       13.4
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 15
+     },
+     "big": {
+      "file": "patches/wave/mouth_big.png",
+      "rect": [361, 468, 82, 59],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       13.4
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 15
+     },
+     "smile": {
+      "file": "patches/wave/mouth_smile.png",
+      "rect": [361, 468, 82, 59],
+      "color_shift_rgb": [
+       7.0,
+       9.0,
+       13.4
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 15
+     }
+    },
+    "blink": {
+     "file": "patches/wave/blink.png",
+     "rect": [269, 378, 257, 112],
+     "color_shift_rgb": [
+      7.0,
+      7.0,
+      12.0
+     ],
+     "skin_samples": 1645,
+     "occluded_px": 5299
+    },
+    "clean": {
+     "file": "patches/wave/clean.png",
+     "rect": [269, 350, 257, 177],
+     "color_shift_rgb": [
+      7.0,
+      8.0,
+      12.0
+     ],
+     "skin_samples": 2778,
+     "occluded_px": 9063
+    },
+    "face": {
+     "angry": {
+      "blush": {
+       "file": "patches/wave/face_angry_blush.png",
+       "rect": [291, 441, 217, 92],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/wave/face_angry_eyes.png",
+       "rect": [283, 378, 231, 111],
+       "color_shift_rgb": [
+        2.5,
+        8.5,
+        13.2
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_angry_mouth.png",
+       "rect": [355, 462, 103, 65],
+       "color_shift_rgb": [
+        2.7,
+        7.9,
+        13.0
+       ]
+      },
+      "brow": {
+       "file": "patches/wave/face_angry_brow.png",
+       "rect": [307, 364, 178, 46],
+       "color_shift_rgb": [
+        2.6,
+        7.7,
+        12.0
+       ]
+      }
+     },
+     "awkward": {
+      "blush": {
+       "file": "patches/wave/face_awkward_blush.png",
+       "rect": [291, 441, 217, 92],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/wave/face_awkward_eyes.png",
+       "rect": [283, 377, 231, 98],
+       "color_shift_rgb": [
+        2.0,
+        7.6,
+        10.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_awkward_mouth.png",
+       "rect": [361, 468, 82, 59],
+       "color_shift_rgb": [
+        2.0,
+        7.0,
+        10.1
+       ]
+      },
+      "brow": {
+       "file": "patches/wave/face_awkward_brow.png",
+       "rect": [301, 380, 180, 31],
+       "color_shift_rgb": [
+        1.8,
+        6.8,
+        10.3
+       ]
+      }
+     },
+     "doubt": {
+      "blush": {
+       "file": "patches/wave/face_doubt_blush.png",
+       "rect": [291, 441, 217, 92],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/wave/face_doubt_eyes.png",
+       "rect": [283, 376, 231, 103],
+       "color_shift_rgb": [
+        2.4,
+        7.3,
+        11.7
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_doubt_mouth.png",
+       "rect": [361, 468, 82, 59],
+       "color_shift_rgb": [
+        3.0,
+        7.1,
+        12.3
+       ]
+      },
+      "brow": {
+       "file": "patches/wave/face_doubt_brow.png",
+       "rect": [308, 367, 169, 37],
+       "color_shift_rgb": [
+        2.2,
+        7.5,
+        12.2
+       ]
+      }
+     },
+     "flat": {
+      "blush": {
+       "file": "patches/wave/face_flat_blush.png",
+       "rect": [291, 441, 217, 92],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/wave/face_flat_eyes.png",
+       "rect": [283, 376, 231, 109],
+       "color_shift_rgb": [
+        3.0,
+        10.5,
+        13.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_flat_mouth.png",
+       "rect": [361, 468, 82, 59],
+       "color_shift_rgb": [
+        3.0,
+        7.0,
+        12.1
+       ]
+      },
+      "brow": {
+       "file": "patches/wave/face_flat_brow.png",
+       "rect": [297, 372, 195, 33],
+       "color_shift_rgb": [
+        2.9,
+        7.0,
+        10.4
+       ]
+      }
+     },
+     "happy": {
+      "eyes": {
+       "file": "patches/wave/face_happy_eyes.png",
+       "rect": [283, 377, 231, 106],
+       "color_shift_rgb": [
+        2.1,
+        8.5,
+        11.5
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_happy_mouth.png",
+       "rect": [359, 456, 89, 75],
+       "color_shift_rgb": [
+        2.1,
+        7.3,
+        11.1
+       ]
+      }
+     },
+     "love": {
+      "blush": {
+       "file": "patches/wave/face_love_blush.png",
+       "rect": [291, 441, 217, 92],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/wave/face_love_eyes.png",
+       "rect": [283, 378, 231, 114],
+       "color_shift_rgb": [
+        2.1,
+        10.0,
+        14.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_love_mouth.png",
+       "rect": [361, 468, 82, 59],
+       "color_shift_rgb": [
+        2.0,
+        9.6,
+        13.6
+       ]
+      },
+      "brow": {
+       "file": "patches/wave/face_love_brow.png",
+       "rect": [298, 352, 173, 27],
+       "color_shift_rgb": [
+        1.3,
+        7.5,
+        10.8
+       ]
+      }
+     },
+     "squeeze": {
+      "blush": {
+       "file": "patches/wave/face_squeeze_blush.png",
+       "rect": [291, 441, 217, 92],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/wave/face_squeeze_eyes.png",
+       "rect": [283, 379, 231, 105],
+       "color_shift_rgb": [
+        2.9,
+        7.5,
+        9.6
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_squeeze_mouth.png",
+       "rect": [361, 468, 82, 59],
+       "color_shift_rgb": [
+        2.8,
+        6.5,
+        10.0
+       ]
+      },
+      "brow": {
+       "file": "patches/wave/face_squeeze_brow.png",
+       "rect": [318, 380, 152, 37],
+       "color_shift_rgb": [
+        2.9,
+        7.1,
+        10.2
+       ]
+      }
+     },
+     "surprise": {
+      "blush": {
+       "file": "patches/wave/face_surprise_blush.png",
+       "rect": [291, 441, 217, 92],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/wave/face_surprise_eyes.png",
+       "rect": [283, 378, 231, 107],
+       "color_shift_rgb": [
+        2.2,
+        7.1,
+        10.4
+       ]
+      },
+      "mouth": {
+       "file": "patches/wave/face_surprise_mouth.png",
+       "rect": [361, 468, 82, 59],
+       "color_shift_rgb": [
+        2.4,
+        7.0,
+        10.9
+       ]
+      },
+      "brow": {
+       "file": "patches/wave/face_surprise_brow.png",
+       "rect": [295, 354, 187, 36],
+       "color_shift_rgb": [
+        2.0,
+        7.3,
+        12.2
+       ]
+      }
+     }
+    },
+    "eyeSkin": {
+     "file": "patches/wave/eye_skin.png",
+     "rect": [283, 375, 225, 117]
+    },
+    "browErase": {
+     "file": "patches/wave/brow_erase.png",
+     "rect": [186, 156, 436, 846],
+     "source": "noBrow"
+    }
+   },
+   "browOk": false,
+   "browRead": {
+    "line_px": 2.82,
+    "doubled": 0.356,
+    "shift_px": 0.47,
+    "region_px": 52289
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "shrug": {
+   "label": "双手摊开（嘴没管住）（幅度最大处，第 21 帧）",
+   "frame": "frames/shrug_loop/21.png",
+   "bbox": [150, 140, 678, 1002],
+   "margin": [150, 140, 154, 102],
+   "patches": {
+    "align": {
+     "scale": 0.3415,
+     "rotate_deg": 3.97,
+     "translate": [
+      77.4,
+      44.2
+     ],
+     "matches": 73,
+     "inliers": 42,
+     "residual_px": 0.9
+    },
+    "mouth": {
+     "closed": {
+      "file": "patches/shrug/mouth_closed.png",
+      "rect": [373, 461, 83, 59],
+      "color_shift_rgb": [
+       5.0,
+       7.0,
+       10.0
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 141
+     },
+     "small": {
+      "file": "patches/shrug/mouth_small.png",
+      "rect": [373, 461, 83, 59],
+      "color_shift_rgb": [
+       5.0,
+       7.0,
+       10.0
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 141
+     },
+     "big": {
+      "file": "patches/shrug/mouth_big.png",
+      "rect": [373, 461, 83, 59],
+      "color_shift_rgb": [
+       5.0,
+       7.0,
+       10.0
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 141
+     },
+     "smile": {
+      "file": "patches/shrug/mouth_smile.png",
+      "rect": [373, 461, 83, 59],
+      "color_shift_rgb": [
+       5.0,
+       7.0,
+       10.0
+      ],
+      "skin_samples": 1017,
+      "occluded_px": 141
+     }
+    },
+    "blink": {
+     "file": "patches/shrug/blink.png",
+     "rect": [290, 372, 259, 108],
+     "color_shift_rgb": [
+      5.0,
+      5.0,
+      8.0
+     ],
+     "skin_samples": 2037,
+     "occluded_px": 131
+    },
+    "clean": {
+     "file": "patches/shrug/clean.png",
+     "rect": [290, 344, 259, 176],
+     "color_shift_rgb": [
+      5.0,
+      5.0,
+      8.1
+     ],
+     "skin_samples": 3186,
+     "occluded_px": 1360
+    },
+    "face": {
+     "angry": {
+      "blush": {
+       "file": "patches/shrug/face_angry_blush.png",
+       "rect": [303, 430, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/shrug/face_angry_eyes.png",
+       "rect": [304, 376, 232, 103],
+       "color_shift_rgb": [
+        0.7,
+        6.0,
+        10.3
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_angry_mouth.png",
+       "rect": [364, 458, 104, 62],
+       "color_shift_rgb": [
+        0.9,
+        5.5,
+        9.4
+       ]
+      },
+      "brow": {
+       "file": "patches/shrug/face_angry_brow.png",
+       "rect": [337, 364, 180, 37],
+       "color_shift_rgb": [
+        1.7,
+        5.2,
+        9.7
+       ]
+      }
+     },
+     "awkward": {
+      "blush": {
+       "file": "patches/shrug/face_awkward_blush.png",
+       "rect": [303, 430, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/shrug/face_awkward_eyes.png",
+       "rect": [304, 375, 232, 103],
+       "color_shift_rgb": [
+        -0.0,
+        5.2,
+        7.8
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_awkward_mouth.png",
+       "rect": [373, 461, 83, 59],
+       "color_shift_rgb": [
+        0.1,
+        4.7,
+        6.4
+       ]
+      },
+      "brow": {
+       "file": "patches/shrug/face_awkward_brow.png",
+       "rect": [327, 370, 181, 31],
+       "color_shift_rgb": [
+        0.9,
+        4.4,
+        7.9
+       ]
+      }
+     },
+     "doubt": {
+      "blush": {
+       "file": "patches/shrug/face_doubt_blush.png",
+       "rect": [303, 430, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/shrug/face_doubt_eyes.png",
+       "rect": [304, 375, 232, 103],
+       "color_shift_rgb": [
+        0.5,
+        5.0,
+        9.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_doubt_mouth.png",
+       "rect": [373, 461, 83, 59],
+       "color_shift_rgb": [
+        1.0,
+        5.0,
+        8.6
+       ]
+      },
+      "brow": {
+       "file": "patches/shrug/face_doubt_brow.png",
+       "rect": [337, 362, 171, 30],
+       "color_shift_rgb": [
+        1.1,
+        5.0,
+        9.4
+       ]
+      }
+     },
+     "flat": {
+      "blush": {
+       "file": "patches/shrug/face_flat_blush.png",
+       "rect": [303, 430, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/shrug/face_flat_eyes.png",
+       "rect": [304, 374, 232, 104],
+       "color_shift_rgb": [
+        1.0,
+        7.8,
+        10.3
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_flat_mouth.png",
+       "rect": [373, 461, 83, 59],
+       "color_shift_rgb": [
+        1.0,
+        4.8,
+        8.7
+       ]
+      },
+      "brow": {
+       "file": "patches/shrug/face_flat_brow.png",
+       "rect": [324, 370, 198, 23],
+       "color_shift_rgb": [
+        1.8,
+        4.3,
+        9.0
+       ]
+      }
+     },
+     "happy": {
+      "eyes": {
+       "file": "patches/shrug/face_happy_eyes.png",
+       "rect": [304, 376, 232, 102],
+       "color_shift_rgb": [
+        0.1,
+        6.1,
+        8.7
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_happy_mouth.png",
+       "rect": [373, 449, 88, 73],
+       "color_shift_rgb": [
+        0.3,
+        5.1,
+        8.0
+       ]
+      }
+     },
+     "love": {
+      "blush": {
+       "file": "patches/shrug/face_love_blush.png",
+       "rect": [303, 430, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/shrug/face_love_eyes.png",
+       "rect": [304, 380, 232, 102],
+       "color_shift_rgb": [
+        0.4,
+        7.5,
+        11.2
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_love_mouth.png",
+       "rect": [373, 461, 83, 59],
+       "color_shift_rgb": [
+        0.0,
+        9.1,
+        11.7
+       ]
+      },
+      "brow": {
+       "file": "patches/shrug/face_love_brow.png",
+       "rect": [329, 345, 175, 22],
+       "color_shift_rgb": [
+        -2.8,
+        4.0,
+        8.1
+       ]
+      }
+     },
+     "squeeze": {
+      "blush": {
+       "file": "patches/shrug/face_squeeze_blush.png",
+       "rect": [303, 430, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/shrug/face_squeeze_eyes.png",
+       "rect": [304, 376, 232, 99],
+       "color_shift_rgb": [
+        0.8,
+        5.2,
+        7.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_squeeze_mouth.png",
+       "rect": [373, 461, 83, 59],
+       "color_shift_rgb": [
+        0.9,
+        4.1,
+        6.0
+       ]
+      },
+      "brow": {
+       "file": "patches/shrug/face_squeeze_brow.png",
+       "rect": [346, 374, 153, 34],
+       "color_shift_rgb": [
+        2.0,
+        4.7,
+        7.4
+       ]
+      }
+     },
+     "surprise": {
+      "blush": {
+       "file": "patches/shrug/face_surprise_blush.png",
+       "rect": [303, 430, 225, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/shrug/face_surprise_eyes.png",
+       "rect": [304, 375, 232, 97],
+       "color_shift_rgb": [
+        0.3,
+        4.9,
+        7.9
+       ]
+      },
+      "mouth": {
+       "file": "patches/shrug/face_surprise_mouth.png",
+       "rect": [373, 461, 83, 59],
+       "color_shift_rgb": [
+        0.7,
+        4.9,
+        7.0
+       ]
+      },
+      "brow": {
+       "file": "patches/shrug/face_surprise_brow.png",
+       "rect": [326, 347, 189, 35],
+       "color_shift_rgb": [
+        0.9,
+        4.5,
+        8.4
+       ]
+      }
+     }
+    },
+    "eyeSkin": {
+     "file": "patches/shrug/eye_skin.png",
+     "rect": [305, 370, 231, 112]
+    },
+    "browErase": {
+     "file": "patches/shrug/brow_erase.png",
+     "rect": [210, 150, 436, 852],
+     "source": "noBrow"
+    }
+   },
+   "browOk": false,
+   "browRead": {
+    "line_px": 2.93,
+    "doubled": 0.354,
+    "shift_px": 0.84,
+    "region_px": 56962
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  }
+ },
+ "clips": {
+  "think_loop": {
+   "label": "思考（一段做完去和回）",
+   "from": "idle",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/think_loop/00.png",
+    "frames/think_loop/01.png",
+    "frames/think_loop/02.png",
+    "frames/think_loop/03.png",
+    "frames/think_loop/04.png",
+    "frames/think_loop/05.png",
+    "frames/think_loop/06.png",
+    "frames/think_loop/07.png",
+    "frames/think_loop/08.png",
+    "frames/think_loop/09.png",
+    "frames/think_loop/10.png",
+    "frames/think_loop/11.png",
+    "frames/think_loop/12.png",
+    "frames/think_loop/13.png",
+    "frames/think_loop/14.png",
+    "frames/think_loop/15.png",
+    "frames/think_loop/16.png",
+    "frames/think_loop/17.png",
+    "frames/think_loop/18.png",
+    "frames/think_loop/19.png",
+    "frames/think_loop/20.png",
+    "frames/think_loop/21.png",
+    "frames/think_loop/22.png",
+    "frames/think_loop/23.png",
+    "frames/think_loop/24.png",
+    "frames/think_loop/25.png",
+    "frames/think_loop/26.png",
+    "frames/think_loop/27.png",
+    "frames/think_loop/28.png",
+    "frames/think_loop/29.png",
+    "frames/think_loop/30.png",
+    "frames/think_loop/31.png",
+    "frames/think_loop/32.png",
+    "frames/think_loop/33.png",
+    "frames/think_loop/34.png",
+    "frames/think_loop/35.png",
+    "frames/think_loop/36.png",
+    "frames/think_loop/37.png",
+    "frames/think_loop/38.png",
+    "frames/think_loop/39.png",
+    "frames/think_loop/40.png",
+    "frames/think_loop/41.png",
+    "frames/think_loop/42.png",
+    "frames/think_loop/43.png",
+    "frames/think_loop/44.png",
+    "frames/think_loop/45.png",
+    "frames/think_loop/46.png",
+    "frames/think_loop/47.png",
+    "frames/think_loop/48.png"
+   ],
+   "apex": 23,
+   "away_pct": [
+    0.0,
+    1.15,
+    1.13,
+    1.17,
+    1.6,
+    2.45,
+    4.53,
+    5.15,
+    5.08,
+    4.55,
+    6.07,
+    7.28,
+    8.84,
+    9.4,
+    9.75,
+    9.9,
+    9.99,
+    10.03,
+    10.0,
+    10.0,
+    9.99,
+    10.0,
+    10.01,
+    10.01,
+    10.0,
+    10.0,
+    10.0,
+    10.02,
+    10.06,
+    10.47,
+    10.79,
+    10.98,
+    10.72,
+    10.17,
+    8.82,
+    7.91,
+    5.96,
+    5.04,
+    4.45,
+    4.3,
+    4.09,
+    3.28,
+    2.08,
+    1.61,
+    1.18,
+    1.11,
+    1.12,
+    1.13,
+    0.0
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 135, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 134, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [186, 138, 650, 1002],
+    [184, 138, 650, 1002],
+    [184, 138, 648, 1002],
+    [182, 136, 648, 1002],
+    [180, 132, 644, 1002],
+    [180, 130, 644, 1002],
+    [176, 130, 640, 1002],
+    [176, 130, 640, 1002],
+    [174, 130, 638, 1002],
+    [174, 132, 636, 1002],
+    [172, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [172, 132, 636, 1002],
+    [172, 132, 636, 1002],
+    [172, 132, 634, 1002],
+    [172, 132, 634, 1002],
+    [174, 132, 636, 1002],
+    [176, 134, 638, 1002],
+    [176, 134, 640, 1002],
+    [180, 134, 644, 1002],
+    [180, 132, 646, 1002],
+    [182, 132, 646, 1002],
+    [182, 132, 646, 1002],
+    [184, 132, 648, 1002],
+    [184, 134, 648, 1002],
+    [182, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [172, 130, 650, 1002],
+   "margin": [172, 130, 182, 102],
+   "active": [
+    [
+     4,
+     42
+    ]
+   ],
+   "dupes": [
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30
+   ],
+   "arc": [
+    0.0,
+    0.0062,
+    0.0063,
+    0.0065,
+    0.0273,
+    0.0595,
+    0.1222,
+    0.1405,
+    0.1766,
+    0.2272,
+    0.33,
+    0.3687,
+    0.4248,
+    0.4381,
+    0.4752,
+    0.4937,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.4939,
+    0.5005,
+    0.5015,
+    0.512,
+    0.5391,
+    0.5701,
+    0.6515,
+    0.6828,
+    0.7697,
+    0.831,
+    0.9163,
+    0.9277,
+    0.9457,
+    0.9567,
+    0.979,
+    0.9848,
+    0.9929,
+    0.9935,
+    0.9935,
+    0.9935,
+    1.0
+   ],
+   "minSeconds": 0.6,
+   "browOk": true,
+   "browRead": {
+    "line_px_median": 0.3,
+    "line_px_max": 1.32,
+    "frames_over": 1,
+    "longest_run_over": 1,
+    "per_frame_line_px": [
+     0.02,
+     0.08,
+     0.08,
+     0.08,
+     0.16,
+     0.45,
+     1.05,
+     1.32,
+     1.17,
+     0.7,
+     0.36,
+     0.17,
+     0.17,
+     0.18,
+     0.23,
+     0.25,
+     0.31,
+     0.36,
+     0.29,
+     0.29,
+     0.3,
+     0.33,
+     0.35,
+     0.31,
+     0.3,
+     0.3,
+     0.3,
+     0.29,
+     0.31,
+     0.3,
+     0.29,
+     0.34,
+     0.39,
+     0.63,
+     0.94,
+     0.89,
+     0.62,
+     0.32,
+     0.3,
+     0.26,
+     0.22,
+     0.17,
+     0.11,
+     0.09,
+     0.08,
+     0.08,
+     0.08,
+     0.08,
+     0.02
+    ]
+   },
+   "facePaste": true,
+   "browSwap": true,
+   "faceBlank": false,
+   "faceClass": 1,
+   "attrManual": [
+    "browSwap"
+   ]
+  },
+  "think_in": {
+   "label": "归位 → 思考",
+   "from": "idle",
+   "to": "think",
+   "fps": 16,
+   "frames": [
+    "frames/think_loop/00.png",
+    "frames/think_loop/01.png",
+    "frames/think_loop/02.png",
+    "frames/think_loop/03.png",
+    "frames/think_loop/04.png",
+    "frames/think_loop/05.png",
+    "frames/think_loop/06.png",
+    "frames/think_loop/07.png",
+    "frames/think_loop/08.png",
+    "frames/think_loop/09.png",
+    "frames/think_loop/10.png",
+    "frames/think_loop/11.png",
+    "frames/think_loop/12.png",
+    "frames/think_loop/13.png",
+    "frames/think_loop/14.png",
+    "frames/think_loop/15.png",
+    "frames/think_loop/16.png",
+    "frames/think_loop/17.png",
+    "frames/think_loop/18.png",
+    "frames/think_loop/19.png",
+    "frames/think_loop/20.png",
+    "frames/think_loop/21.png",
+    "frames/think_loop/22.png",
+    "frames/think_loop/23.png"
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 135, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 134, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [186, 138, 650, 1002],
+    [184, 138, 650, 1002],
+    [184, 138, 648, 1002],
+    [182, 136, 648, 1002],
+    [180, 132, 644, 1002],
+    [180, 130, 644, 1002],
+    [176, 130, 640, 1002],
+    [176, 130, 640, 1002],
+    [174, 130, 638, 1002],
+    [174, 132, 636, 1002],
+    [172, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002]
+   ],
+   "bbox": [172, 130, 650, 1002],
+   "margin": [172, 130, 182, 102],
+   "active": [
+    [
+     4,
+     22
+    ]
+   ],
+   "dupes": [
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "arc": [
+    0.0,
+    0.0126,
+    0.0127,
+    0.0132,
+    0.0552,
+    0.1204,
+    0.2475,
+    0.2845,
+    0.3576,
+    0.4601,
+    0.6681,
+    0.7465,
+    0.8601,
+    0.8869,
+    0.9622,
+    0.9996,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "browOk": true,
+   "browRead": {
+    "line_px_median": 0.29,
+    "line_px_max": 1.32,
+    "frames_over": 1,
+    "longest_run_over": 1,
+    "per_frame_line_px": [
+     0.02,
+     0.08,
+     0.08,
+     0.08,
+     0.16,
+     0.45,
+     1.05,
+     1.32,
+     1.17,
+     0.7,
+     0.36,
+     0.17,
+     0.17,
+     0.18,
+     0.23,
+     0.25,
+     0.31,
+     0.36,
+     0.29,
+     0.29,
+     0.3,
+     0.33,
+     0.35,
+     0.31
+    ]
+   },
+   "facePaste": true,
+   "browSwap": true,
+   "faceBlank": false,
+   "faceClass": 1,
+   "attrManual": [
+    "browSwap"
+   ]
+  },
+  "think_out": {
+   "label": "思考 → 归位",
+   "from": "think",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/think_loop/23.png",
+    "frames/think_loop/24.png",
+    "frames/think_loop/25.png",
+    "frames/think_loop/26.png",
+    "frames/think_loop/27.png",
+    "frames/think_loop/28.png",
+    "frames/think_loop/29.png",
+    "frames/think_loop/30.png",
+    "frames/think_loop/31.png",
+    "frames/think_loop/32.png",
+    "frames/think_loop/33.png",
+    "frames/think_loop/34.png",
+    "frames/think_loop/35.png",
+    "frames/think_loop/36.png",
+    "frames/think_loop/37.png",
+    "frames/think_loop/38.png",
+    "frames/think_loop/39.png",
+    "frames/think_loop/40.png",
+    "frames/think_loop/41.png",
+    "frames/think_loop/42.png",
+    "frames/think_loop/43.png",
+    "frames/think_loop/44.png",
+    "frames/think_loop/45.png",
+    "frames/think_loop/46.png",
+    "frames/think_loop/47.png",
+    "frames/think_loop/48.png"
+   ],
+   "frameBBox": [
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [174, 132, 636, 1002],
+    [172, 132, 636, 1002],
+    [172, 132, 636, 1002],
+    [172, 132, 634, 1002],
+    [172, 132, 634, 1002],
+    [174, 132, 636, 1002],
+    [176, 134, 638, 1002],
+    [176, 134, 640, 1002],
+    [180, 134, 644, 1002],
+    [180, 132, 646, 1002],
+    [182, 132, 646, 1002],
+    [182, 132, 646, 1002],
+    [184, 132, 648, 1002],
+    [184, 134, 648, 1002],
+    [182, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [172, 132, 649, 1002],
+   "margin": [172, 132, 183, 102],
+   "active": [
+    [
+     1,
+     19
+    ]
+   ],
+   "dupes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "arc": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.013,
+    0.0151,
+    0.0358,
+    0.0894,
+    0.1505,
+    0.3113,
+    0.3733,
+    0.5449,
+    0.6662,
+    0.8346,
+    0.8572,
+    0.8928,
+    0.9144,
+    0.9585,
+    0.97,
+    0.9859,
+    0.9871,
+    0.9871,
+    0.9871,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "browOk": true,
+   "browRead": {
+    "line_px_median": 0.3,
+    "line_px_max": 0.94,
+    "frames_over": 0,
+    "longest_run_over": 0,
+    "per_frame_line_px": [
+     0.31,
+     0.3,
+     0.3,
+     0.3,
+     0.29,
+     0.31,
+     0.3,
+     0.29,
+     0.34,
+     0.39,
+     0.63,
+     0.94,
+     0.89,
+     0.62,
+     0.32,
+     0.3,
+     0.26,
+     0.22,
+     0.17,
+     0.11,
+     0.09,
+     0.08,
+     0.08,
+     0.08,
+     0.08,
+     0.02
+    ]
+   },
+   "facePaste": true,
+   "browSwap": true,
+   "faceBlank": false,
+   "faceClass": 1,
+   "attrManual": [
+    "browSwap"
+   ]
+  },
+  "wave_loop": {
+   "label": "挥手（一段做完去和回）",
+   "from": "idle",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/wave_loop/00.png",
+    "frames/wave_loop/01.png",
+    "frames/wave_loop/02.png",
+    "frames/wave_loop/03.png",
+    "frames/wave_loop/04.png",
+    "frames/wave_loop/05.png",
+    "frames/wave_loop/06.png",
+    "frames/wave_loop/07.png",
+    "frames/wave_loop/08.png",
+    "frames/wave_loop/09.png",
+    "frames/wave_loop/10.png",
+    "frames/wave_loop/11.png",
+    "frames/wave_loop/12.png",
+    "frames/wave_loop/13.png",
+    "frames/wave_loop/14.png",
+    "frames/wave_loop/15.png",
+    "frames/wave_loop/16.png",
+    "frames/wave_loop/17.png",
+    "frames/wave_loop/18.png",
+    "frames/wave_loop/19.png",
+    "frames/wave_loop/20.png",
+    "frames/wave_loop/21.png",
+    "frames/wave_loop/22.png",
+    "frames/wave_loop/23.png",
+    "frames/wave_loop/24.png",
+    "frames/wave_loop/25.png",
+    "frames/wave_loop/26.png",
+    "frames/wave_loop/27.png",
+    "frames/wave_loop/28.png",
+    "frames/wave_loop/29.png",
+    "frames/wave_loop/30.png",
+    "frames/wave_loop/31.png",
+    "frames/wave_loop/32.png",
+    "frames/wave_loop/33.png",
+    "frames/wave_loop/34.png",
+    "frames/wave_loop/35.png",
+    "frames/wave_loop/36.png",
+    "frames/wave_loop/37.png",
+    "frames/wave_loop/38.png",
+    "frames/wave_loop/39.png",
+    "frames/wave_loop/40.png",
+    "frames/wave_loop/41.png",
+    "frames/wave_loop/42.png",
+    "frames/wave_loop/43.png",
+    "frames/wave_loop/44.png",
+    "frames/wave_loop/45.png",
+    "frames/wave_loop/46.png",
+    "frames/wave_loop/47.png",
+    "frames/wave_loop/48.png"
+   ],
+   "apex": 37,
+   "away_pct": [
+    0.0,
+    1.33,
+    3.9,
+    6.02,
+    10.02,
+    12.22,
+    14.56,
+    14.47,
+    12.98,
+    12.89,
+    13.17,
+    12.7,
+    11.23,
+    10.73,
+    8.78,
+    6.6,
+    7.62,
+    10.13,
+    11.25,
+    12.61,
+    12.61,
+    11.23,
+    10.02,
+    7.11,
+    6.29,
+    8.13,
+    9.26,
+    10.9,
+    11.45,
+    12.49,
+    13.08,
+    14.22,
+    15.03,
+    15.39,
+    15.81,
+    15.81,
+    18.14,
+    18.85,
+    17.05,
+    14.91,
+    10.97,
+    8.8,
+    4.85,
+    3.27,
+    1.46,
+    1.13,
+    1.11,
+    1.15,
+    0.0
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 134, 648, 1002],
+    [184, 135, 648, 1002],
+    [184, 134, 652, 1002],
+    [180, 134, 692, 1002],
+    [178, 132, 706, 1002],
+    [174, 130, 712, 1002],
+    [172, 130, 702, 1002],
+    [168, 128, 658, 1002],
+    [168, 128, 628, 1002],
+    [168, 128, 630, 1002],
+    [168, 128, 632, 1002],
+    [172, 128, 634, 1002],
+    [174, 130, 636, 1002],
+    [178, 132, 640, 1002],
+    [184, 134, 648, 1002],
+    [186, 136, 652, 1002],
+    [192, 140, 656, 1002],
+    [194, 142, 658, 1002],
+    [198, 144, 662, 1002],
+    [198, 144, 662, 1002],
+    [194, 142, 660, 1002],
+    [190, 140, 656, 1002],
+    [184, 138, 650, 1002],
+    [182, 136, 648, 1002],
+    [178, 134, 642, 1002],
+    [176, 132, 640, 1002],
+    [172, 132, 636, 1002],
+    [170, 132, 634, 1002],
+    [168, 130, 632, 1002],
+    [168, 130, 630, 1002],
+    [166, 130, 626, 1002],
+    [164, 130, 624, 1002],
+    [164, 130, 624, 1002],
+    [162, 130, 626, 1002],
+    [164, 130, 644, 1002],
+    [166, 130, 682, 1002],
+    [168, 130, 694, 1002],
+    [172, 132, 692, 1002],
+    [174, 132, 682, 1002],
+    [176, 132, 658, 1002],
+    [178, 134, 646, 1002],
+    [180, 134, 644, 1002],
+    [182, 134, 646, 1002],
+    [182, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [162, 128, 712, 1002],
+   "margin": [162, 128, 120, 102],
+   "active": [
+    [
+     2,
+     44
+    ]
+   ],
+   "dupes": [
+    13,
+    20
+   ],
+   "arc": [
+    0.0,
+    0.0048,
+    0.0144,
+    0.0233,
+    0.0553,
+    0.0777,
+    0.1269,
+    0.1544,
+    0.2012,
+    0.2216,
+    0.2416,
+    0.2513,
+    0.2765,
+    0.2807,
+    0.3128,
+    0.357,
+    0.3835,
+    0.4236,
+    0.442,
+    0.4658,
+    0.4666,
+    0.4914,
+    0.5113,
+    0.5522,
+    0.5723,
+    0.6069,
+    0.623,
+    0.6494,
+    0.657,
+    0.6742,
+    0.6817,
+    0.7004,
+    0.717,
+    0.7266,
+    0.7451,
+    0.7592,
+    0.7985,
+    0.8219,
+    0.8653,
+    0.8877,
+    0.9293,
+    0.946,
+    0.9739,
+    0.9823,
+    0.9951,
+    0.9968,
+    0.997,
+    0.997,
+    1.0
+   ],
+   "minSeconds": 0.6,
+   "browOk": false,
+   "browRead": {
+    "line_px_median": 0.71,
+    "line_px_max": 2.04,
+    "frames_over": 11,
+    "longest_run_over": 4,
+    "per_frame_line_px": [
+     0.02,
+     0.08,
+     0.26,
+     0.52,
+     0.69,
+     0.79,
+     0.91,
+     0.97,
+     1.82,
+     2.04,
+     1.4,
+     1.35,
+     0.95,
+     0.88,
+     0.68,
+     0.56,
+     0.55,
+     0.64,
+     0.65,
+     1.14,
+     1.32,
+     1.24,
+     1.21,
+     0.7,
+     0.71,
+     0.52,
+     0.54,
+     0.67,
+     0.67,
+     0.71,
+     0.74,
+     0.84,
+     1.04,
+     1.16,
+     1.68,
+     1.86,
+     1.45,
+     1.31,
+     1.2,
+     1.08,
+     0.8,
+     0.58,
+     0.23,
+     0.14,
+     0.1,
+     0.08,
+     0.08,
+     0.08,
+     0.02
+    ]
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "wave_in": {
+   "label": "归位 → 挥手",
+   "from": "idle",
+   "to": "wave",
+   "fps": 16,
+   "frames": [
+    "frames/wave_loop/00.png",
+    "frames/wave_loop/01.png",
+    "frames/wave_loop/02.png",
+    "frames/wave_loop/03.png",
+    "frames/wave_loop/04.png",
+    "frames/wave_loop/05.png",
+    "frames/wave_loop/06.png",
+    "frames/wave_loop/07.png",
+    "frames/wave_loop/08.png",
+    "frames/wave_loop/09.png",
+    "frames/wave_loop/10.png",
+    "frames/wave_loop/11.png",
+    "frames/wave_loop/12.png",
+    "frames/wave_loop/13.png",
+    "frames/wave_loop/14.png",
+    "frames/wave_loop/15.png",
+    "frames/wave_loop/16.png",
+    "frames/wave_loop/17.png",
+    "frames/wave_loop/18.png",
+    "frames/wave_loop/19.png",
+    "frames/wave_loop/20.png",
+    "frames/wave_loop/21.png",
+    "frames/wave_loop/22.png",
+    "frames/wave_loop/23.png",
+    "frames/wave_loop/24.png",
+    "frames/wave_loop/25.png",
+    "frames/wave_loop/26.png",
+    "frames/wave_loop/27.png",
+    "frames/wave_loop/28.png",
+    "frames/wave_loop/29.png",
+    "frames/wave_loop/30.png",
+    "frames/wave_loop/31.png",
+    "frames/wave_loop/32.png",
+    "frames/wave_loop/33.png",
+    "frames/wave_loop/34.png",
+    "frames/wave_loop/35.png",
+    "frames/wave_loop/36.png",
+    "frames/wave_loop/37.png"
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 134, 648, 1002],
+    [184, 135, 648, 1002],
+    [184, 134, 652, 1002],
+    [180, 134, 692, 1002],
+    [178, 132, 706, 1002],
+    [174, 130, 712, 1002],
+    [172, 130, 702, 1002],
+    [168, 128, 658, 1002],
+    [168, 128, 628, 1002],
+    [168, 128, 630, 1002],
+    [168, 128, 632, 1002],
+    [172, 128, 634, 1002],
+    [174, 130, 636, 1002],
+    [178, 132, 640, 1002],
+    [184, 134, 648, 1002],
+    [186, 136, 652, 1002],
+    [192, 140, 656, 1002],
+    [194, 142, 658, 1002],
+    [198, 144, 662, 1002],
+    [198, 144, 662, 1002],
+    [194, 142, 660, 1002],
+    [190, 140, 656, 1002],
+    [184, 138, 650, 1002],
+    [182, 136, 648, 1002],
+    [178, 134, 642, 1002],
+    [176, 132, 640, 1002],
+    [172, 132, 636, 1002],
+    [170, 132, 634, 1002],
+    [168, 130, 632, 1002],
+    [168, 130, 630, 1002],
+    [166, 130, 626, 1002],
+    [164, 130, 624, 1002],
+    [164, 130, 624, 1002],
+    [162, 130, 626, 1002],
+    [164, 130, 644, 1002],
+    [166, 130, 682, 1002],
+    [168, 130, 694, 1002]
+   ],
+   "bbox": [162, 128, 712, 1002],
+   "margin": [162, 128, 120, 102],
+   "active": [
+    [
+     2,
+     36
+    ]
+   ],
+   "dupes": [
+    13,
+    20
+   ],
+   "arc": [
+    0.0,
+    0.0058,
+    0.0176,
+    0.0285,
+    0.0676,
+    0.095,
+    0.155,
+    0.1887,
+    0.2458,
+    0.2707,
+    0.2951,
+    0.307,
+    0.3378,
+    0.3429,
+    0.3821,
+    0.4361,
+    0.4685,
+    0.5174,
+    0.54,
+    0.569,
+    0.5699,
+    0.6003,
+    0.6246,
+    0.6745,
+    0.6991,
+    0.7413,
+    0.761,
+    0.7932,
+    0.8026,
+    0.8236,
+    0.8327,
+    0.8555,
+    0.8758,
+    0.8875,
+    0.9101,
+    0.9274,
+    0.9754,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "browOk": false,
+   "browRead": {
+    "line_px_median": 0.81,
+    "line_px_max": 2.04,
+    "frames_over": 11,
+    "longest_run_over": 4,
+    "per_frame_line_px": [
+     0.02,
+     0.08,
+     0.26,
+     0.52,
+     0.69,
+     0.79,
+     0.91,
+     0.97,
+     1.82,
+     2.04,
+     1.4,
+     1.35,
+     0.95,
+     0.88,
+     0.68,
+     0.56,
+     0.55,
+     0.64,
+     0.65,
+     1.14,
+     1.32,
+     1.24,
+     1.21,
+     0.7,
+     0.71,
+     0.52,
+     0.54,
+     0.67,
+     0.67,
+     0.71,
+     0.74,
+     0.84,
+     1.04,
+     1.16,
+     1.68,
+     1.86,
+     1.45,
+     1.31
+    ]
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "wave_out": {
+   "label": "挥手 → 归位",
+   "from": "wave",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/wave_loop/37.png",
+    "frames/wave_loop/38.png",
+    "frames/wave_loop/39.png",
+    "frames/wave_loop/40.png",
+    "frames/wave_loop/41.png",
+    "frames/wave_loop/42.png",
+    "frames/wave_loop/43.png",
+    "frames/wave_loop/44.png",
+    "frames/wave_loop/45.png",
+    "frames/wave_loop/46.png",
+    "frames/wave_loop/47.png",
+    "frames/wave_loop/48.png"
+   ],
+   "frameBBox": [
+    [168, 130, 694, 1002],
+    [172, 132, 692, 1002],
+    [174, 132, 682, 1002],
+    [176, 132, 658, 1002],
+    [178, 134, 646, 1002],
+    [180, 134, 644, 1002],
+    [182, 134, 646, 1002],
+    [182, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [168, 130, 694, 1002],
+   "margin": [168, 130, 138, 102],
+   "active": [
+    [
+     1,
+     7
+    ]
+   ],
+   "dupes": [],
+   "arc": [
+    0.0,
+    0.0866,
+    0.2385,
+    0.5204,
+    0.634,
+    0.8234,
+    0.8802,
+    0.9668,
+    0.978,
+    0.9798,
+    0.9798,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "browOk": true,
+   "browRead": {
+    "line_px_median": 0.18,
+    "line_px_max": 1.31,
+    "frames_over": 1,
+    "longest_run_over": 1,
+    "per_frame_line_px": [
+     1.31,
+     1.2,
+     1.08,
+     0.8,
+     0.58,
+     0.23,
+     0.14,
+     0.1,
+     0.08,
+     0.08,
+     0.08,
+     0.02
+    ]
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "shrug_loop": {
+   "label": "双手摊开（嘴没管住）（一段做完去和回）",
+   "from": "idle",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/shrug_loop/00.png",
+    "frames/shrug_loop/01.png",
+    "frames/shrug_loop/02.png",
+    "frames/shrug_loop/03.png",
+    "frames/shrug_loop/04.png",
+    "frames/shrug_loop/05.png",
+    "frames/shrug_loop/06.png",
+    "frames/shrug_loop/07.png",
+    "frames/shrug_loop/08.png",
+    "frames/shrug_loop/09.png",
+    "frames/shrug_loop/10.png",
+    "frames/shrug_loop/11.png",
+    "frames/shrug_loop/12.png",
+    "frames/shrug_loop/13.png",
+    "frames/shrug_loop/14.png",
+    "frames/shrug_loop/15.png",
+    "frames/shrug_loop/16.png",
+    "frames/shrug_loop/17.png",
+    "frames/shrug_loop/18.png",
+    "frames/shrug_loop/19.png",
+    "frames/shrug_loop/20.png",
+    "frames/shrug_loop/21.png",
+    "frames/shrug_loop/22.png",
+    "frames/shrug_loop/23.png",
+    "frames/shrug_loop/24.png",
+    "frames/shrug_loop/25.png",
+    "frames/shrug_loop/26.png",
+    "frames/shrug_loop/27.png",
+    "frames/shrug_loop/28.png",
+    "frames/shrug_loop/29.png",
+    "frames/shrug_loop/30.png",
+    "frames/shrug_loop/31.png",
+    "frames/shrug_loop/32.png",
+    "frames/shrug_loop/33.png",
+    "frames/shrug_loop/34.png",
+    "frames/shrug_loop/35.png",
+    "frames/shrug_loop/36.png",
+    "frames/shrug_loop/37.png",
+    "frames/shrug_loop/38.png",
+    "frames/shrug_loop/39.png",
+    "frames/shrug_loop/40.png",
+    "frames/shrug_loop/41.png",
+    "frames/shrug_loop/42.png",
+    "frames/shrug_loop/43.png",
+    "frames/shrug_loop/44.png",
+    "frames/shrug_loop/45.png",
+    "frames/shrug_loop/46.png",
+    "frames/shrug_loop/47.png",
+    "frames/shrug_loop/48.png"
+   ],
+   "apex": 21,
+   "away_pct": [
+    0.0,
+    1.17,
+    3.96,
+    6.71,
+    12.26,
+    14.3,
+    17.04,
+    18.26,
+    19.64,
+    20.09,
+    20.47,
+    20.5,
+    20.34,
+    20.13,
+    19.76,
+    19.53,
+    19.45,
+    19.57,
+    19.7,
+    19.84,
+    19.9,
+    20.02,
+    20.11,
+    20.17,
+    20.21,
+    20.25,
+    20.26,
+    20.29,
+    20.36,
+    21.04,
+    21.4,
+    21.84,
+    22.02,
+    21.93,
+    20.86,
+    19.59,
+    16.73,
+    14.99,
+    12.15,
+    10.25,
+    6.34,
+    4.6,
+    2.42,
+    1.66,
+    1.14,
+    1.23,
+    1.23,
+    1.19,
+    0.0
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 136, 648, 1002],
+    [186, 136, 650, 1002],
+    [186, 138, 650, 1002],
+    [178, 140, 652, 1002],
+    [168, 140, 660, 1002],
+    [160, 140, 668, 1002],
+    [154, 138, 672, 1002],
+    [148, 138, 680, 1002],
+    [146, 136, 680, 1002],
+    [146, 136, 682, 1002],
+    [146, 136, 682, 1002],
+    [146, 138, 682, 1002],
+    [146, 138, 680, 1002],
+    [148, 138, 680, 1002],
+    [148, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [148, 142, 680, 1002],
+    [148, 142, 680, 1002],
+    [148, 142, 680, 1002],
+    [148, 144, 680, 1002],
+    [148, 144, 680, 1002],
+    [150, 144, 680, 1002],
+    [152, 142, 674, 1002],
+    [168, 140, 662, 1002],
+    [174, 140, 658, 1002],
+    [184, 140, 652, 1002],
+    [186, 138, 650, 1002],
+    [184, 136, 650, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [146, 136, 682, 1002],
+   "margin": [146, 136, 150, 102],
+   "active": [
+    [
+     2,
+     44
+    ]
+   ],
+   "dupes": [
+    11,
+    12,
+    13,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    30,
+    31,
+    32,
+    33
+   ],
+   "arc": [
+    0.0,
+    0.008,
+    0.0471,
+    0.08,
+    0.1445,
+    0.1833,
+    0.2864,
+    0.3363,
+    0.4057,
+    0.4234,
+    0.4393,
+    0.4393,
+    0.449,
+    0.4577,
+    0.4815,
+    0.4934,
+    0.4957,
+    0.4981,
+    0.4981,
+    0.5002,
+    0.5002,
+    0.5027,
+    0.503,
+    0.5052,
+    0.5052,
+    0.5077,
+    0.5079,
+    0.5099,
+    0.5099,
+    0.5291,
+    0.5337,
+    0.5434,
+    0.5448,
+    0.5476,
+    0.5859,
+    0.6172,
+    0.7018,
+    0.7469,
+    0.8374,
+    0.8717,
+    0.9237,
+    0.9426,
+    0.967,
+    0.9788,
+    0.991,
+    0.9915,
+    0.9915,
+    0.9915,
+    1.0
+   ],
+   "minSeconds": 0.6,
+   "browOk": false,
+   "browRead": {
+    "line_px_median": 1.26,
+    "line_px_max": 1.44,
+    "frames_over": 28,
+    "longest_run_over": 28,
+    "per_frame_line_px": [
+     0.02,
+     0.07,
+     0.21,
+     0.47,
+     0.86,
+     1.02,
+     1.12,
+     1.25,
+     1.28,
+     1.36,
+     1.35,
+     1.42,
+     1.44,
+     1.37,
+     1.36,
+     1.36,
+     1.32,
+     1.34,
+     1.38,
+     1.34,
+     1.35,
+     1.32,
+     1.29,
+     1.28,
+     1.3,
+     1.33,
+     1.31,
+     1.32,
+     1.29,
+     1.24,
+     1.25,
+     1.29,
+     1.3,
+     1.32,
+     1.26,
+     1.2,
+     1.13,
+     1.06,
+     0.9,
+     0.77,
+     0.46,
+     0.29,
+     0.11,
+     0.09,
+     0.09,
+     0.09,
+     0.09,
+     0.08,
+     0.02
+    ]
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "shrug_in": {
+   "label": "归位 → 双手摊开（嘴没管住）",
+   "from": "idle",
+   "to": "shrug",
+   "fps": 16,
+   "frames": [
+    "frames/shrug_loop/00.png",
+    "frames/shrug_loop/01.png",
+    "frames/shrug_loop/02.png",
+    "frames/shrug_loop/03.png",
+    "frames/shrug_loop/04.png",
+    "frames/shrug_loop/05.png",
+    "frames/shrug_loop/06.png",
+    "frames/shrug_loop/07.png",
+    "frames/shrug_loop/08.png",
+    "frames/shrug_loop/09.png",
+    "frames/shrug_loop/10.png",
+    "frames/shrug_loop/11.png",
+    "frames/shrug_loop/12.png",
+    "frames/shrug_loop/13.png",
+    "frames/shrug_loop/14.png",
+    "frames/shrug_loop/15.png",
+    "frames/shrug_loop/16.png",
+    "frames/shrug_loop/17.png",
+    "frames/shrug_loop/18.png",
+    "frames/shrug_loop/19.png",
+    "frames/shrug_loop/20.png",
+    "frames/shrug_loop/21.png"
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 136, 648, 1002],
+    [186, 136, 650, 1002],
+    [186, 138, 650, 1002],
+    [178, 140, 652, 1002],
+    [168, 140, 660, 1002],
+    [160, 140, 668, 1002],
+    [154, 138, 672, 1002],
+    [148, 138, 680, 1002],
+    [146, 136, 680, 1002],
+    [146, 136, 682, 1002],
+    [146, 136, 682, 1002],
+    [146, 138, 682, 1002],
+    [146, 138, 680, 1002],
+    [148, 138, 680, 1002],
+    [148, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002]
+   ],
+   "bbox": [146, 136, 682, 1002],
+   "margin": [146, 136, 150, 102],
+   "active": [
+    [
+     2,
+     20
+    ]
+   ],
+   "dupes": [
+    11,
+    12,
+    13,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "arc": [
+    0.0,
+    0.0159,
+    0.0938,
+    0.1591,
+    0.2874,
+    0.3646,
+    0.5696,
+    0.6689,
+    0.807,
+    0.8422,
+    0.8738,
+    0.8738,
+    0.8932,
+    0.9105,
+    0.9578,
+    0.9814,
+    0.9861,
+    0.9907,
+    0.9907,
+    0.9951,
+    0.9951,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "browOk": false,
+   "browRead": {
+    "line_px_median": 1.33,
+    "line_px_max": 1.44,
+    "frames_over": 15,
+    "longest_run_over": 15,
+    "per_frame_line_px": [
+     0.02,
+     0.07,
+     0.21,
+     0.47,
+     0.86,
+     1.02,
+     1.12,
+     1.25,
+     1.28,
+     1.36,
+     1.35,
+     1.42,
+     1.44,
+     1.37,
+     1.36,
+     1.36,
+     1.32,
+     1.34,
+     1.38,
+     1.34,
+     1.35,
+     1.32
+    ]
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "shrug_out": {
+   "label": "双手摊开（嘴没管住） → 归位",
+   "from": "shrug",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/shrug_loop/21.png",
+    "frames/shrug_loop/22.png",
+    "frames/shrug_loop/23.png",
+    "frames/shrug_loop/24.png",
+    "frames/shrug_loop/25.png",
+    "frames/shrug_loop/26.png",
+    "frames/shrug_loop/27.png",
+    "frames/shrug_loop/28.png",
+    "frames/shrug_loop/29.png",
+    "frames/shrug_loop/30.png",
+    "frames/shrug_loop/31.png",
+    "frames/shrug_loop/32.png",
+    "frames/shrug_loop/33.png",
+    "frames/shrug_loop/34.png",
+    "frames/shrug_loop/35.png",
+    "frames/shrug_loop/36.png",
+    "frames/shrug_loop/37.png",
+    "frames/shrug_loop/38.png",
+    "frames/shrug_loop/39.png",
+    "frames/shrug_loop/40.png",
+    "frames/shrug_loop/41.png",
+    "frames/shrug_loop/42.png",
+    "frames/shrug_loop/43.png",
+    "frames/shrug_loop/44.png",
+    "frames/shrug_loop/45.png",
+    "frames/shrug_loop/46.png",
+    "frames/shrug_loop/47.png",
+    "frames/shrug_loop/48.png"
+   ],
+   "frameBBox": [
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [150, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [148, 140, 678, 1002],
+    [148, 142, 680, 1002],
+    [148, 142, 680, 1002],
+    [148, 142, 680, 1002],
+    [148, 144, 680, 1002],
+    [148, 144, 680, 1002],
+    [150, 144, 680, 1002],
+    [152, 142, 674, 1002],
+    [168, 140, 662, 1002],
+    [174, 140, 658, 1002],
+    [184, 140, 652, 1002],
+    [186, 138, 650, 1002],
+    [184, 136, 650, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [148, 136, 680, 1002],
+   "margin": [148, 136, 152, 102],
+   "active": [
+    [
+     1,
+     23
+    ]
+   ],
+   "dupes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "arc": [
+    0.0,
+    0.0005,
+    0.0049,
+    0.0049,
+    0.0099,
+    0.0105,
+    0.0144,
+    0.0144,
+    0.053,
+    0.0622,
+    0.0818,
+    0.0847,
+    0.0902,
+    0.1674,
+    0.2302,
+    0.4004,
+    0.4911,
+    0.6731,
+    0.7419,
+    0.8466,
+    0.8846,
+    0.9336,
+    0.9573,
+    0.982,
+    0.9829,
+    0.9829,
+    0.9829,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "browOk": false,
+   "browRead": {
+    "line_px_median": 1.22,
+    "line_px_max": 1.33,
+    "frames_over": 14,
+    "longest_run_over": 14,
+    "per_frame_line_px": [
+     1.32,
+     1.29,
+     1.28,
+     1.3,
+     1.33,
+     1.31,
+     1.32,
+     1.29,
+     1.24,
+     1.25,
+     1.29,
+     1.3,
+     1.32,
+     1.26,
+     1.2,
+     1.13,
+     1.06,
+     0.9,
+     0.77,
+     0.46,
+     0.29,
+     0.11,
+     0.09,
+     0.09,
+     0.09,
+     0.09,
+     0.08,
+     0.02
+    ]
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "turn_loop": {
+   "label": "转一圈·双脚踏着转（一段做完去和回）",
+   "from": "idle",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/turn_loop/00.png",
+    "frames/turn_loop/01.png",
+    "frames/turn_loop/02.png",
+    "frames/turn_loop/03.png",
+    "frames/turn_loop/04.png",
+    "frames/turn_loop/05.png",
+    "frames/turn_loop/06.png",
+    "frames/turn_loop/07.png",
+    "frames/turn_loop/08.png",
+    "frames/turn_loop/09.png",
+    "frames/turn_loop/10.png",
+    "frames/turn_loop/11.png",
+    "frames/turn_loop/12.png",
+    "frames/turn_loop/13.png",
+    "frames/turn_loop/14.png",
+    "frames/turn_loop/15.png",
+    "frames/turn_loop/16.png",
+    "frames/turn_loop/17.png",
+    "frames/turn_loop/18.png",
+    "frames/turn_loop/19.png",
+    "frames/turn_loop/20.png",
+    "frames/turn_loop/21.png",
+    "frames/turn_loop/22.png",
+    "frames/turn_loop/23.png",
+    "frames/turn_loop/24.png",
+    "frames/turn_loop/25.png",
+    "frames/turn_loop/26.png",
+    "frames/turn_loop/27.png",
+    "frames/turn_loop/28.png",
+    "frames/turn_loop/29.png",
+    "frames/turn_loop/30.png",
+    "frames/turn_loop/31.png",
+    "frames/turn_loop/32.png",
+    "frames/turn_loop/33.png",
+    "frames/turn_loop/34.png",
+    "frames/turn_loop/35.png",
+    "frames/turn_loop/36.png",
+    "frames/turn_loop/37.png",
+    "frames/turn_loop/38.png",
+    "frames/turn_loop/39.png",
+    "frames/turn_loop/40.png",
+    "frames/turn_loop/41.png",
+    "frames/turn_loop/42.png",
+    "frames/turn_loop/43.png",
+    "frames/turn_loop/44.png",
+    "frames/turn_loop/45.png",
+    "frames/turn_loop/46.png",
+    "frames/turn_loop/47.png",
+    "frames/turn_loop/48.png",
+    "frames/turn_loop/49.png",
+    "frames/turn_loop/50.png",
+    "frames/turn_loop/51.png",
+    "frames/turn_loop/52.png",
+    "frames/turn_loop/53.png",
+    "frames/turn_loop/54.png",
+    "frames/turn_loop/55.png",
+    "frames/turn_loop/56.png",
+    "frames/turn_loop/57.png",
+    "frames/turn_loop/58.png",
+    "frames/turn_loop/59.png",
+    "frames/turn_loop/60.png",
+    "frames/turn_loop/61.png",
+    "frames/turn_loop/62.png",
+    "frames/turn_loop/63.png",
+    "frames/turn_loop/64.png",
+    "frames/turn_loop/65.png",
+    "frames/turn_loop/66.png",
+    "frames/turn_loop/67.png",
+    "frames/turn_loop/68.png",
+    "frames/turn_loop/69.png",
+    "frames/turn_loop/70.png",
+    "frames/turn_loop/71.png",
+    "frames/turn_loop/72.png",
+    "frames/turn_loop/73.png",
+    "frames/turn_loop/74.png",
+    "frames/turn_loop/75.png",
+    "frames/turn_loop/76.png",
+    "frames/turn_loop/77.png",
+    "frames/turn_loop/78.png",
+    "frames/turn_loop/79.png",
+    "frames/turn_loop/80.png"
+   ],
+   "apex": 51,
+   "away_pct": [
+    0.0,
+    1.44,
+    2.32,
+    3.37,
+    4.71,
+    5.51,
+    7.29,
+    9.49,
+    11.75,
+    14.29,
+    16.86,
+    19.5,
+    22.01,
+    24.74,
+    27.25,
+    28.47,
+    30.58,
+    32.69,
+    34.2,
+    35.09,
+    34.86,
+    33.84,
+    31.95,
+    29.96,
+    27.59,
+    26.23,
+    23.72,
+    21.11,
+    18.78,
+    16.17,
+    13.77,
+    11.75,
+    10.05,
+    8.95,
+    9.11,
+    9.88,
+    10.61,
+    11.6,
+    13.1,
+    15.0,
+    17.01,
+    19.11,
+    21.35,
+    23.79,
+    25.04,
+    27.76,
+    30.22,
+    32.38,
+    34.14,
+    35.59,
+    36.24,
+    36.07,
+    34.92,
+    33.48,
+    32.56,
+    30.88,
+    29.13,
+    27.21,
+    25.17,
+    23.27,
+    21.48,
+    19.6,
+    17.8,
+    16.91,
+    15.24,
+    13.62,
+    12.12,
+    10.64,
+    9.23,
+    7.89,
+    6.73,
+    5.74,
+    4.81,
+    4.38,
+    3.72,
+    3.05,
+    2.51,
+    2.02,
+    1.59,
+    1.26,
+    0.0
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 136, 648, 1002],
+    [186, 136, 646, 1002],
+    [188, 136, 644, 1004],
+    [190, 136, 640, 1004],
+    [192, 136, 640, 1004],
+    [196, 136, 642, 1004],
+    [202, 136, 642, 1004],
+    [210, 136, 642, 1004],
+    [222, 136, 642, 1004],
+    [232, 136, 642, 1004],
+    [246, 136, 642, 1004],
+    [252, 136, 642, 1004],
+    [258, 136, 640, 1004],
+    [264, 136, 640, 1004],
+    [268, 136, 640, 1002],
+    [274, 136, 638, 1002],
+    [272, 136, 638, 1002],
+    [272, 136, 638, 1000],
+    [272, 138, 638, 1000],
+    [272, 138, 638, 1000],
+    [272, 138, 638, 998],
+    [272, 138, 638, 998],
+    [270, 136, 636, 998],
+    [270, 136, 636, 998],
+    [268, 136, 634, 998],
+    [260, 136, 632, 998],
+    [254, 136, 630, 996],
+    [248, 134, 626, 996],
+    [236, 134, 624, 996],
+    [222, 132, 620, 994],
+    [210, 132, 628, 994],
+    [200, 132, 638, 992],
+    [192, 130, 642, 992],
+    [188, 130, 644, 992],
+    [186, 130, 648, 990],
+    [184, 130, 646, 992],
+    [186, 128, 642, 992],
+    [188, 128, 636, 994],
+    [194, 128, 628, 994],
+    [196, 128, 618, 994],
+    [194, 128, 604, 996],
+    [192, 126, 586, 996],
+    [192, 126, 580, 996],
+    [192, 126, 578, 996],
+    [194, 126, 572, 996],
+    [194, 126, 564, 996],
+    [196, 126, 564, 998],
+    [196, 126, 566, 998],
+    [198, 126, 566, 998],
+    [198, 126, 564, 998],
+    [198, 128, 564, 1000],
+    [200, 128, 564, 1000],
+    [200, 128, 564, 1000],
+    [200, 128, 566, 1000],
+    [200, 128, 568, 1002],
+    [200, 130, 574, 1002],
+    [200, 130, 578, 1004],
+    [202, 130, 582, 1004],
+    [202, 132, 588, 1004],
+    [202, 132, 592, 1004],
+    [204, 132, 598, 1004],
+    [204, 132, 600, 1004],
+    [206, 132, 604, 1004],
+    [206, 132, 612, 1004],
+    [208, 134, 618, 1004],
+    [208, 134, 624, 1004],
+    [204, 134, 630, 1004],
+    [198, 134, 634, 1004],
+    [194, 134, 638, 1004],
+    [192, 134, 640, 1004],
+    [188, 134, 644, 1004],
+    [186, 134, 646, 1004],
+    [186, 134, 646, 1004],
+    [184, 134, 648, 1004],
+    [184, 134, 648, 1004],
+    [184, 134, 648, 1004],
+    [184, 134, 648, 1002],
+    [184, 134, 648, 1002],
+    [184, 134, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [183, 126, 649, 1004],
+   "margin": [183, 126, 183, 100],
+   "active": [
+    [
+     2,
+     79
+    ]
+   ],
+   "dupes": [
+    73
+   ],
+   "arc": [
+    0.0,
+    0.0064,
+    0.0139,
+    0.023,
+    0.0343,
+    0.0397,
+    0.0549,
+    0.0722,
+    0.0902,
+    0.1089,
+    0.1278,
+    0.1471,
+    0.1663,
+    0.1863,
+    0.2058,
+    0.2173,
+    0.2354,
+    0.2528,
+    0.2692,
+    0.2846,
+    0.2992,
+    0.3136,
+    0.3283,
+    0.3427,
+    0.3566,
+    0.365,
+    0.3787,
+    0.3928,
+    0.4069,
+    0.4209,
+    0.4345,
+    0.4481,
+    0.4615,
+    0.4742,
+    0.4795,
+    0.4905,
+    0.501,
+    0.5127,
+    0.5256,
+    0.5395,
+    0.5538,
+    0.5683,
+    0.5826,
+    0.597,
+    0.6053,
+    0.6196,
+    0.6337,
+    0.6476,
+    0.6615,
+    0.6751,
+    0.6885,
+    0.7016,
+    0.7152,
+    0.7298,
+    0.7386,
+    0.7536,
+    0.7692,
+    0.7849,
+    0.8002,
+    0.8152,
+    0.8298,
+    0.8446,
+    0.8587,
+    0.8655,
+    0.8791,
+    0.8924,
+    0.9054,
+    0.9179,
+    0.9296,
+    0.9408,
+    0.9509,
+    0.9603,
+    0.9683,
+    0.9701,
+    0.9764,
+    0.982,
+    0.9868,
+    0.9907,
+    0.9938,
+    0.9963,
+    1.0
+   ],
+   "minSeconds": 0.6,
+   "moveSeconds": 2.4,
+   "browOk": false,
+   "browRead": {
+    "note": "没有头部跟踪 / 有不可贴的帧"
+   },
+   "facePaste": false,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 3
+  },
+  "spin_loop": {
+   "label": "转一圈·单脚为轴（一段做完去和回）",
+   "from": "idle",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/spin_loop/00.png",
+    "frames/spin_loop/01.png",
+    "frames/spin_loop/02.png",
+    "frames/spin_loop/03.png",
+    "frames/spin_loop/04.png",
+    "frames/spin_loop/05.png",
+    "frames/spin_loop/06.png",
+    "frames/spin_loop/07.png",
+    "frames/spin_loop/08.png",
+    "frames/spin_loop/09.png",
+    "frames/spin_loop/10.png",
+    "frames/spin_loop/11.png",
+    "frames/spin_loop/12.png",
+    "frames/spin_loop/13.png",
+    "frames/spin_loop/14.png",
+    "frames/spin_loop/15.png",
+    "frames/spin_loop/16.png",
+    "frames/spin_loop/17.png",
+    "frames/spin_loop/18.png",
+    "frames/spin_loop/19.png",
+    "frames/spin_loop/20.png",
+    "frames/spin_loop/21.png",
+    "frames/spin_loop/22.png",
+    "frames/spin_loop/23.png",
+    "frames/spin_loop/24.png",
+    "frames/spin_loop/25.png",
+    "frames/spin_loop/26.png",
+    "frames/spin_loop/27.png",
+    "frames/spin_loop/28.png",
+    "frames/spin_loop/29.png",
+    "frames/spin_loop/30.png",
+    "frames/spin_loop/31.png",
+    "frames/spin_loop/32.png",
+    "frames/spin_loop/33.png",
+    "frames/spin_loop/34.png",
+    "frames/spin_loop/35.png",
+    "frames/spin_loop/36.png",
+    "frames/spin_loop/37.png",
+    "frames/spin_loop/38.png",
+    "frames/spin_loop/39.png",
+    "frames/spin_loop/40.png",
+    "frames/spin_loop/41.png",
+    "frames/spin_loop/42.png",
+    "frames/spin_loop/43.png",
+    "frames/spin_loop/44.png",
+    "frames/spin_loop/45.png",
+    "frames/spin_loop/46.png",
+    "frames/spin_loop/47.png",
+    "frames/spin_loop/48.png",
+    "frames/spin_loop/49.png",
+    "frames/spin_loop/50.png",
+    "frames/spin_loop/51.png",
+    "frames/spin_loop/52.png",
+    "frames/spin_loop/53.png",
+    "frames/spin_loop/54.png",
+    "frames/spin_loop/55.png",
+    "frames/spin_loop/56.png",
+    "frames/spin_loop/57.png",
+    "frames/spin_loop/58.png",
+    "frames/spin_loop/59.png",
+    "frames/spin_loop/60.png",
+    "frames/spin_loop/61.png",
+    "frames/spin_loop/62.png",
+    "frames/spin_loop/63.png",
+    "frames/spin_loop/64.png",
+    "frames/spin_loop/65.png",
+    "frames/spin_loop/66.png",
+    "frames/spin_loop/67.png",
+    "frames/spin_loop/68.png",
+    "frames/spin_loop/69.png",
+    "frames/spin_loop/70.png",
+    "frames/spin_loop/71.png",
+    "frames/spin_loop/72.png",
+    "frames/spin_loop/73.png",
+    "frames/spin_loop/74.png",
+    "frames/spin_loop/75.png",
+    "frames/spin_loop/76.png",
+    "frames/spin_loop/77.png",
+    "frames/spin_loop/78.png",
+    "frames/spin_loop/79.png",
+    "frames/spin_loop/80.png"
+   ],
+   "apex": 52,
+   "away_pct": [
+    0.0,
+    1.35,
+    2.02,
+    2.97,
+    4.38,
+    5.31,
+    7.47,
+    10.43,
+    13.55,
+    16.4,
+    18.85,
+    21.32,
+    23.62,
+    25.97,
+    27.95,
+    28.83,
+    30.01,
+    30.96,
+    31.77,
+    32.2,
+    31.87,
+    31.19,
+    30.08,
+    28.61,
+    26.91,
+    26.12,
+    24.56,
+    22.61,
+    20.51,
+    18.4,
+    16.36,
+    14.55,
+    12.68,
+    10.98,
+    10.58,
+    10.71,
+    11.3,
+    11.87,
+    12.06,
+    12.6,
+    13.75,
+    15.59,
+    17.19,
+    19.06,
+    20.26,
+    23.13,
+    26.09,
+    28.52,
+    30.02,
+    31.54,
+    33.38,
+    34.52,
+    34.44,
+    33.38,
+    32.61,
+    31.34,
+    30.11,
+    28.65,
+    27.13,
+    25.37,
+    23.57,
+    21.75,
+    20.1,
+    19.18,
+    17.5,
+    15.72,
+    14.07,
+    12.37,
+    10.82,
+    9.25,
+    7.86,
+    6.52,
+    5.41,
+    4.86,
+    4.0,
+    3.17,
+    2.5,
+    1.95,
+    1.55,
+    1.24,
+    0.0
+   ],
+   "frameBBox": [
+    [183, 137, 649, 1000],
+    [184, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [186, 136, 646, 1002],
+    [188, 136, 644, 1004],
+    [190, 136, 642, 1004],
+    [194, 136, 642, 1004],
+    [202, 136, 644, 1004],
+    [210, 136, 644, 1004],
+    [222, 134, 644, 1004],
+    [236, 134, 644, 1004],
+    [244, 134, 644, 1004],
+    [248, 134, 642, 1002],
+    [254, 134, 642, 1002],
+    [256, 134, 642, 1002],
+    [256, 134, 640, 1002],
+    [254, 134, 640, 1002],
+    [254, 134, 640, 1000],
+    [256, 134, 640, 1000],
+    [260, 134, 638, 1000],
+    [264, 134, 638, 1000],
+    [260, 136, 638, 998],
+    [258, 136, 638, 998],
+    [256, 136, 636, 998],
+    [256, 136, 636, 996],
+    [256, 136, 636, 996],
+    [258, 136, 634, 996],
+    [254, 136, 632, 996],
+    [250, 136, 628, 994],
+    [236, 136, 626, 994],
+    [220, 136, 622, 992],
+    [210, 136, 626, 992],
+    [200, 136, 634, 992],
+    [192, 136, 640, 990],
+    [190, 136, 644, 990],
+    [186, 136, 646, 990],
+    [184, 136, 648, 988],
+    [184, 136, 648, 990],
+    [186, 136, 646, 990],
+    [192, 136, 642, 992],
+    [194, 136, 636, 992],
+    [190, 136, 624, 994],
+    [190, 134, 612, 994],
+    [190, 134, 594, 994],
+    [190, 134, 592, 994],
+    [190, 134, 586, 994],
+    [192, 134, 578, 996],
+    [192, 134, 568, 996],
+    [194, 134, 566, 998],
+    [196, 134, 570, 998],
+    [196, 134, 572, 998],
+    [196, 134, 572, 1000],
+    [198, 134, 570, 1000],
+    [198, 136, 570, 1000],
+    [198, 136, 572, 1000],
+    [198, 136, 576, 1002],
+    [198, 136, 578, 1002],
+    [200, 136, 578, 1002],
+    [200, 136, 580, 1002],
+    [200, 136, 584, 1002],
+    [200, 136, 588, 1004],
+    [202, 136, 590, 1004],
+    [202, 136, 594, 1004],
+    [204, 136, 596, 1004],
+    [204, 136, 604, 1004],
+    [206, 136, 610, 1004],
+    [206, 136, 618, 1004],
+    [206, 136, 624, 1004],
+    [202, 136, 628, 1004],
+    [196, 136, 632, 1004],
+    [192, 136, 636, 1004],
+    [190, 136, 640, 1004],
+    [186, 136, 642, 1004],
+    [186, 136, 644, 1004],
+    [184, 136, 646, 1004],
+    [184, 136, 646, 1004],
+    [184, 136, 648, 1002],
+    [182, 136, 648, 1002],
+    [182, 136, 648, 1002],
+    [184, 136, 648, 1002],
+    [183, 137, 649, 1000]
+   ],
+   "bbox": [182, 134, 649, 1004],
+   "margin": [182, 134, 183, 100],
+   "active": [
+    [
+     2,
+     78
+    ]
+   ],
+   "dupes": [],
+   "arc": [
+    0.0,
+    0.0043,
+    0.0096,
+    0.0172,
+    0.0277,
+    0.033,
+    0.0491,
+    0.0682,
+    0.0879,
+    0.108,
+    0.1279,
+    0.1475,
+    0.1664,
+    0.1858,
+    0.2047,
+    0.2157,
+    0.2334,
+    0.2504,
+    0.2664,
+    0.2817,
+    0.2963,
+    0.3106,
+    0.3246,
+    0.338,
+    0.3513,
+    0.3591,
+    0.3722,
+    0.3856,
+    0.3983,
+    0.4109,
+    0.4232,
+    0.4358,
+    0.4487,
+    0.4614,
+    0.4675,
+    0.4795,
+    0.4907,
+    0.5009,
+    0.511,
+    0.5218,
+    0.5334,
+    0.5466,
+    0.5603,
+    0.5742,
+    0.5824,
+    0.5972,
+    0.6121,
+    0.6267,
+    0.6413,
+    0.6557,
+    0.6703,
+    0.6849,
+    0.6994,
+    0.714,
+    0.723,
+    0.738,
+    0.7533,
+    0.7688,
+    0.7843,
+    0.7998,
+    0.8151,
+    0.8302,
+    0.8446,
+    0.8515,
+    0.8653,
+    0.8789,
+    0.8923,
+    0.9053,
+    0.918,
+    0.9307,
+    0.9428,
+    0.9543,
+    0.9647,
+    0.9674,
+    0.9758,
+    0.9832,
+    0.989,
+    0.9931,
+    0.9957,
+    0.9974,
+    1.0
+   ],
+   "minSeconds": 0.6,
+   "moveSeconds": 2.4,
+   "browOk": false,
+   "browRead": {
+    "note": "没有头部跟踪 / 有不可贴的帧"
+   },
+   "facePaste": false,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 3
+  }
+ },
+ "actions": [
+  {
+   "id": "think",
+   "label": "思考",
+   "in": "think_loop",
+   "oneshot": true
+  },
+  {
+   "id": "think_hold",
+   "label": "思考（停在幅度最大处）",
+   "in": "think_in",
+   "pose": "think",
+   "out": "think_out"
+  },
+  {
+   "id": "wave",
+   "label": "挥手",
+   "in": "wave_loop",
+   "oneshot": true
+  },
+  {
+   "id": "wave_hold",
+   "label": "挥手（停在幅度最大处）",
+   "in": "wave_in",
+   "pose": "wave",
+   "out": "wave_out",
+   "host": false,
+   "host_note": "讲解员不用这一种：挥手没有真正的停顿，而且那一帧手举在头旁边，眨眼和干净脸贴片在脸左侧被大片判成遮挡。讲解员里挥手整段一次播完；演示页 demo-draft 仍可以看这种停法"
+  },
+  {
+   "id": "shrug",
+   "label": "双手摊开（嘴没管住）",
+   "in": "shrug_loop",
+   "oneshot": true
+  },
+  {
+   "id": "shrug_hold",
+   "label": "双手摊开（嘴没管住）（停在幅度最大处）",
+   "in": "shrug_in",
+   "pose": "shrug",
+   "out": "shrug_out"
+  },
+  {
+   "id": "turn",
+   "label": "转一圈·双脚踏着转",
+   "in": "turn_loop",
+   "oneshot": true
+  },
+  {
+   "id": "spin",
+   "label": "转一圈·单脚为轴",
+   "in": "spin_loop",
+   "oneshot": true
+  }
+ ],
+ "tier": "draft",
+ "note": "草稿档片段库（第一批，新舞台 832×1104、人高 78%）：帧是 4 步草稿，抠图是出片时的做法，只用来看动作，不进成片。",
+ "minMargin": {
+  "left": 146,
+  "top": 126,
+  "right": 120,
+  "bottom": 100,
+  "min": 100
+ },
+ "mouthShapes": [
+  "closed",
+  "small",
+  "big",
+  "smile"
+ ],
+ "talk": {
+  "pattern": [
+   [
+    "small",
+    0.1
+   ],
+   [
+    "big",
+    0.14
+   ],
+   [
+    "small",
+    0.08
+   ],
+   [
+    "closed",
+    0.08
+   ],
+   [
+    "big",
+    0.16
+   ],
+   [
+    "smile",
+    0.14
+   ],
+   [
+    "small",
+    0.1
+   ],
+   [
+    "closed",
+    0.1
+   ],
+   [
+    "small",
+    0.08
+   ],
+   [
+    "big",
+    0.14
+   ],
+   [
+    "small",
+    0.1
+   ],
+   [
+    "smile",
+    0.16
+   ],
+   [
+    "closed",
+    0.12
+   ],
+   [
+    null,
+    0.6
+   ]
+  ]
+ },
+ "blink": {
+  "period": 3.2,
+  "closed": 0.13,
+  "offset": 1.4
+ },
+ "headTracks": {
+  "frames/wave_loop/00.png": {
+   "m": [
+    1.00052,
+    2e-05,
+    -0.14,
+    -0.36
+   ],
+   "scale": 1.0005,
+   "rot_deg": 0.0,
+   "shift": [
+    0.1,
+    -0.1
+   ],
+   "inliers": 331,
+   "residual_px": 0.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_00.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_00_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/01.png": {
+   "m": [
+    1.00188,
+    0.00012,
+    -0.45,
+    -1.37
+   ],
+   "scale": 1.0019,
+   "rot_deg": 0.01,
+   "shift": [
+    0.3,
+    -0.4
+   ],
+   "inliers": 184,
+   "residual_px": 0.59,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_01.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_01_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 21,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/02.png": {
+   "m": [
+    1.0023,
+    -0.00044,
+    -0.76,
+    -1.58
+   ],
+   "scale": 1.0023,
+   "rot_deg": -0.02,
+   "shift": [
+    0.4,
+    -0.7
+   ],
+   "inliers": 189,
+   "residual_px": 0.71,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_02.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_02_u.png",
+    "rect": [297, 380, 231, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 21,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/03.png": {
+   "m": [
+    1.00199,
+    -0.00598,
+    -3.77,
+    0.73
+   ],
+   "scale": 1.002,
+   "rot_deg": -0.34,
+   "shift": [
+    -0.2,
+    -0.8
+   ],
+   "inliers": 174,
+   "residual_px": 0.82,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_03.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_03_u.png",
+    "rect": [297, 380, 229, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 22,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/04.png": {
+   "m": [
+    1.00111,
+    -0.01993,
+    -11.41,
+    6.87
+   ],
+   "scale": 1.0013,
+   "rot_deg": -1.14,
+   "shift": [
+    -1.7,
+    -0.8
+   ],
+   "inliers": 127,
+   "residual_px": 0.8,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_04.png",
+    "rect": [167, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_04_u.png",
+    "rect": [294, 379, 231, 107]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 19,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/05.png": {
+   "m": [
+    1.00111,
+    -0.03768,
+    -21.36,
+    14.19
+   ],
+   "scale": 1.0018,
+   "rot_deg": -2.16,
+   "shift": [
+    -3.4,
+    -0.7
+   ],
+   "inliers": 122,
+   "residual_px": 0.89,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_05.png",
+    "rect": [166, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_05_u.png",
+    "rect": [292, 377, 230, 110]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 16,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/06.png": {
+   "m": [
+    1.00078,
+    -0.05899,
+    -33.66,
+    23.01
+   ],
+   "scale": 1.0025,
+   "rot_deg": -3.37,
+   "shift": [
+    -5.9,
+    -0.7
+   ],
+   "inliers": 126,
+   "residual_px": 0.65,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_06.png",
+    "rect": [163, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_06_u.png",
+    "rect": [288, 376, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 8,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/07.png": {
+   "m": [
+    0.9999,
+    -0.07492,
+    -42.85,
+    29.67
+   ],
+   "scale": 1.0027,
+   "rot_deg": -4.28,
+   "shift": [
+    -8.0,
+    -1.0
+   ],
+   "inliers": 120,
+   "residual_px": 0.86,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_07.png",
+    "rect": [161, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_07_u.png",
+    "rect": [286, 374, 230, 115]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 4,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/08.png": {
+   "m": [
+    0.99765,
+    -0.09014,
+    -50.37,
+    36.33
+   ],
+   "scale": 1.0017,
+   "rot_deg": -5.16,
+   "shift": [
+    -9.4,
+    -1.6
+   ],
+   "inliers": 83,
+   "residual_px": 0.79,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_08.png",
+    "rect": [160, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_08_u.png",
+    "rect": [284, 372, 228, 118]
+   },
+   "yield_eye_px": 214,
+   "yield_px": 232,
+   "cover_alien_px": 5,
+   "occluded": 0.012,
+   "w": 1.0
+  },
+  "frames/wave_loop/09.png": {
+   "m": [
+    0.99727,
+    -0.09702,
+    -53.99,
+    39.01
+   ],
+   "scale": 1.002,
+   "rot_deg": -5.56,
+   "shift": [
+    -10.0,
+    -1.9
+   ],
+   "inliers": 74,
+   "residual_px": 0.85,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_09.png",
+    "rect": [159, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_09_u.png",
+    "rect": [283, 372, 228, 118]
+   },
+   "yield_eye_px": 792,
+   "yield_px": 1000,
+   "cover_alien_px": 0,
+   "occluded": 0.046,
+   "w": 1.0
+  },
+  "frames/wave_loop/10.png": {
+   "m": [
+    0.99811,
+    -0.09343,
+    -52.39,
+    37.05
+   ],
+   "scale": 1.0025,
+   "rot_deg": -5.35,
+   "shift": [
+    -9.7,
+    -2.0
+   ],
+   "inliers": 56,
+   "residual_px": 0.78,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_10.png",
+    "rect": [159, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_10_u.png",
+    "rect": [283, 372, 227, 118]
+   },
+   "yield_eye_px": 1501,
+   "yield_px": 1967,
+   "cover_alien_px": 0,
+   "occluded": 0.086,
+   "w": 1.0
+  },
+  "frames/wave_loop/11.png": {
+   "m": [
+    0.99905,
+    -0.08316,
+    -47.12,
+    32.29
+   ],
+   "scale": 1.0025,
+   "rot_deg": -4.76,
+   "shift": [
+    -8.8,
+    -2.1
+   ],
+   "inliers": 48,
+   "residual_px": 0.77,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 2.2,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_11.png",
+    "rect": [160, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_11_u.png",
+    "rect": [285, 372, 231, 117]
+   },
+   "yield_eye_px": 1843,
+   "yield_px": 2401,
+   "cover_alien_px": 0,
+   "occluded": 0.106,
+   "w": 1.0
+  },
+  "frames/wave_loop/12.png": {
+   "m": [
+    1.00123,
+    -0.0673,
+    -39.36,
+    24.73
+   ],
+   "scale": 1.0035,
+   "rot_deg": -3.85,
+   "shift": [
+    -7.5,
+    -2.2
+   ],
+   "inliers": 53,
+   "residual_px": 0.79,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_12.png",
+    "rect": [161, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_12_u.png",
+    "rect": [286, 373, 232, 114]
+   },
+   "yield_eye_px": 2313,
+   "yield_px": 2964,
+   "cover_alien_px": 1,
+   "occluded": 0.133,
+   "w": 1.0
+  },
+  "frames/wave_loop/13.png": {
+   "m": [
+    1.00165,
+    -0.05291,
+    -31.56,
+    18.55
+   ],
+   "scale": 1.0031,
+   "rot_deg": -3.02,
+   "shift": [
+    -6.3,
+    -2.3
+   ],
+   "inliers": 52,
+   "residual_px": 0.82,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 2.2,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_13.png",
+    "rect": [163, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_13_u.png",
+    "rect": [288, 374, 231, 112]
+   },
+   "yield_eye_px": 2378,
+   "yield_px": 3018,
+   "cover_alien_px": 0,
+   "occluded": 0.137,
+   "w": 1.0
+  },
+  "frames/wave_loop/14.png": {
+   "m": [
+    1.00267,
+    -0.02748,
+    -18.02,
+    7.65
+   ],
+   "scale": 1.0031,
+   "rot_deg": -1.57,
+   "shift": [
+    -4.1,
+    -2.3
+   ],
+   "inliers": 64,
+   "residual_px": 0.78,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.4,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_14.png",
+    "rect": [165, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_14_u.png",
+    "rect": [291, 376, 232, 108]
+   },
+   "yield_eye_px": 1490,
+   "yield_px": 2125,
+   "cover_alien_px": 0,
+   "occluded": 0.086,
+   "w": 1.0
+  },
+  "frames/wave_loop/15.png": {
+   "m": [
+    1.00274,
+    0.00655,
+    0.67,
+    -6.34
+   ],
+   "scale": 1.0028,
+   "rot_deg": 0.37,
+   "shift": [
+    -1.3,
+    -2.4
+   ],
+   "inliers": 82,
+   "residual_px": 0.84,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_15.png",
+    "rect": [168, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_15_u.png",
+    "rect": [296, 379, 230, 103]
+   },
+   "yield_eye_px": 446,
+   "yield_px": 944,
+   "cover_alien_px": 5,
+   "occluded": 0.026,
+   "w": 1.0
+  },
+  "frames/wave_loop/16.png": {
+   "m": [
+    1.00193,
+    0.03522,
+    16.92,
+    -17.81
+   ],
+   "scale": 1.0026,
+   "rot_deg": 2.01,
+   "shift": [
+    1.3,
+    -2.5
+   ],
+   "inliers": 107,
+   "residual_px": 0.75,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_16.png",
+    "rect": [170, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_16_u.png",
+    "rect": [299, 377, 230, 107]
+   },
+   "yield_eye_px": 379,
+   "yield_px": 915,
+   "cover_alien_px": 4,
+   "occluded": 0.022,
+   "w": 1.0
+  },
+  "frames/wave_loop/17.png": {
+   "m": [
+    0.99995,
+    0.06359,
+    33.6,
+    -28.56
+   ],
+   "scale": 1.002,
+   "rot_deg": 3.64,
+   "shift": [
+    4.0,
+    -2.6
+   ],
+   "inliers": 91,
+   "residual_px": 0.74,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_17.png",
+    "rect": [173, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_17_u.png",
+    "rect": [304, 375, 230, 111]
+   },
+   "yield_eye_px": 125,
+   "yield_px": 636,
+   "cover_alien_px": 5,
+   "occluded": 0.007,
+   "w": 1.0
+  },
+  "frames/wave_loop/18.png": {
+   "m": [
+    0.99786,
+    0.08326,
+    45.24,
+    -35.57
+   ],
+   "scale": 1.0013,
+   "rot_deg": 4.77,
+   "shift": [
+    5.6,
+    -2.5
+   ],
+   "inliers": 84,
+   "residual_px": 0.89,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_18.png",
+    "rect": [175, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_18_u.png",
+    "rect": [307, 374, 229, 114]
+   },
+   "yield_eye_px": 171,
+   "yield_px": 703,
+   "cover_alien_px": 7,
+   "occluded": 0.01,
+   "w": 1.0
+  },
+  "frames/wave_loop/19.png": {
+   "m": [
+    0.99636,
+    0.09739,
+    53.21,
+    -40.41
+   ],
+   "scale": 1.0011,
+   "rot_deg": 5.58,
+   "shift": [
+    6.4,
+    -2.3
+   ],
+   "inliers": 67,
+   "residual_px": 0.74,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_19.png",
+    "rect": [175, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_19_u.png",
+    "rect": [311, 373, 227, 116]
+   },
+   "yield_eye_px": 1052,
+   "yield_px": 1838,
+   "cover_alien_px": 0,
+   "occluded": 0.061,
+   "w": 1.0
+  },
+  "frames/wave_loop/20.png": {
+   "m": [
+    0.99575,
+    0.09817,
+    53.3,
+    -40.22
+   ],
+   "scale": 1.0006,
+   "rot_deg": 5.63,
+   "shift": [
+    5.9,
+    -2.1
+   ],
+   "inliers": 72,
+   "residual_px": 0.83,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_20.png",
+    "rect": [175, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_20_u.png",
+    "rect": [311, 373, 225, 116]
+   },
+   "yield_eye_px": 1201,
+   "yield_px": 1984,
+   "cover_alien_px": 3,
+   "occluded": 0.069,
+   "w": 1.0
+  },
+  "frames/wave_loop/21.png": {
+   "m": [
+    0.99716,
+    0.08452,
+    44.66,
+    -35.03
+   ],
+   "scale": 1.0007,
+   "rot_deg": 4.85,
+   "shift": [
+    4.2,
+    -1.8
+   ],
+   "inliers": 57,
+   "residual_px": 0.87,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.4,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_21.png",
+    "rect": [173, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_21_u.png",
+    "rect": [307, 374, 228, 115]
+   },
+   "yield_eye_px": 1056,
+   "yield_px": 1832,
+   "cover_alien_px": 4,
+   "occluded": 0.061,
+   "w": 1.0
+  },
+  "frames/wave_loop/22.png": {
+   "m": [
+    0.99982,
+    0.06335,
+    31.66,
+    -27.35
+   ],
+   "scale": 1.0018,
+   "rot_deg": 3.63,
+   "shift": [
+    2.1,
+    -1.5
+   ],
+   "inliers": 61,
+   "residual_px": 0.98,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_22.png",
+    "rect": [171, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_22_u.png",
+    "rect": [304, 376, 228, 111]
+   },
+   "yield_eye_px": 857,
+   "yield_px": 1623,
+   "cover_alien_px": 12,
+   "occluded": 0.049,
+   "w": 1.0
+  },
+  "frames/wave_loop/23.png": {
+   "m": [
+    1.00121,
+    0.0347,
+    15.07,
+    -15.92
+   ],
+   "scale": 1.0018,
+   "rot_deg": 1.99,
+   "shift": [
+    -0.6,
+    -1.2
+   ],
+   "inliers": 93,
+   "residual_px": 0.68,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 2.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_23.png",
+    "rect": [168, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_23_u.png",
+    "rect": [298, 378, 231, 107]
+   },
+   "yield_eye_px": 187,
+   "yield_px": 675,
+   "cover_alien_px": 12,
+   "occluded": 0.011,
+   "w": 1.0
+  },
+  "frames/wave_loop/24.png": {
+   "m": [
+    1.00249,
+    0.01127,
+    1.27,
+    -6.54
+   ],
+   "scale": 1.0026,
+   "rot_deg": 0.64,
+   "shift": [
+    -3.0,
+    -0.8
+   ],
+   "inliers": 112,
+   "residual_px": 0.73,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_24.png",
+    "rect": [166, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_24_u.png",
+    "rect": [294, 380, 232, 104]
+   },
+   "yield_eye_px": 96,
+   "yield_px": 573,
+   "cover_alien_px": 18,
+   "occluded": 0.006,
+   "w": 1.0
+  },
+  "frames/wave_loop/25.png": {
+   "m": [
+    1.00406,
+    -0.01247,
+    -12.75,
+    2.8
+   ],
+   "scale": 1.0041,
+   "rot_deg": -0.71,
+   "shift": [
+    -5.3,
+    -0.4
+   ],
+   "inliers": 94,
+   "residual_px": 0.88,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.4,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_25.png",
+    "rect": [164, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_25_u.png",
+    "rect": [291, 379, 231, 106]
+   },
+   "yield_eye_px": 147,
+   "yield_px": 605,
+   "cover_alien_px": 6,
+   "occluded": 0.008,
+   "w": 1.0
+  },
+  "frames/wave_loop/26.png": {
+   "m": [
+    1.00408,
+    -0.03118,
+    -23.13,
+    10.61
+   ],
+   "scale": 1.0046,
+   "rot_deg": -1.78,
+   "shift": [
+    -7.0,
+    -0.2
+   ],
+   "inliers": 72,
+   "residual_px": 0.97,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_26.png",
+    "rect": [162, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_26_u.png",
+    "rect": [288, 378, 231, 109]
+   },
+   "yield_eye_px": 132,
+   "yield_px": 557,
+   "cover_alien_px": 8,
+   "occluded": 0.008,
+   "w": 1.0
+  },
+  "frames/wave_loop/27.png": {
+   "m": [
+    1.00144,
+    -0.04874,
+    -31.55,
+    18.95
+   ],
+   "scale": 1.0026,
+   "rot_deg": -2.79,
+   "shift": [
+    -8.3,
+    -0.3
+   ],
+   "inliers": 69,
+   "residual_px": 0.67,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.4,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_27.png",
+    "rect": [161, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_27_u.png",
+    "rect": [286, 377, 232, 111]
+   },
+   "yield_eye_px": 535,
+   "yield_px": 955,
+   "cover_alien_px": 7,
+   "occluded": 0.031,
+   "w": 1.0
+  },
+  "frames/wave_loop/28.png": {
+   "m": [
+    1.00019,
+    -0.06116,
+    -37.87,
+    24.68
+   ],
+   "scale": 1.0021,
+   "rot_deg": -3.5,
+   "shift": [
+    -9.3,
+    -0.2
+   ],
+   "inliers": 66,
+   "residual_px": 0.77,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_28.png",
+    "rect": [160, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_28_u.png",
+    "rect": [285, 376, 231, 113]
+   },
+   "yield_eye_px": 654,
+   "yield_px": 1042,
+   "cover_alien_px": 6,
+   "occluded": 0.038,
+   "w": 1.0
+  },
+  "frames/wave_loop/29.png": {
+   "m": [
+    0.99921,
+    -0.07269,
+    -44.03,
+    29.97
+   ],
+   "scale": 1.0019,
+   "rot_deg": -4.16,
+   "shift": [
+    -10.5,
+    -0.1
+   ],
+   "inliers": 69,
+   "residual_px": 0.75,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_29.png",
+    "rect": [158, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_29_u.png",
+    "rect": [283, 375, 231, 115]
+   },
+   "yield_eye_px": 1236,
+   "yield_px": 1695,
+   "cover_alien_px": 4,
+   "occluded": 0.071,
+   "w": 1.0
+  },
+  "frames/wave_loop/30.png": {
+   "m": [
+    0.99832,
+    -0.08361,
+    -49.89,
+    35.01
+   ],
+   "scale": 1.0018,
+   "rot_deg": -4.79,
+   "shift": [
+    -11.7,
+    0.1
+   ],
+   "inliers": 56,
+   "residual_px": 0.67,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_30.png",
+    "rect": [157, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_30_u.png",
+    "rect": [282, 375, 231, 116]
+   },
+   "yield_eye_px": 1314,
+   "yield_px": 1739,
+   "cover_alien_px": 7,
+   "occluded": 0.076,
+   "w": 1.0
+  },
+  "frames/wave_loop/31.png": {
+   "m": [
+    0.99659,
+    -0.09785,
+    -57.16,
+    41.94
+   ],
+   "scale": 1.0014,
+   "rot_deg": -5.61,
+   "shift": [
+    -13.0,
+    0.4
+   ],
+   "inliers": 57,
+   "residual_px": 0.76,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_31.png",
+    "rect": [156, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_31_u.png",
+    "rect": [280, 374, 231, 118]
+   },
+   "yield_eye_px": 1516,
+   "yield_px": 1947,
+   "cover_alien_px": 5,
+   "occluded": 0.087,
+   "w": 1.0
+  },
+  "frames/wave_loop/32.png": {
+   "m": [
+    0.99496,
+    -0.10991,
+    -63.12,
+    47.95
+   ],
+   "scale": 1.001,
+   "rot_deg": -6.3,
+   "shift": [
+    -14.0,
+    0.7
+   ],
+   "inliers": 69,
+   "residual_px": 0.69,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_32.png",
+    "rect": [155, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_32_u.png",
+    "rect": [279, 373, 229, 121]
+   },
+   "yield_eye_px": 642,
+   "yield_px": 942,
+   "cover_alien_px": 5,
+   "occluded": 0.037,
+   "w": 1.0
+  },
+  "frames/wave_loop/33.png": {
+   "m": [
+    0.9944,
+    -0.11649,
+    -66.53,
+    51.2
+   ],
+   "scale": 1.0012,
+   "rot_deg": -6.68,
+   "shift": [
+    -14.6,
+    1.0
+   ],
+   "inliers": 71,
+   "residual_px": 0.72,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_33.png",
+    "rect": [154, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_33_u.png",
+    "rect": [278, 373, 229, 121]
+   },
+   "yield_eye_px": 314,
+   "yield_px": 491,
+   "cover_alien_px": 6,
+   "occluded": 0.018,
+   "w": 1.0
+  },
+  "frames/wave_loop/34.png": {
+   "m": [
+    0.99408,
+    -0.11943,
+    -68.01,
+    52.77
+   ],
+   "scale": 1.0012,
+   "rot_deg": -6.85,
+   "shift": [
+    -14.9,
+    1.2
+   ],
+   "inliers": 66,
+   "residual_px": 0.74,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_34.png",
+    "rect": [154, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_34_u.png",
+    "rect": [277, 373, 229, 122]
+   },
+   "yield_eye_px": 360,
+   "yield_px": 454,
+   "cover_alien_px": 4,
+   "occluded": 0.021,
+   "w": 1.0
+  },
+  "frames/wave_loop/35.png": {
+   "m": [
+    0.99452,
+    -0.1159,
+    -65.82,
+    51.18
+   ],
+   "scale": 1.0012,
+   "rot_deg": -6.65,
+   "shift": [
+    -14.1,
+    1.3
+   ],
+   "inliers": 83,
+   "residual_px": 0.81,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_35.png",
+    "rect": [155, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_35_u.png",
+    "rect": [278, 374, 229, 121]
+   },
+   "yield_eye_px": 420,
+   "yield_px": 476,
+   "cover_alien_px": 3,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/wave_loop/36.png": {
+   "m": [
+    0.99507,
+    -0.10442,
+    -59.0,
+    46.02
+   ],
+   "scale": 1.0005,
+   "rot_deg": -5.99,
+   "shift": [
+    -12.4,
+    1.1
+   ],
+   "inliers": 80,
+   "residual_px": 0.69,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_36.png",
+    "rect": [157, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_36_u.png",
+    "rect": [280, 374, 230, 120]
+   },
+   "yield_eye_px": 376,
+   "yield_px": 441,
+   "cover_alien_px": 2,
+   "occluded": 0.022,
+   "w": 1.0
+  },
+  "frames/wave_loop/37.png": {
+   "m": [
+    0.99646,
+    -0.09024,
+    -51.35,
+    39.28
+   ],
+   "scale": 1.0005,
+   "rot_deg": -5.17,
+   "shift": [
+    -10.8,
+    0.7
+   ],
+   "inliers": 68,
+   "residual_px": 0.79,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_37.png",
+    "rect": [158, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_37_u.png",
+    "rect": [282, 375, 230, 117]
+   },
+   "yield_eye_px": 306,
+   "yield_px": 394,
+   "cover_alien_px": 3,
+   "occluded": 0.018,
+   "w": 1.0
+  },
+  "frames/wave_loop/38.png": {
+   "m": [
+    0.9991,
+    -0.07315,
+    -42.74,
+    30.77
+   ],
+   "scale": 1.0018,
+   "rot_deg": -4.19,
+   "shift": [
+    -9.1,
+    0.5
+   ],
+   "inliers": 86,
+   "residual_px": 0.79,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 2.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_38.png",
+    "rect": [160, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_38_u.png",
+    "rect": [285, 376, 230, 115]
+   },
+   "yield_eye_px": 169,
+   "yield_px": 209,
+   "cover_alien_px": 3,
+   "occluded": 0.01,
+   "w": 1.0
+  },
+  "frames/wave_loop/39.png": {
+   "m": [
+    1.00115,
+    -0.05713,
+    -34.96,
+    23.11
+   ],
+   "scale": 1.0028,
+   "rot_deg": -3.27,
+   "shift": [
+    -7.9,
+    0.3
+   ],
+   "inliers": 93,
+   "residual_px": 1.24,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_39.png",
+    "rect": [161, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_39_u.png",
+    "rect": [286, 377, 232, 112]
+   },
+   "yield_eye_px": 110,
+   "yield_px": 149,
+   "cover_alien_px": 3,
+   "occluded": 0.006,
+   "w": 1.0
+  },
+  "frames/wave_loop/40.png": {
+   "m": [
+    1.00098,
+    -0.04228,
+    -25.76,
+    16.83
+   ],
+   "scale": 1.0019,
+   "rot_deg": -2.42,
+   "shift": [
+    -5.7,
+    0.0
+   ],
+   "inliers": 135,
+   "residual_px": 0.97,
+   "ref_residual_px": {
+    "eyeL": 2.0,
+    "eyeR": 1.0,
+    "mouth": 2.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_40.png",
+    "rect": [163, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_40_u.png",
+    "rect": [289, 378, 231, 110]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 1,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/41.png": {
+   "m": [
+    1.00109,
+    -0.03029,
+    -18.5,
+    11.69
+   ],
+   "scale": 1.0015,
+   "rot_deg": -1.73,
+   "shift": [
+    -4.0,
+    -0.2
+   ],
+   "inliers": 147,
+   "residual_px": 0.81,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_41.png",
+    "rect": [165, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_41_u.png",
+    "rect": [292, 378, 230, 109]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/42.png": {
+   "m": [
+    1.00223,
+    -0.01847,
+    -12.18,
+    6.19
+   ],
+   "scale": 1.0024,
+   "rot_deg": -1.06,
+   "shift": [
+    -2.7,
+    -0.3
+   ],
+   "inliers": 164,
+   "residual_px": 0.71,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_42.png",
+    "rect": [166, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_42_u.png",
+    "rect": [293, 379, 231, 107]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 10,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/43.png": {
+   "m": [
+    1.00255,
+    -0.01108,
+    -7.81,
+    2.97
+   ],
+   "scale": 1.0026,
+   "rot_deg": -0.63,
+   "shift": [
+    -1.6,
+    -0.4
+   ],
+   "inliers": 177,
+   "residual_px": 0.65,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_43.png",
+    "rect": [167, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_43_u.png",
+    "rect": [295, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/44.png": {
+   "m": [
+    1.00269,
+    -0.00591,
+    -4.51,
+    0.79
+   ],
+   "scale": 1.0027,
+   "rot_deg": -0.34,
+   "shift": [
+    -0.7,
+    -0.4
+   ],
+   "inliers": 172,
+   "residual_px": 0.62,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_44.png",
+    "rect": [168, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_44_u.png",
+    "rect": [296, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 12,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/45.png": {
+   "m": [
+    1.00252,
+    -0.00281,
+    -2.66,
+    -0.49
+   ],
+   "scale": 1.0025,
+   "rot_deg": -0.16,
+   "shift": [
+    -0.3,
+    -0.5
+   ],
+   "inliers": 195,
+   "residual_px": 0.59,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_45.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_45_u.png",
+    "rect": [296, 380, 231, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 3,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/46.png": {
+   "m": [
+    1.00234,
+    -0.00146,
+    -1.81,
+    -1.02
+   ],
+   "scale": 1.0023,
+   "rot_deg": -0.08,
+   "shift": [
+    -0.2,
+    -0.5
+   ],
+   "inliers": 198,
+   "residual_px": 0.56,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_46.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_46_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/47.png": {
+   "m": [
+    1.00187,
+    -0.00047,
+    -1.07,
+    -1.13
+   ],
+   "scale": 1.0019,
+   "rot_deg": -0.03,
+   "shift": [
+    -0.1,
+    -0.5
+   ],
+   "inliers": 199,
+   "residual_px": 0.55,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_47.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_47_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 11,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/wave_loop/48.png": {
+   "m": [
+    1.00052,
+    -6e-05,
+    -0.26,
+    -0.34
+   ],
+   "scale": 1.0005,
+   "rot_deg": -0.0,
+   "shift": [
+    -0.0,
+    -0.1
+   ],
+   "inliers": 331,
+   "residual_px": 0.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/wave_loop_48.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/wave_loop_48_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/00.png": {
+   "m": [
+    1.00052,
+    -0.00015,
+    -0.28,
+    -0.3
+   ],
+   "scale": 1.0005,
+   "rot_deg": -0.01,
+   "shift": [
+    0.0,
+    -0.1
+   ],
+   "inliers": 331,
+   "residual_px": 0.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_00.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_00_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/01.png": {
+   "m": [
+    1.00185,
+    -0.00057,
+    -1.0,
+    -1.11
+   ],
+   "scale": 1.0019,
+   "rot_deg": -0.03,
+   "shift": [
+    0.0,
+    -0.5
+   ],
+   "inliers": 193,
+   "residual_px": 0.51,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_01.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_01_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 13,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/02.png": {
+   "m": [
+    1.00225,
+    -0.00063,
+    -1.16,
+    -1.44
+   ],
+   "scale": 1.0023,
+   "rot_deg": -0.04,
+   "shift": [
+    0.1,
+    -0.7
+   ],
+   "inliers": 198,
+   "residual_px": 0.55,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_02.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_02_u.png",
+    "rect": [297, 380, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 18,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/03.png": {
+   "m": [
+    1.00219,
+    -0.00012,
+    -0.79,
+    -1.35
+   ],
+   "scale": 1.0022,
+   "rot_deg": -0.01,
+   "shift": [
+    0.2,
+    -0.4
+   ],
+   "inliers": 181,
+   "residual_px": 0.54,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_03.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_03_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 18,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/04.png": {
+   "m": [
+    1.00135,
+    0.00157,
+    0.62,
+    -0.32
+   ],
+   "scale": 1.0014,
+   "rot_deg": 0.09,
+   "shift": [
+    0.4,
+    1.0
+   ],
+   "inliers": 165,
+   "residual_px": 0.76,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_04.png",
+    "rect": [169, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_04_u.png",
+    "rect": [297, 382, 231, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/05.png": {
+   "m": [
+    1.00006,
+    0.00448,
+    2.81,
+    2.06
+   ],
+   "scale": 1.0001,
+   "rot_deg": 0.26,
+   "shift": [
+    0.8,
+    3.9
+   ],
+   "inliers": 116,
+   "residual_px": 1.04,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_05.png",
+    "rect": [170, 226, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_05_u.png",
+    "rect": [298, 385, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 11,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/06.png": {
+   "m": [
+    1.00062,
+    0.00441,
+    2.95,
+    5.98
+   ],
+   "scale": 1.0006,
+   "rot_deg": 0.25,
+   "shift": [
+    1.1,
+    8.1
+   ],
+   "inliers": 71,
+   "residual_px": 0.94,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 2.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_06.png",
+    "rect": [170, 230, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_06_u.png",
+    "rect": [298, 389, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 6,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/07.png": {
+   "m": [
+    1.00167,
+    0.0033,
+    2.03,
+    7.55
+   ],
+   "scale": 1.0017,
+   "rot_deg": 0.19,
+   "shift": [
+    1.2,
+    9.7
+   ],
+   "inliers": 61,
+   "residual_px": 1.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 2.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_07.png",
+    "rect": [170, 232, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_07_u.png",
+    "rect": [298, 391, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 3,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/08.png": {
+   "m": [
+    1.00242,
+    0.00092,
+    0.09,
+    6.9
+   ],
+   "scale": 1.0024,
+   "rot_deg": 0.05,
+   "shift": [
+    0.6,
+    8.4
+   ],
+   "inliers": 63,
+   "residual_px": 0.99,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.4,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_08.png",
+    "rect": [170, 230, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_08_u.png",
+    "rect": [297, 389, 231, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 1,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/09.png": {
+   "m": [
+    1.00212,
+    -0.00427,
+    -3.35,
+    5.62
+   ],
+   "scale": 1.0021,
+   "rot_deg": -0.24,
+   "shift": [
+    -0.5,
+    4.9
+   ],
+   "inliers": 71,
+   "residual_px": 0.89,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 2.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_09.png",
+    "rect": [169, 227, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_09_u.png",
+    "rect": [296, 385, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/10.png": {
+   "m": [
+    1.00036,
+    -0.01309,
+    -8.44,
+    5.42
+   ],
+   "scale": 1.0004,
+   "rot_deg": -0.75,
+   "shift": [
+    -2.2,
+    0.2
+   ],
+   "inliers": 133,
+   "residual_px": 0.79,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 0.0,
+    "nose": 1.0,
+    "pin": 2.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_10.png",
+    "rect": [167, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_10_u.png",
+    "rect": [294, 380, 231, 106]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 15,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/11.png": {
+   "m": [
+    1.00065,
+    -0.02259,
+    -14.59,
+    6.71
+   ],
+   "scale": 1.0009,
+   "rot_deg": -1.29,
+   "shift": [
+    -3.8,
+    -2.2
+   ],
+   "inliers": 146,
+   "residual_px": 0.72,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_11.png",
+    "rect": [165, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_11_u.png",
+    "rect": [292, 377, 230, 107]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 15,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/12.png": {
+   "m": [
+    1.00172,
+    -0.03181,
+    -21.14,
+    9.05
+   ],
+   "scale": 1.0022,
+   "rot_deg": -1.82,
+   "shift": [
+    -5.6,
+    -3.1
+   ],
+   "inliers": 131,
+   "residual_px": 0.9,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_12.png",
+    "rect": [163, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_12_u.png",
+    "rect": [290, 375, 230, 109]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 263,
+   "cover_alien_px": 10,
+   "occluded": 0.008,
+   "w": 1.0
+  },
+  "frames/think_loop/13.png": {
+   "m": [
+    1.0011,
+    -0.03931,
+    -25.47,
+    13.03
+   ],
+   "scale": 1.0019,
+   "rot_deg": -2.25,
+   "shift": [
+    -6.7,
+    -2.5
+   ],
+   "inliers": 130,
+   "residual_px": 0.91,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.4,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_13.png",
+    "rect": [162, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_13_u.png",
+    "rect": [288, 375, 231, 110]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 446,
+   "cover_alien_px": 13,
+   "occluded": 0.015,
+   "w": 1.0
+  },
+  "frames/think_loop/14.png": {
+   "m": [
+    1.00054,
+    -0.04615,
+    -29.04,
+    18.12
+   ],
+   "scale": 1.0016,
+   "rot_deg": -2.64,
+   "shift": [
+    -7.3,
+    -0.5
+   ],
+   "inliers": 112,
+   "residual_px": 0.85,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 3.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_14.png",
+    "rect": [162, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_14_u.png",
+    "rect": [287, 377, 231, 110]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 603,
+   "cover_alien_px": 12,
+   "occluded": 0.022,
+   "w": 1.0
+  },
+  "frames/think_loop/15.png": {
+   "m": [
+    1.00045,
+    -0.04971,
+    -31.04,
+    21.63
+   ],
+   "scale": 1.0017,
+   "rot_deg": -2.84,
+   "shift": [
+    -7.7,
+    1.5
+   ],
+   "inliers": 116,
+   "residual_px": 0.81,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 1.4,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_15.png",
+    "rect": [161, 224, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_15_u.png",
+    "rect": [287, 379, 230, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 624,
+   "cover_alien_px": 13,
+   "occluded": 0.023,
+   "w": 1.0
+  },
+  "frames/think_loop/16.png": {
+   "m": [
+    0.99734,
+    -0.05068,
+    -30.32,
+    24.25
+   ],
+   "scale": 0.9986,
+   "rot_deg": -2.91,
+   "shift": [
+    -7.8,
+    2.3
+   ],
+   "inliers": 105,
+   "residual_px": 1.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 4.0,
+    "nose": 1.4,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_16.png",
+    "rect": [161, 224, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_16_u.png",
+    "rect": [287, 380, 230, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 624,
+   "cover_alien_px": 2,
+   "occluded": 0.023,
+   "w": 1.0
+  },
+  "frames/think_loop/17.png": {
+   "m": [
+    0.99645,
+    -0.05103,
+    -30.09,
+    25.5
+   ],
+   "scale": 0.9978,
+   "rot_deg": -2.93,
+   "shift": [
+    -7.8,
+    3.0
+   ],
+   "inliers": 107,
+   "residual_px": 0.97,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "nose": 1.4,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_17.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_17_u.png",
+    "rect": [287, 380, 230, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 626,
+   "cover_alien_px": 2,
+   "occluded": 0.023,
+   "w": 1.0
+  },
+  "frames/think_loop/18.png": {
+   "m": [
+    0.99982,
+    -0.05152,
+    -31.67,
+    24.65
+   ],
+   "scale": 1.0011,
+   "rot_deg": -2.95,
+   "shift": [
+    -7.8,
+    3.5
+   ],
+   "inliers": 104,
+   "residual_px": 0.8,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 1.4,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_18.png",
+    "rect": [161, 226, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_18_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 658,
+   "cover_alien_px": 6,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/19.png": {
+   "m": [
+    1.00044,
+    -0.05176,
+    -32.01,
+    24.45
+   ],
+   "scale": 1.0018,
+   "rot_deg": -2.96,
+   "shift": [
+    -7.7,
+    3.5
+   ],
+   "inliers": 109,
+   "residual_px": 0.84,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 1.4,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_19.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_19_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 659,
+   "cover_alien_px": 4,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/20.png": {
+   "m": [
+    0.99911,
+    -0.0513,
+    -31.24,
+    24.67
+   ],
+   "scale": 1.0004,
+   "rot_deg": -2.94,
+   "shift": [
+    -7.7,
+    3.3
+   ],
+   "inliers": 106,
+   "residual_px": 0.93,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 1.4,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_20.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_20_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 643,
+   "cover_alien_px": 5,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/21.png": {
+   "m": [
+    0.99772,
+    -0.05092,
+    -30.55,
+    25.16
+   ],
+   "scale": 0.999,
+   "rot_deg": -2.92,
+   "shift": [
+    -7.8,
+    3.3
+   ],
+   "inliers": 115,
+   "residual_px": 0.83,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "nose": 1.4,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_21.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_21_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 639,
+   "cover_alien_px": 3,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/22.png": {
+   "m": [
+    0.99715,
+    -0.05045,
+    -30.16,
+    25.15
+   ],
+   "scale": 0.9984,
+   "rot_deg": -2.9,
+   "shift": [
+    -7.8,
+    3.2
+   ],
+   "inliers": 121,
+   "residual_px": 0.95,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "nose": 1.4,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_22.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_22_u.png",
+    "rect": [287, 380, 230, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 631,
+   "cover_alien_px": 3,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/23.png": {
+   "m": [
+    0.99909,
+    -0.05092,
+    -31.16,
+    24.65
+   ],
+   "scale": 1.0004,
+   "rot_deg": -2.92,
+   "shift": [
+    -7.8,
+    3.4
+   ],
+   "inliers": 115,
+   "residual_px": 0.81,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 5.1,
+    "nose": 1.4,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_23.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_23_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 652,
+   "cover_alien_px": 3,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/24.png": {
+   "m": [
+    0.99915,
+    -0.05139,
+    -31.4,
+    24.81
+   ],
+   "scale": 1.0005,
+   "rot_deg": -2.94,
+   "shift": [
+    -7.8,
+    3.4
+   ],
+   "inliers": 114,
+   "residual_px": 0.87,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 5.1,
+    "nose": 1.4,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_24.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_24_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 651,
+   "cover_alien_px": 1,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/25.png": {
+   "m": [
+    0.99956,
+    -0.05142,
+    -31.54,
+    24.64
+   ],
+   "scale": 1.0009,
+   "rot_deg": -2.95,
+   "shift": [
+    -7.8,
+    3.4
+   ],
+   "inliers": 105,
+   "residual_px": 0.83,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 5.1,
+    "nose": 1.4,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_25.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_25_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 654,
+   "cover_alien_px": 4,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/26.png": {
+   "m": [
+    1.00027,
+    -0.0503,
+    -31.39,
+    23.85
+   ],
+   "scale": 1.0015,
+   "rot_deg": -2.88,
+   "shift": [
+    -7.9,
+    3.4
+   ],
+   "inliers": 109,
+   "residual_px": 0.83,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 5.1,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_26.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_26_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 655,
+   "cover_alien_px": 4,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/27.png": {
+   "m": [
+    0.99969,
+    -0.05057,
+    -31.34,
+    24.05
+   ],
+   "scale": 1.001,
+   "rot_deg": -2.9,
+   "shift": [
+    -7.9,
+    3.2
+   ],
+   "inliers": 119,
+   "residual_px": 0.86,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 5.1,
+    "nose": 1.4,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_27.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_27_u.png",
+    "rect": [287, 380, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 652,
+   "cover_alien_px": 4,
+   "occluded": 0.025,
+   "w": 1.0
+  },
+  "frames/think_loop/28.png": {
+   "m": [
+    0.99798,
+    -0.05234,
+    -31.52,
+    25.07
+   ],
+   "scale": 0.9994,
+   "rot_deg": -3.0,
+   "shift": [
+    -8.0,
+    2.7
+   ],
+   "inliers": 121,
+   "residual_px": 0.93,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 1.4,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_28.png",
+    "rect": [161, 225, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_28_u.png",
+    "rect": [287, 380, 230, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 646,
+   "cover_alien_px": 3,
+   "occluded": 0.024,
+   "w": 1.0
+  },
+  "frames/think_loop/29.png": {
+   "m": [
+    0.99754,
+    -0.05601,
+    -33.3,
+    26.05
+   ],
+   "scale": 0.9991,
+   "rot_deg": -3.21,
+   "shift": [
+    -8.2,
+    2.0
+   ],
+   "inliers": 125,
+   "residual_px": 0.91,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_29.png",
+    "rect": [161, 224, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_29_u.png",
+    "rect": [286, 379, 231, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 691,
+   "cover_alien_px": 2,
+   "occluded": 0.026,
+   "w": 1.0
+  },
+  "frames/think_loop/30.png": {
+   "m": [
+    0.99783,
+    -0.05976,
+    -35.53,
+    27.18
+   ],
+   "scale": 0.9996,
+   "rot_deg": -3.43,
+   "shift": [
+    -8.6,
+    1.7
+   ],
+   "inliers": 115,
+   "residual_px": 0.99,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 6.3,
+    "nose": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_30.png",
+    "rect": [160, 224, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_30_u.png",
+    "rect": [286, 378, 230, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 693,
+   "cover_alien_px": 8,
+   "occluded": 0.026,
+   "w": 1.0
+  },
+  "frames/think_loop/31.png": {
+   "m": [
+    0.99756,
+    -0.06298,
+    -36.92,
+    29.17
+   ],
+   "scale": 0.9995,
+   "rot_deg": -3.61,
+   "shift": [
+    -8.6,
+    2.3
+   ],
+   "inliers": 99,
+   "residual_px": 0.88,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_31.png",
+    "rect": [160, 224, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_31_u.png",
+    "rect": [286, 378, 230, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 233,
+   "cover_alien_px": 8,
+   "occluded": 0.007,
+   "w": 1.0
+  },
+  "frames/think_loop/32.png": {
+   "m": [
+    1.00109,
+    -0.06427,
+    -38.67,
+    29.95
+   ],
+   "scale": 1.0032,
+   "rot_deg": -3.67,
+   "shift": [
+    -8.3,
+    4.2
+   ],
+   "inliers": 102,
+   "residual_px": 1.01,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_32.png",
+    "rect": [161, 226, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_32_u.png",
+    "rect": [286, 380, 230, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 12,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/33.png": {
+   "m": [
+    1.00202,
+    -0.06156,
+    -36.59,
+    30.88
+   ],
+   "scale": 1.0039,
+   "rot_deg": -3.52,
+   "shift": [
+    -7.1,
+    6.7
+   ],
+   "inliers": 84,
+   "residual_px": 0.91,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 1.0,
+    "mouth": 0.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_33.png",
+    "rect": [162, 229, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_33_u.png",
+    "rect": [287, 383, 231, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 7,
+   "cover_alien_px": 8,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/34.png": {
+   "m": [
+    0.99951,
+    -0.05258,
+    -29.47,
+    30.79
+   ],
+   "scale": 1.0009,
+   "rot_deg": -3.01,
+   "shift": [
+    -5.2,
+    9.1
+   ],
+   "inliers": 78,
+   "residual_px": 1.02,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 2.2,
+    "nose": 1.4,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_34.png",
+    "rect": [164, 231, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_34_u.png",
+    "rect": [289, 386, 231, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 4,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/35.png": {
+   "m": [
+    0.99964,
+    -0.04311,
+    -23.49,
+    26.54
+   ],
+   "scale": 1.0006,
+   "rot_deg": -2.47,
+   "shift": [
+    -3.6,
+    8.8
+   ],
+   "inliers": 76,
+   "residual_px": 1.05,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 2.0,
+    "nose": 2.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_35.png",
+    "rect": [165, 231, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_35_u.png",
+    "rect": [291, 386, 231, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 5,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/36.png": {
+   "m": [
+    1.00165,
+    -0.03289,
+    -18.23,
+    17.77
+   ],
+   "scale": 1.0022,
+   "rot_deg": -1.88,
+   "shift": [
+    -2.3,
+    5.1
+   ],
+   "inliers": 93,
+   "residual_px": 0.82,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_36.png",
+    "rect": [167, 227, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_36_u.png",
+    "rect": [293, 383, 231, 109]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 3,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/37.png": {
+   "m": [
+    1.00208,
+    -0.02361,
+    -13.24,
+    9.45
+   ],
+   "scale": 1.0024,
+   "rot_deg": -1.35,
+   "shift": [
+    -1.4,
+    0.8
+   ],
+   "inliers": 121,
+   "residual_px": 0.75,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_37.png",
+    "rect": [168, 223, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_37_u.png",
+    "rect": [294, 380, 231, 107]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 3,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/38.png": {
+   "m": [
+    1.00281,
+    -0.01365,
+    -8.58,
+    1.31
+   ],
+   "scale": 1.0029,
+   "rot_deg": -0.78,
+   "shift": [
+    -1.1,
+    -3.0
+   ],
+   "inliers": 141,
+   "residual_px": 0.64,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_38.png",
+    "rect": [168, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_38_u.png",
+    "rect": [295, 377, 231, 106]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 12,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/39.png": {
+   "m": [
+    1.00268,
+    -0.00897,
+    -6.05,
+    -1.6
+   ],
+   "scale": 1.0027,
+   "rot_deg": -0.51,
+   "shift": [
+    -0.8,
+    -4.0
+   ],
+   "inliers": 159,
+   "residual_px": 0.67,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_39.png",
+    "rect": [168, 218, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_39_u.png",
+    "rect": [296, 376, 230, 106]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 12,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/40.png": {
+   "m": [
+    1.0024,
+    -0.00591,
+    -4.23,
+    -2.03
+   ],
+   "scale": 1.0024,
+   "rot_deg": -0.34,
+   "shift": [
+    -0.5,
+    -3.3
+   ],
+   "inliers": 161,
+   "residual_px": 0.66,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_40.png",
+    "rect": [168, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_40_u.png",
+    "rect": [296, 377, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/41.png": {
+   "m": [
+    1.00249,
+    -0.00375,
+    -3.16,
+    -1.75
+   ],
+   "scale": 1.0025,
+   "rot_deg": -0.21,
+   "shift": [
+    -0.4,
+    -2.1
+   ],
+   "inliers": 173,
+   "residual_px": 0.59,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_41.png",
+    "rect": [169, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_41_u.png",
+    "rect": [296, 378, 231, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 15,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/42.png": {
+   "m": [
+    1.00263,
+    -0.00221,
+    -2.46,
+    -1.36
+   ],
+   "scale": 1.0026,
+   "rot_deg": -0.13,
+   "shift": [
+    -0.4,
+    -1.0
+   ],
+   "inliers": 183,
+   "residual_px": 0.51,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_42.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_42_u.png",
+    "rect": [296, 380, 231, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 8,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/43.png": {
+   "m": [
+    1.00257,
+    -0.00137,
+    -1.96,
+    -1.24
+   ],
+   "scale": 1.0026,
+   "rot_deg": -0.08,
+   "shift": [
+    -0.3,
+    -0.6
+   ],
+   "inliers": 183,
+   "residual_px": 0.53,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_43.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_43_u.png",
+    "rect": [296, 380, 231, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 5,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/44.png": {
+   "m": [
+    1.00241,
+    -0.00109,
+    -1.67,
+    -1.18
+   ],
+   "scale": 1.0024,
+   "rot_deg": -0.06,
+   "shift": [
+    -0.2,
+    -0.5
+   ],
+   "inliers": 185,
+   "residual_px": 0.55,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_44.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_44_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 8,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/45.png": {
+   "m": [
+    1.00245,
+    -0.00083,
+    -1.54,
+    -1.31
+   ],
+   "scale": 1.0025,
+   "rot_deg": -0.05,
+   "shift": [
+    -0.2,
+    -0.5
+   ],
+   "inliers": 183,
+   "residual_px": 0.51,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_45.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_45_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 8,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/46.png": {
+   "m": [
+    1.00243,
+    -0.00073,
+    -1.47,
+    -1.33
+   ],
+   "scale": 1.0024,
+   "rot_deg": -0.04,
+   "shift": [
+    -0.1,
+    -0.5
+   ],
+   "inliers": 196,
+   "residual_px": 0.53,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_46.png",
+    "rect": [169, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_46_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 12,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/47.png": {
+   "m": [
+    1.00199,
+    -0.00055,
+    -1.17,
+    -1.11
+   ],
+   "scale": 1.002,
+   "rot_deg": -0.03,
+   "shift": [
+    -0.1,
+    -0.4
+   ],
+   "inliers": 194,
+   "residual_px": 0.55,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_47.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_47_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 9,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/think_loop/48.png": {
+   "m": [
+    1.00055,
+    -0.00015,
+    -0.32,
+    -0.31
+   ],
+   "scale": 1.0006,
+   "rot_deg": -0.01,
+   "shift": [
+    -0.0,
+    -0.1
+   ],
+   "inliers": 331,
+   "residual_px": 0.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/think_loop_48.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/think_loop_48_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/00.png": {
+   "m": [
+    1.00048,
+    0.00055,
+    0.11,
+    -0.52
+   ],
+   "scale": 1.0005,
+   "rot_deg": 0.03,
+   "shift": [
+    0.0,
+    -0.1
+   ],
+   "inliers": 331,
+   "residual_px": 0.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_00.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_00_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/01.png": {
+   "m": [
+    1.0016,
+    0.00377,
+    1.39,
+    -2.5
+   ],
+   "scale": 1.0016,
+   "rot_deg": 0.22,
+   "shift": [
+    0.3,
+    -0.2
+   ],
+   "inliers": 195,
+   "residual_px": 0.53,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_01.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_01_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/02.png": {
+   "m": [
+    1.0016,
+    0.01105,
+    5.28,
+    -5.29
+   ],
+   "scale": 1.0017,
+   "rot_deg": 0.63,
+   "shift": [
+    0.8,
+    -0.0
+   ],
+   "inliers": 164,
+   "residual_px": 0.57,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_02.png",
+    "rect": [170, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_02_u.png",
+    "rect": [298, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 8,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/03.png": {
+   "m": [
+    1.0014,
+    0.01963,
+    9.94,
+    -8.43
+   ],
+   "scale": 1.0016,
+   "rot_deg": 1.12,
+   "shift": [
+    1.4,
+    0.2
+   ],
+   "inliers": 148,
+   "residual_px": 0.69,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_03.png",
+    "rect": [170, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_03_u.png",
+    "rect": [299, 381, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/04.png": {
+   "m": [
+    1.00125,
+    0.0311,
+    16.1,
+    -12.94
+   ],
+   "scale": 1.0017,
+   "rot_deg": 1.78,
+   "shift": [
+    2.1,
+    0.4
+   ],
+   "inliers": 121,
+   "residual_px": 0.79,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_04.png",
+    "rect": [171, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_04_u.png",
+    "rect": [300, 380, 230, 107]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 13,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/05.png": {
+   "m": [
+    1.00067,
+    0.04117,
+    21.6,
+    -17.85
+   ],
+   "scale": 1.0015,
+   "rot_deg": 2.36,
+   "shift": [
+    2.7,
+    -0.7
+   ],
+   "inliers": 114,
+   "residual_px": 0.85,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.4,
+    "mouth": 1.4,
+    "nose": 1.4,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_05.png",
+    "rect": [172, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_05_u.png",
+    "rect": [301, 378, 230, 108]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 10,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/06.png": {
+   "m": [
+    0.9993,
+    0.05093,
+    27.18,
+    -24.09
+   ],
+   "scale": 1.0006,
+   "rot_deg": 2.92,
+   "shift": [
+    3.2,
+    -3.6
+   ],
+   "inliers": 98,
+   "residual_px": 0.95,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_06.png",
+    "rect": [172, 218, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_06_u.png",
+    "rect": [302, 375, 230, 109]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/07.png": {
+   "m": [
+    0.99788,
+    0.05986,
+    32.07,
+    -29.72
+   ],
+   "scale": 0.9997,
+   "rot_deg": 3.43,
+   "shift": [
+    3.4,
+    -6.2
+   ],
+   "inliers": 93,
+   "residual_px": 0.81,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_07.png",
+    "rect": [172, 216, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_07_u.png",
+    "rect": [303, 372, 230, 110]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 3,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/08.png": {
+   "m": [
+    0.99791,
+    0.06426,
+    34.41,
+    -33.58
+   ],
+   "scale": 1.0,
+   "rot_deg": 3.68,
+   "shift": [
+    3.7,
+    -8.3
+   ],
+   "inliers": 94,
+   "residual_px": 1.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_08.png",
+    "rect": [173, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_08_u.png",
+    "rect": [303, 369, 230, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 10,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/09.png": {
+   "m": [
+    0.99743,
+    0.06625,
+    35.73,
+    -35.55
+   ],
+   "scale": 0.9996,
+   "rot_deg": 3.8,
+   "shift": [
+    3.9,
+    -9.7
+   ],
+   "inliers": 87,
+   "residual_px": 0.92,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_09.png",
+    "rect": [173, 212, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_09_u.png",
+    "rect": [304, 368, 230, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 166,
+   "cover_alien_px": 3,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/10.png": {
+   "m": [
+    0.99819,
+    0.06564,
+    35.35,
+    -36.36
+   ],
+   "scale": 1.0003,
+   "rot_deg": 3.76,
+   "shift": [
+    4.1,
+    -10.4
+   ],
+   "inliers": 87,
+   "residual_px": 1.05,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_10.png",
+    "rect": [173, 212, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_10_u.png",
+    "rect": [304, 367, 229, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 154,
+   "cover_alien_px": 2,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/11.png": {
+   "m": [
+    0.99619,
+    0.06796,
+    37.19,
+    -36.66
+   ],
+   "scale": 0.9985,
+   "rot_deg": 3.9,
+   "shift": [
+    4.0,
+    -10.7
+   ],
+   "inliers": 87,
+   "residual_px": 1.0,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_11.png",
+    "rect": [173, 211, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_11_u.png",
+    "rect": [304, 367, 229, 111]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 195,
+   "cover_alien_px": 1,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/12.png": {
+   "m": [
+    0.99488,
+    0.06994,
+    38.51,
+    -36.55
+   ],
+   "scale": 0.9973,
+   "rot_deg": 4.02,
+   "shift": [
+    3.9,
+    -10.3
+   ],
+   "inliers": 85,
+   "residual_px": 0.96,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_12.png",
+    "rect": [173, 212, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_12_u.png",
+    "rect": [304, 367, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 252,
+   "cover_alien_px": 1,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/13.png": {
+   "m": [
+    0.99638,
+    0.07019,
+    37.99,
+    -36.26
+   ],
+   "scale": 0.9989,
+   "rot_deg": 4.03,
+   "shift": [
+    3.8,
+    -9.3
+   ],
+   "inliers": 97,
+   "residual_px": 0.97,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_13.png",
+    "rect": [173, 213, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_13_u.png",
+    "rect": [304, 368, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 136,
+   "cover_alien_px": 1,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/14.png": {
+   "m": [
+    0.99729,
+    0.07095,
+    37.94,
+    -35.77
+   ],
+   "scale": 0.9998,
+   "rot_deg": 4.07,
+   "shift": [
+    3.8,
+    -8.0
+   ],
+   "inliers": 89,
+   "residual_px": 0.95,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 2.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_14.png",
+    "rect": [173, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_14_u.png",
+    "rect": [304, 369, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 122,
+   "cover_alien_px": 2,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/15.png": {
+   "m": [
+    0.99739,
+    0.07132,
+    38.12,
+    -35.17
+   ],
+   "scale": 0.9999,
+   "rot_deg": 4.09,
+   "shift": [
+    3.9,
+    -7.2
+   ],
+   "inliers": 85,
+   "residual_px": 0.89,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_15.png",
+    "rect": [173, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_15_u.png",
+    "rect": [304, 370, 230, 112]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 108,
+   "cover_alien_px": 2,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/16.png": {
+   "m": [
+    0.99915,
+    0.07223,
+    37.97,
+    -36.0
+   ],
+   "scale": 1.0018,
+   "rot_deg": 4.13,
+   "shift": [
+    4.0,
+    -6.9
+   ],
+   "inliers": 73,
+   "residual_px": 0.91,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 0.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_16.png",
+    "rect": [173, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_16_u.png",
+    "rect": [304, 370, 229, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 71,
+   "cover_alien_px": 3,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/17.png": {
+   "m": [
+    0.99782,
+    0.07393,
+    39.34,
+    -36.14
+   ],
+   "scale": 1.0006,
+   "rot_deg": 4.24,
+   "shift": [
+    4.0,
+    -6.9
+   ],
+   "inliers": 97,
+   "residual_px": 0.99,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_17.png",
+    "rect": [173, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_17_u.png",
+    "rect": [304, 370, 230, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 67,
+   "cover_alien_px": 2,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/18.png": {
+   "m": [
+    0.99538,
+    0.07579,
+    41.33,
+    -36.22
+   ],
+   "scale": 0.9983,
+   "rot_deg": 4.35,
+   "shift": [
+    4.2,
+    -7.4
+   ],
+   "inliers": 74,
+   "residual_px": 0.83,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 0.0,
+    "nose": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_18.png",
+    "rect": [173, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_18_u.png",
+    "rect": [305, 369, 229, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 191,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/19.png": {
+   "m": [
+    0.99585,
+    0.07543,
+    41.27,
+    -36.38
+   ],
+   "scale": 0.9987,
+   "rot_deg": 4.33,
+   "shift": [
+    4.5,
+    -7.5
+   ],
+   "inliers": 86,
+   "residual_px": 1.0,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_19.png",
+    "rect": [173, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_19_u.png",
+    "rect": [305, 369, 229, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 177,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/20.png": {
+   "m": [
+    0.99537,
+    0.07665,
+    42.17,
+    -36.71
+   ],
+   "scale": 0.9983,
+   "rot_deg": 4.4,
+   "shift": [
+    4.6,
+    -7.5
+   ],
+   "inliers": 92,
+   "residual_px": 0.95,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_20.png",
+    "rect": [174, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_20_u.png",
+    "rect": [305, 369, 229, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 178,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/21.png": {
+   "m": [
+    0.99549,
+    0.07924,
+    43.21,
+    -37.75
+   ],
+   "scale": 0.9986,
+   "rot_deg": 4.55,
+   "shift": [
+    4.5,
+    -7.5
+   ],
+   "inliers": 86,
+   "residual_px": 0.92,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_21.png",
+    "rect": [173, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_21_u.png",
+    "rect": [305, 369, 230, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 152,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/22.png": {
+   "m": [
+    0.99671,
+    0.07993,
+    43.18,
+    -38.37
+   ],
+   "scale": 0.9999,
+   "rot_deg": 4.58,
+   "shift": [
+    4.6,
+    -7.2
+   ],
+   "inliers": 96,
+   "residual_px": 0.98,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_22.png",
+    "rect": [174, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_22_u.png",
+    "rect": [305, 369, 230, 114]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 64,
+   "cover_alien_px": 1,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/23.png": {
+   "m": [
+    0.99724,
+    0.07909,
+    42.9,
+    -38.25
+   ],
+   "scale": 1.0004,
+   "rot_deg": 4.53,
+   "shift": [
+    5.0,
+    -7.2
+   ],
+   "inliers": 94,
+   "residual_px": 1.07,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 1.4,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_23.png",
+    "rect": [174, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_23_u.png",
+    "rect": [305, 369, 230, 114]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 62,
+   "cover_alien_px": 2,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/24.png": {
+   "m": [
+    0.99616,
+    0.08139,
+    44.34,
+    -38.89
+   ],
+   "scale": 0.9995,
+   "rot_deg": 4.67,
+   "shift": [
+    4.9,
+    -7.4
+   ],
+   "inliers": 103,
+   "residual_px": 0.99,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_24.png",
+    "rect": [174, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_24_u.png",
+    "rect": [305, 369, 230, 114]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 130,
+   "cover_alien_px": 1,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/25.png": {
+   "m": [
+    0.99529,
+    0.08303,
+    45.42,
+    -39.29
+   ],
+   "scale": 0.9987,
+   "rot_deg": 4.77,
+   "shift": [
+    4.9,
+    -7.5
+   ],
+   "inliers": 100,
+   "residual_px": 0.9,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_25.png",
+    "rect": [174, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_25_u.png",
+    "rect": [306, 369, 229, 114]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 181,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/26.png": {
+   "m": [
+    0.99568,
+    0.08351,
+    45.5,
+    -39.59
+   ],
+   "scale": 0.9992,
+   "rot_deg": 4.79,
+   "shift": [
+    4.9,
+    -7.5
+   ],
+   "inliers": 103,
+   "residual_px": 1.02,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 0.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_26.png",
+    "rect": [174, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_26_u.png",
+    "rect": [306, 369, 229, 114]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 162,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/27.png": {
+   "m": [
+    0.99555,
+    0.08463,
+    46.07,
+    -40.12
+   ],
+   "scale": 0.9991,
+   "rot_deg": 4.86,
+   "shift": [
+    4.9,
+    -7.6
+   ],
+   "inliers": 88,
+   "residual_px": 0.82,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 0.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_27.png",
+    "rect": [174, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_27_u.png",
+    "rect": [306, 369, 229, 114]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 159,
+   "cover_alien_px": 4,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/28.png": {
+   "m": [
+    0.9977,
+    0.08594,
+    46.12,
+    -41.49
+   ],
+   "scale": 1.0014,
+   "rot_deg": 4.92,
+   "shift": [
+    5.2,
+    -7.4
+   ],
+   "inliers": 83,
+   "residual_px": 0.94,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_28.png",
+    "rect": [174, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_28_u.png",
+    "rect": [306, 368, 229, 115]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 130,
+   "cover_alien_px": 4,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/29.png": {
+   "m": [
+    0.99712,
+    0.09198,
+    49.49,
+    -43.54
+   ],
+   "scale": 1.0014,
+   "rot_deg": 5.27,
+   "shift": [
+    5.5,
+    -7.3
+   ],
+   "inliers": 93,
+   "residual_px": 1.08,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.4,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_29.png",
+    "rect": [175, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_29_u.png",
+    "rect": [306, 368, 230, 116]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 116,
+   "cover_alien_px": 4,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/30.png": {
+   "m": [
+    0.99536,
+    0.09869,
+    53.52,
+    -45.73
+   ],
+   "scale": 1.0002,
+   "rot_deg": 5.66,
+   "shift": [
+    5.7,
+    -7.6
+   ],
+   "inliers": 91,
+   "residual_px": 0.91,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "nose": 1.0,
+    "pin": 1.4
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_30.png",
+    "rect": [175, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_30_u.png",
+    "rect": [307, 368, 229, 116]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 129,
+   "cover_alien_px": 4,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/31.png": {
+   "m": [
+    0.99457,
+    0.10376,
+    56.57,
+    -47.73
+   ],
+   "scale": 1.0,
+   "rot_deg": 5.96,
+   "shift": [
+    6.1,
+    -7.9
+   ],
+   "inliers": 90,
+   "residual_px": 1.03,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 4.1,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_31.png",
+    "rect": [175, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_31_u.png",
+    "rect": [308, 367, 229, 117]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 144,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/32.png": {
+   "m": [
+    0.9931,
+    0.10781,
+    59.1,
+    -48.86
+   ],
+   "scale": 0.9989,
+   "rot_deg": 6.2,
+   "shift": [
+    6.1,
+    -8.0
+   ],
+   "inliers": 85,
+   "residual_px": 0.93,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_32.png",
+    "rect": [175, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_32_u.png",
+    "rect": [308, 367, 229, 117]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 191,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/33.png": {
+   "m": [
+    0.99299,
+    0.10768,
+    58.91,
+    -48.59
+   ],
+   "scale": 0.9988,
+   "rot_deg": 6.19,
+   "shift": [
+    5.9,
+    -7.8
+   ],
+   "inliers": 80,
+   "residual_px": 0.89,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_33.png",
+    "rect": [175, 214, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_33_u.png",
+    "rect": [308, 367, 229, 117]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 191,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/34.png": {
+   "m": [
+    0.99488,
+    0.10117,
+    54.7,
+    -45.98
+   ],
+   "scale": 1.0,
+   "rot_deg": 5.81,
+   "shift": [
+    5.5,
+    -7.0
+   ],
+   "inliers": 80,
+   "residual_px": 0.97,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 1.0,
+    "mouth": 1.4,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_34.png",
+    "rect": [175, 215, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_34_u.png",
+    "rect": [307, 368, 229, 117]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 140,
+   "cover_alien_px": 5,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/35.png": {
+   "m": [
+    0.99732,
+    0.09031,
+    48.02,
+    -41.43
+   ],
+   "scale": 1.0014,
+   "rot_deg": 5.17,
+   "shift": [
+    4.9,
+    -5.8
+   ],
+   "inliers": 79,
+   "residual_px": 0.9,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_35.png",
+    "rect": [174, 216, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_35_u.png",
+    "rect": [306, 370, 230, 115]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 4,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/36.png": {
+   "m": [
+    0.99851,
+    0.07361,
+    38.75,
+    -33.81
+   ],
+   "scale": 1.0012,
+   "rot_deg": 4.22,
+   "shift": [
+    3.9,
+    -4.4
+   ],
+   "inliers": 88,
+   "residual_px": 0.93,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 1.0,
+    "mouth": 1.4,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_36.png",
+    "rect": [173, 218, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_36_u.png",
+    "rect": [304, 372, 229, 113]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/37.png": {
+   "m": [
+    0.99972,
+    0.0565,
+    29.35,
+    -26.04
+   ],
+   "scale": 1.0013,
+   "rot_deg": 3.23,
+   "shift": [
+    2.9,
+    -3.1
+   ],
+   "inliers": 99,
+   "residual_px": 0.86,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 1.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_37.png",
+    "rect": [172, 219, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_37_u.png",
+    "rect": [302, 375, 230, 110]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 5,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/38.png": {
+   "m": [
+    1.00184,
+    0.03661,
+    18.41,
+    -17.34
+   ],
+   "scale": 1.0025,
+   "rot_deg": 2.09,
+   "shift": [
+    2.1,
+    -1.5
+   ],
+   "inliers": 141,
+   "residual_px": 1.01,
+   "ref_residual_px": {
+    "eyeL": 1.4,
+    "eyeR": 1.0,
+    "mouth": 1.4,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_38.png",
+    "rect": [171, 220, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_38_u.png",
+    "rect": [300, 378, 230, 107]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 8,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/39.png": {
+   "m": [
+    1.00254,
+    0.02282,
+    11.01,
+    -11.17
+   ],
+   "scale": 1.0028,
+   "rot_deg": 1.3,
+   "shift": [
+    1.4,
+    -0.7
+   ],
+   "inliers": 144,
+   "residual_px": 0.8,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_39.png",
+    "rect": [170, 221, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_39_u.png",
+    "rect": [299, 379, 230, 106]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 6,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/40.png": {
+   "m": [
+    1.00237,
+    0.01282,
+    5.75,
+    -6.68
+   ],
+   "scale": 1.0025,
+   "rot_deg": 0.73,
+   "shift": [
+    0.8,
+    -0.3
+   ],
+   "inliers": 160,
+   "residual_px": 0.64,
+   "ref_residual_px": {
+    "eyeL": 1.0,
+    "eyeR": 1.0,
+    "mouth": 1.0,
+    "nose": 1.0,
+    "pin": 1.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_40.png",
+    "rect": [170, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_40_u.png",
+    "rect": [298, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/41.png": {
+   "m": [
+    1.00235,
+    0.00649,
+    2.44,
+    -4.03
+   ],
+   "scale": 1.0024,
+   "rot_deg": 0.37,
+   "shift": [
+    0.4,
+    -0.3
+   ],
+   "inliers": 191,
+   "residual_px": 0.56,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_41.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_41_u.png",
+    "rect": [297, 381, 231, 103]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 10,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/42.png": {
+   "m": [
+    1.00239,
+    0.00294,
+    0.51,
+    -2.66
+   ],
+   "scale": 1.0024,
+   "rot_deg": 0.17,
+   "shift": [
+    0.1,
+    -0.3
+   ],
+   "inliers": 200,
+   "residual_px": 0.52,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_42.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_42_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 11,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/43.png": {
+   "m": [
+    1.00237,
+    0.00118,
+    -0.46,
+    -1.99
+   ],
+   "scale": 1.0024,
+   "rot_deg": 0.07,
+   "shift": [
+    -0.0,
+    -0.4
+   ],
+   "inliers": 189,
+   "residual_px": 0.48,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_43.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_43_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/44.png": {
+   "m": [
+    1.00246,
+    0.00012,
+    -1.06,
+    -1.61
+   ],
+   "scale": 1.0025,
+   "rot_deg": 0.01,
+   "shift": [
+    -0.1,
+    -0.4
+   ],
+   "inliers": 186,
+   "residual_px": 0.5,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_44.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_44_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 10,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/45.png": {
+   "m": [
+    1.00266,
+    -0.00084,
+    -1.61,
+    -1.31
+   ],
+   "scale": 1.0027,
+   "rot_deg": -0.05,
+   "shift": [
+    -0.1,
+    -0.4
+   ],
+   "inliers": 189,
+   "residual_px": 0.56,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_45.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_45_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 9,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/46.png": {
+   "m": [
+    1.00264,
+    -0.00093,
+    -1.64,
+    -1.31
+   ],
+   "scale": 1.0026,
+   "rot_deg": -0.05,
+   "shift": [
+    -0.1,
+    -0.5
+   ],
+   "inliers": 189,
+   "residual_px": 0.55,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_46.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_46_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 7,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/47.png": {
+   "m": [
+    1.00211,
+    -0.00077,
+    -1.33,
+    -1.07
+   ],
+   "scale": 1.0021,
+   "rot_deg": -0.04,
+   "shift": [
+    -0.1,
+    -0.4
+   ],
+   "inliers": 190,
+   "residual_px": 0.56,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_47.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_47_u.png",
+    "rect": [297, 380, 230, 105]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 5,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/shrug_loop/48.png": {
+   "m": [
+    1.00058,
+    -0.00022,
+    -0.37,
+    -0.29
+   ],
+   "scale": 1.0006,
+   "rot_deg": -0.01,
+   "shift": [
+    -0.0,
+    -0.1
+   ],
+   "inliers": 331,
+   "residual_px": 0.0,
+   "ref_residual_px": {
+    "eyeL": 0.0,
+    "eyeR": 0.0,
+    "mouth": 0.0,
+    "nose": 0.0,
+    "pin": 0.0
+   },
+   "ok": true,
+   "mask": {
+    "file": "track/shrug_loop_48.png",
+    "rect": [169, 222, 484, 402],
+    "halves": [
+     "under_hair",
+     "over_hair"
+    ]
+   },
+   "under": {
+    "file": "track/shrug_loop_48_u.png",
+    "rect": [297, 381, 230, 104]
+   },
+   "yield_eye_px": 0,
+   "yield_px": 0,
+   "cover_alien_px": 0,
+   "occluded": 0.0,
+   "w": 1.0
+  },
+  "frames/spin_loop/00.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/01.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/02.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/03.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/04.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/05.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/06.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/07.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/08.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/09.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/10.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/11.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/12.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/13.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/14.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/15.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/16.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/17.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/18.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/19.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/20.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/21.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/22.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/23.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/24.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/25.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/26.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/27.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/28.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/29.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/30.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/31.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/32.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/33.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/34.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/35.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/36.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/37.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/38.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/39.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/40.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/41.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/42.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/43.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/44.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/45.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/46.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/47.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/48.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/49.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/50.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/51.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/52.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/53.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/54.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/55.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/56.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/57.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/58.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/59.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/60.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/61.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/62.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/63.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/64.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/65.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/66.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/67.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/68.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/69.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/70.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/71.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/72.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/73.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/74.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/75.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/76.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/77.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/78.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/79.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/spin_loop/80.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/00.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/01.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/02.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/03.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/04.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/05.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/06.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/07.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/08.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/09.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/10.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/11.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/12.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/13.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/14.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/15.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/16.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/17.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/18.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/19.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/20.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/21.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/22.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/23.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/24.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/25.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/26.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/27.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/28.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/29.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/30.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/31.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/32.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/33.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/34.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/35.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/36.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/37.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/38.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/39.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/40.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/41.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/42.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/43.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/44.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/45.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/46.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/47.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/48.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/49.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/50.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/51.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/52.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/53.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/54.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/55.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/56.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/57.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/58.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/59.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/60.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/61.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/62.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/63.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/64.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/65.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/66.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/67.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/68.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/69.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/70.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/71.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/72.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/73.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/74.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/75.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/76.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/77.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/78.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/79.png": {
+   "ok": false,
+   "w": 0
+  },
+  "frames/turn_loop/80.png": {
+   "ok": false,
+   "w": 0
+  }
+ },
+ "headTrackBasis": "idle",
+ "headTrackRefs": {
+  "eyeL": [
+   313.9,
+   441.4
+  ],
+  "eyeR": [
+   509.5,
+   439.3
+  ],
+  "mouth": [
+   410.7,
+   491.2
+  ],
+  "nose": [
+   408.7,
+   465.3
+  ],
+  "pin": [
+   547.3,
+   299.6
+  ]
+ },
+ "browRule": {
+  "thresh_line_px": 1.2,
+  "run_frames": 3,
+  "note": "见 clips/brow_ok.py"
+ }
+};

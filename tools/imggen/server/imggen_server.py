@@ -12,6 +12,8 @@
   POST /txt2video  JSON {prompt, model?, negative?, seconds?|frames?, res?, width?, height?, seed?, fast?, audio?}
     model=wan（默认）：Wan 2.2 A14B，16fps；fast=true 走 lightx2v 4 步，false 走 20 步定稿；end_image 仅 wan。
     model=ltx：LTX-2.5 22B distilled，24fps，固定 8+3 步（fast 不起作用）；audio=true 时带上它同时生成的音轨。
+  POST /control2video JSON {image: b64 参考图, control_video: b64 mp4, prompt, negative?, seed?, frames?(默认 49), width?, height?, steps?, cfg?, fast?}
+    Wan2.2 Fun Control 14B（2026-10-10 加）：参考图定外观，控制视频逐帧定运动；归视频类，加速 LoRA 借用 i2v 的 lightx2v。
   GET  /jobs/<id>         -> JSON 状态；GET /jobs/<id>/video -> video/mp4；DELETE /jobs/<id> 取消（排队中直接取消，在跑的打断）
   模式
   POST /mode       JSON {mode: image|video}   预先切换（可选，生成请求会自动切）
@@ -65,6 +67,8 @@ V = {
     "t2v_low": "wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors",
     "t2v_lora_high": "wan2.2_t2v_A14b_high_noise_lora_rank64_lightx2v_4step_1217.safetensors",
     "t2v_lora_low": "wan2.2_t2v_A14b_low_noise_lora_rank64_lightx2v_4step_1217.safetensors",
+    "ctrl_high": "wan2.2_fun_control_high_noise_14B_fp8_scaled.safetensors",   # Wan2.2 Fun Control（控制视频）；加速 LoRA 借用 i2v 的
+    "ctrl_low": "wan2.2_fun_control_low_noise_14B_fp8_scaled.safetensors",
     "clip": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
     "vae": "wan_2.1_vae.safetensors",
 }
@@ -189,9 +193,10 @@ def wf_video(p, kind, names, size, frames, prefix):
         "4": {"class_type": "VAELoader", "inputs": {"vae_name": V["vae"]}},
     }
     high, low = ["1", 0], ["2", 0]
+    lk = "i2v" if kind == "ctrl" else kind
     if fast:
-        g["5"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": high, "lora_name": V[f"{kind}_lora_high"], "strength_model": 1.0}}
-        g["6"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": low, "lora_name": V[f"{kind}_lora_low"], "strength_model": 1.0}}
+        g["5"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": high, "lora_name": V[f"{lk}_lora_high"], "strength_model": 1.0}}
+        g["6"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": low, "lora_name": V[f"{lk}_lora_low"], "strength_model": 1.0}}
         high, low = ["5", 0], ["6", 0]
     g["7"] = {"class_type": "ModelSamplingSD3", "inputs": {"model": high, "shift": 5.0}}
     g["8"] = {"class_type": "ModelSamplingSD3", "inputs": {"model": low, "shift": 5.0}}
@@ -201,6 +206,12 @@ def wf_video(p, kind, names, size, frames, prefix):
     if kind == "t2v":
         g["12"] = {"class_type": "EmptyHunyuanLatentVideo", "inputs": {"width": w, "height": h, "length": frames, "batch_size": 1}}
         pos, neg, lat = ["10", 0], ["11", 0], ["12", 0]
+    elif kind == "ctrl":   # names = [参考图, 控制视频文件名]；参考图当 ref_image，控制视频逐帧当 control_video
+        g["20"] = {"class_type": "LoadImage", "inputs": {"image": names[0]}}
+        g["21"] = {"class_type": "LoadVideo", "inputs": {"file": names[1]}}
+        g["22"] = {"class_type": "GetVideoComponents", "inputs": {"video": ["21", 0]}}
+        g["12"] = {"class_type": "Wan22FunControlToVideo", "inputs": {**common, "ref_image": ["20", 0], "control_video": ["22", 0]}}
+        pos, neg, lat = ["12", 0], ["12", 1], ["12", 2]
     else:
         g["20"] = {"class_type": "LoadImage", "inputs": {"image": names[0]}}
         if len(names) > 1:
@@ -285,10 +296,10 @@ def gpu_procs():
         return {"error": str(e)}
 
 
-async def upload(session, png_bytes):
-    name = f"api_{uuid.uuid4().hex}.png"
+async def upload(session, png_bytes, ext="png", ctype="image/png"):
+    name = f"api_{uuid.uuid4().hex}.{ext}"
     form = aiohttp.FormData()
-    form.add_field("image", png_bytes, filename=name, content_type="image/png")
+    form.add_field("image", png_bytes, filename=name, content_type=ctype)
     form.add_field("overwrite", "true")
     async with session.post(f"{COMFY}/upload/image", data=form) as r:
         r.raise_for_status()
@@ -339,6 +350,8 @@ async def run(session, graph, timeout=TIMEOUT, want="image"):
             for key, items in out.items():
                 for it in items if isinstance(items, list) else []:
                     if not isinstance(it, dict) or "filename" not in it:
+                        continue
+                    if it.get("type") == "input":   # LoadVideo 的预览条目（输入文件本身），不是结果
                         continue
                     is_video = it["filename"].endswith((".mp4", ".webm", ".mkv"))
                     if (want == "video") != is_video:
@@ -561,6 +574,30 @@ async def submit_video(request, kind):
     return web.json_response(job_public(j), status=202)
 
 
+async def h_control2video(request):
+    """POST /control2video {image: b64 参考图, control_video: b64 mp4, prompt, negative?, seed?, frames?(默认 49), width?, height?, steps?, cfg?, fast?}
+    Wan2.2 Fun Control 14B：参考图定外观，控制视频逐帧定运动。控制视频帧数要 >= frames，会被缩放 + 居中裁剪到 width×height。"""
+    p = await request.json()
+    for k in ("prompt", "image", "control_video"):
+        if not p.get(k):
+            raise web.HTTPBadRequest(text=f"{k} required")
+    seed_of(p)
+    s = request.app["session"]
+    first = b64png(p["image"])
+    raw = p["control_video"]
+    raw = base64.b64decode(raw.split(",", 1)[1] if "," in raw[:100] else raw)
+    names = [await upload(s, first[0]), await upload(s, raw, "mp4", "video/mp4")]
+    size = video_size(p, first[1], "wan")
+    frames = frames_of({**p, "frames": p.get("frames") or 49}, VIDEO_FPS, 4)
+    jid = uuid.uuid4().hex[:12]
+    j = {"id": jid, "kind": "ctrl", "backend": "wan", "status": "queued", "created": time.time(), "width": size[0], "height": size[1],
+         "frames": frames, "fps": VIDEO_FPS, "seconds": round((frames - 1) / VIDEO_FPS, 2), "seed": p["seed"], "fast": p["fast"], "prompt": p["prompt"]}
+    jobs[jid] = j
+    job_save(j)
+    asyncio.create_task(video_worker(request.app, j, p, names))
+    return web.json_response(job_public(j), status=202)
+
+
 async def h_img2video(request):
     return await submit_video(request, "i2v")
 
@@ -676,7 +713,7 @@ async def on_stop(app):
 def main():
     app = web.Application(middlewares=[auth], client_max_size=64 * 2**20)
     app.add_routes([web.post("/txt2img", h_txt2img), web.post("/edit", h_edit), web.post("/cutout", h_cutout),
-                    web.post("/img2video", h_img2video), web.post("/txt2video", h_txt2video),
+                    web.post("/img2video", h_img2video), web.post("/control2video", h_control2video), web.post("/txt2video", h_txt2video),
                     web.get("/jobs/{id}", h_job), web.get("/jobs/{id}/video", h_job_video), web.delete("/jobs/{id}", h_job_cancel),
                     web.post("/mode", h_mode), web.get("/health", h_health)])
     app.on_startup.append(on_start)

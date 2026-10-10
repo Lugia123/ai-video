@@ -1,0 +1,24 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>姿势一览</title>
+<style>html,body{margin:0;background:#f3f8fb}#stage{position:relative;overflow:hidden;background:#f3f8fb}#host{position:absolute;left:0;top:0}canvas#c{position:absolute;left:0;top:0;z-index:5}</style>
+<div id="stage"><div id="host"></div><canvas id="c"></canvas></div>
+<script type="module">
+// 姿势一览：每个姿势一格，上半身放大到成片的 2 倍（成片里讲解员 size=760，这里 1520），头不动、不说话、不眨眼。
+//   ?poses=surprise,covermouth,wave,think,fist（默认：姿势库里全部）  ?pack=…（相对 puppet/）
+import { createHost } from '../host/index.js';
+const Q = new URLSearchParams(location.search), PACK = new URL('../' + (Q.get('pack') || 'characters/beret-girl/'), location.href).href;
+const probe = await fetch(new URL('character.json', PACK)).then(r => r.json()), all = Object.keys(await fetch(new URL(probe.host.kit + 'poses.json', PACK)).then(r => r.json()));
+const POSES = (Q.get('poses') || all.join(',')).split(','), CW = 760, H = 1120, W = CW * POSES.length;
+const stage = document.getElementById('stage'); stage.style.width = W + 'px'; stage.style.height = H + 'px';
+const c = document.getElementById('c'); c.width = W; c.height = H; const g = c.getContext('2d'), hosts = [];
+for (const [i, pose] of POSES.entries()) {
+  const mount = Object.assign(document.createElement('div'), { style: `position:absolute;left:${i * CW}px;top:0;width:${CW}px;height:${H}px;overflow:hidden` });
+  document.getElementById('host').appendChild(mount);
+  const h = await createHost({ mount, timings: { duration: 10, segments: [] }, W: CW, H, ground: 1560, size: 1520, pack: PACK, swapFx: 'a' });
+  h.direct(() => ({ x: CW / 2, look: null, talk: false, pose: pose === 'idle' ? {} : { [pose]: 1 }, face: { yaw: 0, pitch: 0, roll: 0, blink: 0 } })); hosts.push(h);
+}
+function seek() { hosts.forEach(h => h.draw(1)); g.clearRect(0, 0, W, H); g.font = '28px "PingFang SC", "Heiti SC", sans-serif'; g.fillStyle = '#1e2a4a'; POSES.forEach((n, i) => g.fillText(n, i * CW + 16, 38)); }
+seek();
+window.__video = { width: W, height: H, fps: 30, duration: 1, seek };
+</script>

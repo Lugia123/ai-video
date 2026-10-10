@@ -1,0 +1,375 @@
+{
+ "version": 1,
+ "id": "beret-girl",
+ "name": "贝雷帽女孩",
+ "canvas": {
+  "width": 2208,
+  "height": 2944
+ },
+ "unit": {
+  "R": 330,
+  "hh": 290.8,
+  "headCenter": [
+   1080,
+   896
+  ],
+  "neckPivot": [
+   1080,
+   1361
+  ],
+  "headMasterOrigin": [
+   390,
+   136
+  ],
+  "turnPivotDepth": 0.37
+ },
+ "turn": {
+  "x": {
+   "parameter": "ParamAngleX",
+   "degreesPerUnit": 1
+  },
+  "y": {
+   "parameter": "ParamAngleY",
+   "degreesPerUnit": 1
+  }
+ },
+ "parameters": [
+  {
+   "id": "ParamAngleX",
+   "min": -30,
+   "max": 30,
+   "default": 0
+  },
+  {
+   "id": "ParamAngleY",
+   "min": -8,
+   "max": 8,
+   "default": 0
+  },
+  {
+   "id": "ParamAngleZ",
+   "min": -30,
+   "max": 30,
+   "default": 0
+  },
+  {
+   "id": "ParamEyeLOpen",
+   "min": 0,
+   "max": 1.3,
+   "default": 1
+  },
+  {
+   "id": "ParamEyeLSmile",
+   "min": 0,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamEyeROpen",
+   "min": 0,
+   "max": 1.3,
+   "default": 1
+  },
+  {
+   "id": "ParamEyeRSmile",
+   "min": 0,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamEyeBallX",
+   "min": -1,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamEyeBallY",
+   "min": -1,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamBrowLY",
+   "min": -1,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamBrowRY",
+   "min": -1,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamBrowLAngle",
+   "min": -1,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamBrowRAngle",
+   "min": -1,
+   "max": 1,
+   "default": 0
+  },
+  {
+   "id": "ParamIrisScale",
+   "min": 0.6,
+   "max": 1.3,
+   "default": 1
+  },
+  {
+   "id": "ParamMouthShape",
+   "min": 0,
+   "max": 3,
+   "default": 0
+  },
+  {
+   "id": "ParamMouthScale",
+   "min": -1,
+   "max": 1.4,
+   "default": 1
+  }
+ ],
+ "mouthShapes": [
+  "closed",
+  "small",
+  "big",
+  "smile"
+ ],
+ "groups": [
+  {
+   "id": "head",
+   "pivot": [
+    1080,
+    1361
+   ],
+   "bindings": [
+    {
+     "parameter": "ParamAngleZ",
+     "channel": "rotate",
+     "k": 0.4
+    }
+   ]
+  }
+ ],
+ "families": [
+  {
+   "id": "eye_L"
+  },
+  {
+   "id": "eye_R"
+  },
+  {
+   "id": "brow_L"
+  },
+  {
+   "id": "brow_R"
+  },
+  {
+   "id": "hair"
+  }
+ ],
+ "poseGroups": [],
+ "physics": [],
+ "anchors": {
+  "eyeL": {
+   "part": "eye_white_R",
+   "at": [
+    883.5,
+    1068.0
+   ]
+  },
+  "eyeR": {
+   "part": "eye_white_L",
+   "at": [
+    1263.5,
+    1066.5
+   ]
+  },
+  "mouth": {
+   "part": "mouth",
+   "at": [
+    1070.5011792452829,
+    1219.4587264150944
+   ]
+  },
+  "forehead": {
+   "part": "face",
+   "at": [
+    1073.5,
+    907.3375
+   ]
+  },
+  "cheekL": {
+   "part": "face",
+   "at": [
+    850.5,
+    1189.365
+   ]
+  },
+  "cheekR": {
+   "part": "face",
+   "at": [
+    1296.5,
+    1189.365
+   ]
+  },
+  "top": {
+   "part": "hat",
+   "at": [
+    1080,
+    222
+   ]
+  },
+  "chin": {
+   "part": "face",
+   "at": [
+    1073.5,
+    1358
+   ]
+  }
+ },
+ "slots": {
+  "eyes": [
+   "eye_white_R",
+   "iris_R",
+   "eye_highlight_R",
+   "lash_lower_R",
+   "lash_R",
+   "eye_white_L",
+   "iris_L",
+   "eye_highlight_L",
+   "lash_lower_L",
+   "lash_L",
+   "lid_R",
+   "lid_L"
+  ],
+  "brows": [
+   "brow_R",
+   "brow_L"
+  ],
+  "mouth": [
+   "mouth",
+   "mouth_small",
+   "mouth_big",
+   "mouth_smile"
+  ]
+ },
+ "overlays": [
+  {
+   "id": "back",
+   "order": 0,
+   "group": "head"
+  },
+  {
+   "id": "face",
+   "order": 165,
+   "group": "head",
+   "clipTo": "face",
+   "depth": 0.23,
+   "depthY": 0.4045
+  },
+  {
+   "id": "top",
+   "order": 100000
+  }
+ ],
+ "files": {
+  "parts": "parts.json",
+  "provenance": "provenance.json"
+ },
+ "host": {
+  "height": 2565.25,
+  "foot": [
+   1091.625,
+   2734.25
+  ],
+  "kit": "kit/",
+  "kitScale": 2,
+  "shoulders": {
+   "L": [
+    440,
+    715
+   ],
+   "R": [
+    654,
+    715
+   ]
+  },
+  "midX": 547,
+  "yawMax": 24,
+  "pointDepth": {
+   "face": 0.23,
+   "hair": 0.18,
+   "hat": -0.01
+  },
+  "pointDepthY": {
+   "face": 0.4045,
+   "hair": 0.397,
+   "hat": 0.3685
+  },
+  "points": {
+   "eyeL": [
+    883.5,
+    1068.0,
+    "face"
+   ],
+   "eyeR": [
+    1263.5,
+    1066.5,
+    "face"
+   ],
+   "mouth": [
+    1070.5011792452829,
+    1219.4587264150944,
+    "face"
+   ],
+   "cheekL": [
+    820,
+    1190,
+    "face"
+   ],
+   "cheekR": [
+    1330,
+    1190,
+    "face"
+   ],
+   "chin": [
+    1075,
+    1335,
+    "face"
+   ],
+   "forehead": [
+    1078,
+    860,
+    "hair"
+   ],
+   "templeL": [
+    640,
+    900,
+    "hair"
+   ],
+   "templeR": [
+    1520,
+    900,
+    "hair"
+   ],
+   "top": [
+    1100,
+    300,
+    "hat"
+   ],
+   "crownL": [
+    700,
+    420,
+    "hat"
+   ],
+   "crownR": [
+    1500,
+    420,
+    "hat"
+   ]
+  }
+ }
+}

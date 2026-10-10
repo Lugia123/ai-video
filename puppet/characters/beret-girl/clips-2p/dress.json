@@ -1,0 +1,36 @@
+{
+ "blank": true,
+ "alignFrom": "clips-b1",
+ "origRest": "clips-b1/frames/idle.png",
+ "track": [
+  "think_b1_final_loop",
+  "wave_b1_final_loop",
+  "shrug_b1_final_s1_loop",
+  "shrug_b1_final_s2_loop",
+  "think_b1_draft_loop",
+  "wave_b1_draft_loop",
+  "wave_h1_canny_loop",
+  "think_h1_canny_loop",
+  "wave_h1_s2_canny_loop",
+  "wave_h1_mid_canny_loop"
+ ],
+ "ink": true,
+ "refine": true,
+ "noBrow": "clips-b1/frames/idle_nobrow.png",
+ "perFeature": true,
+ "twoPass": {
+  "restA": "clips-b1/frames/idle.png",
+  "srcA": {
+   "think_b1_final_loop": "clips-batch1/frames/think-v2-final-s1",
+   "wave_b1_final_loop": "clips-batch1/frames/wave-v2-final-s1",
+   "shrug_b1_final_s1_loop": "clips-batch1/frames/shrug-v2-final-s1",
+   "shrug_b1_final_s2_loop": "clips-batch1/frames/shrug-v2-final-s2",
+   "think_b1_draft_loop": "clips-batch1/frames/think-v2-draft-s1",
+   "wave_b1_draft_loop": "clips-batch1/frames/wave-v2-draft-s1",
+   "wave_h1_canny_loop": "clips-blank/frames/wave_h1-blank2A-draft-s1",
+   "think_h1_canny_loop": "clips-blank/frames/think_h1-blank2A-draft-s1",
+   "wave_h1_s2_canny_loop": "clips-blank/frames/wave_h1-blank2A-draft-s2",
+   "wave_h1_mid_canny_loop": "clips-blank/frames/wave_h1-blank2A-draft-s1"
+  }
+ }
+}

@@ -1,0 +1,99 @@
+{
+ "note": "点头 / 叉腰 / 双手比划的 A 遍重做（v2）：只改提示词，每动作 3 个种子，用 control_video.py 报告里的 track_fail 帧数每动作留一条进 B 遍。路径都相对 puppet/。给 pipeline/clips/new_action_batch.py 读，配 --select-by track_fail。",
+ "character": "characters/beret-girl",
+ "canvas": [
+  832,
+  1104
+ ],
+ "frames": 49,
+ "fps": 16,
+ "tier": "draft",
+ "home": {
+  "faceMagenta": "characters/beret-girl/clips-blank/home_withface_magenta.png",
+  "faceRgba": "characters/beret-girl/clips-b1/frames/idle.png",
+  "aFit": "faceRgba",
+  "_note": "aFit = A 遍抠图时颜色对哪张归位帧校：faceRgba（有五官归位帧）；写 blankRgba 就和 clips-blank/frames/*-blank2A-* 那几条旧 A 帧逐像素同一做法（对空脸归位帧校、首末帧换有五官归位帧）",
+  "blankMagenta": "characters/beret-girl/clips-blank/home_blank_v2_magenta.png",
+  "blankRgba": "characters/beret-girl/clips-blank/home_blank_v2_rgba.png"
+ },
+ "control": {
+  "style": "canny",
+  "variant": "line-noface",
+  "polarity": "whiteonblack"
+ },
+ "estimateSeconds": {
+  "_note": "a_gen / b_gen = 2026-10-11 缩减版真跑的实测（A 188.4–188.8 s，B 209.2–210.4 s）；submit_wait = 实测 总等待 − 生成（约 22–23 s）；本机三步同上一份清单",
+  "a_gen": 188,
+  "b_gen": 210,
+  "submit_wait": 23,
+  "a_key": 9,
+  "ctl": 5,
+  "b_key": 9
+ },
+ "prompt": {
+  "head": "一个Q版动漫小女孩站在纯色背景前，正面全身，双手垂在身侧。",
+  "faceA": "她的表情很平静，一直抿着嘴安静地微笑，嘴唇合拢，眼睛睁着注视镜头，整张脸从头到尾保持同一个样子。",
+  "faceB": "她的脸是一整片光滑平整的肤色，像一个还没有画脸的人偶，从头到尾保持这样。",
+  "tail": "人物始终完整地在画面中央，站在原地同一处，大小保持一致。镜头固定，背景是均匀的纯色。赛璐璐平涂动画风格，线条清晰。",
+  "_note": "head / faceB / tail 和 tier1-new-actions.json 相同；faceA 每个动作自己带（actions[].faceA），这里的 faceA 是没带时的通用写法"
+ },
+ "work": "characters/beret-girl/clips-newact-v2",
+ "lib": {
+  "name": "clips-2p-new-v2",
+  "like": "clips-b1",
+  "dressFrom": "clips-2p",
+  "perFeature": true,
+  "acceptOut": "out/render-wb/newact-v2"
+ },
+ "actions": [
+  {
+   "id": "nod_v2",
+   "label": "点头·v2",
+   "seeds": [
+    4,
+    5,
+    6
+   ],
+   "motion": "她的头和脸始终正对镜头。她缓慢地轻轻点一下头：下巴只向下低一点点，再缓慢地抬回正中，幅度非常小，贝雷帽和头发跟着头一起动。点头的整个过程里整张脸都露在外面。点完头后头回到正中，回到一开始的站姿。两只手臂一直垂在身体两侧。",
+   "faceA": "她的两只眼睛从头到尾一直睁得大大的，目光平视镜头，点头的时候眼睛也睁着；嘴唇一直合拢，嘴角带着浅浅的微笑。整张脸像一张定格的画，从头到尾保持同一个样子。",
+   "still": "肩膀、身体、裙子、腿和脚保持静止。",
+   "risks": [
+    "俯仰本身还在：五官会被压扁、被刘海盖住一部分，眼睛睁着模板匹配分也可能掉",
+    "改成「点一下」「幅度非常小」，草稿档可能几乎不动"
+   ]
+  },
+  {
+   "id": "hips_v2",
+   "label": "叉腰·v2",
+   "seeds": [
+    4,
+    5,
+    6
+   ],
+   "motion": "她的头和脸始终正对镜头。她把两只手同时抬起来叉在腰上：两只手贴在腰的两侧，手肘向身体两边撑开，两个手肘都完整地留在画面里面，保持这个姿势安静地停一会儿，然后把两只手臂放下来，落回身体两侧，回到一开始的站姿。",
+   "faceA": "抬手、叉腰、放下手的整个过程里，她的两只眼睛一直睁得大大的，目光平视镜头；嘴唇一直合拢，嘴角带着浅浅的微笑。她很安静，整张脸像一张定格的画，从头到尾保持同一个样子。",
+   "still": "头、帽子、头发、裙子、腿和脚保持静止。",
+   "risks": [
+    "动作段没改，只改了脸段；抬手 / 放手那一下的眨眼（旧版第 6–7、36–37 帧）可能还在",
+    "手肘撑开时包围盒变宽（旧版左右最小边距 178 px，没贴边）"
+   ]
+  },
+  {
+   "id": "gesture_v2",
+   "label": "双手比划·v2",
+   "seeds": [
+    4,
+    5,
+    6
+   ],
+   "motion": "她的头和脸始终正对镜头。她把两只前臂缓慢地抬到腰和胸口之间，手掌张开、手心朝上，两只手在身体前方缓慢地向两侧打开到肩膀那么宽，再缓慢地合拢回到身体前方，这样打开、合拢两次。两只手一直在胸口以下、肩膀宽度以内，整张脸都露在外面。做完后把两只手臂放下来，落回身体两侧，回到一开始的站姿。",
+   "faceA": "做这些手部动作的整个过程里，她的嘴唇一直合拢，嘴角带着浅浅的微笑；两只眼睛一直睁得大大的，目光平视镜头。她很安静，只有手在动，整张脸像一张定格的画，从头到尾保持同一个样子。",
+   "still": "头、帽子、头发、裙子、腿和脚保持静止。",
+   "risks": [
+    "手心朝上摊开的姿势本身可能仍带出说话的嘴（草稿档 cfg=1，反向词不生效）",
+    "和已有的摊手（shrug）可能更像了",
+    "旧版左右最小边距 126 / 123 px；新写了「肩膀那么宽」，手可能开得更宽"
+   ]
+  }
+ ]
+}

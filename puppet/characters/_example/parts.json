@@ -1,0 +1,15 @@
+[
+  { "id": "face", "group": "head", "texture": "tex/face.png", "rect": [380, 520, 650, 700], "order": 200, "depth": 0.37 },
+  { "id": "eye_white_L", "family": "eye_L", "group": "head", "texture": "tex/eye_white_L.png", "rect": [790, 830, 200, 170], "order": 210, "depth": 0.6 },
+  { "id": "iris_L", "family": "eye_L", "group": "head", "texture": "tex/iris_L.png", "rect": [810, 830, 150, 170], "order": 220, "depth": 0.7,
+    "mask": { "by": ["eye_white_L"] } },
+  { "id": "lash_L", "family": "eye_L", "group": "head", "texture": "tex/lash_L.png", "rect": [780, 790, 250, 160], "order": 230, "depth": 0.6,
+    "mesh": { "preset": "small" },
+    "keyforms": [ { "at": { "ParamEyeLOpen": 0 }, "translate": [0, 96], "scale": [1, 0.35] } ] },
+  { "id": "bang_C", "group": "head", "texture": "tex/bang_C.png", "rect": [560, 380, 300, 520], "order": 300, "depth": 0.45,
+    "weight": "tex/bang_C_w.png", "physics": "hairFrontX", "mesh": { "preset": "thin" },
+    "keyforms": [ { "at": { "ParamAngleX": 30, "ParamAngleY": 0 }, "translate": [8, 0], "scale": [0.94, 1] } ],
+    "orderKeys": [ { "parameter": "ParamAngleX", "at": 25, "order": 190 } ] },
+  { "id": "arm_L_idle", "group": "body", "texture": "tex/arm_L_idle.png", "rect": [900, 1420, 260, 620], "order": 120, "depth": 0 },
+  { "id": "arm_L_think", "group": "body", "texture": "tex/arm_L_think.png", "rect": [860, 1180, 330, 520], "order": 400, "depth": 0 }
+]

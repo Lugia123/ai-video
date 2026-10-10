@@ -1,0 +1,15 @@
+# 片段素材不入库（用户 2026-10-07 定：「素材不用上传 git」）：透明序列帧、贴片图、小样的原始视频和关键图。
+# 片段库里的 clips.json / clips.js / points.json / provenance.json 这类小的数据照常入库。干净环境里素材要另外取得。
+characters/*/clips/frames/
+characters/*/clips/patches/**/*.png
+characters/*/clips-trial/
+characters/*/clips-draft/frames/
+characters/*/clips-work/
+characters/*/clips-draft*/frames/
+characters/*/clips-batch*/
+characters/*/clips-stage/
+characters/*/clips*/review/
+characters/*/faces/*.png
+characters/*/clips*/track/
+characters/*/clips-b*/frames/
+characters/*/clips*/track/

@@ -1,0 +1,28 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>口型修前 / 修后对照（#1162）</title>
+<style>html,body{margin:0;background:#22262b}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+// 用 puppet 引擎把四个口型贴在脸上画出来：正面一行、转头 20° 一行；每个口型左「修前」右「修后」。
+// 修前 / 修后的贴图由 mouth_compare.mjs 用请求拦截换。数据包目录由 ?pack=<相对 puppet 根的路径> 给。
+import { createPuppet } from '../../engine/index.js';
+const Q = new URLSearchParams(location.search);
+const TW = 620, TH = 420, K = 1.4;                       // 每格大小；K = 1.4 ≈ 成片里头部缩放的 2 倍
+const SHAPES = ['closed', 'small', 'big', 'smile'], YAWS = [0, 20];
+const c = document.getElementById('c'); c.width = TW * SHAPES.length; c.height = TH * YAWS.length;
+const ctx = c.getContext('2d');
+const p = await createPuppet(new URL('../../' + Q.get('pack').replace(/\/$/, '') + '/', location.href).href, { width: TW, height: TH });
+const MOUTH = [1071.5, 1215];                           // 嘴在 rig 空间的位置（头部母版像素 + [390,136]）
+const off = document.createElement('canvas'); off.width = TW; off.height = TH; const o = off.getContext('2d');
+function seek() {
+  YAWS.forEach((yaw, r) => SHAPES.forEach((s, i) => {
+    p.set({ ParamAngleX: yaw, ParamAngleY: 0, ParamAngleZ: 0, ParamMouthShape: i, ParamMouthScale: 1 });
+    o.fillStyle = '#eef1f4'; o.fillRect(0, 0, TW, TH);
+    p.draw(o, { x: TW * 0.42 - MOUTH[0] * K, y: TH * 0.6 - MOUTH[1] * K, scale: K });
+    ctx.drawImage(off, i * TW, r * TH);
+  }));
+}
+seek();
+window.__video = { width: c.width, height: c.height, fps: 30, duration: 1, seek };
+</script>

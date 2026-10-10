@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>草稿片段库演示</title>
+<style>
+  :root { --ink: #14274A; --sub: #5B6B85; --line: #D5DEE8; }
+  html, body { margin: 0; background: #F3F8FB; color: var(--ink); font: 16px/1.5 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+  #fit { width: 1920px; height: 1080px; transform-origin: 0 0; } canvas#c { display: block; width: 1920px; height: 1080px; }
+  body.render { overflow: hidden; } body.render #panel { display: none; }
+  #panel { padding: 18px 28px 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 32px; background: #fff; border-top: 1px solid var(--line); }
+  h2 { font-size: 13px; font-weight: 600; color: var(--sub); margin: 0 0 8px; letter-spacing: .04em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { font: inherit; font-size: 17px; padding: 9px 18px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--ink); color: #fff; cursor: pointer; }
+  button.ghost { background: #fff; color: var(--ink); } button:disabled { opacity: .4; cursor: default; }
+  label { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; } p.note { margin: 6px 0 0; color: var(--sub); font-size: 13px; }
+  input[type=range] { width: 220px; vertical-align: middle; }
+
+  /* 一屏排版（非渲染模式）：舞台在左、按视口等比缩放；控件在右侧竖栏，放不下时竖栏自己滚，整页不滚 */
+  body:not(.render) { height: 100vh; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 27vw, 400px); }
+  body:not(.render) #stagecol { min-width: 0; min-height: 0; height: 100vh; display: flex; align-items: center; justify-content: center; background: #E9EFF5; overflow: hidden; }
+  body:not(.render) #panel { box-sizing: border-box; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 14px 16px; border-top: 0; border-left: 1px solid var(--line); grid-template-columns: none; }
+  body:not(.render) #panel h2 { font-size: 12px; margin: 0 0 5px; }
+  body:not(.render) #panel .btns { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 5px; }
+  body:not(.render) #panel button { font-size: 13px; padding: 5px 6px; border-radius: 7px; line-height: 1.25; }
+  body:not(.render) #panel label { font-size: 13px; margin-right: 8px; }
+  body:not(.render) #panel p.note { font-size: 11.5px; line-height: 1.4; margin: 4px 0 0; }
+  body:not(.render) #panel input[type=range] { width: 120px; }
+  body:not(.render) #panel #problems { font-size: 12px; max-height: none; }
+  @media (max-height: 800px) { body:not(.render) #panel { gap: 6px; padding: 8px 12px 10px; } body:not(.render) #panel h2 { margin-bottom: 3px; } body:not(.render) #panel p.note { line-height: 1.3; margin-top: 3px; } }
+  body.render #stagecol { display: block; }
+</style>
+<div id="stagecol"><div id="fit"><canvas id="c" width="1920" height="1080"></canvas></div></div>
+<div id="panel">
+  <section><h2>动作</h2><div class="btns" id="actions"></div><div class="btns" style="margin-top:8px"><button id="rest" class="ghost">归位</button></div></section>
+  <section><h2>时长（单程）</h2><input id="secs" type="range" min="0.3" max="2.4" step="0.1" value="0.8"> <span id="secsVal"></span>
+    <label style="margin-left:12px"><input type="checkbox" id="natural"> 按片段原速</label>
+    <p class="note">默认单程 0.8 秒；一段做完去和回的动作占两倍；转一圈按片段数据里自己的默认（2.4 秒）等比例变。短了跳帧，长了每帧停久一点。</p></section>
+  <section><h2>怎么播</h2><label><input type="checkbox" id="hold"> 在幅度最大处停住</label> 停 <input id="holdSecs" type="range" min="0.3" max="4" step="0.1" value="1.2" style="width:120px"> <span id="holdVal"></span>
+    <p class="note">不勾：整段当一次性动作，播完直接回到归位。勾上：前半当去程，停在幅度最大的那一帧，后半当回程（转一圈没有这一种）。</p></section>
+  <section><h2>显示</h2><label><input type="checkbox" id="dark"> 深色底</label><label><input type="checkbox" id="box"> 包围盒</label></section>
+  <section><h2>固定演示</h2><div class="btns"><button id="fixed" class="ghost">播固定演示</button></div><p class="note">渲染：<code>node tools/render.mjs clips --page demo-draft.html</code></p></section>
+</div>
+<script src="player.js"></script>
+<script>
+// 草稿片段库的演示（默认 characters/<角色>/clips-draft2/，?lib=draft1 看最早的三段小样）：都是「只用一张归位帧、一段做完去和回」的草稿。
+// 这类片段中间没有保持帧，两种播法：整段一次播完回归位（动作 <名>），或在幅度最大的那一帧切开、当成 去程 → 保持 → 回程（动作 <名>_hold）。
+// ?render=1：固定演示，三个动作各播一遍，浅底、深底各一遍。走本地服务打开。
+(async () => {
+  const Q = new URLSearchParams(location.search), RENDER = Q.has('render'), W = 1920, H = 1080, FPS = 30, $ = id => document.getElementById(id);
+  // 读哪个草稿库：默认第一批（新舞台，人高 78%）clips-draft2/；?lib=draft1 = 最早那三段小样（旧画幅，人高 59%）clips-draft/；也可以 ?lib=<目录名>
+  const LIBS = { draft1: 'clips-draft', draft2: 'clips-draft2' }, LIB = Q.get('lib') || 'draft2';
+  const BASE = '../characters/' + (Q.get('char') || 'beret-girl') + '/' + (LIBS[LIB] || LIB) + '/';
+  document.body.classList.toggle('render', RENDER);
+  const cv = $('c'), g = cv.getContext('2d'), pc = document.createElement('canvas');
+  let lib, player, fixed = null, fixedT = RENDER ? 0 : null, clock = 0, lastPlayed = null;
+  const moveSecs = clip => clip.moveSeconds != null ? clip.moveSeconds : (clip.from === clip.to ? 2 : 1) * (lib.moveSeconds || 0.8);      // 这段片段的默认时长
+  const ready = (async () => {
+    lib = await ClipPlayer.loadLibrary(BASE); const images = await ClipPlayer.preload(lib, BASE);
+    player = new ClipPlayer(lib, images, pc, { trimmed: true, hold: 1.2 });
+    // 固定演示：挥手（一次播完）→ 摊手（停在幅度最大处 1.2 秒）→ 转一圈；浅底一遍、深底一遍。时长都用默认。
+    const one = id => { const a = lib.actions.find(x => x.id === id); return { action: id, in: moveSecs(lib.clips[a.in]), ...(a.out ? { out: moveSecs(lib.clips[a.out]), hold: 1.2 } : {}), trimmed: true }; };
+    // 库里有什么动作就播什么：思考、摊手这类有停顿的用「停在幅度最大处」那一种，其余整段一次播完
+    const has = id => lib.actions.some(x => x.id === id), bases = [...new Set(lib.actions.map(x => x.id.replace(/_hold$/, '')))];
+    const pass = [{ rest: 0.8 }]; for (const b of bases) pass.push(one(/^(think|shrug)$/.test(b) && has(b + '_hold') ? b + '_hold' : b), { rest: 1.0 });
+    fixed = ClipPlayer.timeline(lib, [...pass, ...pass]); fixed.half = fixed.duration / 2; V.duration = fixed.duration;
+  })();
+  const text = (s, x, y, size, o = {}) => { g.font = `${o.weight || 500} ${size}px "PingFang SC", "Hiragino Sans GB", sans-serif`; g.fillStyle = o.color; g.textAlign = o.align || 'left'; g.textBaseline = 'middle'; g.fillText(s, x, y); };
+  const MODE = { rest: '归位', in: '播放中', hold: '停在幅度最大处', out: '回程' };
+  function paint(view, t, dark, secsNote) {
+    player.opts.showBox = !RENDER && $('box').checked; player.render(view, t);
+    const ink = dark ? '#E6ECF5' : '#14274A', sub = dark ? '#8C9BB5' : '#5B6B85';
+    g.fillStyle = dark ? '#141821' : '#F3F8FB'; g.fillRect(0, 0, W, H); g.fillStyle = dark ? '#1D2330' : '#E2E8EF'; g.fillRect(0, 900, W, H - 900);
+    const rb = lib.poses[lib.rest].bbox, s = 780 / (rb[3] - rb[1]), x = 1360 - lib.anchor.x * s, y = 930 - lib.anchor.y * s;          // 人画成 780px 高，不管这个库的画幅里人占多大
+    g.imageSmoothingQuality = 'high'; g.drawImage(pc, x, y, lib.canvas.w * s, lib.canvas.h * s);
+    const a = view.action && lib.actions.find(q => q.id === view.action), r = player.last;
+    text('草稿片段库（4 步草稿，只看动作）' + (LIB === 'draft1' ? '　最早的三段小样' : LIB === 'draft2' ? '　第一批' : '　' + LIB), 110, 130, 30, { color: sub });
+    text(a ? a.label : '归位', 110, 200, 56, { color: ink, weight: 600 });
+    text(MODE[view.mode] + (r.clip ? `　第 ${r.frame} 帧 / 共 ${r.total} 帧` : ''), 110, 276, 32, { color: r.clip ? '#E8590C' : sub });
+    if (secsNote) text(secsNote, 110, 330, 28, { color: sub });
+    text('只用一张归位帧、靠提示词一段做完去和回；中间没有保持帧', 110, 820, 24, { color: sub });
+  }
+  function note(view) {          // 这一段占多少秒、播了几格
+    if (!view.clip) return '';
+    const f = ClipPlayer.fit(lib.clips[view.clip], view);
+    return `这段占 ${f.seconds.toFixed(2)} 秒（片段原速 ${f.natural.toFixed(2)} 秒），播 ${f.frames.length} 格 / ${f.unique} 个不同帧`;
+  }
+  function seek(t) {
+    if (!fixed) throw new Error('片段库还没加载完就被 seek 了');
+    t = Math.max(0, Math.min(fixed.duration - 1e-6, t)); const v = fixed.at(t);
+    paint(v, t, t >= fixed.half, note(v));
+  }
+  const V = window.__video = { width: W, height: H, fps: FPS, duration: 1, seek, ready };
+  try { await ready; } catch (e) { g.fillStyle = '#C92A2A'; g.font = '28px sans-serif'; g.fillText(e.message + '（走本地服务打开：puppet/ 下 python3 -m http.server 8000）', 60, 200); throw e; }
+  if (RENDER) { seek(0); return; }
+  const fit = () => { const c = $('stagecol'), k = Math.min(c.clientWidth / W, c.clientHeight / H); $('fit').style.transform = `scale(${k})`; $('fit').style.height = H * k + 'px'; $('fit').style.width = W * k + 'px'; };          // 舞台按左栏能放下的大小等比缩放
+  fit(); addEventListener('resize', fit);
+  const bases = [...new Set(lib.actions.map(a => a.id.replace(/_hold$/, '')))];
+  const sync = () => { $('secsVal').textContent = $('natural').checked ? '原速' : (+$('secs').value).toFixed(1) + ' 秒'; $('secs').disabled = $('natural').checked; $('holdVal').textContent = (+$('holdSecs').value).toFixed(1) + ' 秒'; player.opts.hold = +$('holdSecs').value; };
+  for (const id of ['secs', 'natural', 'holdSecs', 'hold']) $(id).addEventListener('input', sync); sync();
+  for (const b of bases) {
+    const a = lib.actions.find(x => x.id === b), btn = document.createElement('button'); btn.textContent = a.label;
+    btn.onclick = () => {
+      fixedT = null; const hold = $('hold').checked && lib.actions.find(x => x.id === b + '_hold'), act = hold || a, clip = lib.clips[act.in];
+      player.opts.seconds = $('natural').checked ? null : moveSecs(clip) * (+$('secs').value / (lib.moveSeconds || 0.8)); if (player.opts.seconds == null) delete player.opts.seconds;
+      lastPlayed = act.id; player.play(act.id);
+    };
+    $('actions').appendChild(btn);
+  }
+  $('rest').onclick = () => { fixedT = null; player.rest(); };
+  $('fixed').onclick = () => { fixedT = 0; };
+  let last = performance.now();
+  const loop = now => {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now; clock += dt;
+    if (fixedT !== null) { fixedT += dt; if (fixedT >= fixed.duration) fixedT = 0; seek(fixedT); }
+    else { player.advance(dt); const v = player.view(); paint({ ...v, seconds: player.opts.seconds, trimmed: player.opts.trimmed }, clock, $('dark').checked, note({ ...v, seconds: player.opts.seconds, trimmed: player.opts.trimmed })); }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+})();
+</script>
+</html>

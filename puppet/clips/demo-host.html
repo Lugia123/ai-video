@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>片段式讲解员演示</title>
+<style>
+  :root { --ink: #14274A; --sub: #5B6B85; --line: #D5DEE8; --page: #F3F8FB; --card: #FFFFFF; --bad: #C92A2A; --warn: #B7791F; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.5 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+  #fit { width: 1920px; height: 1080px; transform-origin: 0 0; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #F3F8FB; }
+  #stage canvas { position: absolute; left: 0; top: 0; }
+  body.render { overflow: hidden; } body.render #panel { display: none; }
+  #panel { padding: 18px 28px 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 32px; background: var(--card); border-top: 1px solid var(--line); }
+  h2 { font-size: 13px; font-weight: 600; color: var(--sub); margin: 0 0 8px; letter-spacing: .04em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { font: inherit; font-size: 15px; padding: 7px 14px; border-radius: 9px; border: 1.5px solid var(--ink); background: var(--ink); color: #fff; cursor: pointer; }
+  button.ghost { background: #fff; color: var(--ink); }
+  button:disabled { opacity: .4; cursor: default; }
+  label { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; font-size: 15px; }
+  #problems { margin: 0; padding: 0; list-style: none; font-size: 14px; max-height: 190px; overflow: auto; }
+  #problems li { padding: 3px 0 3px 12px; border-left: 3px solid var(--warn); margin-bottom: 5px; }
+  #problems li.error { border-color: var(--bad); color: var(--bad); }
+  #problems li.ok { border-color: #2F9E44; color: #2F9E44; }
+  p.note { margin: 6px 0 0; color: var(--sub); font-size: 13px; }
+  code { font: 12.5px/1.4 ui-monospace, "SF Mono", Menlo, monospace; background: #E7EEF5; padding: 1px 5px; border-radius: 4px; }
+
+  /* 一屏排版（非渲染模式）：舞台在左、按视口等比缩放；控件在右侧竖栏，放不下时竖栏自己滚，整页不滚 */
+  body:not(.render) { height: 100vh; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 27vw, 400px); }
+  body:not(.render) #stagecol { min-width: 0; min-height: 0; height: 100vh; display: flex; align-items: center; justify-content: center; background: #E9EFF5; overflow: hidden; }
+  body:not(.render) #panel { box-sizing: border-box; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 14px 16px; border-top: 0; border-left: 1px solid var(--line); grid-template-columns: none; }
+  body:not(.render) #panel h2 { font-size: 12px; margin: 0 0 5px; }
+  body:not(.render) #panel .btns { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 5px; }
+  body:not(.render) #panel button { font-size: 13px; padding: 5px 6px; border-radius: 7px; line-height: 1.25; }
+  body:not(.render) #panel label { font-size: 13px; margin-right: 8px; }
+  body:not(.render) #panel p.note { font-size: 11.5px; line-height: 1.4; margin: 4px 0 0; }
+  body:not(.render) #panel input[type=range] { width: 120px; }
+  body:not(.render) #panel #problems { font-size: 12px; max-height: none; }
+  @media (max-height: 800px) { body:not(.render) #panel { gap: 4px; padding: 6px 12px 8px; } body:not(.render) #panel h2 { margin-bottom: 3px; } body:not(.render) #panel p.note { line-height: 1.3; margin-top: 3px; } }
+  body:not(.render) #panel p.note.tip { display: none; }
+  body:not(.render) #panel .btns { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 4px; }
+  body:not(.render) #panel button { font-size: 12.5px; padding: 4px 4px; }
+  body:not(.render) #panel input[type=range] { width: 96px; }
+  body:not(.render) #panel .btns.groups { display: flex; flex-direction: column; gap: 3px; }
+  #panel .grow { display: grid; grid-template-columns: 4.2em minmax(0, 1fr) auto; gap: 5px; align-items: center; font-size: 13px; }
+  #panel .grow select { font: inherit; font-size: 12.5px; padding: 2px 4px; min-width: 0; }
+  body.render #stagecol { display: block; }
+</style>
+<div id="stagecol"><div id="fit"><div id="stage"><canvas id="bg" width="1920" height="1080"></canvas><div id="host"></div><canvas id="fg" width="1920" height="1080"></canvas></div></div></div>
+<div id="panel">
+  <section><h2>动作（片段去程 → 保持 → 回程归位）</h2><div class="btns" id="actions"></div>
+    <p class="note">保持 <input id="hold" type="range" min="0.5" max="6" step="0.5" value="3"> <span id="holdVal"></span>　<label title="一段做完去和回的动作才有这个选择；转一圈只能一次播完。动作中再点会排到归位之后"><input type="checkbox" id="once"> 一次播完不停</label></p></section>
+  <section><h2>漫符（只出符号，不换脸）</h2><div class="btns" id="emotes"></div>
+    <p class="note">停留 <input id="stay" type="range" min="1.5" max="8" step="0.5" value="3"> <span id="stayVal"></span>（不拉动时：脸红、黑线、汗滴 4 秒，其余 3 秒）　<button id="clearEmote" class="ghost" style="display:inline;padding:2px 8px">清除漫符</button></p></section>
+  <section><h2>表情（只换脸，不出符号）</h2><div class="btns" id="faces"></div>
+    <p class="note">停留 <input id="faceStay" type="range" min="1.5" max="8.5" step="0.5" value="4"> <span id="faceStayVal"></span>（拉到最右 = 一直保持）　<button id="clearFace" class="ghost" style="display:inline;padding:2px 8px">清除表情</button></p></section>
+  <section><h2>常用组合（一个漫符 + 一张表情，角色数据里配的）</h2><div class="btns" id="combos"></div>
+    <p class="note tip">漫符和表情互相独立：可以各点各的、同时保持。脸红、黑线的阴影叠在当前的脸上、刘海之下；脸只在静帧上换，人一动就收。</p></section>
+  <section><h2>说话 · 固定演示 · 显示</h2><div class="btns"><button id="say" title="自动排到人停住之后">说一句</button><button id="sayBad" class="ghost" title="把一句话硬放在动作的去程上，看下面报什么">故意违规</button><button id="fixed">固定演示</button><button id="clear" class="ghost">清空</button></div>
+    <p class="note"><label><input type="checkbox" id="pts"> 挂点</label><label><input type="checkbox" id="box"> 包围盒</label><label title="默认表情只换眼和嘴、原画的眉留着。勾上 = 连眉一起换；2026-10-08 用户看过否了（头发歪了，还不如之前），留着只为对照"><input type="checkbox" id="brow"> 换眉（试验，未通过：头发会错位）</label>　库：<a href="?">正式库</a>　<a href="?lib=draft2">草稿·第一批</a>　<a href="?lib=batch1">正式档候选</a>　<a href="?lib=blank">空脸库</a></p></section>
+  <section><h2>时间表校验</h2><ul id="problems"></ul></section>
+</div>
+<script type="module">
+// 片段式讲解员演示。导演脚本的写法和拆件讲解员一样：state.pose = { think: 1 }、state.emote = { name, t0, t1 }，旁白给 timings。
+// ?render=1：只播固定演示，等渲染器 seek。?show=wavetalk：边动边说、动作中挂表情和漫符的那一段。?fit=1：旁白按默认节奏排、动作自动塞进停顿里的那一版。?bad=1：故意违规的时间表（验证校验）。固定演示 = 归位说两句 → 思考动作 → 保持时说一句并出一个漫符 → 归位。
+import { createClipHost } from '../host-clips/index.js';
+import { attachEmotes, emoteSpan } from '../host-clips/emotes.js';
+
+const Q = new URLSearchParams(location.search), RENDER = Q.has('render');
+const W = 1920, H = 1080, FPS = 30, INK = '#14274A', SUB = '#5B6B85', FONT = '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif';
+const PACK = new URL('../characters/' + (Q.get('char') || 'beret-girl') + '/', location.href).href;
+// 读哪个片段库：默认角色的正式库 clips/；?lib=draft2 = 第一批草稿（新舞台）clips-draft2/；?lib=draft1 = 最早的小样；也可以直接写目录名
+const LIBN = Q.get('lib') || 'clips', CLIPS = PACK + ({ draft1: 'clips-draft', draft2: 'clips-draft2', batch1: 'clips-b1', blank: 'clips-bl1' }[LIBN] || LIBN) + '/';
+const ONE = Q.has('one'), DARK = Q.has('dark');          // ?one=1：人物按片段原像素画（1:1，审看用）；?dark=1：深色底
+const X = 1400, GROUND = ONE ? 1030 : 950, SIZE = ONE ? 'native' : 780;
+const $ = id => document.getElementById(id);
+document.body.classList.toggle('render', RENDER);
+
+// —— 时间表：三样东西，都是「从几秒到几秒」——
+let sentences = [], poses = [], emotes = [], faces = [], DURATION = 0;
+// 固定演示。节奏按项目的默认值：句间 0.6s；动作在上一句说完 ≥ 1.0s 之后开始；新画面（保持帧）停住 ≥ 0.3s 后下一句才开口；收尾停 ≥ 2.5s。
+function fixedShow(host) {
+  if (Q.has('fit')) return fitShow();
+  if (Q.get('show') === 'wavetalk') return waveTalkShow();
+  if (Q.get('show') === 'blankface') return blankFaceShow();
+  if (host.lib.tier === 'draft-blank') return blankFaceShow();          // 只有挥手的库（空脸库）
+  if (host.actions.spin) return stageShow();
+  const d = host.seconds('think');
+  const s1 = { text: '截图这件事，听起来很简单。', start: 0.8, end: 3.0 };
+  const s2 = { text: '可真要做好，要想的还不少。', start: s1.end + 0.6, end: s1.end + 0.6 + 2.3 };
+  const p0 = s2.end + 1.0;                               // 上一句说完 1.0s 后才动
+  const s3 = { text: '比如，窗口的圆角要不要一起截进去？', start: p0 + d.in + 0.4, end: p0 + d.in + 0.4 + 3.0 };
+  const p1 = s3.end + 1.0;                               // 说完 1.0s 后才放下手
+  if (Q.has('bad')) { s3.start = p0 + 0.3; s3.end = s3.start + 3.0; }      // ?bad=1：故意把第三句放到去程上，看校验报什么（渲染时会直接报错退出）
+  return { sentences: [s1, s2, s3], poses: [{ name: 'think', t0: p0, t1: p1 }], emotes: [{ name: 'question', t0: s3.start - 0.1, t1: s3.end + 0.5 }], faces: [{ name: 'doubt', t0: s3.start - 0.1, t1: s3.end + 0.5 }], duration: p1 + d.out + 2.6 };          // 问号 + 疑惑脸：两样都显式写
+}
+// ?fit=1：旁白按项目默认节奏排（句间 0.6s、段间 1.2s、问句后再 +0.3s），不为动作专门留空。脚本只说「第二句说完就做思考，第三句说完就放下」，
+// 去程 / 回程各占多少秒由讲解员按停顿自己定：目标每段 0.8s，且要在下一句开口前 0.3s 做完；段间 1.2s 放得下，问句后 0.9s 缩到 0.6s，句间 0.6s 缩到 0.3s（会提醒）。
+function fitShow() {
+  const GAP = +(Q.get('gap') || 1.2);          // ?gap=0.5：故意把这个停顿缩到放不下最短时长，看校验报什么
+  const s1 = { text: '截图这件事，听起来很简单。', start: 0.8, end: 3.0 };
+  const s2 = { text: '可真要做好，要想的还不少。', start: s1.end + 0.6, end: s1.end + 0.6 + 2.3 };
+  const s3 = { text: '比如，窗口的圆角要不要一起截进去？', start: s2.end + GAP, end: s2.end + GAP + 3.0 };      // 换段：1.2s
+  const s4 = { text: '先从最容易漏掉的说起。', start: s3.end + 0.9, end: s3.end + 0.9 + 2.2 };                    // 问句后：0.6 + 0.3
+  const s5 = { text: '也就是，边角到底算不算窗口。', start: s4.end + 0.6, end: s4.end + 0.6 + 2.6 };              // 同段句间：0.6s —— 这里再做一次动作，看它怎么缩
+  return { sentences: [s1, s2, s3, s4, s5], poses: [{ name: 'think', t0: s2.end, t1: s3.end }, { name: 'think', t0: s4.end, t1: s5.end }], emotes: [{ name: 'question', t0: s3.start - 0.1, t1: s3.end }], faces: [{ name: 'doubt', t0: s3.start - 0.1, t1: s3.end }], duration: s5.end + 0.8 + 2.6 };
+}
+// 新舞台草稿库的固定演示：归位说一句 → 思考并在停顿处说一句 + 问号 → 归位 → 挥手（一次播完）→ 说一句 → 单脚转一圈 → 归位。
+// 脚本只写「什么时候做哪个动作」；思考那段够长，讲解员自己选带停顿帧的那一种，挥手和转圈那段很短，就整段一次播完。
+function stageShow() {
+  const s1 = { text: '今天看一个不起眼的小功能。', start: 0.8, end: 3.0 };
+  const s2 = { text: '截图的时候，圆角要不要一起截？', start: s1.end + 1.2, end: s1.end + 1.2 + 2.8 };
+  const wave0 = s2.end + 0.9 + 0.5;                       // 回程 0.8s 左右，再留一点
+  const s3 = { text: '答案藏在窗口的边上。', start: wave0 + 1.6 + 0.5, end: wave0 + 1.6 + 0.5 + 2.2 };
+  const spin0 = s3.end + 1.0;
+  return { sentences: [s1, s2, s3], poses: [{ name: 'think', t0: s1.end, t1: s2.end }, { name: 'wave', t0: wave0, t1: wave0 + 0.4 }, { name: 'spin', t0: spin0, t1: spin0 + 0.4 }],
+    emotes: [{ name: 'question', t0: s2.start - 0.1, t1: s2.end }], faces: [{ name: 'doubt', t0: s2.start - 0.1, t1: s2.end }], duration: spin0 + 2.4 + 2.6 };
+}
+// ?show=blankface（配 ?lib=clips-bl1，空脸库）：空脸挥手，整段每一帧都由贴片画脸——默认脸 → 开心（静帧）→ 挥手中依次 默认脸 / flat / surprise / angry + 边挥边说 → 归位后 surprise、flat 说话。
+function blankFaceShow() {
+  // ?act=<动作名>（缺省 = 库里第一个动作）&face=<表情名>（缺省 = 默认脸）&talk=1（边做动作边说）：整段一直是这张脸，给用户逐条看。不带 face / act / talk = 混合版（见下）
+  if (Q.has('act') || Q.has('face') || Q.has('talk')) {
+    const act = Q.get('act') || Object.keys(host.actions)[0], d = host.seconds(act).in, t0 = 1.0, tEnd = t0 + d;
+    const sents = Q.has('talk') ? [{ text: '我一边做动作，一边说话。', start: t0 + 0.3, end: tEnd - 0.3 }, { text: '动作做完了，接着说。', start: tEnd + 0.6, end: tEnd + 2.4 }] : [];
+    return { sentences: sents, poses: [{ name: act, t0, t1: t0 + 0.4, move: { in: d } }], faces: Q.get('face') ? [{ name: Q.get('face'), t0: 0.2, t1: 1e9 }] : [], emotes: [], duration: tEnd + 2.8 };
+  }
+  const s1 = { text: '大家好，这是一张空脸挥手。', start: 1.3, end: 3.7 }, s2 = { text: '这句是在归位以后说的。', start: 4.8, end: 6.4 };
+  const act = Object.keys(host.actions).find(k => k.startsWith('wave')) || Object.keys(host.actions)[0];
+  return { sentences: [s1, s2], poses: [{ name: act, t0: 1.0, t1: 1.4, move: { in: 2.95 } }],
+    faces: [{ name: 'happy', t0: 0.2, t1: 0.9 }, { name: 'flat', t0: 1.9, t1: 2.6 }, { name: 'surprise', t0: 2.6, t1: 3.3 }, { name: 'angry', t0: 3.3, t1: 4.0 }, { name: 'surprise', t0: 4.4, t1: 5.2 }, { name: 'flat', t0: 5.2, t1: 6.6 }],
+    emotes: [], duration: 7.4 };
+}
+// ?show=wavetalk（配 ?lib=draft2）：动作进行中也挂表情、说话、出漫符——片段有逐帧头部跟踪时才行。
+// 第一次挥手：开心脸 + 脸红 + 边挥边说；第二次挥手：疑惑脸 + 问号 + 边挥边说；然后思考：抬手的过程中就开口，- - 脸。
+function waveTalkShow() {
+  const s1 = { text: '大家好，欢迎来看这一期。', start: 0.9, end: 3.5 }, s2 = { text: '这个按钮，是做什么用的呢？', start: 5.6, end: 8.2 }, s3 = { text: '让我想一想，嗯……', start: 10.0, end: 12.4 };
+  return { sentences: [s1, s2, s3],
+    poses: [{ name: 'wave', t0: 0.8, t1: 1.2, move: { in: 2.7 } }, { name: 'wave', t0: 5.5, t1: 5.9, move: { in: 2.7 } }, { name: 'think', t0: 9.8, t1: 12.6 }],
+    faces: [{ name: 'happy', t0: 0.5, t1: 4.0 }, { name: 'doubt', t0: 5.3, t1: 8.6 }, { name: 'flat', t0: 9.8, t1: 12.6 }],
+    emotes: [{ name: 'blush', t0: 0.8, t1: 4.0 }, { name: 'question', t0: 5.5, t1: 8.5 }], duration: 12.6 + 0.8 + 2.4 };
+}
+const timingsOf = () => ({ duration: DURATION, segments: [{ sentences }] });
+// 导演脚本：和拆件讲解员的脚本同一种写法
+function stateAt(t) {
+  const p = poses.find(q => t >= q.t0 && t < q.t1), e = emotes.find(q => t >= q.t0 && t < q.t1);
+  const f = faces.find(q => t >= q.t0 && t < q.t1);
+  return { x: X, ...(p ? { pose: { [p.name]: 1 }, ...(p.move ? { move: p.move } : {}) } : {}), ...(e ? { emote: e } : {}), ...(f ? { face: f.name } : {}), ...(Q.has('brow') || (!RENDER && $('brow')?.checked) ? { brow: true } : {}) };          // ?brow=1：渲染时也换眉（试验，出对比片用）
+}
+
+let host, drawHost, loadError = null, warns = [];
+const ready = (async () => {
+  host = await createClipHost({ mount: $('host'), timings: timingsOf(), W, H, ground: GROUND, size: SIZE, pack: PACK, clips: CLIPS, strict: RENDER, duration: 1 });
+  drawHost = attachEmotes(host, stateAt, { W, H });
+  load(fixedShow(host));
+})();
+function load(show) { sentences = show.sentences; poses = show.poses; emotes = show.emotes; faces = show.faces || []; DURATION = show.duration; host.duration = DURATION; host.retime(timingsOf()); V.duration = DURATION; try { warns = host.check().filter(p => p.level === 'warn' && /压到/.test(p.msg)).map(p => p.msg); } catch (e) { warns = []; } }
+
+// —— 舞台：左边是字幕和时间条，右边是人；字不压人 ——
+const bg = $('bg').getContext('2d'), fg = $('fg').getContext('2d');
+function text(g, s, x, y, size, o = {}) { g.font = `${o.weight || 500} ${size}px ${FONT}`; g.fillStyle = o.color || INK; g.textAlign = o.align || 'left'; g.textBaseline = o.base || 'middle'; g.fillText(s, x, y); }
+const MODE = { rest: '归位（静帧 + 呼吸）', in: '去程（播片段）', hold: '保持（静帧 + 呼吸）', out: '回程（播片段）' };
+function drawStage(t) {
+  const g = bg; g.fillStyle = DARK ? '#141821' : '#F3F8FB'; g.fillRect(0, 0, W, H); g.fillStyle = DARK ? '#1D2330' : '#E2E8EF'; g.fillRect(0, GROUND - 20, W, H - GROUND + 20);
+  const L = host.last(), v = L.view, cur = sentences.find(s => t >= s.start && t < s.end);
+  text(g, '片段式讲解员', 110, 120, 30, { color: SUB });
+  text(g, MODE[v.mode] + (L.clip ? `　${L.clip} 第 ${L.frame} 帧` : ''), 110, 172, 34, { weight: 600 });
+  text(g, L.patches.length ? '贴片：' + L.patches.join(' + ') : '贴片：无', 110, 222, 26, { color: SUB });
+  // 这一句的字幕（纸条底）
+  if (cur) { g.font = `600 46px ${FONT}`; const w = g.measureText(cur.text).width; g.fillStyle = '#FFFDF5'; g.beginPath(); g.roundRect(96, 392, w + 56, 96, 14); g.fill(); g.strokeStyle = '#E6DFC8'; g.lineWidth = 2; g.stroke(); text(g, cur.text, 124, 441, 46, { weight: 600 }); }
+  else text(g, '（没在说话）', 124, 441, 34, { color: '#9AA7B8' });
+  // 时间条：句子、人在动的时间段、漫符，各一行；看「动作是不是落在句间停顿里」
+  const x0 = 110, x1 = 980, y = 640, row = 44, span = Math.max(DURATION, 1), T0 = RENDER || fixedOn ? 0 : Math.max(0, t - span * 0.7), px = s => x0 + (s - T0) / span * (x1 - x0);
+  const bar = (a, b, r, color) => { const xa = Math.max(x0, px(a)), xb = Math.min(x1, px(b)); if (xb > xa) { g.fillStyle = color; g.beginPath(); g.roundRect(xa, y + r * row, xb - xa, 26, 6); g.fill(); } };
+  for (const [r, name] of [[0, '旁白'], [1, '在动'], [2, '漫符']]) { text(g, name, x0 - 14, y + r * row + 13, 22, { color: SUB, align: 'right' }); g.fillStyle = '#E7EEF5'; g.fillRect(x0, y + r * row + 11, x1 - x0, 4); }
+  for (const s of sentences) bar(s.start, s.end, 0, '#1C7ED6');
+  let bad = false, talkMove = false; for (const m of host.moves()) { const hit = sentences.some(s => m.t0 < s.end - 1e-3 && m.t1 > s.start + 1e-3); bad = bad || (hit && !m.pasteable); talkMove = talkMove || (hit && m.pasteable); bar(m.t0, m.t1, 1, hit && !m.pasteable ? '#C92A2A' : hit ? '#7048E8' : '#E8590C'); }
+  for (const e of emotes) bar(e.t0, e.t1, 2, '#2F9E44');
+  g.fillStyle = INK; g.fillRect(px(t) - 1.5, y - 14, 3, row * 3 + 14);
+  text(g, t.toFixed(2) + ' s', px(t), y - 30, 22, { align: 'center', color: SUB });
+  text(g, bad ? '有动作压在旁白上（红色）——这段片段贴不了口型，时间表不合格' : talkMove ? '紫色 = 边动边说：这段片段有逐帧头部跟踪，口型和表情钉在动着的脸上' : '人在动的时候不说话，停在静帧上才说话（片段可贴时也可以边动边说）', x0, y + row * 3 + 34, 24, { color: bad ? '#C92A2A' : talkMove ? '#7048E8' : SUB });
+  // 每段动作实际占多少秒、播出几个不同的帧（时长是讲解员按停顿定的，或脚本写的）
+  host.moves().filter(m => m.t1 > T0 && m.t0 < T0 + span).slice(-4).forEach((m, i) => text(g, `${m.kind} ${m.seconds.toFixed(2)}s` + (m.cut ? '：放不下最短时长，硬切 + 回弹' : Math.abs(m.seconds - m.natural) < 1e-6 ? `（自然时长），${m.unique} 个不同帧` : `（片段原速 ${m.natural.toFixed(2)}s），${m.unique} 个不同帧`), x0, y + row * 3 + 78 + i * 34, 22, { color: t >= m.t0 && t < m.t1 ? '#E8590C' : SUB }));
+  // 讲解员给的提醒（不是报错）：哪里的停顿把动作压短了、加到多少就能按默认时长播
+  if (RENDER || fixedOn) { let yy = y + row * 3 + 78 + 4 * 34 + 10; for (const w of warns) for (let k = 0; k < w.length; k += 44) { text(g, (k ? '　　　' : '提醒：') + w.slice(k, k + 44), x0, yy, 20, { color: '#B7791F' }); yy += 28; } }
+  // 调试叠层：挂点、包围盒（在人的上面）
+  fg.clearRect(0, 0, W, H);
+  if ($('pts').checked) { const a = host.anchors(); for (const [k, p] of Object.entries(a.pt)) { fg.fillStyle = k.startsWith('hand') ? '#E8590C' : '#C2255C'; fg.beginPath(); fg.arc(p.x, p.y, 5, 0, 7); fg.fill(); text(fg, k, p.x + 8, p.y - 8, 15, { color: '#C2255C' }); } }
+  if ($('box').checked) { const b = host.bbox(); if (b) { fg.strokeStyle = '#1C7ED6'; fg.lineWidth = 2; fg.strokeRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0); } }
+}
+function seek(t) {
+  if (!host) throw new Error('讲解员还没加载完就被 seek 了');
+  t = Math.max(0, RENDER ? Math.min(DURATION - 1e-6, t) : t);
+  drawHost(t); drawStage(t);
+}
+const V = window.__video = { width: W, height: H, fps: FPS, duration: 1, seek, ready };
+window.__host = () => host;          // 审看工具（head3x 十字标）用
+
+// —— 交互：往时间表里加东西，时间一直往前走。画面始终是「时间表 + t」的函数，没有别的状态 ——
+let now = 0, fixedOn = false;
+const busyUntil = () => Math.max(0, ...host.moves().map(m => m.t1));           // 人最后一次归位的时刻
+const quietFrom = t => Math.max(t, ...sentences.filter(s => s.end > t - 1).map(s => s.end));
+function showProblems() {
+  let list; try { list = host.check(); } catch (e) { list = [{ level: 'error', msg: e.message }]; }
+  $('problems').innerHTML = list.length ? list.map(p => `<li class="${p.level}">${p.level === 'error' ? '不合格：' : '提醒：'}${p.msg}</li>`).join('') : '<li class="ok">时间表合格：动作都在句间停顿里</li>';
+}
+function changed() { DURATION = Math.max(now + 20, DURATION); host.duration = DURATION; host.retime(timingsOf()); showProblems(); }
+// 舞台按左边那一栏能放下的大小等比缩放（宽、高都不超），人物不裁
+function fit() { if (RENDER) return; const c = $('stagecol'), k = Math.min(c.clientWidth / W, c.clientHeight / H); $('fit').style.transform = `scale(${k})`; $('fit').style.height = H * k + 'px'; $('fit').style.width = W * k + 'px'; }
+
+try { await ready; } catch (e) { loadError = e; document.body.insertAdjacentHTML('afterbegin', `<p style="padding:20px;color:#C92A2A;white-space:pre-wrap">${e.message}\n（这个页面要走本地服务打开：在 puppet/ 下 python3 -m http.server 8000，开 http://localhost:8000/clips/demo-host.html）</p>`); throw e; }
+if (RENDER) { seek(0); }
+else {
+  fit(); addEventListener('resize', fit);
+  const SAY = ['这个地方值得多看一眼。', '先别急，一步一步来。', '你看，其实没那么复杂。', '好，下一个问题。'];
+  let sayI = 0;
+  const live = () => { if (fixedOn) { fixedOn = false; sentences = []; poses = []; emotes = []; faces = []; now = 0; DURATION = 20; } };
+  const playAction = id => { live(); const t0 = Math.max(quietFrom(now) + 0.2, busyUntil() + 0.3), d = host.seconds(id);
+    // 一次性动作：pose 那段给得短（或勾了「一次播完」）就整段播完；给得够长、库里又有停顿帧，就停在那儿
+    poses.push(d.oneshot ? { name: id, t0, t1: t0 + (d.hold && !$('once').checked ? 0.8 + +$('hold').value : 0.3) } : { name: id, t0, t1: t0 + Math.min(d.in, 0.8) + +$('hold').value }); changed(); };
+  const actIds = Object.keys(host.actions).filter(k => !(k.endsWith('_hold') && host.actions[k.slice(0, -5)])), meta = id => host.lib.actions.find(a => a.id === id);
+  if (actIds.some(id => meta(id).group)) {          // 库里同一个动作有几条候选（actions 带 group / variant）：每个动作一行，下拉选哪一条，点「播」
+    $('actions').className = 'groups'; const groups = new Map(); for (const id of actIds) { const g = meta(id).group || meta(id).label; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(id); }
+    for (const [g, ids] of groups) { const row = document.createElement('div'); row.className = 'grow'; const lab = document.createElement('span'); lab.textContent = g; const sel = document.createElement('select');
+      for (const id of ids) { const o = document.createElement('option'); o.value = id; o.textContent = meta(id).variant || meta(id).label; sel.appendChild(o); }
+      const b = document.createElement('button'); b.textContent = '播'; b.onclick = () => playAction(sel.value); sel.onchange = () => playAction(sel.value); row.append(lab, sel, b); $('actions').appendChild(row); }
+  } else for (const id of actIds) { const b = document.createElement('button'); b.textContent = meta(id).label; b.onclick = () => playAction(id); $('actions').appendChild(b); }
+  for (const [name, label] of [['question', '问号'], ['exclaim', '感叹号'], ['sweat', '汗滴'], ['vein', '青筋'], ['bulb', '灯泡'], ['hearts', '爱心 + 脸红'], ['blush', '脸红'], ['gloom', '黑线'], ['focus', '集中线（背后）']]) {
+    const b = document.createElement('button'); b.className = 'ghost'; b.textContent = label;
+    b.onclick = () => { live(); emotes = emotes.filter(e => e.t1 <= now); emotes.push(emoteSpan(name, now, stayTouched ? +$('stay').value : undefined)); changed(); };
+    $('emotes').appendChild(b);
+  }
+  const FACE_ZH = { squeeze: '> <', flat: '- -', surprise: '吃惊', happy: '开心', love: '喜欢', angry: '生气', awkward: '尴尬', doubt: '疑惑' };
+  // 表情：点一下换上，停留按「表情停留」滑杆（拉到最右 = 一直保持）；和漫符互不相干
+  const faceUntil = () => (+$('faceStay').value > 8 ? 1e9 : now + +$('faceStay').value);
+  const setFace = name => { for (const q of faces) if (q.t1 > now) q.t1 = now; if (name) faces.push({ name, t0: now, t1: faceUntil() }); };
+  for (const name of host.faces) { const b = document.createElement('button'); b.className = 'ghost'; b.textContent = FACE_ZH[name] || name; b.dataset.face = name; b.onclick = () => { live(); setFace(name); changed(); }; $('faces').appendChild(b); }
+  for (const [name, c] of Object.entries(drawHost.combos)) { const b = document.createElement('button'); b.className = 'ghost'; b.textContent = c.zh || name; b.title = `${c.emote} + ${c.face}`;
+    b.onclick = () => { live(); emotes = emotes.filter(e => e.t1 <= now); const e = emoteSpan(c.emote, now, stayTouched ? +$('stay').value : undefined); emotes.push(e); for (const q of faces) if (q.t1 > now) q.t1 = now; faces.push({ name: c.face, t0: now, t1: e.t1 }); changed(); }; $('combos').appendChild(b); }
+  $('clearEmote').onclick = () => { for (const e of emotes) if (e.t1 > now) e.t1 = now; changed(); };
+  $('clearFace').onclick = () => { setFace(null); changed(); };
+  $('faceStay').oninput = () => { $('faceStayVal').textContent = +$('faceStay').value > 8 ? '一直' : (+$('faceStay').value).toFixed(1) + ' 秒'; }; $('faceStay').oninput();
+  let stayTouched = false; $('stay').oninput = () => { stayTouched = true; $('stayVal').textContent = (+$('stay').value).toFixed(1) + ' 秒'; }; $('stayVal').textContent = '默认';
+  const say = start => { const text = SAY[sayI++ % SAY.length]; sentences.push({ text, start, end: start + 0.22 * text.length }); sentences.sort((a, b) => a.start - b.start); changed(); };
+  $('say').onclick = () => { live(); const m = host.moves(); let t = quietFrom(now) + 0.3; for (const q of m) if (t < q.t1 + 0.3 && t + 2.5 > q.t0) t = q.t1 + 0.3; say(t); };
+  $('sayBad').onclick = () => { live(); const id = Object.keys(host.actions)[0], t0 = Math.max(quietFrom(now) + 0.2, busyUntil() + 0.3); poses.push({ name: id, t0, t1: t0 + 0.8 + 3 }); say(t0 + 0.2); };
+  $('fixed').onclick = () => { load(fixedShow(host)); now = 0; fixedOn = true; showProblems(); };
+  $('clear').onclick = () => { fixedOn = false; sentences = []; poses = []; emotes = []; faces = []; now = 0; DURATION = 20; changed(); };
+  $('hold').oninput = () => { $('holdVal').textContent = (+$('hold').value).toFixed(1) + ' 秒'; }; $('hold').oninput();
+  fixedOn = true; showProblems();
+  let lastNow = performance.now();
+  const loop = ts => {
+    now += Math.min(0.1, (ts - lastNow) / 1000); lastNow = ts;
+    if (fixedOn && now >= DURATION) now = 0;
+    if (!fixedOn && now > DURATION - 10) { DURATION = now + 20; host.duration = DURATION; }
+    try { seek(now); } catch (e) { $('problems').innerHTML = `<li class="error">${e.message}</li>`; }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+</script>
+</html>

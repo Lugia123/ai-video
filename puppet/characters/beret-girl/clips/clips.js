@@ -1,0 +1,1636 @@
+// 由 clips/sync.py 从 clips.json 生成，别手改。file:// 打开页面时靠它加载片段库。
+window.__clipLibrary = {
+ "character": "beret-girl",
+ "version": 1,
+ "canvas": {
+  "w": 832,
+  "h": 1104
+ },
+ "anchor": {
+  "x": 412,
+  "y": 1038,
+  "note": "脚底中点；呼吸绕这一点缩放"
+ },
+ "breath": {
+  "amp": 0.006,
+  "period": 3.6,
+  "note": "竖向 ×(1+amp·sin)，横向 ×(1−amp·sin)"
+ },
+ "rest": "idle",
+ "poses": {
+  "idle": {
+   "label": "归位（待机）",
+   "frame": "frames/idle.png",
+   "bbox": [160, 79, 665, 1032],
+   "margin": [160, 79, 167, 72],
+   "patches": {
+    "align": {
+     "scale": 0.3716,
+     "rotate_deg": -0.13,
+     "translate": [
+      5.8,
+      14.8
+     ],
+     "matches": 96,
+     "inliers": 71,
+     "residual_px": 0.72
+    },
+    "mouth": {
+     "closed": {
+      "file": "patches/idle/mouth_closed.png",
+      "rect": [362, 444, 87, 60],
+      "color_shift_rgb": [
+       5.0,
+       14.0,
+       20.0
+      ],
+      "skin_samples": 1057,
+      "occluded_px": 0
+     },
+     "small": {
+      "file": "patches/idle/mouth_small.png",
+      "rect": [362, 444, 87, 60],
+      "color_shift_rgb": [
+       5.0,
+       14.0,
+       20.0
+      ],
+      "skin_samples": 1057,
+      "occluded_px": 0
+     },
+     "big": {
+      "file": "patches/idle/mouth_big.png",
+      "rect": [362, 444, 87, 60],
+      "color_shift_rgb": [
+       5.0,
+       14.0,
+       20.0
+      ],
+      "skin_samples": 1057,
+      "occluded_px": 0
+     },
+     "smile": {
+      "file": "patches/idle/mouth_smile.png",
+      "rect": [362, 444, 87, 60],
+      "color_shift_rgb": [
+       5.0,
+       14.0,
+       20.0
+      ],
+      "skin_samples": 1057,
+      "occluded_px": 0
+     }
+    },
+    "blink": {
+     "file": "patches/idle/blink.png",
+     "rect": [267, 349, 279, 106],
+     "color_shift_rgb": [
+      5.0,
+      12.0,
+      18.0
+     ],
+     "skin_samples": 2287,
+     "occluded_px": 0
+    },
+    "clean": {
+     "file": "patches/idle/clean.png",
+     "rect": [267, 319, 279, 185],
+     "color_shift_rgb": [
+      5.0,
+      13.0,
+      19.0
+     ],
+     "skin_samples": 3817,
+     "occluded_px": 0
+    },
+    "face": {
+     "angry": {
+      "blush": {
+       "file": "patches/idle/face_angry_blush.png",
+       "rect": [283, 416, 245, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_angry_eyes.png",
+       "rect": [281, 350, 253, 105],
+       "color_shift_rgb": [
+        0.5,
+        13.6,
+        20.5
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_angry_mouth.png",
+       "rect": [353, 437, 110, 67],
+       "color_shift_rgb": [
+        0.9,
+        13.0,
+        20.0
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_angry_brow.png",
+       "rect": [313, 335, 195, 39],
+       "color_shift_rgb": [
+        0.4,
+        11.8,
+        19.0
+       ]
+      }
+     },
+     "awkward": {
+      "blush": {
+       "file": "patches/idle/face_awkward_blush.png",
+       "rect": [283, 416, 245, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_awkward_eyes.png",
+       "rect": [281, 350, 253, 98],
+       "color_shift_rgb": [
+        0.0,
+        12.5,
+        17.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_awkward_mouth.png",
+       "rect": [362, 444, 87, 60],
+       "color_shift_rgb": [
+        0.0,
+        12.2,
+        17.1
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_awkward_brow.png",
+       "rect": [303, 345, 198, 24],
+       "color_shift_rgb": [
+        -0.2,
+        10.9,
+        17.0
+       ]
+      }
+     },
+     "doubt": {
+      "blush": {
+       "file": "patches/idle/face_doubt_blush.png",
+       "rect": [283, 416, 245, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_doubt_eyes.png",
+       "rect": [281, 349, 253, 101],
+       "color_shift_rgb": [
+        0.4,
+        12.4,
+        18.5
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_doubt_mouth.png",
+       "rect": [362, 444, 87, 60],
+       "color_shift_rgb": [
+        1.0,
+        12.8,
+        19.4
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_doubt_brow.png",
+       "rect": [313, 338, 185, 28],
+       "color_shift_rgb": [
+        0.1,
+        11.9,
+        19.2
+       ]
+      }
+     },
+     "flat": {
+      "blush": {
+       "file": "patches/idle/face_flat_blush.png",
+       "rect": [283, 416, 245, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_flat_eyes.png",
+       "rect": [281, 354, 253, 98],
+       "color_shift_rgb": [
+        1.0,
+        14.5,
+        20.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_flat_mouth.png",
+       "rect": [362, 444, 87, 60],
+       "color_shift_rgb": [
+        1.0,
+        12.4,
+        19.2
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_flat_brow.png",
+       "rect": [300, 342, 215, 22],
+       "color_shift_rgb": [
+        0.7,
+        11.0,
+        18.5
+       ]
+      }
+     },
+     "happy": {
+      "eyes": {
+       "file": "patches/idle/face_happy_eyes.png",
+       "rect": [281, 349, 253, 102],
+       "color_shift_rgb": [
+        0.2,
+        13.3,
+        19.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_happy_mouth.png",
+       "rect": [361, 431, 93, 77],
+       "color_shift_rgb": [
+        0.4,
+        12.6,
+        18.2
+       ]
+      }
+     },
+     "love": {
+      "blush": {
+       "file": "patches/idle/face_love_blush.png",
+       "rect": [283, 416, 245, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_love_eyes.png",
+       "rect": [281, 351, 253, 106],
+       "color_shift_rgb": [
+        0.2,
+        14.0,
+        20.7
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_love_mouth.png",
+       "rect": [362, 444, 87, 60],
+       "color_shift_rgb": [
+        0.0,
+        14.5,
+        20.2
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_love_brow.png",
+       "rect": [303, 318, 190, 15],
+       "color_shift_rgb": [
+        0.0,
+        10.8,
+        17.1
+       ]
+      }
+     },
+     "squeeze": {
+      "blush": {
+       "file": "patches/idle/face_squeeze_blush.png",
+       "rect": [283, 416, 245, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_squeeze_eyes.png",
+       "rect": [281, 351, 253, 98],
+       "color_shift_rgb": [
+        1.0,
+        12.1,
+        17.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_squeeze_mouth.png",
+       "rect": [362, 444, 87, 60],
+       "color_shift_rgb": [
+        0.9,
+        12.0,
+        17.0
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_squeeze_brow.png",
+       "rect": [323, 351, 167, 30],
+       "color_shift_rgb": [
+        0.8,
+        11.0,
+        16.7
+       ]
+      }
+     },
+     "surprise": {
+      "blush": {
+       "file": "patches/idle/face_surprise_blush.png",
+       "rect": [283, 416, 245, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/idle/face_surprise_eyes.png",
+       "rect": [281, 351, 253, 98],
+       "color_shift_rgb": [
+        0.4,
+        12.2,
+        17.8
+       ]
+      },
+      "mouth": {
+       "file": "patches/idle/face_surprise_mouth.png",
+       "rect": [362, 444, 87, 60],
+       "color_shift_rgb": [
+        0.5,
+        12.2,
+        18.0
+       ]
+      },
+      "brow": {
+       "file": "patches/idle/face_surprise_brow.png",
+       "rect": [300, 324, 206, 27],
+       "color_shift_rgb": [
+        -0.1,
+        11.3,
+        18.2
+       ]
+      }
+     }
+    },
+    "eyeSkin": {
+     "file": "patches/idle/eye_skin.png",
+     "rect": [281, 347, 252, 110]
+    },
+    "browErase": {
+     "file": "patches/idle/brow_erase.png",
+     "rect": [160, 79, 505, 953],
+     "source": "noBrow"
+    }
+   },
+   "noBrow": {
+    "frame": "frames/idle_nobrow.png",
+    "brow_bbox": [282, 328, 531, 370],
+    "found_shift": [
+     [
+      5,
+      -1
+     ],
+     [
+      -3,
+      -1
+     ]
+    ]
+   },
+   "facePaste": true,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 2
+  },
+  "think": {
+   "label": "手抵下巴（保持帧，取自生成帧）",
+   "frame": "frames/think.png",
+   "bbox": [158, 80, 664, 1038],
+   "margin": [158, 80, 168, 66],
+   "patches": {
+    "align": {
+     "scale": 0.3741,
+     "rotate_deg": -0.0,
+     "translate": [
+      2.8,
+      8.6
+     ],
+     "matches": 121,
+     "inliers": 83,
+     "residual_px": 0.95
+    },
+    "mouth": {
+     "closed": {
+      "file": "patches/think/mouth_closed.png",
+      "rect": [360, 442, 88, 58],
+      "color_shift_rgb": [
+       5.0,
+       12.0,
+       19.0
+      ],
+      "skin_samples": 869,
+      "occluded_px": 580
+     },
+     "small": {
+      "file": "patches/think/mouth_small.png",
+      "rect": [360, 442, 88, 58],
+      "color_shift_rgb": [
+       5.0,
+       12.0,
+       19.0
+      ],
+      "skin_samples": 869,
+      "occluded_px": 580
+     },
+     "big": {
+      "file": "patches/think/mouth_big.png",
+      "rect": [360, 442, 88, 58],
+      "color_shift_rgb": [
+       5.0,
+       12.0,
+       19.0
+      ],
+      "skin_samples": 869,
+      "occluded_px": 580
+     },
+     "smile": {
+      "file": "patches/think/mouth_smile.png",
+      "rect": [360, 442, 88, 58],
+      "color_shift_rgb": [
+       5.0,
+       12.0,
+       19.0
+      ],
+      "skin_samples": 869,
+      "occluded_px": 580
+     }
+    },
+    "blink": {
+     "file": "patches/think/blink.png",
+     "rect": [265, 346, 281, 107],
+     "color_shift_rgb": [
+      4.5,
+      8.0,
+      16.0
+     ],
+     "skin_samples": 2269,
+     "occluded_px": 0
+    },
+    "clean": {
+     "file": "patches/think/clean.png",
+     "rect": [265, 316, 281, 184],
+     "color_shift_rgb": [
+      4.9,
+      9.0,
+      17.0
+     ],
+     "skin_samples": 3603,
+     "occluded_px": 2032
+    },
+    "face": {
+     "angry": {
+      "blush": {
+       "file": "patches/think/face_angry_blush.png",
+       "rect": [281, 413, 247, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_angry_eyes.png",
+       "rect": [274, 348, 265, 104],
+       "color_shift_rgb": [
+        0.4,
+        10.4,
+        19.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_angry_mouth.png",
+       "rect": [352, 435, 110, 65],
+       "color_shift_rgb": [
+        1.0,
+        10.9,
+        19.0
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_angry_brow.png",
+       "rect": [311, 332, 197, 39],
+       "color_shift_rgb": [
+        1.2,
+        8.6,
+        17.4
+       ]
+      }
+     },
+     "awkward": {
+      "blush": {
+       "file": "patches/think/face_awkward_blush.png",
+       "rect": [281, 413, 247, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_awkward_eyes.png",
+       "rect": [274, 348, 264, 96],
+       "color_shift_rgb": [
+        -0.0,
+        9.6,
+        16.2
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_awkward_mouth.png",
+       "rect": [360, 442, 88, 58],
+       "color_shift_rgb": [
+        0.0,
+        9.6,
+        16.0
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_awkward_brow.png",
+       "rect": [301, 341, 200, 25],
+       "color_shift_rgb": [
+        1.0,
+        7.7,
+        15.3
+       ]
+      }
+     },
+     "doubt": {
+      "blush": {
+       "file": "patches/think/face_doubt_blush.png",
+       "rect": [281, 413, 247, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_doubt_eyes.png",
+       "rect": [274, 347, 264, 100],
+       "color_shift_rgb": [
+        0.4,
+        9.4,
+        17.6
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_doubt_mouth.png",
+       "rect": [360, 442, 88, 58],
+       "color_shift_rgb": [
+        1.0,
+        10.0,
+        18.2
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_doubt_brow.png",
+       "rect": [311, 335, 187, 28],
+       "color_shift_rgb": [
+        1.5,
+        8.7,
+        18.0
+       ]
+      }
+     },
+     "flat": {
+      "blush": {
+       "file": "patches/think/face_flat_blush.png",
+       "rect": [281, 413, 247, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_flat_eyes.png",
+       "rect": [275, 351, 264, 96],
+       "color_shift_rgb": [
+        1.0,
+        12.1,
+        19.5
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_flat_mouth.png",
+       "rect": [360, 442, 88, 58],
+       "color_shift_rgb": [
+        1.0,
+        10.0,
+        18.1
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_flat_brow.png",
+       "rect": [298, 339, 217, 22],
+       "color_shift_rgb": [
+        1.9,
+        8.0,
+        16.5
+       ]
+      }
+     },
+     "happy": {
+      "eyes": {
+       "file": "patches/think/face_happy_eyes.png",
+       "rect": [275, 347, 263, 99],
+       "color_shift_rgb": [
+        0.1,
+        10.7,
+        17.5
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_happy_mouth.png",
+       "rect": [360, 429, 93, 74],
+       "color_shift_rgb": [
+        0.1,
+        9.9,
+        17.0
+       ]
+      }
+     },
+     "love": {
+      "blush": {
+       "file": "patches/think/face_love_blush.png",
+       "rect": [281, 413, 247, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_love_eyes.png",
+       "rect": [274, 348, 264, 107],
+       "color_shift_rgb": [
+        0.4,
+        11.3,
+        19.2
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_love_mouth.png",
+       "rect": [360, 442, 88, 58],
+       "color_shift_rgb": [
+        -0.1,
+        16.4,
+        22.2
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_love_brow.png",
+       "rect": [301, 315, 192, 15],
+       "color_shift_rgb": [
+        -0.3,
+        6.3,
+        15.5
+       ]
+      }
+     },
+     "squeeze": {
+      "blush": {
+       "file": "patches/think/face_squeeze_blush.png",
+       "rect": [281, 413, 247, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_squeeze_eyes.png",
+       "rect": [275, 349, 263, 97],
+       "color_shift_rgb": [
+        1.0,
+        9.4,
+        16.0
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_squeeze_mouth.png",
+       "rect": [360, 442, 88, 58],
+       "color_shift_rgb": [
+        0.9,
+        9.3,
+        16.0
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_squeeze_brow.png",
+       "rect": [321, 348, 169, 30],
+       "color_shift_rgb": [
+        2.0,
+        8.0,
+        15.0
+       ]
+      }
+     },
+     "surprise": {
+      "blush": {
+       "file": "patches/think/face_surprise_blush.png",
+       "rect": [281, 413, 247, 91],
+       "blend": "multiply"
+      },
+      "eyes": {
+       "file": "patches/think/face_surprise_eyes.png",
+       "rect": [274, 350, 264, 96],
+       "color_shift_rgb": [
+        0.4,
+        9.0,
+        16.3
+       ]
+      },
+      "mouth": {
+       "file": "patches/think/face_surprise_mouth.png",
+       "rect": [360, 441, 88, 59],
+       "color_shift_rgb": [
+        0.4,
+        9.5,
+        16.6
+       ]
+      },
+      "brow": {
+       "file": "patches/think/face_surprise_brow.png",
+       "rect": [298, 321, 207, 27],
+       "color_shift_rgb": [
+        -0.1,
+        7.8,
+        16.9
+       ]
+      }
+     }
+    },
+    "eyeSkin": {
+     "file": "patches/think/eye_skin.png",
+     "rect": [279, 344, 254, 111]
+    },
+    "browErase": {
+     "file": "patches/think/brow_erase.png",
+     "rect": [162, 106, 495, 924],
+     "source": "noBrow"
+    }
+   },
+   "facePaste": true,
+   "browSwap": true,
+   "faceBlank": false,
+   "faceClass": 1,
+   "attrManual": [
+    "browSwap"
+   ]
+  }
+ },
+ "clips": {
+  "think_in": {
+   "label": "归位 → 手抵下巴",
+   "from": "idle",
+   "to": "think",
+   "fps": 16,
+   "frames": [
+    "frames/think_in/00.png",
+    "frames/think_in/01.png",
+    "frames/think_in/02.png",
+    "frames/think_in/03.png",
+    "frames/think_in/04.png",
+    "frames/think_in/05.png",
+    "frames/think_in/06.png",
+    "frames/think_in/07.png",
+    "frames/think_in/08.png",
+    "frames/think_in/09.png",
+    "frames/think_in/10.png",
+    "frames/think_in/11.png",
+    "frames/think_in/12.png",
+    "frames/think_in/13.png",
+    "frames/think_in/14.png",
+    "frames/think_in/15.png",
+    "frames/think_in/16.png",
+    "frames/think_in/17.png",
+    "frames/think_in/18.png",
+    "frames/think_in/19.png",
+    "frames/think_in/20.png",
+    "frames/think_in/21.png",
+    "frames/think_in/22.png",
+    "frames/think_in/23.png",
+    "frames/think_in/24.png",
+    "frames/think_in/25.png",
+    "frames/think_in/26.png",
+    "frames/think_in/27.png",
+    "frames/think_in/28.png"
+   ],
+   "active": [
+    [
+     1,
+     18
+    ],
+    [
+     25,
+     27
+    ]
+   ],
+   "notes": "第 0 帧 = 归位帧原图；1–24 是生成帧（逐帧对归位帧校色）；25–27 是交叉淡化；第 28 帧 = 保持帧（回程的第一张生成帧）。手在第 2–13 帧抬到下巴，14–18 帧身体还在收，19–24 帧基本静止（可裁）。第 5、11、13、17 帧和前一帧几乎一样（像重复帧），标在 dupes 里，播放器可选跳过。",
+   "frameBBox": [
+    [160, 79, 665, 1032],
+    [160, 76, 664, 1034],
+    [160, 76, 664, 1034],
+    [158, 78, 662, 1034],
+    [158, 78, 660, 1034],
+    [158, 78, 660, 1034],
+    [156, 78, 658, 1034],
+    [154, 78, 656, 1034],
+    [152, 76, 654, 1034],
+    [150, 76, 652, 1036],
+    [150, 76, 652, 1036],
+    [150, 76, 652, 1036],
+    [150, 76, 652, 1038],
+    [150, 76, 652, 1038],
+    [154, 76, 656, 1038],
+    [156, 76, 658, 1038],
+    [158, 78, 660, 1038],
+    [158, 78, 662, 1038],
+    [158, 78, 662, 1038],
+    [160, 78, 662, 1038],
+    [158, 78, 662, 1038],
+    [158, 80, 662, 1038],
+    [158, 80, 664, 1038],
+    [158, 80, 664, 1038],
+    [158, 80, 662, 1038],
+    [158, 80, 664, 1038],
+    [158, 80, 664, 1038],
+    [158, 80, 664, 1038],
+    [158, 80, 664, 1038]
+   ],
+   "bbox": [150, 76, 665, 1038],
+   "margin": [150, 76, 167, 66],
+   "dupes": [5, 11, 13, 17],
+   "import": {
+    "frames": 25,
+    "color_diff_to_rest_before": [
+     9.41,
+     10.5,
+     14.83,
+     17.97,
+     22.78,
+     22.96,
+     26.34,
+     28.47,
+     31.45,
+     33.35,
+     35.07,
+     35.22,
+     36.06,
+     36.03,
+     33.27,
+     30.97,
+     27.61,
+     26.24,
+     24.44,
+     24.13,
+     24.18,
+     23.93,
+     23.91,
+     24.15,
+     26.71
+    ],
+    "color_diff_to_rest_after": [
+     7.2,
+     8.68,
+     13.28,
+     16.63,
+     21.48,
+     21.72,
+     25.08,
+     27.26,
+     30.22,
+     32.2,
+     33.91,
+     34.05,
+     34.9,
+     34.92,
+     32.16,
+     29.89,
+     26.53,
+     25.25,
+     23.42,
+     23.14,
+     23.14,
+     22.89,
+     22.88,
+     22.93,
+     24.45
+    ],
+    "luma_diff_to_rest_before": [
+     -3.83,
+     -3.07,
+     -2.5,
+     -2.29,
+     -2.58,
+     -2.45,
+     -3.47,
+     -3.1,
+     -2.24,
+     -0.27,
+     0.22,
+     0.28,
+     0.37,
+     0.48,
+     0.71,
+     0.82,
+     0.92,
+     1.08,
+     1.03,
+     1.11,
+     0.98,
+     1.26,
+     1.52,
+     1.37,
+     7.18
+    ],
+    "luma_diff_to_rest_after": [
+     0.38,
+     0.73,
+     1.17,
+     1.07,
+     0.55,
+     0.59,
+     -0.44,
+     -0.09,
+     0.74,
+     2.52,
+     3.14,
+     3.2,
+     3.35,
+     3.26,
+     3.45,
+     3.52,
+     3.78,
+     3.9,
+     3.9,
+     3.94,
+     3.86,
+     4.11,
+     4.26,
+     4.58,
+     3.5
+    ],
+    "fit_pixels_used": [
+     0.854,
+     0.816,
+     0.712,
+     0.655,
+     0.584,
+     0.58,
+     0.54,
+     0.506,
+     0.476,
+     0.457,
+     0.437,
+     0.433,
+     0.425,
+     0.42,
+     0.45,
+     0.473,
+     0.51,
+     0.53,
+     0.562,
+     0.569,
+     0.569,
+     0.572,
+     0.572,
+     0.569,
+     0.583
+    ],
+    "source_frames": 25,
+    "xfade_frames": [
+     25,
+     27
+    ],
+    "hold_gap": {
+     "what": "去程最后一张生成帧 ↔ 保持帧（回程第一张生成帧）",
+     "color_diff": 4.76,
+     "luma_diff": 0.95
+    },
+    "rule": "第 0 帧 = 归位帧原图；其余是生成帧，逐帧对归位帧校色；末尾接交叉淡化到保持帧"
+   },
+   "arc": [
+    0.0,
+    0.0177,
+    0.0712,
+    0.1365,
+    0.2387,
+    0.2397,
+    0.3163,
+    0.4025,
+    0.4998,
+    0.5689,
+    0.6377,
+    0.6377,
+    0.6829,
+    0.6893,
+    0.8574,
+    0.9058,
+    0.9707,
+    0.9708,
+    0.9999,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "facePaste": false,
+   "browSwap": true,
+   "faceBlank": false,
+   "faceClass": 3,
+   "attrManual": [
+    "browSwap"
+   ]
+  },
+  "think_out": {
+   "label": "手抵下巴 → 归位",
+   "from": "think",
+   "to": "idle",
+   "fps": 16,
+   "frames": [
+    "frames/think_out/00.png",
+    "frames/think_out/01.png",
+    "frames/think_out/02.png",
+    "frames/think_out/03.png",
+    "frames/think_out/04.png",
+    "frames/think_out/05.png",
+    "frames/think_out/06.png",
+    "frames/think_out/07.png",
+    "frames/think_out/08.png",
+    "frames/think_out/09.png",
+    "frames/think_out/10.png",
+    "frames/think_out/11.png",
+    "frames/think_out/12.png",
+    "frames/think_out/13.png",
+    "frames/think_out/14.png",
+    "frames/think_out/15.png",
+    "frames/think_out/16.png",
+    "frames/think_out/17.png",
+    "frames/think_out/18.png",
+    "frames/think_out/19.png",
+    "frames/think_out/20.png",
+    "frames/think_out/21.png",
+    "frames/think_out/22.png",
+    "frames/think_out/23.png",
+    "frames/think_out/24.png"
+   ],
+   "active": [
+    [
+     4,
+     16
+    ],
+    [
+     21,
+     23
+    ]
+   ],
+   "notes": "第 0 帧 = 保持帧（生成帧）；末帧 = 归位帧原图；逐帧对归位帧校色。1–3 帧几乎不动（可裁），4–7 帧手慢慢离开下巴，8–16 帧放下（8–10 帧眨一次眼），17–20 帧基本静止（可裁），21–23 帧逐步混向归位帧原图。",
+   "frameBBox": [
+    [158, 80, 664, 1038],
+    [158, 80, 664, 1038],
+    [158, 78, 664, 1038],
+    [158, 78, 664, 1038],
+    [158, 78, 664, 1038],
+    [158, 80, 664, 1038],
+    [158, 80, 664, 1038],
+    [158, 80, 664, 1038],
+    [158, 84, 664, 1036],
+    [160, 91, 664, 1036],
+    [158, 98, 664, 1034],
+    [158, 102, 664, 1034],
+    [160, 98, 664, 1034],
+    [160, 92, 664, 1034],
+    [160, 84, 664, 1034],
+    [158, 80, 664, 1034],
+    [160, 78, 664, 1034],
+    [160, 78, 664, 1034],
+    [160, 76, 664, 1034],
+    [160, 76, 664, 1034],
+    [160, 76, 664, 1034],
+    [160, 76, 665, 1034],
+    [160, 76, 665, 1034],
+    [160, 76, 665, 1034],
+    [160, 79, 665, 1032]
+   ],
+   "bbox": [158, 76, 665, 1038],
+   "margin": [158, 76, 167, 66],
+   "import": {
+    "frames": 25,
+    "color_diff_to_rest_before": [
+     27.49,
+     26.57,
+     26.49,
+     26.49,
+     26.29,
+     26.14,
+     25.3,
+     23.1,
+     22.33,
+     30.21,
+     34.94,
+     37.93,
+     36.56,
+     30.83,
+     23.22,
+     16.16,
+     10.47,
+     9.21,
+     8.87,
+     9.0,
+     9.06,
+     8.77,
+     8.59,
+     8.54,
+     8.64
+    ],
+    "color_diff_to_rest_after": [
+     23.93,
+     24.5,
+     25.29,
+     25.63,
+     25.71,
+     25.67,
+     24.88,
+     22.74,
+     22.08,
+     30.02,
+     34.76,
+     37.69,
+     36.31,
+     30.51,
+     22.83,
+     15.68,
+     9.94,
+     8.56,
+     8.26,
+     8.37,
+     8.45,
+     8.22,
+     8.07,
+     7.97,
+     8.06
+    ],
+    "luma_diff_to_rest_before": [
+     -5.04,
+     -2.39,
+     -0.68,
+     0.18,
+     0.87,
+     1.16,
+     1.29,
+     1.42,
+     2.11,
+     5.84,
+     2.17,
+     -0.42,
+     -0.25,
+     1.35,
+     2.09,
+     2.39,
+     2.46,
+     3.05,
+     3.23,
+     3.11,
+     3.09,
+     2.72,
+     2.42,
+     1.99,
+     1.92
+    ],
+    "luma_diff_to_rest_after": [
+     2.45,
+     2.99,
+     3.57,
+     3.67,
+     3.69,
+     3.65,
+     3.44,
+     3.04,
+     3.57,
+     6.76,
+     2.81,
+     0.11,
+     0.1,
+     1.09,
+     1.67,
+     1.73,
+     1.44,
+     1.77,
+     1.86,
+     1.84,
+     1.78,
+     1.85,
+     1.74,
+     1.66,
+     1.7
+    ],
+    "fit_pixels_used": [
+     0.524,
+     0.519,
+     0.51,
+     0.506,
+     0.505,
+     0.504,
+     0.51,
+     0.537,
+     0.574,
+     0.49,
+     0.418,
+     0.381,
+     0.39,
+     0.438,
+     0.535,
+     0.643,
+     0.761,
+     0.806,
+     0.81,
+     0.804,
+     0.798,
+     0.809,
+     0.817,
+     0.821,
+     0.818
+    ],
+    "settle_frames": [
+     21,
+     23
+    ],
+    "rule": "第 0 帧 = 保持帧（生成帧）；末帧 = 归位帧原图；逐帧对归位帧校色；末尾几张逐步混向归位帧"
+   },
+   "arc": [
+    0.0,
+    0.0001,
+    0.0004,
+    0.0004,
+    0.0073,
+    0.0182,
+    0.0353,
+    0.069,
+    0.1865,
+    0.3695,
+    0.5356,
+    0.6482,
+    0.6897,
+    0.8011,
+    0.9136,
+    0.9733,
+    0.9999,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "minSeconds": 0.3,
+   "facePaste": false,
+   "browSwap": true,
+   "faceBlank": false,
+   "faceClass": 3,
+   "attrManual": [
+    "browSwap"
+   ]
+  },
+  "turn_draft": {
+   "label": "转头一圈（草稿，仅头部）",
+   "from": null,
+   "to": null,
+   "fps": 16,
+   "frames": [
+    "frames/turn_draft/000.jpg",
+    "frames/turn_draft/001.jpg",
+    "frames/turn_draft/002.jpg",
+    "frames/turn_draft/003.jpg",
+    "frames/turn_draft/004.jpg",
+    "frames/turn_draft/005.jpg",
+    "frames/turn_draft/006.jpg",
+    "frames/turn_draft/007.jpg",
+    "frames/turn_draft/008.jpg",
+    "frames/turn_draft/009.jpg",
+    "frames/turn_draft/010.jpg",
+    "frames/turn_draft/011.jpg",
+    "frames/turn_draft/012.jpg",
+    "frames/turn_draft/013.jpg",
+    "frames/turn_draft/014.jpg",
+    "frames/turn_draft/015.jpg",
+    "frames/turn_draft/016.jpg",
+    "frames/turn_draft/017.jpg",
+    "frames/turn_draft/018.jpg",
+    "frames/turn_draft/019.jpg",
+    "frames/turn_draft/020.jpg",
+    "frames/turn_draft/021.jpg",
+    "frames/turn_draft/022.jpg",
+    "frames/turn_draft/023.jpg",
+    "frames/turn_draft/024.jpg",
+    "frames/turn_draft/025.jpg",
+    "frames/turn_draft/026.jpg",
+    "frames/turn_draft/027.jpg",
+    "frames/turn_draft/028.jpg",
+    "frames/turn_draft/029.jpg",
+    "frames/turn_draft/030.jpg",
+    "frames/turn_draft/031.jpg",
+    "frames/turn_draft/032.jpg",
+    "frames/turn_draft/033.jpg",
+    "frames/turn_draft/034.jpg",
+    "frames/turn_draft/035.jpg",
+    "frames/turn_draft/036.jpg",
+    "frames/turn_draft/037.jpg",
+    "frames/turn_draft/038.jpg",
+    "frames/turn_draft/039.jpg",
+    "frames/turn_draft/040.jpg",
+    "frames/turn_draft/041.jpg",
+    "frames/turn_draft/042.jpg",
+    "frames/turn_draft/043.jpg",
+    "frames/turn_draft/044.jpg",
+    "frames/turn_draft/045.jpg",
+    "frames/turn_draft/046.jpg",
+    "frames/turn_draft/047.jpg",
+    "frames/turn_draft/048.jpg",
+    "frames/turn_draft/049.jpg",
+    "frames/turn_draft/050.jpg",
+    "frames/turn_draft/051.jpg",
+    "frames/turn_draft/052.jpg",
+    "frames/turn_draft/053.jpg",
+    "frames/turn_draft/054.jpg",
+    "frames/turn_draft/055.jpg",
+    "frames/turn_draft/056.jpg",
+    "frames/turn_draft/057.jpg",
+    "frames/turn_draft/058.jpg",
+    "frames/turn_draft/059.jpg",
+    "frames/turn_draft/060.jpg",
+    "frames/turn_draft/061.jpg",
+    "frames/turn_draft/062.jpg",
+    "frames/turn_draft/063.jpg",
+    "frames/turn_draft/064.jpg",
+    "frames/turn_draft/065.jpg",
+    "frames/turn_draft/066.jpg",
+    "frames/turn_draft/067.jpg",
+    "frames/turn_draft/068.jpg",
+    "frames/turn_draft/069.jpg",
+    "frames/turn_draft/070.jpg",
+    "frames/turn_draft/071.jpg",
+    "frames/turn_draft/072.jpg",
+    "frames/turn_draft/073.jpg",
+    "frames/turn_draft/074.jpg",
+    "frames/turn_draft/075.jpg",
+    "frames/turn_draft/076.jpg",
+    "frames/turn_draft/077.jpg",
+    "frames/turn_draft/078.jpg",
+    "frames/turn_draft/079.jpg",
+    "frames/turn_draft/080.jpg",
+    "frames/turn_draft/081.jpg",
+    "frames/turn_draft/082.jpg",
+    "frames/turn_draft/083.jpg",
+    "frames/turn_draft/084.jpg",
+    "frames/turn_draft/085.jpg",
+    "frames/turn_draft/086.jpg",
+    "frames/turn_draft/087.jpg",
+    "frames/turn_draft/088.jpg",
+    "frames/turn_draft/089.jpg",
+    "frames/turn_draft/090.jpg",
+    "frames/turn_draft/091.jpg",
+    "frames/turn_draft/092.jpg",
+    "frames/turn_draft/093.jpg",
+    "frames/turn_draft/094.jpg",
+    "frames/turn_draft/095.jpg",
+    "frames/turn_draft/096.jpg",
+    "frames/turn_draft/097.jpg",
+    "frames/turn_draft/098.jpg",
+    "frames/turn_draft/099.jpg",
+    "frames/turn_draft/100.jpg",
+    "frames/turn_draft/101.jpg",
+    "frames/turn_draft/102.jpg",
+    "frames/turn_draft/103.jpg",
+    "frames/turn_draft/104.jpg",
+    "frames/turn_draft/105.jpg",
+    "frames/turn_draft/106.jpg",
+    "frames/turn_draft/107.jpg",
+    "frames/turn_draft/108.jpg",
+    "frames/turn_draft/109.jpg",
+    "frames/turn_draft/110.jpg",
+    "frames/turn_draft/111.jpg",
+    "frames/turn_draft/112.jpg",
+    "frames/turn_draft/113.jpg",
+    "frames/turn_draft/114.jpg",
+    "frames/turn_draft/115.jpg",
+    "frames/turn_draft/116.jpg",
+    "frames/turn_draft/117.jpg",
+    "frames/turn_draft/118.jpg",
+    "frames/turn_draft/119.jpg",
+    "frames/turn_draft/120.jpg",
+    "frames/turn_draft/121.jpg",
+    "frames/turn_draft/122.jpg",
+    "frames/turn_draft/123.jpg",
+    "frames/turn_draft/124.jpg",
+    "frames/turn_draft/125.jpg",
+    "frames/turn_draft/126.jpg",
+    "frames/turn_draft/127.jpg",
+    "frames/turn_draft/128.jpg",
+    "frames/turn_draft/129.jpg",
+    "frames/turn_draft/130.jpg",
+    "frames/turn_draft/131.jpg",
+    "frames/turn_draft/132.jpg",
+    "frames/turn_draft/133.jpg",
+    "frames/turn_draft/134.jpg",
+    "frames/turn_draft/135.jpg",
+    "frames/turn_draft/136.jpg",
+    "frames/turn_draft/137.jpg",
+    "frames/turn_draft/138.jpg",
+    "frames/turn_draft/139.jpg",
+    "frames/turn_draft/140.jpg",
+    "frames/turn_draft/141.jpg",
+    "frames/turn_draft/142.jpg",
+    "frames/turn_draft/143.jpg",
+    "frames/turn_draft/144.jpg",
+    "frames/turn_draft/145.jpg",
+    "frames/turn_draft/146.jpg",
+    "frames/turn_draft/147.jpg",
+    "frames/turn_draft/148.jpg",
+    "frames/turn_draft/149.jpg",
+    "frames/turn_draft/150.jpg",
+    "frames/turn_draft/151.jpg",
+    "frames/turn_draft/152.jpg",
+    "frames/turn_draft/153.jpg",
+    "frames/turn_draft/154.jpg",
+    "frames/turn_draft/155.jpg",
+    "frames/turn_draft/156.jpg",
+    "frames/turn_draft/157.jpg",
+    "frames/turn_draft/158.jpg",
+    "frames/turn_draft/159.jpg",
+    "frames/turn_draft/160.jpg",
+    "frames/turn_draft/161.jpg",
+    "frames/turn_draft/162.jpg",
+    "frames/turn_draft/163.jpg",
+    "frames/turn_draft/164.jpg",
+    "frames/turn_draft/165.jpg",
+    "frames/turn_draft/166.jpg",
+    "frames/turn_draft/167.jpg",
+    "frames/turn_draft/168.jpg",
+    "frames/turn_draft/169.jpg",
+    "frames/turn_draft/170.jpg",
+    "frames/turn_draft/171.jpg",
+    "frames/turn_draft/172.jpg",
+    "frames/turn_draft/173.jpg",
+    "frames/turn_draft/174.jpg",
+    "frames/turn_draft/175.jpg",
+    "frames/turn_draft/176.jpg",
+    "frames/turn_draft/177.jpg",
+    "frames/turn_draft/178.jpg",
+    "frames/turn_draft/179.jpg",
+    "frames/turn_draft/180.jpg",
+    "frames/turn_draft/181.jpg",
+    "frames/turn_draft/182.jpg",
+    "frames/turn_draft/183.jpg",
+    "frames/turn_draft/184.jpg",
+    "frames/turn_draft/185.jpg",
+    "frames/turn_draft/186.jpg",
+    "frames/turn_draft/187.jpg",
+    "frames/turn_draft/188.jpg",
+    "frames/turn_draft/189.jpg",
+    "frames/turn_draft/190.jpg",
+    "frames/turn_draft/191.jpg",
+    "frames/turn_draft/192.jpg"
+   ],
+   "canvas": {
+    "w": 624,
+    "h": 624
+   },
+   "opaque": true,
+   "draft": true,
+   "active": [
+    [
+     1,
+     22
+    ],
+    [
+     49,
+     88
+    ],
+    [
+     115,
+     144
+    ],
+    [
+     171,
+     191
+    ]
+   ],
+   "segments": [
+    {
+     "name": "正面 → 左侧面",
+     "start": 0,
+     "end": 48
+    },
+    {
+     "name": "左侧面 → 正后",
+     "start": 49,
+     "end": 96
+    },
+    {
+     "name": "正后 → 右侧面（原片倒放）",
+     "start": 97,
+     "end": 144
+    },
+    {
+     "name": "右侧面 → 正面（原片倒放）",
+     "start": 145,
+     "end": 192
+    }
+   ],
+   "notes": "四段首尾帧图生视频草稿首尾相接拼成，接缝处重复的一帧已去掉。只有头和肩，带灰底不透明，画幅和全身片段不同，和归位帧接不上，只能单独看。有效帧范围是看抽帧图粗估的。",
+   "facePaste": false,
+   "browSwap": false,
+   "faceBlank": false,
+   "faceClass": 3
+  }
+ },
+ "actions": [
+  {
+   "id": "think",
+   "label": "思考（手抵下巴）",
+   "in": "think_in",
+   "pose": "think",
+   "out": "think_out"
+  },
+  {
+   "id": "turn_draft",
+   "label": "转头一圈（草稿，仅头部）",
+   "in": "turn_draft",
+   "standalone": true
+  }
+ ],
+ "minMargin": {
+  "left": 150,
+  "top": 76,
+  "right": 167,
+  "bottom": 66,
+  "min": 66
+ },
+ "mouthShapes": [
+  "closed",
+  "small",
+  "big",
+  "smile"
+ ],
+ "talk": {
+  "pattern": [
+   [
+    "small",
+    0.1
+   ],
+   [
+    "big",
+    0.14
+   ],
+   [
+    "small",
+    0.08
+   ],
+   [
+    "closed",
+    0.08
+   ],
+   [
+    "big",
+    0.16
+   ],
+   [
+    "smile",
+    0.14
+   ],
+   [
+    "small",
+    0.1
+   ],
+   [
+    "closed",
+    0.1
+   ],
+   [
+    "small",
+    0.08
+   ],
+   [
+    "big",
+    0.14
+   ],
+   [
+    "small",
+    0.1
+   ],
+   [
+    "smile",
+    0.16
+   ],
+   [
+    "closed",
+    0.12
+   ],
+   [
+    null,
+    0.6
+   ]
+  ]
+ },
+ "blink": {
+  "period": 3.2,
+  "closed": 0.13,
+  "offset": 1.4
+ },
+ "colorBasis": "idle",
+ "matte": {
+  "method": "chroma-linear + unmix + edge-recolor + choke",
+  "edge": "soft",
+  "static_lock": false,
+  "model_matte": true,
+  "note": "2026-10-08 恢复到 #1176 落定那版的帧：软边 + 收边，不做静止锁定，不做亮度重建轮廓"
+ },
+ "restCleaned": true
+};

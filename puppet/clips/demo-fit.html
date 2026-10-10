@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>片段按指定时长播</title>
+<style>html,body{margin:0;background:#F3F8FB;overflow:hidden}canvas{display:block;width:1920px;height:1080px}</style>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="player.js"></script>
+<script>
+// 同一个动作按不同时长各播一遍，并排看：时长由脚本定，播放端按时长挑帧（短了跳帧，长了每帧停久一点，低于最短时长改硬切 + 压扁回弹）。
+// 三遍：挑帧方式依次是 linear / inout / snap。?ease=linear 只播一种；?action= 换动作；?char= 换角色。走本地服务打开（要 fetch 片段库）。
+(async () => {
+  const Q = new URLSearchParams(location.search), RENDER = Q.has('render'), W = 1920, H = 1080, FPS = 30;
+  const BASE = '../characters/' + (Q.get('char') || 'beret-girl') + '/clips/', ACTION = Q.get('action') || 'think';
+  const EASES = Q.get('ease') ? [Q.get('ease')] : ['linear', 'inout', 'snap'], EASE_ZH = { linear: 'linear：每格走的动作量一样', inout: 'inout：起止慢、中间快', snap: 'snap：起手快、到位前收住' };
+  const cv = document.getElementById('c'), g = cv.getContext('2d');
+  let cols = [], PASS = 0, DURATION = 1, lib, A;
+  const ready = (async () => {
+    lib = await ClipPlayer.loadLibrary(BASE); const images = await ClipPlayer.preload(lib, BASE);
+    A = lib.actions.find(a => a.id === ACTION); if (!A || !A.out) throw new Error('片段库里没有带去程 / 回程的动作：' + ACTION);
+    const o = { trimmed: true }, natIn = ClipPlayer.naturalSeconds(lib.clips[A.in], o), natOut = ClipPlayer.naturalSeconds(lib.clips[A.out], o);
+    const minIn = ClipPlayer.minSeconds(lib.clips[A.in]);
+    const LIST = [[0.2, 0.2, '硬切'], [0.3, 0.3], [0.5, 0.5], [0.8, 0.8], [natIn, natOut, '自然'], [2.0, 2.0]];
+    const T_IN = 1.0, T_OUT = T_IN + 2.0 + 1.2; PASS = T_OUT + 2.0 + 1.0; DURATION = PASS * EASES.length;
+    cols = LIST.map(([din, dout, tag]) => {
+      const canvas = document.createElement('canvas'), player = new ClipPlayer(lib, images, canvas, { talk: false, blink: false });
+      const per = EASES.map(ease => {
+        const q = { ...o, ease }, fi = ClipPlayer.fit(lib.clips[A.in], { ...q, seconds: din }), fo = ClipPlayer.fit(lib.clips[A.out], { ...q, seconds: dout });
+        const tl = ClipPlayer.timeline(lib, [{ rest: T_IN }, { action: ACTION, ...q, in: din, out: dout, hold: T_OUT - T_IN - din, short: 'cut' }, { rest: PASS }]);
+        return { tl, fi, fo };
+      });
+      return { din, dout, tag, canvas, player, per, short: din < minIn - 1e-9 };
+    });
+    window.__video.duration = DURATION;          // 在 ready 兑现之前就把总长写好（渲染器等完 ready 立刻读它）
+  })();
+  const text = (s, x, y, size, o = {}) => { g.font = `${o.weight || 500} ${size}px "PingFang SC", "Hiragino Sans GB", sans-serif`; g.fillStyle = o.color || '#14274A'; g.textAlign = o.align || 'center'; g.textBaseline = 'middle'; g.fillText(s, x, y); };
+  function seek(t) {
+    if (!cols.length) throw new Error('片段库还没加载完就被 seek 了');
+    t = Math.max(0, Math.min(DURATION - 1e-6, t));
+    const k = Math.min(EASES.length - 1, Math.floor(t / PASS)), lt = t - k * PASS, cw = W / cols.length, SX = 110, SW = 600, s = (cw - 8) / SW, top = 250;
+    g.fillStyle = '#F3F8FB'; g.fillRect(0, 0, W, H); g.fillStyle = '#E2E8EF'; g.fillRect(0, top + 1042 * s, W, H);
+    text(`同一个动作（${A.label}），时长由脚本定：短了跳帧，长了每帧停久一点`, 60, 62, 38, { align: 'left', weight: 600 });
+    text(`挑帧方式 ${k + 1} / ${EASES.length}　${EASE_ZH[EASES[k]] || EASES[k]}`, 60, 118, 28, { align: 'left', color: '#5B6B85' });
+    cols.forEach((c, i) => {
+      const p = c.per[k], v = p.tl.at(lt), x = i * cw; c.player.render(v, t);
+      g.drawImage(c.canvas, SX, 0, SW, 1104, x + 4, top, SW * s, 1104 * s);
+      const same = Math.abs(c.din - c.dout) < 1e-6;
+      text(same ? `${c.din.toFixed(c.din % 0.1 > 0.001 ? 2 : 1)} 秒` : `去 ${c.din.toFixed(2)} / 回 ${c.dout.toFixed(2)} 秒`, x + cw / 2, 178, same ? 36 : 28, { weight: 600 });
+      text(c.short ? '低于最短时长 → 硬切 + 压扁回弹' : `去程播 ${p.fi.frames.length} 格 / ${p.fi.unique} 个不同帧` + (c.tag ? `（${c.tag}）` : ''), x + cw / 2, 222, 24, { color: c.short ? '#C92A2A' : '#5B6B85' });
+      const fr = v.clip ? ClipPlayer.sequence(lib.clips[v.clip], v)[v.pos] : null;
+      text(v.mode === 'in' ? `去程 第 ${fr} 帧` : v.mode === 'out' ? `回程 第 ${fr} 帧` : v.mode === 'hold' ? '保持' : '归位', x + cw / 2, top + 1104 * s + 38, 28, { color: v.clip ? '#E8590C' : '#9AA7B8', weight: v.clip ? 600 : 500 });
+      if (!c.short && !same) text(`回程播 ${p.fo.frames.length} 格 / ${p.fo.unique} 个不同帧`, x + cw / 2, top + 1104 * s + 80, 22, { color: '#5B6B85' });
+      else if (!c.short) text(`回程播 ${p.fo.frames.length} 格 / ${p.fo.unique} 个不同帧`, x + cw / 2, top + 1104 * s + 80, 22, { color: '#5B6B85' });
+    });
+  }
+  window.__video = { width: W, height: H, fps: FPS, duration: 1, seek, ready };
+  try { await ready; } catch (e) { text(e.message + '（走本地服务打开）', 60, 200, 28, { align: 'left', color: '#C92A2A' }); throw e; }
+  if (RENDER) { seek(0); return; }
+  const t0 = performance.now(); const loop = () => { seek(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); }; loop();
+})();
+</script>
+</html>

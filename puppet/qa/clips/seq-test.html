@@ -1,0 +1,51 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>序列帧页面的写法样板 + 渲染确定性测试页</title>
+<style>html,body{margin:0;background:#F3F8FB;overflow:hidden}canvas{display:block}</style>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+// 「按 t 取序列帧」页面该怎么写的样板，也是渲染器的测试页。规则见 README.md，要点三条：
+//   1. 所有帧在 ready 之前加载并 decode() 完；ready 是一个 Promise，渲染器等它 resolve 才开始截帧。
+//   2. seek(t) 同步画，只用已经解码好的图；要的帧不在就 throw，不许悄悄跳过（悄悄跳过 = 成片里混进空帧还没人知道）。
+//   3. 帧号是 t 的纯函数：floor((t − 起点) × 片段帧率 + 1e-6)，夹在 0…n−1。
+// 参数：?frames=<帧地址前缀，如 /some/dir/up->&n=25[&pad=2][&ext=png][&fps=16]
+//       &lazy=1 页面 load 之后才开始加载帧（模拟先读清单再加载；不带时帧会拖住 load 事件，测不出问题）
+//       &ready=promise（默认）| bool（ready 先是 false，好了改 true）| none（故意不等，反例：验证渲染器 / 检查抓得到空帧）
+const Q = new URLSearchParams(location.search), RENDER = Q.has('render');
+const W = 1920, H = 1080, FPS = 30;
+const PREFIX = Q.get('frames'), N = +Q.get('n') || 0, PAD = +(Q.get('pad') ?? 2), EXT = Q.get('ext') || 'png', CLIP_FPS = +Q.get('fps') || 16, MODE = Q.get('ready') || 'promise';
+const HOLD = 0.5, DURATION = HOLD + (N - 1) / CLIP_FPS + HOLD;
+const cv = document.getElementById('c'), g = cv.getContext('2d');
+
+// —— 预加载：每张图 decode() 完才算数。onload 只说明文件到了，不保证已经解码成位图 ——
+async function loadFrame(src) {
+  const im = new Image(); im.decoding = 'sync'; im.src = src;
+  await im.decode();                                   // 失败会 reject（地址错、文件坏），ready 跟着 reject，渲染器报错退出
+  if (!im.naturalWidth) throw new Error(`空图：${src}`);
+  return im;
+}
+const frames = new Array(N).fill(null);
+const loading = (async () => {
+  if (!PREFIX || !N) throw new Error('要带 ?frames=<前缀>&n=<帧数>');
+  // lazy=1：等页面 load 事件过了才开始要图，模拟「先 fetch 一份清单、再按清单加载帧」的页面。
+  // 脚本一开头就 new Image() 的图会拖住 load 事件，渲染器等 load 时顺带等到了它们；load 之后才发起的加载没有这层保护，只能靠 ready。
+  if (Q.has('lazy') && document.readyState !== 'complete') await new Promise(ok => addEventListener('load', ok, { once: true }));
+  await Promise.all(frames.map((_, i) => loadFrame(`${PREFIX}${String(i).padStart(PAD, '0')}.${EXT}`).then(im => { frames[i] = im; })));
+})();
+
+function frameAt(t) { return Math.max(0, Math.min(N - 1, Math.floor((t - HOLD) * CLIP_FPS + 1e-6))); }
+function seek(t) {
+  t = Math.max(0, Math.min(DURATION - 1e-6, t));
+  const i = frameAt(t), im = frames[i];
+  if (!im) { if (MODE === 'none') { g.fillStyle = '#F3F8FB'; g.fillRect(0, 0, W, H); return; } throw new Error(`第 ${i} 帧还没加载就被 seek 到了（t=${t.toFixed(3)}）`); }
+  g.fillStyle = '#F3F8FB'; g.fillRect(0, 0, W, H);
+  const s = Math.min(W / im.naturalWidth, H / im.naturalHeight);
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(im, (W - im.naturalWidth * s) / 2, (H - im.naturalHeight * s) / 2, im.naturalWidth * s, im.naturalHeight * s);
+}
+const video = window.__video = { width: W, height: H, fps: FPS, duration: DURATION, seek };
+if (MODE === 'promise') video.ready = loading;
+else if (MODE === 'bool') { video.ready = false; loading.then(() => { video.ready = true; }); }
+else loading.catch(() => {});                           // none：不给 ready
+if (!RENDER) loading.then(() => { const t0 = performance.now(); const loop = () => { seek(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); }; loop(); });
+</script>

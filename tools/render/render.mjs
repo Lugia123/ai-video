@@ -20,6 +20,8 @@
 //               （--disable-accelerated-2d-canvas：GPU 画 2D canvas 时，两次渲染会有零星 1 个色阶的差）。
 //               three.js 页面快 2–3 倍；同一台机器两次渲染逐帧 md5 一致（实测），换机器 / 驱动像素会变，
 //               所以默认仍是 SwiftShader；同一部片子别混用两种后端
+//   --scale n   deviceScaleFactor = n，截图是 n 倍像素（页面要自己按 devicePixelRatio 把 canvas 画大，否则只是放大）。
+//               产物名带后缀：3840 宽叫 final-4k.mp4，其余叫 final-x<n>.mp4；帧目录 frames-x<n>。不影响默认的 final.mp4
 //   --workers   并行页面数（默认 4）。同一 workers 值下逐像素可复现；换 workers 值时
 //               文字边缘可能差 1–3 个色阶（见 runPool 注释），肉眼不可见
 
@@ -35,7 +37,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 // ---------- 参数 ----------
 function parseArgs(argv) {
-  const opts = { preview: false, from: null, to: null, workers: 4, dir: null, keepFrames: false, gpu: false, page: 'index.html', step: 1 };
+  const opts = { preview: false, from: null, to: null, workers: 4, dir: null, keepFrames: false, gpu: false, page: 'index.html', step: 1, scale: 1 };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--preview') opts.preview = true;
@@ -45,6 +47,7 @@ function parseArgs(argv) {
     else if (a === '--page') opts.page = argv[++i];
     else if (a === '--step') opts.step = Number(argv[++i]);
     else if (a === '--to') opts.to = Number(argv[++i]);
+    else if (a === '--scale') opts.scale = Number(argv[++i]);
     else if (a === '--workers') opts.workers = Math.max(1, parseInt(argv[++i], 10));
     else if (a === '-h' || a === '--help') { usage(0); }
     else if (a.startsWith('--')) { console.error(`未知参数 ${a}`); usage(1); }
@@ -57,7 +60,7 @@ function parseArgs(argv) {
   return opts;
 }
 function usage(code) {
-  console.log('用法：node tools/render/render.mjs <dir> [--preview [--step s]] [--page f.html] [--from s] [--to s] [--workers n] [--keep-frames] [--gpu]');
+  console.log('用法：node tools/render/render.mjs <dir> [--preview [--step s]] [--page f.html] [--from s] [--to s] [--workers n] [--keep-frames] [--gpu] [--scale n]');
   process.exit(code);
 }
 
@@ -202,7 +205,8 @@ async function main() {
   });
 
   try {
-    const scale = opts.preview ? 0.5 : 1;
+    if (!(opts.scale > 0)) throw new Error('--scale 需要正数');
+    const scale = opts.preview ? 0.5 : opts.scale;
     const first = await openPage(browser, url, { scale });
     const { width, height, fps, duration } = first.meta;
     const totalFrames = Math.ceil(duration * fps - 1e-6);
@@ -223,7 +227,8 @@ async function main() {
     const startFrame = Math.round(from * fps);
     const endFrame = Math.min(Math.ceil(to * fps - 1e-6), totalFrames); // 不含
     const frameCount = endFrame - startFrame;
-    const framesDir = path.join(outDir, prefix ? `frames-${prefix}` : 'frames');   // 按页分目录，多人同时渲不互删
+    const hi = opts.scale !== 1 ? (width * opts.scale === 3840 ? '-4k' : `-x${opts.scale}`) : '';
+    const framesDir = path.join(outDir, (prefix ? `frames-${prefix}` : 'frames') + (opts.scale !== 1 ? `-x${opts.scale}` : ''));   // 按页分目录，多人同时渲不互删
     await rm(framesDir, { recursive: true, force: true });
     await mkdir(framesDir, { recursive: true });
 
@@ -232,7 +237,7 @@ async function main() {
     await runPool(pages, jobs, (ctx, i) => seekAndShoot(ctx, i / fps, frameFile(i)), '截帧');
 
     const isClip = opts.from !== null || opts.to !== null;
-    const outFile = path.join(outDir, isClip ? `${prefix ? prefix + '-' : ''}clip-${from}-${to}.mp4` : prefix ? `${prefix}.mp4` : 'final.mp4');
+    const outFile = path.join(outDir, isClip ? `${prefix ? prefix + '-' : ''}clip-${from}-${to}${hi}.mp4` : prefix ? `${prefix}${hi}.mp4` : `final${hi}.mp4`);
     const tracks = [];
     const narration = path.join(dir, 'narration', 'narration.mp3');
     if (existsSync(narration)) tracks.push({ file: narration, label: '旁白' });

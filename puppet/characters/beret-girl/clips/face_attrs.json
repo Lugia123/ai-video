@@ -1,0 +1,5 @@
+{
+ "_note": "人工覆盖。思考：用户 2026-10-09 指认「原来换眉毛效果就挺好」→ 眼和眉都能换。其余按程序建议（browSwap 否）。",
+ "poses": { "think*": { "browSwap": true } },
+ "clips": { "think*": { "browSwap": true } }
+}

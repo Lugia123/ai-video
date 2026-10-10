@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "_example",
+  "name": "最小样例",
+  "canvas": { "width": 1408, "height": 1408 },
+  "unit": { "R": 330, "hh": 340, "headCenter": [704, 760], "neckPivot": [704, 1190] },
+  "parameters": [
+    { "id": "ParamAngleX", "min": -30, "max": 30, "default": 0, "degreesPerUnit": 1 },
+    { "id": "ParamAngleY", "min": -30, "max": 30, "default": 0 },
+    { "id": "ParamEyeLOpen", "min": 0, "max": 1, "default": 1 },
+    { "id": "ParamHairFront", "min": -1, "max": 1, "default": 0, "kind": "physics" }
+  ],
+  "families": [
+    { "id": "eye_L", "grid": { "cols": 2, "rows": 2, "rect": [770, 800, 240, 200] } }
+  ],
+  "poseGroups": [
+    { "id": "ArmL", "parts": ["arm_L_idle", "arm_L_think"], "fadeIn": 0.2 }
+  ],
+  "physics": [
+    { "id": "hairFrontX", "model": "spring",
+      "inputs": [{ "parameter": "ParamAngleX", "weight": 1 }],
+      "output": { "parameter": "ParamHairFront", "scale": 1 },
+      "mass": 1, "stiffness": 30, "damping": 3 }
+  ],
+  "anchors": {
+    "face": { "part": "face", "at": [704, 900] },
+    "headTop": { "part": "bang_C", "at": [704, 420] }
+  },
+  "overlays": [
+    { "id": "back", "order": 0 },
+    { "id": "face", "order": 250, "clipTo": "face" },
+    { "id": "top", "order": 900 }
+  ],
+  "files": { "parts": "parts.json" }
+}

@@ -1,0 +1,16 @@
+{
+ "blank": true,
+ "alignFrom": "clips-b1",
+ "origRest": "clips-b1/frames/idle.png",
+ "track": [
+  "wave_s1_loop",
+  "wave_s2_loop",
+  "wave_mid_loop",
+  "think_s1_loop",
+  "think_s2_loop",
+  "think_mid_loop"
+ ],
+ "noBrow": "clips-b1/frames/idle_nobrow.png",
+ "refine": true,
+ "ink": true
+}

@@ -1,0 +1,21 @@
+{
+ "track": [
+  "think_loop",
+  "think_f2_loop",
+  "think_mid_loop",
+  "think_d1_loop",
+  "wave_loop",
+  "wave_f1_loop",
+  "wave_d1_loop",
+  "shrug_loop",
+  "shrug_f2_loop"
+ ],
+ "noPaste": [
+  "spin_loop",
+  "spin_d5_loop",
+  "spin_d6_loop",
+  "spin_f1_loop",
+  "turn_loop",
+  "turn_d4_loop"
+ ]
+}

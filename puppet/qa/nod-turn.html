@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>点头 / 转头特写</title>
+<style>html,body{margin:0;background:#111;overflow:hidden}#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#F3F8FB}#c,#host{position:absolute;left:0;top:0;width:1920px;height:1080px}</style></head>
+<body><div id="stage"><canvas id="c" width="1920" height="1080"></canvas><div id="host"></div></div>
+<script type="module">
+// 点头 / 转头特写：讲解员放大到头占满画面，头的角度由这页直接给（不走默认行为），用来看整头是不是一体在动、层间有没有开缝。
+//   0–5 秒 点头到数据包允许的两头；5–10 秒 转头 ±24°；10–14 秒 两个一起；全程不眨眼不说话。?pack=…
+import { createHost } from '../host/index.js';
+const Q = new URLSearchParams(location.search), W = 1920, H = 1080, DUR = 14;
+const PACK = new URL('../' + (Q.get('pack') || 'characters/beret-girl/'), location.href).href;
+const host = await createHost({ mount: document.getElementById('host'), timings: { duration: DUR, segments: [] }, W, H, ground: 2150, size: 2300, pack: PACK });
+const C = host.character, yp = C.parameters.find(p => p.id === C.turn.y.parameter), PMAX = Math.min(Math.abs(yp.min), yp.max), YAW = C.host.yawMax ?? 24;
+const ss = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+const key = (t, ks) => { if (t <= ks[0][0]) return ks[0][1]; for (let i = 1; i < ks.length; i++) if (t <= ks[i][0]) { const [a, va] = ks[i - 1], [b, vb] = ks[i]; return va + (vb - va) * ss((t - a) / (b - a)); } return ks.at(-1)[1]; };
+const pitchAt = t => key(t, [[0.4, 0], [1.4, -PMAX], [2.2, -PMAX], [3.4, PMAX], [4.0, PMAX], [4.8, 0], [10.2, 0], [11.0, -PMAX], [12.6, -PMAX], [13.6, 0]]);
+const yawAt = t => key(t, [[5.2, 0], [6.2, -YAW], [7.0, -YAW], [8.4, YAW], [9.2, YAW], [10.0, 0], [11.2, 0], [12.0, YAW], [12.6, YAW], [13.6, 0]]);
+host.direct(t => ({ x: 960, talk: false, look: null, face: { yaw: yawAt(t), pitch: pitchAt(t), roll: 0, blink: 0 } }));
+const g = document.getElementById('c').getContext('2d');
+function seek(t) {
+  g.fillStyle = '#F3F8FB'; g.fillRect(0, 0, W, H); host.draw(t);
+  g.fillStyle = '#1E2A4A'; g.font = '600 34px "PingFang SC", "Heiti SC", sans-serif';
+  g.fillText(t < 5 ? '点头（整头一体）' : t < 10 ? '转头' : '低头 + 转头', 48, 70);
+  g.font = '500 28px "PingFang SC", "Heiti SC", sans-serif'; g.fillStyle = '#5A6B86';
+  g.fillText(`俯仰 ${pitchAt(t).toFixed(1)}°   转头 ${yawAt(t).toFixed(0)}°`, 48, 118);
+}
+seek(0);
+window.__video = { width: W, height: H, fps: 30, duration: DUR, seek };
+if (!Q.has('render')) { let t0; const loop = now => { t0 ??= now; seek(((now - t0) / 1000) % DUR); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+</script></body></html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>chibi-emotes 演示</title>
+<style>
+  html, body { margin: 0; background: #1a1a1a; overflow: hidden; }
+  #c { display: block; width: 1920px; height: 1080px; transform-origin: 0 0; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+// 漫符演示页。符合 window.__video 约定：
+//   默认     逐个演示，每个 2.4 秒（弹出 → 保持 → 收掉）
+//   ?sheet=1 一张总表：每格一个漫符，叠在角色脸上，带名字（静帧，seek 到哪一秒就是哪一秒的循环相位）
+//   ?dpr=2   强制 2 倍像素（渲染器用 --scale 2 时自动跟 devicePixelRatio）
+// 底图是 ep09 讲解员的头：直接把 proto-b/parts/ 里头部那几层按 rig.json 的位置叠起来（静止、不变形）。
+// 演示替换眼时，不画原来的眼睛那几层——这就是「角色那边把原眼睛藏起来」的效果。
+import { drawEmote, drawPreset, drawPresetMix, mixPreset, emotePreset, EMOTES, EMOTE_NAMES, PRESETS, PRESET_NAMES } from './chibi-emotes.js';
+
+const Q = new URLSearchParams(location.search);
+const RENDER = Q.has('render'), SHEET = Q.has('sheet');
+// ?set=symbols（默认）16 个漫符各配一套脸 · ?set=presets 组合表情 · ?set=parts 单个部件（眼、嘴、眉）
+const SET = Q.get('set') || 'symbols';
+const DPR = Number(Q.get('dpr')) || window.devicePixelRatio || 1;
+const W = 1920, H = 1080, FPS = 30, EACH = 2.4;
+const canvas = document.getElementById('c');
+canvas.width = W * DPR; canvas.height = H * DPR;
+const ctx = canvas.getContext('2d');
+const PARTS = '../../episodes/ep09-screenshot-devlog/proto-b/parts/';
+const FONT = '"PingFang SC", "Hiragino Sans GB", sans-serif';
+const INK = '#14274A', BG = '#F3F8FB';
+
+const loadImage = src => new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error('图片加载失败：' + src)); i.src = src; });
+const EYE_PARTS = /^(eyeWhite|iris|eyeHl|eyeLow|lash)/;
+const HEAD_ORDER = ['hair_back', 'neck', 'torso', 'face', 'nose', 'eyeWhiteL', 'irisL', 'eyeHlL', 'eyeLowL', 'lashL', 'eyeWhiteR', 'irisR', 'eyeHlR', 'eyeLowR', 'lashR', 'mouth_closed', 'hair_front', 'hair_sideL', 'hair_sideR', 'browL', 'browR', 'ahoge', 'hat'];
+
+async function boot() {
+  const rig = await (await fetch(PARTS + 'rig.json')).json();
+  const byId = Object.fromEntries(rig.parts.map(p => [p.id, p]));
+  const imgs = Object.fromEntries(await Promise.all(HEAD_ORDER.map(async id => [id, await loadImage(PARTS + byId[id].src)])));
+  await document.fonts.load(`600 60px ${FONT}`, '黑线');
+
+  // 母版坐标（rig.json 的 2208×2944）里的锚点
+  const E = rig.eyes, M = {
+    head: { x: rig.head.center[0], y: rig.head.center[1] },
+    eyeL: { x: E.L.center[0], y: E.L.center[1] }, eyeR: { x: E.R.center[0], y: E.R.center[1] },
+    brow: { x: (E.L.center[0] + E.R.center[0]) / 2, y: 905 },
+    cheekL: { x: 800, y: 1205 }, cheekR: { x: 1348, y: 1205 }, top: { x: 1080, y: 250 }, mouth: { x: rig.mouth.center[0], y: rig.mouth.center[1] },
+  };
+  /** 把头画在页面上：母版的 (cx0, cy0) 对到页面的 (x, y)，缩放 k，倾斜 rot。返回页面坐标的锚点。 */
+  const HIDE = { eyes: /^(eyeWhite|iris|eyeHl|eyeLow|lash)/, mouth: /^mouth/, brows: /^brow/ };
+  const UNDER_HAIR = 'hair_front';                       // 贴脸的那一层画在这个部件之前：脸和五官之上、前发 / 侧发 / 帽子之下
+  /** 把头画在页面上。hide = { eyes, mouth, brows }；faceLayer(A) 在画前发之前调一次；返回页面坐标的锚点。 */
+  function drawHead(x, y, k, rot, hide = {}, faceLayer = null) {
+    const c0 = M.head;
+    const map = p => { const dx = (p.x - c0.x) * k, dy = (p.y - c0.y) * k; return { x: x + dx * Math.cos(rot) - dy * Math.sin(rot), y: y + dx * Math.sin(rot) + dy * Math.cos(rot) }; };
+    const A = Object.fromEntries(Object.entries(M).map(([n, p]) => [n, map(p)]));
+    A.head = { ...A.head, rot, scale: (E.R.center[0] - E.L.center[0]) * k / 100 };
+    const part = id => { const r = byId[id].rect; ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(k, k); ctx.translate(-c0.x, -c0.y); ctx.drawImage(imgs[id], r[0], r[1], r[2], r[3]); ctx.restore(); };
+    for (const id of HEAD_ORDER) {
+      if (id === UNDER_HAIR && faceLayer) {                                           // 贴脸层只落在脸的轮廓里
+        ctx.save(); faceLayer(A); ctx.restore();
+      }
+      if ((hide.eyes && HIDE.eyes.test(id)) || (hide.mouth && HIDE.mouth.test(id)) || (hide.brows && HIDE.brows.test(id))) continue;
+      part(id);
+    }
+    return A;
+  }
+  /** 画一个头 + 一套表情（分两层）。q = 预设对象；返回锚点 */
+  function headWith(q, x, y, k, p, t, opts = {}) {
+    const on = p > 0.03 && p < 0.97, h = q.head || {}, w = on ? 1 : 0;
+    const A = drawHead(x, y + (h.nod || 0) * 60 * k * w, k, (h.tilt || 0) * w + (opts.rot || 0), on ? { eyes: !!q.eyes, mouth: !!q.mouth, brows: !!q.brows } : {},
+      A => drawPreset(ctx, q, A, p, t, { ...opts, layer: 'face' }));
+    drawPreset(ctx, q, A, p, t, { ...opts, layer: 'top' });
+    return A;
+  }
+  const partPreset = name => { const e = EMOTES[name]; return { zh: e.zh, eyes: e.kind === 'eyes' ? name : null, mouth: e.kind === 'mouth' ? name : null, brows: e.kind === 'brows' ? name : null, symbols: e.kind === 'symbol' ? [name] : [], head: {} }; };
+  const LIST = SET === 'parts' ? EMOTE_NAMES.filter(n => EMOTES[n].kind !== 'symbol').map(n => [n, partPreset(n)])
+    : SET === 'presets' ? PRESET_NAMES.filter(n => !EMOTES[n] || EMOTES[n].kind !== 'symbol').map(n => [n, emotePreset(n)])
+    : PRESET_NAMES.filter(n => EMOTES[n]?.kind === 'symbol').map(n => [n, emotePreset(n)]);
+  const text = (s, x, y, size, o = {}) => { ctx.font = `${o.weight ?? 600} ${size}px ${o.font ?? FONT}`; ctx.fillStyle = o.color ?? INK; ctx.textAlign = o.align ?? 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); };
+  const clear = () => { ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalAlpha = 1; ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H); };
+
+  function one(t) {
+    clear();
+    const i = Math.min(LIST.length - 1, Math.floor(t / EACH)), [name, q] = LIST[i], lt = t - i * EACH, p = lt / EACH;
+    const rot = Math.sin(t * 1.3) * 0.05, bob = Math.sin(t * 2.1) * 5;       // 头轻轻晃，演示符号跟着头走
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1180, H); ctx.clip();
+    headWith(q, 590, 690 + bob, 0.56, p, t, { rot, bounds: { x: 0, y: 0, w: 1180, h: H } });
+    ctx.restore();
+    text(`${i + 1} / ${LIST.length}`, 1220, 300, 44, { color: '#5A6B86', weight: 500 });
+    text(q.zh, 1220, 420, 110);
+    text(name, 1220, 530, 50, { font: 'Menlo, monospace', color: '#1FA2C9', weight: 500 });
+    [['眼', q.eyes], ['眉', q.brows], ['嘴', q.mouth], ['漫符', (q.symbols || []).map(x => (Array.isArray(x) ? x[0] : x)).join(' + ')], ['动作', q.pose]].filter(r => r[1]).forEach(([k2, v], n) => {
+      text(k2, 1220, 620 + n * 52, 34, { color: '#5A6B86', weight: 500 }); text(String(v), 1320, 620 + n * 52, 34, { font: 'Menlo, monospace', weight: 500 });
+    });
+    ctx.fillStyle = '#DCEFF5'; ctx.beginPath(); ctx.roundRect(1220, 920, 560, 14, 7); ctx.fill();
+    ctx.fillStyle = '#1FA2C9'; ctx.beginPath(); ctx.roundRect(1220, 920, 560 * p, 14, 7); ctx.fill();
+  }
+  function sheet(t) {
+    clear();
+    const n = LIST.length, cols = n <= 3 ? 3 : n > 21 ? 8 : n > 18 ? 7 : 6, rows = Math.ceil(n / cols), cw = W / cols, ch = H / rows, k = n <= 3 ? 0.36 : Math.min(cw / 1500, ch / 2000 * 1.42) * 0.9;
+    LIST.forEach(([name, q], i) => {
+      const x = (i % cols) * cw, y = Math.floor(i / cols) * ch;
+      ctx.save(); ctx.beginPath(); ctx.rect(x + 4, y + 4, cw - 8, ch - 8); ctx.clip();
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x, y, cw, ch);
+      headWith(q, x + cw * (n <= 3 ? 0.4 : 0.5), y + ch * (n <= 3 ? 0.42 : 0.5) + 6 * k / 0.16, k, 0.5, t, { bounds: { x, y, w: cw, h: ch } });
+      ctx.restore();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(x + 4, y + ch - 56, cw - 8, 52);
+      text(q.zh, x + cw / 2, y + ch - 29, Math.min(36, cw / 7.4), { align: 'center' });
+    });
+  }
+  const seek = t => (SHEET ? sheet : one)(Math.min(Math.max(t, 0), window.__video.duration - 1e-6));
+  window.__video.duration = SHEET ? 2 : LIST.length * EACH;
+  window.__video.seek = seek;
+  seek(SHEET ? 0.9 : 0);
+  if (!RENDER) {
+    const fit = () => { canvas.style.transform = `scale(${Math.min(innerWidth / W, innerHeight / H)})`; }; fit(); addEventListener('resize', fit);
+    let t0 = null; const loop = now => { t0 ??= now; seek(((now - t0) / 1000) % window.__video.duration); requestAnimationFrame(loop); }; requestAnimationFrame(loop);
+  }
+}
+window.__video = { width: W, height: H, fps: FPS, duration: 1, seek() {}, ready: null };
+window.__video.ready = boot();
+</script>
+</body>
+</html>

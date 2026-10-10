@@ -1,0 +1,250 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>图层分解图</title>
+<style>
+  html, body { margin: 0; background: #F3F6FA; overflow: hidden; font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+  #stage { position: relative; width: 1920px; height: 1080px; background: #F3F6FA; overflow: hidden; transform-origin: 0 0; user-select: none; }
+  #scene { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  .layer { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
+  .layer img { position: absolute; left: 0; top: 0; display: block; }
+  .layer.glass { outline: 3px solid rgba(40, 60, 100, 0.16); background: rgba(255, 255, 255, 0.05); }
+  .layer.wire { outline: 6px dashed rgba(230, 120, 30, 0.75); background: transparent; }
+  .layer.plane { outline: 5px solid rgba(47, 181, 168, 0.8); background: rgba(47, 181, 168, 0.07); }
+  .layer.axis { outline: 5px solid rgba(214, 51, 108, 0.9); background: rgba(214, 51, 108, 0.06); }
+  .layer.hi { outline: 8px solid #D6336C; }
+  #over { position: absolute; left: 0; top: 0; }
+  #title { position: absolute; left: 28px; top: 18px; font-size: 26px; font-weight: 600; color: #1B2540; }
+  #sub { position: absolute; left: 28px; top: 56px; font-size: 16px; color: #4A5878; width: 1180px; line-height: 1.5; }
+  #labels { position: absolute; left: 1238px; top: 12px; width: 676px; }
+  .lab { height: 28.4px; line-height: 28.4px; font-size: 14.5px; color: #1B2540; white-space: nowrap; cursor: pointer; padding: 0 6px; border-radius: 4px; }
+  .lab b { font-weight: 600; } .lab .n { display: inline-block; width: 30px; color: #7A869A; } .lab .f { color: #7A869A; font-size: 12.5px; }
+  .lab .d { color: #0B7A6E; } .lab .g { color: #B4530A; } .lab.off { opacity: 0.35; text-decoration: line-through; } .lab.hi { background: #FFE3EC; }
+  #ui { position: absolute; left: 28px; bottom: 16px; font-size: 15px; color: #1B2540; background: rgba(255, 255, 255, 0.88); padding: 8px 12px; border-radius: 8px; }
+  #ui label { margin-right: 14px; } #ui input[type=range] { vertical-align: middle; width: 150px; } #ui button { font: inherit; margin-right: 6px; }
+  #ui button.on { background: #1E2A4A; color: #fff; }
+  #top { position: absolute; left: 0; top: 0; }
+</style>
+<div id="stage">
+  <div id="scene"></div>
+  <canvas id="over" width="1920" height="1080"></canvas>
+  <canvas id="top" width="1920" height="1080" style="display:none"></canvas>
+  <div id="title"></div><div id="sub"></div>
+  <div id="labels"></div>
+  <div id="ui"></div>
+</div>
+<script type="module">
+// 图层分解图：把讲解员用到的每一层贴图按真实绘制顺序排开，放进透视场景里沿 Z 轴拉开。只读数据包（character.json / parts.json / tex / kit）。
+//   ?pack=characters/beret-girl/   数据包目录（相对 puppet/）
+//   ?pose=wave                     手臂用哪个姿势的层（姿势库 poses.json 里的键）
+//   ?mode=order|depth              拉开方式：A 按绘制顺序等距 / B 按横向深度值（Z = 深度）
+//   ?spread=1&cam=-38,12&yaw=0     拉开量、视角（水平角, 俯角）、转头角度
+//   ?view=top                      正交俯视图：横轴 = 画面 x，纵轴 = 深度，每层一条线段
+//   ?still=1                       出静图用：画面只由上面这些查询参数决定，seek(t) 不起作用
+//   ?render=1                      不自动播放，等渲染器调 window.__video.seek(t)
+// 画面是这些参数（或 seek 的 t）的纯函数。转头位移用引擎同一个式子：dx = 深度 × R × sin(转头角)。
+const Q = new URLSearchParams(location.search), RENDER = Q.has('render');
+const PACK = new URL('../' + (Q.get('pack') || 'characters/beret-girl/'), location.href).href;
+const C = await (await fetch(PACK + 'character.json')).json();
+const PARTS = await (await fetch(PACK + (C.files?.parts || 'parts.json'))).json().then(d => Array.isArray(d) ? d : d.parts);
+const HO = C.host || {}, KS = HO.kitScale ?? 1, KIT = new URL(HO.kit || 'kit/', PACK).href, U = C.unit, R = U.R;
+const POSES = await (await fetch(KIT + 'poses.json')).json();
+const POSE = POSES[Q.get('pose')] ? Q.get('pose') : (POSES.wave ? 'wave' : Object.keys(POSES)[0]);
+const CW = C.canvas.width, CH = C.canvas.height;
+// 转轴：数据包生成时已经把头部各层的横向深度写成「原深度表里的值 − 转轴深度」，并把转轴深度记在 unit.turnPivotDepth；引擎的式子不变（dx = depth × R × sin θ）。
+// 所以这里深度 0 就是转轴所在的平面；有这个字段时把它画成「转轴」，并在说明里给出原表的值 = 这里的值 + turnPivotDepth。没有这个字段的旧数据包照样能看（深度 0 只是身体所在的平面）。
+const PIVOT = typeof C.unit?.turnPivotDepth === 'number' ? C.unit.turnPivotDepth : null, D0 = PIVOT != null ? 0 : null;
+const NAME = { back: '后发', inner_L: '内层发（左）', inner_R: '内层发（右）', neck: '脖子', face: '脸', nose: '鼻', mouth: '嘴（4 张口型同位切换）', side_L: '侧发（左）', side_R: '侧发（右）', bangs: '刘海', ahoge: '呆毛', hat: '帽子',
+  eye_white_R: '眼白 右', iris_R: '瞳 右', eye_highlight_R: '高光 右', lash_lower_R: '下睫毛 右', lash_R: '上睫毛 右', lid_R: '眼睑 右', eye_white_L: '眼白 左', iris_L: '瞳 左', eye_highlight_L: '高光 左', lash_lower_L: '下睫毛 左', lash_L: '上睫毛 左', lid_L: '眼睑 左', brow_R: '眉 右', brow_L: '眉 左' };
+const loadImg = src => new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error('加载失败 ' + src)); i.src = src; });
+
+// ---------- 层的清单：真实绘制顺序（讲解员：背后挂层 → 身体底图 → 头后面的手臂 → 头的各部件按 order（脖子、贴脸挂层也在里面）→ 盖在头前面的手臂 → 最上面的挂层） ----------
+const mouthIds = new Set(C.slots?.mouth || []), firstMouth = PARTS.filter(p => mouthIds.has(p.id)).sort((a, b) => a.order - b.order)[0]?.id;
+const L = [];
+const ov = id => (C.overlays || []).find(o => o.id === id);
+L.push({ id: 'ov-back', name: '漫符挂层 · 背后', file: '运行时画布', rect: [0, 0, CW, CH], wire: true, follow: '跟画面（屏幕坐标）', depth: null, depthY: null });
+L.push({ id: 'base', name: '身体底图', file: 'kit/base.png', src: KIT + 'base.png', rect: [0, 0, CW, CH], full: true, follow: '跟身体', depth: 0, depthY: 0 });
+if (POSES[POSE].arms) L.push({ id: 'arms', name: `手臂（头后面）· ${POSE}`, file: 'kit/' + POSES[POSE].arms, src: KIT + POSES[POSE].arms, rect: [0, 0, CW, CH], full: true, follow: '跟身体', depth: 0, depthY: 0 });
+const head = [...PARTS.filter(p => !mouthIds.has(p.id) || p.id === firstMouth).map(p => ({ o: p.order, p })), ...(ov('face') ? [{ o: ov('face').order, face: ov('face') }] : [])].sort((a, b) => a.o - b.o);
+for (const h of head) {
+  if (h.face) { const fr = PARTS.find(p => p.id === h.face.clipTo)?.rect || [0, 0, CW, CH]; L.push({ id: 'ov-face', name: '漫符挂层 · 贴脸', file: '运行时画布（裁到脸）', rect: fr, wire: true, follow: '跟头', depth: h.face.depth ?? 0, depthY: h.face.depthY ?? h.face.depth ?? 0, order: h.o }); continue; }
+  const p = h.p; L.push({ id: p.id, name: NAME[p.id] || p.id, file: p.texture, src: PACK + p.texture, rect: p.rect, follow: p.group === 'head' ? (p.mesh && p.keyforms?.some(k => 'ParamAngleX' in k.at) ? '跟头 · 网格变形' : '跟头') : '跟身体', depth: p.depth ?? 0, depthY: p.depthY ?? p.depth ?? 0, order: p.order, part: p, head: p.group === 'head' });
+}
+if (POSES[POSE].over) L.push({ id: 'over', name: `手臂（盖在头前面）· ${POSE}`, file: 'kit/' + POSES[POSE].over, src: KIT + POSES[POSE].over, rect: [0, 0, CW, CH], full: true, follow: '跟身体', depth: 0, depthY: 0 });
+L.push({ id: 'ov-top', name: '漫符挂层 · 最上面（手的位置挖掉）', file: '运行时画布', rect: [0, 0, CW, CH], wire: true, follow: '跟画面（屏幕坐标）', depth: null, depthY: null });
+L.forEach((l, i) => { l.i = i; l.hidden = false; });
+
+// 带网格、且有「只随转头变」的关键形的层（现在只有帽子；以后头上每一层都可能是）：每个网格顶点的有效深度 = 片的深度 + 关键形在最大转角处的横向偏移 ÷ (R·sin 最大角)
+function meshDepth(p) {
+  const [gx, gy] = p.mesh.grid, kf = p.keyforms.filter(k => 'ParamAngleX' in k.at && Object.keys(k.at).length === 1).sort((a, b) => a.at.ParamAngleX - b.at.ParamAngleX), hi = kf.at(-1);
+  if (!hi) return null; const s = R * Math.sin(hi.at.ParamAngleX * Math.PI / 180), d = [];
+  for (let j = 0; j <= gy; j++) { d.push([]); for (let i = 0; i <= gx; i++) d[j].push((p.depth ?? 0) + hi.offsets[(j * (gx + 1) + i) * 2] / s); }
+  return { gx, gy, d, row: d.map(r => r.reduce((a, b) => a + b, 0) / r.length), min: Math.min(...d.flat()), max: Math.max(...d.flat()) };
+}
+for (const l of L) if (l.part?.mesh && l.follow.includes('网格')) { l.mesh = meshDepth(l.part); if (l.mesh) l.follow = '跟头 · 1 层网格，各点深度连续变化'; }
+
+// ---------- 场景 ----------
+let BODY = [0, 0, CW, CH]; const RAIL = [0, 0];
+function alphaBox(im, w, h) {          // 贴图不透明部分的包围盒（角色像素），外扩一点
+  const k = 0.25, c = document.createElement('canvas'); c.width = Math.ceil(w * k); c.height = Math.ceil(h * k); const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0, c.width, c.height);
+  const d = g.getImageData(0, 0, c.width, c.height).data; let x0 = c.width, x1 = 0, y0 = c.height, y1 = 0;
+  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 16) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  const m = 14; return [Math.max(0, x0 / k - m), Math.max(0, y0 / k - m), Math.min(w, (x1 + 1) / k + m) - Math.max(0, x0 / k - m), Math.min(h, (y1 + 1) / k + m) - Math.max(0, y0 / k - m)];
+}
+const scene = document.getElementById('scene'), over = document.getElementById('over').getContext('2d'), labels = document.getElementById('labels');
+for (const l of L) {
+  const [x, y, w, h] = l.rect;
+  if (l.mesh) {          // 带网格的层：一张连续的面。切成三角形，每个三角形把贴图里的那一块仿射贴到屏幕上的三个投影点；相邻三角形共用顶点，所以面是连续的，没有台阶
+    const M = l.mesh, sx = Math.max(1, Math.ceil(M.gx / 24)), sy = Math.max(1, Math.ceil(M.gy / 16)); l.tris = []; l.gridStep = [sx, sy];          // 网格很密时隔行隔列取点（最多约 24×16 格）
+    const V = (i, j) => [Math.min(i, M.gx), Math.min(j, M.gy)];
+    for (let j = 0; j < M.gy; j += sy) for (let i = 0; i < M.gx; i += sx) for (const t of [[V(i, j), V(i + sx, j), V(i, j + sy)], [V(i + sx, j), V(i + sx, j + sy), V(i, j + sy)]]) {
+      const e = document.createElement('div'), uv = t.map(([a, b]) => [w * a / M.gx, h * b / M.gy]), c = [(uv[0][0] + uv[1][0] + uv[2][0]) / 3, (uv[0][1] + uv[1][1] + uv[2][1]) / 3];
+      const ex = uv.map(q => { const d = Math.hypot(q[0] - c[0], q[1] - c[1]) || 1; return [q[0] + (q[0] - c[0]) / d * 3, q[1] + (q[1] - c[1]) / d * 3]; });          // 裁剪范围往外扩 3 个贴图像素，盖住三角形之间的发丝缝
+      e.style.cssText = `position:absolute;left:0;top:0;width:${w}px;height:${h}px;transform-origin:0 0;pointer-events:none;background:url("${l.src}") 0 0 / ${w}px ${h}px no-repeat;clip-path:polygon(${ex.map(q => q[0].toFixed(2) + 'px ' + q[1].toFixed(2) + 'px').join(',')})`;
+      scene.appendChild(e); l.tris.push({ e, v: t, uv });
+    }
+    continue;
+  }
+  const e = document.createElement('div'); e.className = 'layer ' + (l.wire ? 'wire' : 'glass');
+  if (l.src) { const im = await loadImg(l.src);
+    if (l.full) { const b = alphaBox(im, w, h); l.rect = [b[0], b[1], b[2], b[3]]; e.style.overflow = 'hidden'; im.style.left = -b[0] + 'px'; im.style.top = -b[1] + 'px'; if (l.id === 'base') BODY = b; }          // 整幅的层（身体、手臂）：片只取不透明的那一块，位置不变
+    im.style.width = w + 'px'; im.style.height = h + 'px'; e.appendChild(im); }
+  e.style.width = l.rect[2] + 'px'; e.style.height = l.rect[3] + 'px';
+  scene.appendChild(e); l.e = e;
+}
+{ const hb = PARTS.filter(p => p.group === 'head').reduce((b, p) => [Math.min(b[0], p.rect[0]), Math.min(b[1], p.rect[1]), Math.max(b[2], p.rect[0] + p.rect[2]), Math.max(b[3], p.rect[1] + p.rect[3])], [1e9, 1e9, 0, 0]);
+  const x0 = Math.min(hb[0], BODY[0]) - 40, y0 = Math.min(hb[1], BODY[1]) - 40, x1 = Math.max(hb[2], BODY[0] + BODY[2]) + 40, y1 = Math.max(hb[3], BODY[1] + BODY[3]) + 40;
+  RAIL[0] = x1 + 90; RAIL[1] = y0 - 110;
+  for (const l of L) if (l.id === 'ov-back' || l.id === 'ov-top') { l.rect = [x0, y0, x1 - x0, y1 - y0]; l.e.style.width = l.rect[2] + 'px'; l.e.style.height = l.rect[3] + 'px'; } }
+const mkPlane = cls => { const e = document.createElement('div'); e.className = 'layer ' + cls; e.style.width = CW * 0.74 + 'px'; e.style.height = CH * 0.76 + 'px'; scene.appendChild(e); return e; };
+const zeroPlane = mkPlane(PIVOT != null ? 'axis' : 'plane'), axisPlane = null;
+L.forEach(l => { const d = document.createElement('div'); d.className = 'lab'; const f = v => v == null ? '—' : (+v).toFixed(2).replace(/\.?0+$/, '') || '0';
+  const dep = l.mesh ? `${f(l.mesh.min)}…${f(l.mesh.max)}` : f(l.depth);
+  d.innerHTML = `<span class="n">${l.i + 1}</span><b>${l.name}</b> <span class="f">${l.file}</span> · <span class="d">横 ${dep} / 纵 ${f(l.depthY)}</span> · <span class="g">${l.follow}</span>`;
+  d.onclick = () => { l.hidden = !l.hidden; d.classList.toggle('off', l.hidden); redraw(); }; d.onmouseenter = () => { HOVER = l; redraw(); }; d.onmouseleave = () => { HOVER = null; redraw(); };
+  labels.appendChild(d); l.lab = d; });
+let HOVER = null;
+
+// ---------- 投影（自己算，层和标签引线用同一套矩阵） ----------
+const mul = (a, b) => { const o = new Array(16).fill(0); for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) for (let k = 0; k < 4; k++) o[r * 4 + c] += a[r * 4 + k] * b[k * 4 + c]; return o; };
+const T = (x, y, z) => [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1], Sc = s => [s, 0, 0, 0, 0, s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1];
+const Ry = a => { const c = Math.cos(a), s = Math.sin(a); return [c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, 0, 1]; }, Rx = a => { const c = Math.cos(a), s = Math.sin(a); return [1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0, 0, 0, 0, 1]; };
+const Pp = d => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1 / d, 1];
+const css = m => `matrix3d(${[0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15].map(i => m[i].toFixed(6)).join(',')})`;
+const proj = (m, x, y, z) => { const w = m[12] * x + m[13] * y + m[14] * z + m[15]; return [(m[0] * x + m[1] * y + m[2] * z + m[3]) / w, (m[4] * x + m[5] * y + m[6] * z + m[7]) / w]; };
+const DEPS = L.filter(l => l.depth != null).flatMap(l => l.mesh ? [l.mesh.min, l.mesh.max] : [l.depth]), DMIN = Math.min(...DEPS, D0 ?? 0, 0), DMAX = Math.max(...DEPS, D0 ?? 0, 0), DMID = (DMIN + DMAX) / 2;
+const S0 = 0.25, CX = 665, CY = 610, DIST = 9000, DEG = Math.PI / 180, ZA = 4500, ZB = 2100 / Math.max(DMAX - DMIN, 0.05), EPS = 44;          // ZA：方式 A 从最后一层到最前一层的总进深（角色像素）；ZB：方式 B 深度 1 对应的进深；EPS：方式 B 里每一层再按绘制顺序往前错开这么多
+{ const wt = L.map(l => l.rect[2] * l.rect[3] > 250000 ? 1 : 0.28); let acc = 0; const zs = L.map((l, k) => { if (k) acc += (wt[k - 1] + wt[k]) / 2; return acc; }); L.forEach((l, k) => { l.zo = (zs[k] / acc - 0.5) * ZA; }); }
+const state = { spread: 1, mix: 0, camYaw: -62, camPitch: 13, headYaw: 0 };
+const zOf = (l, dep) => state.spread * ((1 - state.mix) * l.zo + state.mix * (((dep ?? l.depth ?? (l.id === 'ov-top' ? DMAX + 0.06 * (DMAX - DMIN) : DMIN - 0.06 * (DMAX - DMIN))) - DMID) * ZB + (l.i - (L.length - 1) / 2) * EPS));
+const dxOf = (l, dep) => l.head || l.id === 'ov-face' ? (dep ?? l.depth) * R * Math.sin(state.headYaw * DEG) : 0;
+function redraw() {
+  const cam = mul(T(CX, CY, 0), mul(Pp(DIST), mul(Rx(-state.camPitch * DEG), mul(Ry(state.camYaw * DEG), Sc(S0))))), order = [];
+  over.clearRect(0, 0, 1920, 1080);
+  const place = (e, x, y, z) => { e.style.transform = css(mul(cam, T(x - CW / 2, y - CH / 2, z))); };
+  for (const l of L) {
+    const z = zOf(l), [x, y, w, h] = l.rect, vis = !l.hidden; l.lab.classList.toggle('hi', HOVER === l);
+    if (l.tris) {
+      const M = l.mesh, P = []; for (let j = 0; j <= M.gy; j++) { P.push([]); for (let i = 0; i <= M.gx; i++) { const d = M.d[j][i]; P[j].push(proj(cam, x + w * i / M.gx + dxOf(l, d) - CW / 2, y + h * j / M.gy - CH / 2, zOf(l, d))); } }
+      for (const t of l.tris) { const [p0, p1, p2] = t.v.map(([i, j]) => P[j][i]), [u0, u1, u2] = t.uv; t.e.style.display = vis ? '' : 'none'; t.e.style.zIndex = 1000 + l.i;
+        const du1 = u1[0] - u0[0], dv1 = u1[1] - u0[1], du2 = u2[0] - u0[0], dv2 = u2[1] - u0[1], det = du1 * dv2 - du2 * dv1;          // 贴图三角形 → 屏幕三角形的仿射
+        const a = ((p1[0] - p0[0]) * dv2 - (p2[0] - p0[0]) * dv1) / det, c = ((p2[0] - p0[0]) * du1 - (p1[0] - p0[0]) * du2) / det, b = ((p1[1] - p0[1]) * dv2 - (p2[1] - p0[1]) * dv1) / det, d = ((p2[1] - p0[1]) * du1 - (p1[1] - p0[1]) * du2) / det;
+        t.e.style.transform = `matrix(${a.toFixed(6)},${b.toFixed(6)},${c.toFixed(6)},${d.toFixed(6)},${(p0[0] - a * u0[0] - c * u0[1]).toFixed(3)},${(p0[1] - b * u0[0] - d * u0[1]).toFixed(3)})`; }
+      if (vis) { const [sx, sy] = l.gridStep; over.strokeStyle = HOVER === l ? '#D6336C' : 'rgba(214,51,108,0.38)'; over.lineWidth = HOVER === l ? 2 : 0.8; over.beginPath();          // 网格线：画在最上面，看得出这是一张弯的面
+        for (let j = 0; j <= M.gy; j += sy) { const jj = Math.min(j, M.gy); P[jj].forEach((q, i) => i ? over.lineTo(q[0], q[1]) : over.moveTo(q[0], q[1])); if (jj === M.gy) break; if (j + sy > M.gy) j = M.gy - sy; }
+        for (let i = 0; i <= M.gx; i += sx) { const ii = Math.min(i, M.gx); for (let j = 0; j <= M.gy; j++) j ? over.lineTo(P[j][ii][0], P[j][ii][1]) : over.moveTo(P[j][ii][0], P[j][ii][1]); if (ii === M.gx) break; if (i + sx > M.gx) i = M.gx - sx; }
+        over.stroke(); }
+    }
+    else { l.e.style.display = vis ? '' : 'none'; l.e.classList.toggle('hi', HOVER === l); place(l.e, x + dxOf(l), y, z); l.e.style.zIndex = 1000 + l.i; }
+    // 引线：每层在自己的进深上、沿整摞图的右上棱有一个点（「导轨」），标签连到这个点，再从它拉一小段到这层自己的右上角。导轨上的点按进深排成一线，引线不会绞在一起
+    if (vis) { const dm = l.mesh ? l.mesh.d[0][l.mesh.gx] : undefined, zr = zOf(l, dm), rail = proj(cam, RAIL[0] - CW / 2, RAIL[1] - CH / 2, zr), a = proj(cam, x + dxOf(l, dm) + w - CW / 2, y - CH / 2, zr), ly = 12 + l.i * 28.4 + 14.2, hot = HOVER === l;
+      over.strokeStyle = hot ? '#D6336C' : 'rgba(60,80,120,0.4)'; over.lineWidth = hot ? 2.5 : 1; over.beginPath(); over.moveTo(a[0], a[1]); over.lineTo(rail[0], rail[1]); over.lineTo(1226, ly); over.lineTo(1238, ly); over.stroke();
+      over.fillStyle = hot ? '#D6336C' : 'rgba(60,80,120,0.7)'; over.beginPath(); over.arc(a[0], a[1], 2.4, 0, 7); over.fill(); over.beginPath(); over.arc(rail[0], rail[1], 1.8, 0, 7); over.fill(); }
+  }
+  // 方式 B：Z = 0 的平面（不随转头动的东西都在这上面）和转轴
+  const showB = state.mix * state.spread; zeroPlane.style.opacity = showB; zeroPlane.style.zIndex = 500; place(zeroPlane, CW * 0.13, CH * 0.12, state.spread * state.mix * (0 - DMID) * ZB - 2);
+  if (showB > 0.5) { const q = proj(cam, CW * 0.13 - CW / 2, CH * 0.88 - CH / 2, state.spread * (0 - DMID) * ZB); over.fillStyle = PIVOT != null ? '#D6336C' : '#0B7A6E'; over.font = '600 16px "PingFang SC", sans-serif'; over.textAlign = 'center'; over.fillText(PIVOT != null ? '红框 = 深度 0 = 转轴所在的平面（身体、手臂、脖子也在这里，不动）' : '绿框 = 深度 0 的平面：身体、手臂、脖子在这里，转头时不动', Math.min(Math.max(q[0] + 150, 330), 900), 1040); over.textAlign = 'left'; }
+  if (axisPlane) { axisPlane.style.opacity = showB; axisPlane.style.zIndex = 501; place(axisPlane, CW * 0.13, CH * 0.12, state.spread * state.mix * (D0 - DMID) * ZB); if (showB > 0.5) { const q = proj(cam, CW * 0.87 - CW / 2, CH * 0.68 - CH / 2, state.spread * (D0 - DMID) * ZB); over.fillStyle = '#D6336C'; over.font = '600 16px "PingFang SC", sans-serif'; over.fillText(`转轴深度 ${D0}：比它浅的往一边动，比它深的往另一边`, q[0] - 420, q[1] + 24); } }
+  document.getElementById('title').textContent = `图层分解图 · ${C.name || C.id} · ${state.spread < 0.02 ? '合拢（平时看到的样子）' : state.mix < 0.5 ? 'A 按绘制顺序拉开（1 在最后面，谁盖谁）' : 'B 按横向深度拉开（Z = 深度；同深度的层按绘制顺序再略错开）'}`;
+  const hl = L.filter(l => l.head), piv = 0, lo = hl.filter(l => (l.mesh ? l.mesh.max : l.depth) < piv - 1e-6).length, hiN = hl.filter(l => (l.mesh ? l.mesh.min : l.depth) > piv + 1e-6).length, eq = hl.length - lo - hiN;
+  document.getElementById('sub').innerHTML = `共 ${L.length} 层（${PARTS.length} 个部件里嘴的 ${mouthIds.size} 张口型并成 1 层；虚线框 = 漫符的三个挂层；带粉色网格线的 = 1 层网格，各点深度连续变化）。转头位移 = 横向深度 × R × sin θ，R = ${R}。` +
+    (PIVOT != null ? `深度是相对转轴的（原深度表的值 − ${PIVOT}）：0 = 转轴。` : '数据包里没有转轴深度字段：深度 0 只是身体所在的平面。') +
+    `跟头的 ${hl.length} 层在 ${Math.min(...hl.map(l => l.mesh ? l.mesh.min : l.depth)).toFixed(2)} … ${Math.max(...hl.map(l => l.mesh ? l.mesh.max : l.depth)).toFixed(2)}：<b>${hiN} 层在${PIVOT != null ? '转轴' : '深度 0 '}前面、${lo} 层在后面、${eq} 层正好在上面（或跨过它）</b>` +
+    (lo === 0 && hiN > 0 ? '——没有一层在后面，转头时整个头朝同一侧平移。' : lo > 0 && hiN > 0 ? '——转头时前面的往转的方向移，后面的往反方向移。' : '。') +
+    (Math.abs(state.headYaw) > 0.5 ? ` 现在转头 ${state.headYaw.toFixed(0)}°。` : '');
+}
+
+// ---------- 正交俯视图（?view=top）：横轴 = 画面 x，纵轴 = 横向深度 ----------
+function drawTop() {
+  const c = document.getElementById('top'), g = c.getContext('2d'); c.style.display = ''; scene.style.display = 'none'; labels.style.display = 'none'; document.getElementById('over').style.display = 'none'; document.getElementById('ui').style.display = 'none'; document.getElementById('sub').style.display = 'none';
+  const FONT = '"PingFang SC", "Hiragino Sans GB", sans-serif', X0 = 90, X1 = 1180, Y0 = 130, Y1 = 985, xa = 250, xb = 1950, da = DMIN - 0.22 * (DMAX - DMIN), db = DMAX + 0.08 * (DMAX - DMIN);
+  const X = x => X0 + (x - xa) / (xb - xa) * (X1 - X0), Y = d => Y0 + (d - da) / (db - da) * (Y1 - Y0), th = 24 * DEG;
+  g.fillStyle = '#F3F6FA'; g.fillRect(0, 0, 1920, 1080); g.fillStyle = '#1B2540'; g.font = `600 26px ${FONT}`; g.fillText(`从头顶往下看：每层一条线段（横轴 = 画面 x，纵轴 = 横向深度）· ${C.name || C.id}`, 28, 44);
+  g.font = `16px ${FONT}`; g.fillStyle = '#4A5878'; g.fillText(`转头位移 = 深度 × R × sin θ，R = ${R}。右边的条 = 转头 24° 时这一层横移多少（角色像素，正 = 朝转的方向）。` + (PIVOT != null ? `深度已相对转轴（原深度表的值 − ${PIVOT}）。` : ''), 28, 76);
+  g.fillText('↑ 远离观众（后）', X1 - 130, Y0 + 22); g.fillText('↓ 朝观众（前）', X1 - 110, Y1 + 34);
+  g.strokeStyle = '#D5DCE6'; g.lineWidth = 1; g.fillStyle = '#7A869A'; g.font = `14px ${FONT}`;
+  for (let d = Math.ceil(da * 10) / 10; d <= db; d = Math.round((d + 0.1) * 10) / 10) { g.beginPath(); g.moveTo(X0, Y(d)); g.lineTo(X1, Y(d)); g.stroke(); g.fillText(d.toFixed(1), X0 - 38, Y(d) + 5); }
+  g.strokeStyle = PIVOT != null ? '#D6336C' : '#2FB5A8'; g.lineWidth = 2; g.setLineDash([10, 6]); g.beginPath(); g.moveTo(X0, Y(0)); g.lineTo(X1, Y(0)); g.stroke(); g.setLineDash([]);
+  g.fillStyle = PIVOT != null ? '#D6336C' : '#0B7A6E'; g.font = `600 15px ${FONT}`; g.fillText(PIVOT != null ? `红虚线 = 深度 0 = 转轴（原深度表里的 ${PIVOT}）。身体、手臂、脖子也在这条线上，不动` : '绿虚线 = 深度 0：身体底图、手臂、脖子（转头时不动）', X0 + 6, Y(da) + 22);
+  g.font = `14px ${FONT}`; g.fillText('这条线以上（后面）：转头时往反方向移　　以下（前面）：往转的方向移，越靠下移得越多', X0 + 6, Y(da) + 44);
+  const col = l => l.id.startsWith('ov') ? '#E6781E' : !l.head ? '#0B7A6E' : /hair|发|毛/.test(l.part?.family || l.name) ? '#2F8F6B' : l.id === 'hat' ? '#1E2A4A' : l.id === 'face' ? '#C9785A' : '#3B6FD6';
+  // 同一个深度上的层错开一点画，免得叠成一条
+  const rows = L.filter(l => l.depth != null), used = {}; const BX = 1230, BW = 1900 - BX - 250, mx = Math.max(DMAX, 0.3) * R * Math.sin(th);
+  g.fillStyle = '#1B2540'; g.font = `600 15px ${FONT}`; g.fillText('层（按绘制顺序）', BX, 122); g.fillText('转头 24° 的横移', BX + 250, 122);
+  rows.forEach((l, k) => {
+    const d = l.depth, key = d.toFixed(2); used[key] = (used[key] || 0) + 1; const off = (used[key] - 1) * 4.2, [x, , w] = l.rect, c2 = col(l), ly = 146 + k * 28;
+    g.strokeStyle = c2; g.lineWidth = 3.2; g.beginPath();
+    if (l.mesh) { g.setLineDash([]); for (const [j, dash] of [[l.mesh.gy, false], [0, true]]) { g.setLineDash(dash ? [6, 5] : []); g.beginPath(); l.mesh.d[j].forEach((dv, i) => { const px = X(x + w * i / l.mesh.gx), py = Y(dv); i ? g.lineTo(px, py) : g.moveTo(px, py); }); g.stroke(); } g.setLineDash([]); }
+    else { g.moveTo(X(x), Y(d) + off); g.lineTo(X(x + w), Y(d) + off); g.stroke(); }
+    if (w > 300 || l.mesh || l.id === 'neck') { const ny = l.mesh ? Y(l.mesh.d[l.mesh.gy][0]) : Y(d) + off; g.fillStyle = '#F3F6FA'; g.fillRect(X(x) - 19, ny - 8, 18, 16); g.fillStyle = c2; g.font = `600 12px ${FONT}`; g.textAlign = 'right'; g.fillText(l.i + 1, X(x) - 3, ny + 4); g.textAlign = 'left'; }
+    // 右侧清单 + 位移条
+    g.fillStyle = c2; g.fillRect(BX, ly - 11, 12, 12); g.fillStyle = '#1B2540'; g.font = `14px ${FONT}`; g.fillText(`${l.i + 1}  ${l.name.replace(/（.*）| · .*/g, '')}`, BX + 20, ly);
+    const dd = l.mesh ? [l.mesh.min, l.mesh.max] : [d, d], sh = v => v * R * Math.sin(th) * (l.head || l.id === 'ov-face' ? 1 : 0), zx = BX + 250 + (DMIN < 0 ? BW * 0.1 : 0);
+    g.strokeStyle = '#9AA8B8'; g.lineWidth = 1; g.beginPath(); g.moveTo(zx, ly - 13); g.lineTo(zx, ly + 5); g.stroke();
+    g.fillStyle = c2; const a = sh(dd[0]) / mx * BW * 0.42, b2 = sh(dd[1]) / mx * BW * 0.42; g.globalAlpha = 0.85; g.fillRect(zx + Math.min(0, a, b2), ly - 9, Math.max(Math.abs(Math.max(a, b2, 0) - Math.min(0, a, b2)), 1.5), 10); g.globalAlpha = 1;
+    g.fillStyle = '#4A5878'; g.fillText(l.mesh ? `${sh(dd[0]).toFixed(0)}…${sh(dd[1]).toFixed(0)} px（深度 ${dd[0].toFixed(2)}…${dd[1].toFixed(2)}）` : `${sh(d).toFixed(0)} px（深度 ${d}）`, zx + Math.max(a, b2, 0) + 8, ly);
+  });
+  g.font = `14px ${FONT}`; g.fillStyle = '#4A5878'; g.fillText('线段左端的数字 = 右边清单里的序号（绘制顺序）；小的五官片（眼、眉、嘴、鼻）没标序号。同一个深度上的几层稍微错开画。', X0, Y1 + 58);
+  const hat = L.find(l => l.mesh); if (hat) { const br = hat.mesh.d[hat.mesh.gy], tp = hat.mesh.d[0];
+    g.fillText(`${hat.i + 1} ${hat.name.replace(/（.*）/, '')}是一张网格：下缘（深色实线）每一处取它下面那片头发的深度 ${Math.min(...br).toFixed(2)}…${Math.max(...br).toFixed(2)}，顶（深色虚线）${(tp.reduce((a, b) => a + b, 0) / tp.length).toFixed(2)}。`, X0, Y1 + 80); }
+}
+
+// ---------- 固定演示（seek）与交互 ----------
+const sm = x => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }, lerp = (a, b, k) => a + (b - a) * k;
+const DURATION = 18, FPS = 30;
+function seek(t) {
+  t = Math.min(Math.max(t, 0), DURATION - 1e-6);
+  const open = sm((t - 1.2) / 2.4), close = sm((t - 16.3) / 1.5), toB = sm((t - 9.2) / 1.6);
+  state.spread = open * (1 - close); state.mix = toB;
+  const orbit = t < 4 ? -62 : t < 9 ? -62 * Math.cos((t - 4) / 5 * 2 * Math.PI) : -62, side = sm((t - 10.6) / 1.2) * (1 - sm((t - 15.4) / 0.9));
+  state.camYaw = lerp(orbit, -74, side) * open * (1 - close); state.camPitch = lerp(13, 18, side) * open * (1 - close);
+  const u = (t - 11.6) / 3.6; state.headYaw = u > 0 && u < 1 ? 24 * Math.sin(u * 2 * Math.PI) : 0;
+  redraw();
+}
+const TOP = Q.get('view') === 'top';
+if (TOP) drawTop();
+else {
+  if (Q.get('mode') === 'depth') state.mix = 1; if (Q.has('spread')) state.spread = Number(Q.get('spread')); if (Q.has('yaw')) state.headYaw = Number(Q.get('yaw'));
+  if (Q.has('cam')) [state.camYaw, state.camPitch] = Q.get('cam').split(',').map(Number);
+  for (const id of (Q.get('hide') || '').split(',').filter(Boolean)) { const l = L.find(q => q.id === id); if (l) { l.hidden = true; l.lab.classList.add('off'); } }
+  redraw();
+}
+const ui = document.getElementById('ui');
+if (RENDER || TOP) ui.style.display = 'none';
+else {
+  ui.innerHTML = `<button id="bA">A 按绘制顺序</button><button id="bB">B 按深度</button><button id="b0">合拢</button><button id="bP">播放演示</button>
+    <label>拉开 <input id="sS" type="range" min="0" max="1.6" step="0.01"></label><label>转头 <input id="sY" type="range" min="-30" max="30" step="1"> <span id="vY"></span></label>
+    <label>姿势 <select id="sP">${Object.keys(POSES).map(k => `<option${k === POSE ? ' selected' : ''}>${k}</option>`).join('')}</select></label> 拖动画面旋转 · 点右侧的行隐藏 / 显示`;
+  const $ = id => document.getElementById(id), sync = () => { $('sS').value = state.spread; $('sY').value = state.headYaw; $('vY').textContent = state.headYaw.toFixed(0) + '°'; $('bA').classList.toggle('on', state.mix < 0.5 && state.spread > 0.02); $('bB').classList.toggle('on', state.mix >= 0.5 && state.spread > 0.02); };
+  let playing = null; const stop = () => { if (playing) cancelAnimationFrame(playing); playing = null; };
+  $('bA').onclick = () => { stop(); state.mix = 0; if (state.spread < 0.05) state.spread = 1; redraw(); sync(); }; $('bB').onclick = () => { stop(); state.mix = 1; if (state.spread < 0.05) state.spread = 1; redraw(); sync(); };
+  $('b0').onclick = () => { stop(); state.spread = 0; redraw(); sync(); }; $('sS').oninput = e => { stop(); state.spread = +e.target.value; redraw(); sync(); }; $('sY').oninput = e => { stop(); state.headYaw = +e.target.value; redraw(); sync(); };
+  $('sP').onchange = e => { Q.set('pose', e.target.value); location.search = Q.toString(); };
+  $('bP').onclick = () => { stop(); const t0 = performance.now(); const loop = () => { seek(((performance.now() - t0) / 1000) % DURATION); sync(); playing = requestAnimationFrame(loop); }; loop(); };
+  let drag = null; const st = document.getElementById('stage');
+  st.addEventListener('pointerdown', e => { if (e.target.closest('#ui, #labels')) return; stop(); drag = [e.clientX, e.clientY, state.camYaw, state.camPitch]; });
+  addEventListener('pointermove', e => { if (!drag) return; const k = 0.35 / (st.getBoundingClientRect().width / 1920); state.camYaw = drag[2] + (e.clientX - drag[0]) * k; state.camPitch = Math.max(-80, Math.min(80, drag[3] + (e.clientY - drag[1]) * k)); redraw(); });
+  addEventListener('pointerup', () => { drag = null; });
+  const fit = () => { st.style.transform = `scale(${Math.min(innerWidth / 1920, innerHeight / 1080)})`; }; fit(); addEventListener('resize', fit); sync();
+}
+window.__video = { width: 1920, height: 1080, fps: FPS, duration: DURATION, seek: TOP || Q.has('still') ? () => {} : seek, ready: Promise.resolve() };
+</script>

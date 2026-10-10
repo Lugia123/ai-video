@@ -1,0 +1,80 @@
+{
+ "about": "3D 人偶的比例（pipeline/clips/control3d.mjs + tools/mannequin3d.html 读）。单位 = 归位帧画布上的像素，y 向上，脚底 y = 0；骨骼名是 Mixamo 标准名（去掉 mixamorig 前缀）。offset = 静止 T 字姿势下「父关节 → 本关节」的向量（角色空间：x = 角色左手方向，y = 上，z = 面朝方向）。数值是对着 clips-b1/frames/idle.png 量的，量法和读数见 out/control3d/README.md。",
+ "canvas": { "w": 832, "h": 1104, "fps": 16, "frames": 49 },
+ "place": { "cx": 417, "footY": 998 },
+ "hips": [0, 250, 0],
+ "bones": {
+  "Spine": { "parent": "Hips", "offset": [0, 45, 0] },
+  "Spine1": { "parent": "Spine", "offset": [0, 50, 0] },
+  "Spine2": { "parent": "Spine1", "offset": [0, 50, 0] },
+  "Neck": { "parent": "Spine2", "offset": [0, 45, 0] },
+  "Head": { "parent": "Neck", "offset": [0, 28, 0] },
+  "HeadTop_End": { "parent": "Head", "offset": [0, 260, 0] },
+  "LeftShoulder": { "parent": "Spine2", "offset": [25, 30, 0] },
+  "LeftArm": { "parent": "LeftShoulder", "offset": [47, 0, 0] },
+  "LeftForeArm": { "parent": "LeftArm", "offset": [95, 0, 0] },
+  "LeftHand": { "parent": "LeftForeArm", "offset": [76, 0, 0] },
+  "LeftHandEnd": { "parent": "LeftHand", "offset": [18, 0, 0], "as": "LeftHand" },
+  "RightShoulder": { "parent": "Spine2", "offset": [-25, 30, 0] },
+  "RightArm": { "parent": "RightShoulder", "offset": [-47, 0, 0] },
+  "RightForeArm": { "parent": "RightArm", "offset": [-95, 0, 0] },
+  "RightHand": { "parent": "RightForeArm", "offset": [-76, 0, 0] },
+  "RightHandEnd": { "parent": "RightHand", "offset": [-18, 0, 0], "as": "RightHand" },
+  "LeftUpLeg": { "parent": "Hips", "offset": [37, -12, 0] },
+  "LeftLeg": { "parent": "LeftUpLeg", "offset": [0, -105, 0] },
+  "LeftFoot": { "parent": "LeftLeg", "offset": [0, -103, 0] },
+  "LeftToeBase": { "parent": "LeftFoot", "offset": [0, -14, 40] },
+  "RightUpLeg": { "parent": "Hips", "offset": [-37, -12, 0] },
+  "RightLeg": { "parent": "RightUpLeg", "offset": [0, -105, 0] },
+  "RightFoot": { "parent": "RightLeg", "offset": [0, -103, 0] },
+  "RightToeBase": { "parent": "RightFoot", "offset": [0, -14, 40] }
+ },
+ "home": {
+  "about": "归位站姿 = T 字基础上的增量（绕角色空间轴的角度，度；整条子链跟着转）。上臂从水平往下放 59°（离竖直 31°）。",
+  "LeftArm": [0, 0, -59],
+  "RightArm": [0, 0, 59]
+ },
+ "capsules": [
+  { "id": "pelvis", "a": "Hips", "b": "Spine1", "r": 60 },
+  { "id": "chest", "a": "Spine1", "b": "Neck", "r": 66 },
+  { "id": "neck", "a": "Neck", "b": "Head", "r": 22 },
+  { "id": "uparmL", "a": "LeftArm", "b": "LeftForeArm", "r": 27 },
+  { "id": "forearmL", "a": "LeftForeArm", "b": "LeftHand", "r": 23 },
+  { "id": "handL", "a": "LeftHand", "b": "LeftHandEnd", "r": 23 },
+  { "id": "uparmR", "a": "RightArm", "b": "RightForeArm", "r": 27 },
+  { "id": "forearmR", "a": "RightForeArm", "b": "RightHand", "r": 23 },
+  { "id": "handR", "a": "RightHand", "b": "RightHandEnd", "r": 23 },
+  { "id": "thighL", "a": "LeftUpLeg", "b": "LeftLeg", "r": 27 },
+  { "id": "shinL", "a": "LeftLeg", "b": "LeftFoot", "r": 23 },
+  { "id": "footL", "a": "LeftFoot", "b": "LeftToeBase", "r": 17 },
+  { "id": "thighR", "a": "RightUpLeg", "b": "RightLeg", "r": 27 },
+  { "id": "shinR", "a": "RightLeg", "b": "RightFoot", "r": 23 },
+  { "id": "footR", "a": "RightFoot", "b": "RightToeBase", "r": 17 }
+ ],
+ "ellipsoids": [
+  { "id": "skull", "bone": "Head", "center": [0, 130, 30], "radii": [116, 130, 112] }
+ ],
+ "adjacent": [
+  ["pelvis", "chest"], ["chest", "neck"], ["neck", "skull"],
+  ["chest", "uparmL"], ["uparmL", "forearmL"], ["forearmL", "handL"],
+  ["chest", "uparmR"], ["uparmR", "forearmR"], ["forearmR", "handR"],
+  ["pelvis", "thighL"], ["thighL", "shinL"], ["shinL", "footL"],
+  ["pelvis", "thighR"], ["thighR", "shinR"], ["shinR", "footR"]
+ ],
+ "extras": {
+  "about": "帽子、头发、裙子的大致轮廓（可开关：页面 ?extras=hat,hair,skirt 或 ?extras=none）。都是刚体，跟着所挂的骨骼转，没有二次运动。",
+  "hair": [
+   { "id": "hair", "bone": "Head", "type": "ellipsoid", "center": [0, 122, -45], "radii": [214, 152, 138] }
+  ],
+  "hat": [
+   { "id": "hat", "bone": "Head", "type": "ellipsoid", "center": [14, 268, 6], "radii": [201, 106, 172], "tiltZ": -6 }
+  ],
+  "skirt": [
+   { "id": "skirt", "bone": "Hips", "type": "cone", "center": [0, 18, 0], "rTop": 62, "rBottom": 148, "height": 140 }
+  ]
+ },
+ "face": {
+  "about": "骨架图里的鼻、眼、耳（Head 骨骼局部坐标），和「手过脸」读数用的脸范围（skull 椭球正面）",
+  "nose": [0, 96, 142], "eyeL": [52, 118, 128], "eyeR": [-52, 118, 128], "earL": [112, 110, 30], "earR": [-112, 110, 30]
+ }
+}

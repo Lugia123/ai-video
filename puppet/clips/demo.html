@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>片段式动作演示</title>
+<style>
+  :root { --ink: #14274A; --sub: #5B6B85; --line: #D5DEE8; --page: #F3F8FB; --card: #FFFFFF; --accent: #1C7ED6; --stage: #F3F8FB; --floor: #E2E8EF; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font: 16px/1.5 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+  body { display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+  header { padding: 14px 28px 10px; border-bottom: 1px solid var(--line); display: flex; gap: 24px; align-items: baseline; flex-wrap: wrap; }
+  header h1 { font-size: 22px; margin: 0; font-weight: 600; }
+  header p { margin: 0; color: var(--sub); font-size: 14px; }
+  code { font: 13px/1.4 ui-monospace, "SF Mono", Menlo, monospace; background: #E7EEF5; padding: 2px 6px; border-radius: 4px; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 520px; min-height: 0; }
+  #stageWrap { position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 18px;
+    background: linear-gradient(var(--stage) 0 86%, var(--floor) 86% 100%); transition: none; }
+  body.dark #stageWrap { --stage: #141821; --floor: #1D2330; }
+  #stage { height: 100%; max-width: 100%; aspect-ratio: 832 / 1104; display: block; }
+  #stageWrap { overflow: hidden; }
+  body.zoom #stage { transform: scale(2.6); transform-origin: 49.5% 37%; }
+  #caption { z-index: 1; background: #FFFDF5; color: #14274A !important; padding: 4px 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(20,39,74,.18); }
+  #caption:empty { display: none; }
+  #caption { position: absolute; left: 28px; top: 18px; font-size: 20px; font-weight: 500; color: var(--ink); }
+  body.dark #caption { color: #E6ECF5; }
+  aside { border-left: 1px solid var(--line); background: var(--card); padding: 20px 24px; overflow: auto; display: flex; flex-direction: column; gap: 18px; }
+  h2 { font-size: 13px; font-weight: 600; color: var(--sub); margin: 0 0 8px; letter-spacing: .04em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; }
+  button { font: inherit; font-size: 17px; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--ink); color: #fff; cursor: pointer; }
+  button.ghost { background: #fff; color: var(--ink); }
+  button.draft { border-style: dashed; background: #fff; color: var(--ink); }
+  button:disabled { opacity: .35; cursor: default; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  label.row { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+  label.row > span:first-child { flex: 0 0 96px; color: var(--sub); font-size: 14px; }
+  input[type=range] { flex: 1; accent-color: var(--ink); }
+  input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--ink); }
+  select { font: inherit; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+  .val { font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
+  dl { margin: 0; display: grid; grid-template-columns: 96px 1fr; gap: 6px 10px; font-size: 15px; font-variant-numeric: tabular-nums; }
+  dt { color: var(--sub); font-size: 14px; } dd { margin: 0; }
+  #state { font-size: 20px; font-weight: 600; }
+  .limits { font-size: 13.5px; color: var(--sub); border-top: 1px solid var(--line); padding-top: 14px; margin-top: auto; }
+  .limits ul { margin: 4px 0 0; padding-left: 1.2em; }
+  /* 矮屏排成一屏：控件不用滚动就能看到。只在窗口高度不足时生效，1920×1080 的渲染画面不受影响。 */
+  @media (max-height: 950px) {
+    header { padding: 8px 20px 6px; } header h1 { font-size: 18px; }
+    aside { padding: 8px 18px; gap: 5px; }
+    h2 { margin-bottom: 4px; } label.row { min-height: 22px; gap: 8px; font-size: 14.5px; } label.row > span:first-child { flex-basis: 84px; font-size: 13px; }
+    button { font-size: 15px; padding: 7px 14px; } .btns { gap: 8px; }
+    dl { gap: 1px 10px; font-size: 13px; } #state { font-size: 17px; }
+    .limits { font-size: 11px; line-height: 1.3; padding-top: 4px; } .limits ul { margin-top: 2px; }
+    #stageWrap { padding: 10px; }
+  }
+  @media (max-height: 800px) {
+    main { grid-template-columns: minmax(0, 1fr) 700px; }
+    aside { display: block; columns: 2; column-gap: 22px; }
+    aside > section, aside > .limits { break-inside: avoid; margin-bottom: 10px; }
+    .limits { border-top: 0; margin-top: 0; }
+  }
+</style>
+<header>
+  <h1>片段式动作演示</h1>
+  <p>双击本文件即可打开。浏览器拦了本地文件时，在 puppet 目录起服务：<code>python3 -m http.server 8000</code>，再开 <code>http://localhost:8000/clips/demo.html</code></p>
+</header>
+<main>
+  <div id="stageWrap">
+    <div id="caption"></div>
+    <canvas id="stage" aria-label="角色画布"></canvas>
+  </div>
+  <aside>
+    <section>
+      <h2>动作（按片段库自动列出）</h2>
+      <div class="btns" id="actions"></div>
+      <div class="btns" style="margin-top:10px">
+        <button class="ghost" id="rest" disabled>归位</button>
+        <button class="ghost" id="fixed" disabled>播一遍固定演示</button>
+      </div>
+    </section>
+    <section>
+      <h2>播放</h2>
+      <label class="row"><span>保持时长</span><input id="hold" type="range" min="0" max="6" step="0.5" value="2"><span class="val" id="holdVal">2.0 秒</span></label>
+      <label class="row"><span></span><input id="holdForever" type="checkbox"><span>一直保持，点「归位」才回</span></label>
+      <label class="row"><span>播放速度</span><select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+      <label class="row"><span>帧范围</span><input id="trim" type="checkbox" checked><span>只播有效帧（不勾 = 播全部帧）</span></label>
+      <label class="row"><span></span><input id="skip" type="checkbox"><span>跳过重复帧（去程第 5、11、13、17 帧）</span></label>
+      <label class="row"><span>动作中再点</span><input id="jump" type="checkbox"><span>直接跳（不勾 = 排队到归位后再播）</span></label>
+    </section>
+    <section>
+      <h2>静止帧上的贴片（片段播放中自动停）</h2>
+      <label class="row"><span>说话</span><input id="talk" type="checkbox"><span>口型贴片，按固定节奏切换</span></label>
+      <label class="row"><span>指定口型</span><select id="mouth"><option value="">不指定（照说话节拍）</option><option value="closed">closed</option><option value="small">small</option><option value="big">big</option><option value="smile">smile</option></select></label>
+      <label class="row" id="faceRow"><span>表情脸</span><select id="face"><option value="">无</option></select></label>
+      <label class="row" id="browRow"><span>换眉</span><select id="brow"><option value="">按标记（可换的才换）</option><option value="1">强制换</option><option value="0">强制不换</option></select></label>
+      <label class="row"><span>干净脸</span><input id="clean" type="checkbox"><span>擦掉眼、眉、嘴（给换整套五官用）</span></label>
+      <label class="row"><span>眨眼</span><input id="blink" type="checkbox"><span>闭眼贴片，每 3.2 秒一次</span></label>
+    </section>
+    <section>
+      <h2>显示</h2>
+      <label class="row"><span>放大</span><input id="zoom" type="checkbox"><span>放大看脸</span></label>
+      <label class="row"><span>底色</span><input id="dark" type="checkbox"><span>深色底（看抠边）</span></label>
+      <label class="row"><span>画布和包围盒</span><input id="box" type="checkbox"><span>橙虚线 = 画布边，蓝框 = 人物包围盒</span></label>
+    </section>
+    <section>
+      <h2>读数</h2>
+      <dl>
+        <dt>状态</dt><dd id="state">加载中…</dd>
+        <dt>片段 / 帧</dt><dd id="frame">—</dd>
+        <dt>贴片</dt><dd id="patch">—</dd>
+        <dt>排队</dt><dd id="queue">—</dd>
+        <dt>离画布边</dt><dd id="margin">—</dd>
+        <dt>全库最小</dt><dd id="minMargin">—</dd>
+      </dl>
+    </section>
+    <div class="limits">
+      已知限制
+      <ul>
+        <li>全身动作只有「手抵下巴」一个。</li>
+        <li>片段播放中嘴和眼是画死的（归位那段里的一次眨眼也是）；口型和眨眼只能贴在两张静止帧上。没有表情切换、没有漫符。</li>
+        <li>「直接跳」是硬切，没有过渡帧。</li>
+        <li>转头一圈是草稿：只有头和肩、带灰底、画幅不同，和归位帧接不上。</li>
+      </ul>
+    </div>
+  </aside>
+</main>
+<script src="player.js"></script>
+<script>
+// 演示页：交互（状态机 + rAF）和固定演示（window.__video，seek(t) 是 t 的纯函数）共用同一个播放器的 render。
+// ?lib=<片段库目录> 换角色；?render=1 不自动播，只等渲染器 seek；?bg=dark 深色底；?zoom=1 放大看脸。
+// ?demo= 选固定演示：main（默认：第 1 遍全部帧，第 2 遍只播有效帧）、dupes（第 1 遍全部帧，第 2 遍跳过重复帧）、
+//   patch（静止帧上说话 + 眨眼：归位 3.5s → 思考 → 保持 4s → 归位 → 2s）。
+(async () => {
+  const Q = new URLSearchParams(location.search), RENDER = Q.has('render');
+  const BASE = Q.get('lib') || '../characters/beret-girl/clips/';
+  const $ = id => document.getElementById(id);
+  const MODE = { rest: '归位（待机）', in: '播动作', hold: '动作保持', out: '播归位' };
+  if (Q.get('bg') === 'dark') { document.body.classList.add('dark'); $('dark').checked = true; }
+  if (Q.get('zoom')) { document.body.classList.add('zoom'); $('zoom').checked = true; }
+  const DEMO = Q.get('demo') || 'main';
+  if (RENDER) { $('faceRow').style.display = 'none'; $('browRow').style.display = 'none'; }      // 渲染画面保持和加这一行之前逐帧相同（固定演示用不到表情脸）
+
+  let player = null, lib = null, fixed = null, fixedT = null;   // fixedT 非空 = 正在按固定时间线播
+  const ready = (async () => {
+    lib = await ClipPlayer.loadLibrary(BASE);
+    const images = await ClipPlayer.preload(lib, BASE, (d, n) => { $('state').textContent = `加载并解码帧 ${d} / ${n}`; });
+    player = new ClipPlayer(lib, images, $('stage'));
+    player.onChange = readout; window.__player = player;   // 调试 / 自动测试用
+    // 固定演示：待机 1s → 思考 → 保持 2s → 归位 → 待机 1s，两遍；第 1 遍播全部帧，第 2 遍只播有效帧
+    const first = lib.actions.find(a => !a.standalone);
+    const once = o => [{ rest: 1 }, Object.assign({ action: first.id, hold: 2 }, o), { rest: 1 }];
+    const steps = DEMO === 'patch' ? [{ rest: 3.5, talk: true, blink: true }, { action: first.id, hold: 4, trimmed: true, talk: true, blink: true }, { rest: 2, talk: true, blink: true }]
+      : DEMO === 'dupes' ? [...once({}), ...once({ skipDupes: true })] : [...once({}), ...once({ trimmed: true })];
+    fixed = ClipPlayer.timeline(lib, steps, { speed: 1 });
+    fixed.half = DEMO === 'patch' ? Infinity : fixed.segments[fixed.segments.length / 2].t0;
+    fixed.names = DEMO === 'patch' ? ['静止帧上贴口型和眨眼（片段播放中不贴）'] : ['第 1 遍：播全部帧', DEMO === 'dupes' ? '第 2 遍：跳过重复帧' : '第 2 遍：只播有效帧'];
+    V.duration = fixed.duration;
+  })();
+
+  function seek(t) {
+    if (!player) throw new Error('帧还没加载完就 seek 了（先等 window.__video.ready）');
+    $('caption').textContent = '固定演示 ' + fixed.names[t < fixed.half ? 0 : 1];
+    player.render(fixed.at(t), t);
+  }
+  const V = window.__video = { width: 1920, height: 1080, fps: 30, duration: 0, seek, ready };
+
+  function readout(r) {
+    const v = r.view, a = v.action && player.action(v.action);
+    $('state').textContent = MODE[v.mode] + (a ? `：${a.label}` : '');
+    $('frame').textContent = r.clip ? `${v.clip}　第 ${r.frame} 帧（本次播 ${r.pos + 1} / ${r.count}，片段共 ${r.total} 帧）` : `静止帧 ${r.file.split('/').pop()} + 呼吸`;
+    $('patch').textContent = r.clip ? '片段播放中，不贴' : r.patches.length ? r.patches.join(' + ') : '无';
+    $('queue').textContent = v.next ? player.action(v.next).label : player.s.wantRest ? '归位' : '—';
+    const m = r.margin, f = x => x.toFixed(0);
+    $('margin').textContent = m ? `左 ${f(m.left)}　上 ${f(m.top)}　右 ${f(m.right)}　下 ${f(m.bottom)}　最小 ${f(m.min)} px` : '带底草稿，不量';
+    $('rest').disabled = fixedT !== null || v.mode === 'rest' || v.mode === 'out';
+  }
+
+  try { await ready; } catch (e) { $('state').textContent = e.message + '（按页面顶部那行命令起本地服务再开）'; return; }
+  const mm = lib.minMargin;
+  $('minMargin').textContent = `${mm.min} px（左 ${mm.left} 上 ${mm.top} 右 ${mm.right} 下 ${mm.bottom}；画布 ${lib.canvas.w}×${lib.canvas.h}，不含呼吸）`;
+  for (const a of lib.actions) {
+    const b = document.createElement('button');
+    b.textContent = a.label; if (a.standalone) b.className = 'draft';
+    b.onclick = () => { stopFixed(); player.play(a.id); };
+    $('actions').appendChild(b);
+  }
+  for (const f of Object.keys(((lib.poses[lib.rest].patches || {}).face) || {})) { const o = document.createElement('option'); o.value = o.textContent = f; $('face').appendChild(o); }
+  $('fixed').disabled = false;
+  $('rest').onclick = () => player.rest();
+  const sync = () => {
+    const o = player.opts;
+    o.hold = $('holdForever').checked ? Infinity : +$('hold').value;
+    $('hold').disabled = $('holdForever').checked;
+    $('holdVal').textContent = $('holdForever').checked ? '不限' : (+$('hold').value).toFixed(1) + ' 秒';
+    o.speed = +$('speed').value; o.trimmed = $('trim').checked; o.jump = $('jump').checked; o.showBox = $('box').checked;
+    o.skipDupes = $('skip').checked; o.talk = $('talk').checked; o.blink = $('blink').checked;
+    o.mouth = $('mouth').value || undefined; o.clean = $('clean').checked; o.face = $('face').value || undefined; o.brow = $('brow').value === '' ? undefined : $('brow').value === '1';
+    document.body.classList.toggle('zoom', $('zoom').checked);
+    document.body.classList.toggle('dark', $('dark').checked);
+  };
+  for (const id of ['hold', 'holdForever', 'speed', 'trim', 'skip', 'jump', 'talk', 'blink', 'mouth', 'face', 'brow', 'clean', 'zoom', 'box', 'dark']) $(id).addEventListener('input', sync);
+  sync();
+  function stopFixed() { fixedT = null; $('caption').textContent = ''; }
+  $('fixed').onclick = () => { player.s = { mode: 'rest', action: null, e: 0, next: null, wantRest: false }; fixedT = 0; };
+
+  if (RENDER) { seek(0); return; }
+  let last = performance.now();
+  const loop = now => {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (fixedT !== null) { fixedT += dt; if (fixedT >= fixed.duration) { stopFixed(); player.advance(0); } else seek(fixedT); }
+    else player.advance(dt);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+})();
+</script>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>下巴—脖子—领口</title>
+<style>html,body{margin:0;background:#f3f8fb}#stage{position:relative;width:3080px;height:560px;overflow:hidden;background:#f3f8fb}#host{position:absolute;left:0;top:0}canvas#c{position:absolute;left:0;top:0;z-index:5}</style>
+<div id="stage"><div id="host"></div><canvas id="c" width="3080" height="560"></canvas></div>
+<script type="module">
+// 「下巴—脖子—领口」检查：七种头的姿态各一格（正面、转头 ±24°、低头 5° / 8°、抬头 5°、歪头），讲解员放大到约 1:1（部件像素的 0.5 倍 × dpr 2）。
+//   ?pack=…（相对 puppet/）  用来出「改前 / 改后」两张
+import { createHost } from '../host/index.js';
+const Q = new URLSearchParams(location.search), PACK = new URL('../' + (Q.get('pack') || 'characters/beret-girl/'), location.href).href;
+const CASES = [['正面', {}], ['转头 −24°', { headYaw: -24 }], ['转头 +24°', { headYaw: 24 }], ['低头 5°', { face: { pitch: -5 } }], ['低头 8°', { face: { pitch: -8 } }], ['抬头 5°', { face: { pitch: 5 } }], ['歪头', { tilt: 0.14 }]];
+const CW = 440, W = CW * CASES.length, H = 560, SIZE = 2565.25 * 0.5;       // 0.5 倍部件像素
+const hosts = [];
+for (const [i, [, st]] of CASES.entries()) {
+  const mount = Object.assign(document.createElement('div'), { style: `position:absolute;left:${i * CW}px;top:0;width:${CW}px;height:${H}px;overflow:hidden` });
+  document.getElementById('host').appendChild(mount);
+  // 脚底放在格子下方很远处，让下巴到领口落在格子中间
+  const h = await createHost({ mount, timings: { duration: 10, segments: [] }, W: CW, H, ground: H + 380, size: SIZE, pack: PACK });
+  h.direct(() => ({ x: CW / 2, look: null, talk: false, ...st })); hosts.push(h);
+}
+const g = document.getElementById('c').getContext('2d');
+function seek() { hosts.forEach(h => h.draw(0.0001)); g.clearRect(0, 0, W, H); g.font = '26px "PingFang SC", "Heiti SC", sans-serif'; g.fillStyle = '#1e2a4a'; CASES.forEach(([n], i) => g.fillText(n, i * CW + 14, 34)); }
+seek();
+window.__video = { width: W, height: H, fps: 30, duration: 1, seek };
+</script>

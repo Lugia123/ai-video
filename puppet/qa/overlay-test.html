@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>叠加层测试</title>
+<style>html,body{margin:0;background:#f3f8fb}canvas{display:block}</style>
+<canvas id="c" width="1920" height="700"></canvas>
+<script type="module">
+// 叠加层测试：三格——不带表情 / 一个贴脸预设（画在脸层：脸上面、刘海下面）/ 一个头顶预设（画在最上层）。
+//   ?pack=…  ?face=gloom  ?top=question  ?yaw=12
+// 表情库在 ../emotes/。
+import { createPuppet } from '../engine/index.js';
+import { emoteAnchors, setSlot } from '../adapters/emote-anchors.js';
+import { drawPreset, emotePreset } from '../emotes/chibi-emotes.js';
+const Q = new URLSearchParams(location.search), c = document.getElementById('c'), ctx = c.getContext('2d');
+const W = 640, H = 700, k = 0.42;
+const p = await createPuppet('../' + (Q.get('pack') || 'characters/beret-girl/'), { width: W, height: H, layerScale: 0.5 });
+const o = p.character.unit.headMasterOrigin ?? [0, 0], place = { x: 20 - o[0] * k, y: 60 - o[1] * k, scale: k };
+const cells = [[null, '不带表情'], [Q.get('face') || 'gloom', '贴脸预设（脸层）'], [Q.get('top') || 'question', '头顶预设（最上层）']];
+function seek(t) {
+  ctx.fillStyle = '#f3f8fb'; ctx.fillRect(0, 0, c.width, c.height);
+  cells.forEach(([name, label], i) => {
+    const q = name ? emotePreset(name) : null, yaw = Number(Q.get('yaw') ?? 12) * (i === 1 ? -1 : 1);
+    p.set({ ParamAngleX: yaw, ParamAngleZ: q ? (q.head.tilt || 0) * 60 : 0 });
+    for (const s of ['eyes', 'brows', 'mouth']) setSlot(p, s, !(q && q[s]));
+    const face = p.layer('face'), top = p.layer('top'); face.clear(); top.clear();
+    if (q) {
+      drawPreset(face.ctx, q, emoteAnchors(p, 'rest'), 0.5, t, { layer: 'face' });
+      p.render(place);                                   // 先摆好，屏幕挂点才是这一帧的
+      const tc = top.ctx; tc.save(); tc.setTransform(top.scale / place.scale, 0, 0, top.scale / place.scale, -place.x * top.scale / place.scale, -place.y * top.scale / place.scale);
+      drawPreset(tc, q, emoteAnchors(p, 'screen'), 0.5, t, { layer: 'top' }); tc.restore(); top.touch();
+    }
+    ctx.drawImage(p.render(place), i * W, 0);
+    ctx.fillStyle = '#1e2a4a'; ctx.font = '26px "PingFang SC", "Heiti SC", sans-serif'; ctx.fillText(label + (name ? '：' + q.zh : ''), i * W + 24, 40);
+  });
+}
+seek(0.5);
+window.__video = { width: c.width, height: c.height, fps: 30, duration: 2, seek };
+</script>

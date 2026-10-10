@@ -1,0 +1,18 @@
+{
+ "blank": true,
+ "alignFrom": "clips-b1",
+ "origRest": "clips-b1/frames/idle.png",
+ "track": [
+  "hips_s1_fix_loop"
+ ],
+ "ink": true,
+ "refine": true,
+ "noBrow": "clips-b1/frames/idle_nobrow.png",
+ "perFeature": true,
+ "twoPass": {
+  "restA": "clips-b1/frames/idle.png",
+  "srcA": {
+   "hips_s1_fix_loop": "clips-newact/frames/hips-A-draft-s1"
+  }
+ }
+}

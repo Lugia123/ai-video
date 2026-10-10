@@ -1,0 +1,26 @@
+{
+ "blank": true,
+ "alignFrom": "clips-b1",
+ "origRest": "clips-b1/frames/idle.png",
+ "track": [
+  "nod_s1_loop",
+  "clap_s1_loop",
+  "hips_s1_loop",
+  "gesture_s1_loop",
+  "stepbeat_s1_loop"
+ ],
+ "ink": true,
+ "refine": true,
+ "noBrow": "clips-b1/frames/idle_nobrow.png",
+ "perFeature": true,
+ "twoPass": {
+  "restA": "clips-b1/frames/idle.png",
+  "srcA": {
+   "nod_s1_loop": "clips-newact/frames/nod-A-draft-s1",
+   "clap_s1_loop": "clips-newact/frames/clap-A-draft-s1",
+   "hips_s1_loop": "clips-newact/frames/hips-A-draft-s1",
+   "gesture_s1_loop": "clips-newact/frames/gesture-A-draft-s1",
+   "stepbeat_s1_loop": "clips-newact/frames/stepbeat-A-draft-s1"
+  }
+ }
+}

@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>错位测试</title>
+<style>html,body{margin:0;background:#fff}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+// 错位测试：只靠「按深度线性平移」出一排转头图，上排浅底、下排品红底（看露不露底）。
+//   ?pack=characters/xxx/  数据包目录（相对 puppet/）
+//   ?crop=x,y,w,h          取角色画布上的哪一块（默认取 headMasterOrigin 起的 1408 见方）
+//   ?k=0.42                每格的缩放；?k=1&only=-30  出某个角度的 1:1 单格
+//   ?masks=0               不用遮罩（和不带遮罩的参考图逐像素比时用）
+//   ?hide=id,id            藏掉几个部件
+import { createPuppet } from '../engine/index.js';
+const Q = new URLSearchParams(location.search);
+const pack = '../' + (Q.get('pack') || 'characters/beret-girl/');
+const k = Number(Q.get('k') || 0.42), only = Q.get('only'), param = Q.get('param') || 'ParamAngleX';
+const angles = only != null ? [Number(only)] : [-30, -20, -10, 0, 10, 20, 30];
+const probe = await fetch(new URL(pack + 'character.json', location.href)).then(r => r.json());
+const o = probe.unit.headMasterOrigin ?? [0, 0];
+const [cx, cy, cw, ch] = (Q.get('crop') || `${o[0]},${o[1]},1408,1408`).split(',').map(Number);
+const w = Math.floor(cw * k), h = Math.floor(ch * k), rows = only != null ? 1 : 2;
+const c = document.getElementById('c'); c.width = w * angles.length; c.height = h * rows;
+const ctx = c.getContext('2d');
+const p = await createPuppet(pack, { width: w, height: h, masks: Q.get('masks') !== '0' });
+const bg = Q.get('bg') || '#f4f7fb';
+for (const id of (Q.get('hide') || '').split(',').filter(Boolean)) p.setPartWeight(id, 0);
+const FIXED = Object.fromEntries((Q.get('set') || '').split(',').filter(Boolean).map(kv => { const [k, v] = kv.split(':'); return [k, Number(v)]; }));      // ?set=参数:值,参数:值：另外固定几个参数      // ?hide=部件id,部件id：藏掉几个部件（回归检查做反向验证用）
+function seek() {
+  angles.forEach((a, i) => {
+    p.set({ ...FIXED, [param]: a });
+    const img = p.render({ x: -cx * k, y: -cy * k, scale: k });
+    [bg, '#ff00ff'].slice(0, rows).forEach((col, r) => { ctx.fillStyle = col; ctx.fillRect(i * w, r * h, w, h); ctx.drawImage(img, i * w, r * h); });
+    if (only == null) { ctx.fillStyle = '#1e2a4a'; ctx.font = '24px "PingFang SC", "Heiti SC", sans-serif'; ctx.fillText((a > 0 ? '+' : '') + a + '°', i * w + 8, 28); }
+  });
+}
+seek();
+window.__video = { width: c.width, height: c.height, fps: 30, duration: 1, seek };
+</script>

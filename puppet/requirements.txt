@@ -1,0 +1,5 @@
+# 回归检查和出图小工具用的 Python 依赖（引擎、讲解员、渲染器不需要 Python）
+Pillow
+numpy
+scipy
+opencv-python          # 只有 pipeline/（素材流水线）用；回归检查和出图工具不用

@@ -1,0 +1,184 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>mannequin3d</title>
+<!-- 3D 人偶 → 控制图（线稿 / 骨架）。由 pipeline/clips/control3d.mjs 驱动，也可以直接打开预览：
+     mannequin3d.html?rig=<比例 json 的网址>&fbx=<Mixamo FBX 的网址>[&start=秒&dur=秒&blend=帧数&extras=hat,hair,skirt|none&lw=线宽&home=<归位帧网址>&play=1]
+     画面是帧号的纯函数：__m.frame(i) 同步算姿势并画 5 张画布（man / line / lineinv / pose / overlay）。不跑模型、不用检测器。
+     姿势怎么来的：FBX 自己的静止 T 字上，每根骨骼的世界朝向增量 A = W(t)·W_rest⁻¹；人偶的关节 = 父关节 + A_parent·offset（offset 是比例 json 里人偶自己的骨长），
+     所以源骨架和人偶的比例可以完全不同（头大身小）。首尾各 blend 帧把 A 向「归位站姿」球面插值、髋的位移同比例收回，首末帧 = 归位站姿。 -->
+<style>body{margin:0;background:#888;font:12px sans-serif}canvas{display:inline-block;margin:2px;background:#fff;width:277px;height:368px}#gl{display:none}</style>
+<canvas id="gl"></canvas><div id="views"></div><pre id="msg"></pre>
+<script type="importmap">{ "imports": { "three": "../../assets/vendor/three/three.module.min.js" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { FBXLoader } from '../../assets/vendor/three/examples/jsm/loaders/FBXLoader.js';
+const Q = new URLSearchParams(location.search), DEG = Math.PI / 180;
+const RIG = await (await fetch(Q.get('rig'))).json();
+const W = RIG.canvas.w, H = RIG.canvas.h, N = +(Q.get('frames') || RIG.canvas.frames), FPS = RIG.canvas.fps;
+const EXTRAS = (Q.get('extras') ?? 'hat,hair,skirt').split(',').filter(x => x && x !== 'none');
+const LW = +(Q.get('lw') || 1), BLEND = +(Q.get('blend') ?? 6);
+const V = a => new THREE.Vector3(a[0], a[1], a[2]);
+const smooth = x => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); };
+
+// ───────── 源骨架（FBX）
+const key = n => n.replace(/^mixamorig:?/, '');
+async function loadSrc(url) {
+  const root = await new FBXLoader().loadAsync(url); const bones = {};
+  root.traverse(o => { if (o.isBone || o.type === 'Bone') bones[key(o.name)] ??= o; });
+  root.updateMatrixWorld(true);
+  const rest = {}, p = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3();
+  for (const k in bones) { bones[k].matrixWorld.decompose(p, q, s); rest[k] = { p: p.clone(), q: q.clone() }; }
+  const clip = root.animations[0]; if (!clip) throw new Error('FBX 里没有动画片段');
+  const mixer = new THREE.AnimationMixer(root); mixer.clipAction(clip).play();
+  const d = (a, b) => rest[a].p.distanceTo(rest[b].p);
+  const leg = d('LeftUpLeg', 'LeftLeg') + d('LeftLeg', 'LeftFoot');
+  const names = Object.keys(bones).sort();
+  // 静止是不是 T 字、朝 +Z：左上臂指向 +X、脊柱指向 +Y、左脚尖在脚踝的 +Z 一侧
+  const dir = (a, b) => rest[b].p.clone().sub(rest[a].p).normalize();
+  const restCheck = { armX: +dir('LeftArm', 'LeftForeArm').x.toFixed(3), spineY: +dir('Hips', 'Spine2').y.toFixed(3), toeZ: +dir('LeftFoot', 'LeftToeBase').z.toFixed(3), leftX: +Math.sign(rest.LeftUpLeg.p.x - rest.RightUpLeg.p.x) };
+  function sample(t) {
+    mixer.setTime(Math.min(Math.max(t, 0), clip.duration - 1e-4)); root.updateMatrixWorld(true);
+    const A = {}; let hips = null;
+    for (const k in bones) { bones[k].matrixWorld.decompose(p, q, s); A[k] = q.clone().multiply(rest[k].q.clone().invert()); if (k === 'Hips') hips = p.clone().sub(rest.Hips.p).divideScalar(leg); }
+    return { A, hips };           // hips = 髋相对静止位置的位移，以源腿长为单位
+  }
+  return { root, bones, rest, clip, sample, leg, names, restCheck, duration: clip.duration, tracks: clip.tracks.length };
+}
+
+// ───────── 人偶骨架（比例 json）
+const ORDER = Object.keys(RIG.bones);                       // json 里父在前
+const LEG = RIG.bones.LeftLeg.offset[1] * -1 + RIG.bones.LeftFoot.offset[1] * -1;
+const HOME = {};                                            // 归位站姿的 A（整条子链继承）
+{ const own = {}; for (const k in RIG.home) if (k !== 'about') { const r = RIG.home[k]; own[k] = new THREE.Quaternion().setFromEuler(new THREE.Euler(r[0] * DEG, r[1] * DEG, r[2] * DEG, 'YXZ')); }
+  HOME.Hips = new THREE.Quaternion();
+  for (const k of ORDER) { const b = RIG.bones[k]; const par = HOME[b.as || b.parent] ?? HOME[b.parent]; HOME[k] = own[k] ? own[k].clone().multiply(par) : par.clone(); } }
+const srcOf = k => RIG.bones[k]?.as || k;
+/** A（每根骨骼的世界增量）+ 髋位移（人偶单位）→ 关节位置和朝向 */
+function solve(A, hipsDisp) {
+  const P = { Hips: V(RIG.hips).add(hipsDisp) }, R = { Hips: A.Hips };
+  for (const k of ORDER) { const b = RIG.bones[k]; R[k] = A[srcOf(k)] || R[b.parent]; P[k] = P[b.parent].clone().add(V(b.offset).applyQuaternion(R[b.parent])); }
+  return { P, R };
+}
+const homeA = () => { const A = {}; for (const k of ['Hips', ...ORDER]) A[k] = HOME[k].clone(); return A; };
+const HOMEPOSE = solve(homeA(), new THREE.Vector3());
+
+// ───────── 时间：帧号 → 片段时间 + 归位权重
+let SRC = null; const START = +(Q.get('start') || 0); let DUR = +(Q.get('dur') || 0);
+function poseAt(i) {
+  if (!SRC) return { ...HOMEPOSE, w: 0, t: 0 };
+  const u = i / (N - 1), t = START + u * DUR, w = BLEND > 0 ? Math.min(smooth(i / BLEND), smooth((N - 1 - i) / BLEND)) : 1;
+  const s = SRC.sample(t), A = {};
+  for (const k of ['Hips', ...ORDER]) { const a = s.A[srcOf(k)]; A[k] = a ? HOME[k].clone().slerp(a, w) : null; }
+  for (const k of ORDER) if (!A[k]) A[k] = A[RIG.bones[k].parent];
+  const hips = s.hips.clone().multiplyScalar(LEG * w); if (Q.get('inplace') !== '0') { hips.x *= +(Q.get('travel') || 0); hips.z *= +(Q.get('travel') || 0); }
+  return { ...solve(A, hips), w, t, yaw: Math.atan2(V([0, 0, 1]).applyQuaternion(s.A.Hips).x, V([0, 0, 1]).applyQuaternion(s.A.Hips).z) / DEG };
+}
+
+// ───────── 画：部件 → 编号 + 深度 → 轮廓线
+const gl = document.getElementById('gl'); const renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: false, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+const cam = new THREE.OrthographicCamera(-RIG.place.cx, W - RIG.place.cx, RIG.place.footY, RIG.place.footY - H, 1, 3000); cam.position.set(0, 0, 1500);
+const scene = new THREE.Scene(); scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8a96, 2.2)); const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(-300, 600, 900); scene.add(sun);
+const IDS = [null]; const idOf = n => { let i = IDS.indexOf(n); if (i < 0) { i = IDS.length; IDS.push(n); } return i; };
+const idMat = id => new THREE.ShaderMaterial({ uniforms: { id: { value: id / 255 } }, vertexShader: 'void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader: 'uniform float id;void main(){float d=gl_FragCoord.z*65535.;gl_FragColor=vec4(id,floor(d/256.)/255.,mod(d,256.)/255.,1.);}' });
+const shade = new THREE.MeshLambertMaterial({ color: 0xe9e6e1 });
+const SPH = new THREE.SphereGeometry(1, 40, 28), CYL = new THREE.CylinderGeometry(1, 1, 1, 32, 1, true), UP = new THREE.Vector3(0, 1, 0);
+const parts = [];
+function mesh(geo, name) { const m = new THREE.Mesh(geo, idMat(idOf(name))); m.userData.idMat = m.material; scene.add(m); return m; }
+for (const c of RIG.capsules) parts.push({ kind: 'cap', c, cyl: mesh(CYL, c.id), s0: mesh(SPH, c.id), s1: mesh(SPH, c.id) });
+const ells = [...RIG.ellipsoids.map(e => ({ ...e, type: 'ellipsoid' })), ...EXTRAS.flatMap(x => RIG.extras[x] || [])];
+for (const e of ells) parts.push({ kind: e.type, e, m: mesh(e.type === 'cone' ? new THREE.CylinderGeometry(e.rTop, e.rBottom, e.height, 48, 1, false) : SPH, e.id) });
+const ADJ = new Set(RIG.adjacent.flatMap(([a, b]) => [idOf(a) * 256 + idOf(b), idOf(b) * 256 + idOf(a)]));
+function place(pose) {
+  const { P, R } = pose;
+  for (const p of parts) {
+    if (p.kind === 'cap') { const a = P[p.c.a], b = P[p.c.b], d = b.clone().sub(a), len = d.length() || 1e-3;
+      p.cyl.position.copy(a).addScaledVector(d, 0.5); p.cyl.quaternion.setFromUnitVectors(UP, d.clone().divideScalar(len)); p.cyl.scale.set(p.c.r, len, p.c.r);
+      p.s0.position.copy(a); p.s0.scale.setScalar(p.c.r); p.s1.position.copy(b); p.s1.scale.setScalar(p.c.r);
+    } else { const e = p.e, q = R[e.bone].clone(); p.m.position.copy(P[e.bone]).add(V(e.center).applyQuaternion(q));
+      if (e.tiltZ) q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), e.tiltZ * DEG)); p.m.quaternion.copy(q); if (e.type !== 'cone') p.m.scale.set(...e.radii); }
+  }
+}
+const rt = new THREE.WebGLRenderTarget(W, H, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter }), buf = new Uint8Array(W * H * 4);
+const C = {}; for (const k of ['man', 'line', 'lineinv', 'pose', 'overlay']) { const c = document.createElement('canvas'); c.width = W; c.height = H; c.title = k; document.getElementById('views').append(c); C[k] = c.getContext('2d', { willReadFrequently: true }); }
+const DEPTH_GAP = 14 / 2999 * 65535;                      // 相邻部件之间：深度差超过约 14px 才算一条线（手臂折回来压在自己身上）
+function edges() {
+  renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 1); scene.traverse(o => { if (o.isMesh) o.material = o.userData.idMat; }); renderer.render(scene, cam);
+  renderer.readRenderTargetPixels(rt, 0, 0, W, H, buf); renderer.setRenderTarget(null);
+  const id = new Uint8Array(W * H), dep = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const s = ((H - 1 - y) * W + x) * 4, o = y * W + x; id[o] = buf[s]; dep[o] = buf[s] ? buf[s + 1] * 256 + buf[s + 2] : 65535; }
+  const m = new Uint8Array(W * H);
+  const test = (a, b) => { const ia = id[a], ib = id[b]; if (ia === ib) return; if (ia && ib && ADJ.has(ia * 256 + ib) && Math.abs(dep[a] - dep[b]) < DEPTH_GAP) return; m[dep[a] <= dep[b] ? a : b] = 1; };   // 线画在靠前的那一侧
+  for (let y = 0; y < H - 1; y++) for (let x = 0; x < W - 1; x++) { const o = y * W + x; test(o, o + 1); test(o, o + W); }
+  let out = m;
+  for (let k = 1; k < LW; k++) { const n = new Uint8Array(out); for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const o = y * W + x; if (out[o]) { if (k % 2) { n[o + 1] = 1; n[o + W] = 1; } else { n[o - 1] = 1; n[o - W] = 1; } } } out = n; }
+  return { mask: out, id };
+}
+// OpenPose 18 点（COCO）：0 鼻 1 颈 2 右肩 3 右肘 4 右腕 5 左肩 6 左肘 7 左腕 8 右髋 9 右膝 10 右踝 11 左髋 12 左膝 13 左踝 14 右眼 15 左眼 16 右耳 17 左耳
+const LIMBS = [[1, 2], [1, 5], [2, 3], [3, 4], [5, 6], [6, 7], [1, 8], [8, 9], [9, 10], [1, 11], [11, 12], [12, 13], [1, 0], [0, 14], [14, 16], [0, 15], [15, 17]];
+const COL = [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0], [85, 255, 0], [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255], [0, 170, 255], [0, 85, 255], [0, 0, 255], [85, 0, 255], [170, 0, 255], [255, 0, 255], [255, 0, 170], [255, 0, 85]];
+const px = v => [RIG.place.cx + v.x, RIG.place.footY - v.y, v.z];
+function keypoints(pose) {
+  const { P, R } = pose, f = n => P.Head.clone().add(V(RIG.face[n]).applyQuaternion(R.Head));
+  const neck = P.LeftArm.clone().add(P.RightArm).multiplyScalar(0.5);
+  return [f('nose'), neck, P.RightArm, P.RightForeArm, P.RightHand, P.LeftArm, P.LeftForeArm, P.LeftHand, P.RightUpLeg, P.RightLeg, P.RightFoot, P.LeftUpLeg, P.LeftLeg, P.LeftFoot, f('eyeR'), f('eyeL'), f('earR'), f('earL')].map(px);
+}
+const STICK = +(Q.get('stick') || 8), NOFACE = Q.get('posehead') === '0';
+function drawPose(g, K) {
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+  LIMBS.forEach(([a, b], i) => { if (NOFACE && i > 12) return; const A = K[a], B = K[b], len = Math.hypot(B[0] - A[0], B[1] - A[1]); g.save(); g.translate((A[0] + B[0]) / 2, (A[1] + B[1]) / 2); g.rotate(Math.atan2(B[1] - A[1], B[0] - A[0]));
+    g.fillStyle = `rgba(${COL[i].map(c => Math.round(c * 0.6))},1)`; g.beginPath(); g.ellipse(0, 0, len / 2, STICK / 2, 0, 0, 7); g.fill(); g.restore(); });
+  K.forEach((k, i) => { if (NOFACE && i >= 14) return; g.fillStyle = `rgb(${COL[i]})`; g.beginPath(); g.arc(k[0], k[1], STICK / 2, 0, 7); g.fill(); });
+}
+let homeImg = null; if (Q.get('home')) { homeImg = new Image(); homeImg.src = Q.get('home'); await homeImg.decode(); }
+let last = null;
+function frame(i) {
+  const pose = poseAt(i); place(pose); const { mask } = edges();
+  scene.traverse(o => { if (o.isMesh) o.material = shade; }); renderer.setClearColor(0xffffff, 1); renderer.render(scene, cam);
+  C.man.drawImage(gl, 0, 0);
+  const im = C.man.getImageData(0, 0, W, H), li = C.line.createImageData(W, H), lv = C.lineinv.createImageData(W, H);
+  for (let o = 0; o < W * H; o++) { const v = mask[o] ? 255 : 0; li.data.set([v, v, v, 255], o * 4); lv.data.set([255 - v, 255 - v, 255 - v, 255], o * 4); if (v) im.data.set([40, 36, 48, 255], o * 4); }
+  C.man.putImageData(im, 0, 0); C.line.putImageData(li, 0, 0); C.lineinv.putImageData(lv, 0, 0);
+  const K = keypoints(pose); drawPose(C.pose, K);
+  const g = C.overlay; g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); if (homeImg) { g.globalAlpha = 0.5; g.drawImage(homeImg, 0, 0, W, H); g.globalAlpha = 1; }
+  const ov = g.getImageData(0, 0, W, H); for (let o = 0; o < W * H; o++) if (mask[o]) ov.data.set([225, 0, 120, 255], o * 4); g.putImageData(ov, 0, 0);
+  g.fillStyle = '#0a55ff'; for (const k of K.slice(1, 14)) { g.beginPath(); g.arc(k[0], k[1], 4, 0, 7); g.fill(); }
+  // 读数：手是不是在脸前（手腕或手端落在脸椭圆里且比头骨中心靠前）；线稿像素数
+  const sk = RIG.ellipsoids[0], hc = px(pose.P.Head.clone().add(V(sk.center).applyQuaternion(pose.R.Head)));
+  const inFace = v => { const p = px(v); return ((p[0] - hc[0]) / sk.radii[0]) ** 2 + ((p[1] - hc[1]) / sk.radii[1]) ** 2 < 1 && p[2] > hc[2]; };
+  let n = 0; for (let o = 0; o < W * H; o++) n += mask[o];
+  last = { i, t: +pose.t.toFixed(4), w: +pose.w.toFixed(3), yaw: +(pose.yaw || 0).toFixed(1), linePx: n, handFace: ['LeftHand', 'LeftHandEnd', 'RightHand', 'RightHandEnd'].some(k => inFace(pose.P[k])),
+    kp: K.map(k => [+k[0].toFixed(1), +k[1].toFixed(1)]), hipsY: +pose.P.Hips.y.toFixed(1), footMinY: +Math.min(pose.P.LeftFoot.y, pose.P.RightFoot.y, pose.P.LeftToeBase.y, pose.P.RightToeBase.y).toFixed(1) };
+  return last;
+}
+
+// ───────── 盘点：一条 FBX 的读数（不画图）
+async function analyze(url) {
+  const S = await loadSrc(url), fps = 30, n = Math.max(2, Math.round(S.duration * fps) + 1), sk = RIG.ellipsoids[0];
+  let yawMax = 0, handFace = 0, tx = [], tz = [], hy = [], first = null, lastP = null, homeD0 = 0, homeD1 = 0, moved = 0, prev = null, footUp = 0;
+  const KEYS = ['Head', 'LeftHand', 'RightHand', 'LeftForeArm', 'RightForeArm', 'LeftFoot', 'RightFoot', 'LeftLeg', 'RightLeg', 'Hips'];
+  const dist = (a, b) => KEYS.reduce((s, k) => s + a[k].distanceTo(b[k]), 0) / KEYS.length;
+  for (let i = 0; i < n; i++) {
+    const s = S.sample(i / fps * (S.duration * fps / (n - 1)) ), A = {}; for (const k of ['Hips', ...ORDER]) A[k] = s.A[srcOf(k)] || null; for (const k of ORDER) if (!A[k]) A[k] = A[RIG.bones[k].parent];
+    const hips = s.hips.clone().multiplyScalar(LEG); tx.push(hips.x); tz.push(hips.z); hy.push(hips.y);
+    const inpl = hips.clone(); inpl.x = 0; inpl.z = 0; const pose = solve(A, inpl);
+    const f = V([0, 0, 1]).applyQuaternion(s.A.Hips), yaw = Math.abs(Math.atan2(f.x, f.z) / DEG); yawMax = Math.max(yawMax, yaw);
+    const hc = pose.P.Head.clone().add(V(sk.center).applyQuaternion(pose.R.Head));
+    if (['LeftHand', 'LeftHandEnd', 'RightHand', 'RightHandEnd'].some(k => { const p = pose.P[k]; return ((p.x - hc.x) / sk.radii[0]) ** 2 + ((p.y - hc.y) / sk.radii[1]) ** 2 < 1 && p.z > hc.z; })) handFace++;
+    if (Math.max(pose.P.LeftFoot.y, pose.P.RightFoot.y) > 30 + 60) footUp++;
+    if (i === 0) { first = pose.P; homeD0 = dist(pose.P, HOMEPOSE.P); } if (prev) moved += dist(pose.P, prev); prev = pose.P; lastP = pose.P;
+  }
+  homeD1 = dist(lastP, HOMEPOSE.P); const rng = a => Math.max(...a) - Math.min(...a);
+  return { duration: +S.duration.toFixed(3), frames30: n, bones: S.names.length, boneSig: S.names.join(','), tracks: S.tracks, restCheck: S.restCheck, srcLeg: +S.leg.toFixed(2),
+    yawMax: +yawMax.toFixed(0), handFaceFrames: handFace, handFaceFrac: +(handFace / n).toFixed(3), travelX: +rng(tx).toFixed(0), travelZ: +rng(tz).toFixed(0), bounceY: +rng(hy).toFixed(0), netX: +(tx.at(-1) - tx[0]).toFixed(0), netZ: +(tz.at(-1) - tz[0]).toFixed(0),
+    seam: +dist(first, lastP).toFixed(1), homeD0: +homeD0.toFixed(1), homeD1: +homeD1.toFixed(1), motion: +(moved / S.duration).toFixed(0), footUpFrac: +(footUp / n).toFixed(2) };
+}
+
+if (Q.get('fbx')) { SRC = await loadSrc(Q.get('fbx')); if (!DUR) DUR = Math.min(SRC.duration - START, (N - 1) / FPS); }
+window.__m = { W, H, N, FPS, frame, analyze, png: k => C[k].canvas.toDataURL('image/png'), ids: IDS,
+  meta: () => ({ extras: EXTRAS, lw: LW, blend: BLEND, start: START, dur: DUR, speed: +(DUR / ((N - 1) / FPS)).toFixed(3), clipDuration: SRC?.duration, restCheck: SRC?.restCheck, bones: SRC?.names.length,
+    home: Object.fromEntries(Object.entries(HOMEPOSE.P).map(([k, v]) => [k, px(v).slice(0, 2).map(x => +x.toFixed(1))])) }) };
+frame(0); window.__ready = true;
+if (Q.get('play')) { let i = 0; setInterval(() => { document.getElementById('msg').textContent = JSON.stringify({ ...frame(i % N), kp: undefined }); i++; }, 1000 / FPS); }
+</script>

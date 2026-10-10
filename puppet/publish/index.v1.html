@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>讲解员 · 动作 / 表情 / 漫符</title>
+<style>
+  :root { --ink: #14274A; --sub: #5B6B85; --line: #D5DEE8; --page: #E9EFF5; --stage: #F3F8FB; --floor: #E2E8EF; --card: #FFFFFF; --bad: #C92A2A; --paper: #FFFDF5; --paper-line: #E6DFC8; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font: 15px/1.5 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+  body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 28vw, 400px); height: 100vh; overflow: hidden; }
+  #stagecol { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+  #stagebox { min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #fit { transform-origin: 0 0; }
+  #stage { position: relative; width: 1200px; height: 1080px; overflow: hidden; background: linear-gradient(var(--stage) 0 1020px, var(--floor) 1020px); }
+  #caption { margin: 0; padding: 12px 20px 14px; min-height: 62px; background: var(--card); border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: center; }
+  #caption span { font-size: 20px; font-weight: 600; padding: 4px 16px; border-radius: 10px; background: var(--paper); border: 1.5px solid var(--paper-line); }
+  #caption span.idle { font-weight: 400; font-size: 14px; color: #9AA7B8; background: none; border-color: transparent; }
+  #caption span.error { font-weight: 400; font-size: 14px; color: var(--bad); background: none; border-color: transparent; white-space: pre-wrap; }
+  #panel { height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 20px; background: var(--card); border-left: 1px solid var(--line); }
+  h2 { font-size: 13px; font-weight: 600; color: var(--sub); margin: 0 0 7px; letter-spacing: .04em; }
+  .btns { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
+  button { font: inherit; font-size: 13.5px; line-height: 1.25; padding: 7px 6px; border-radius: 8px; border: 1.5px solid var(--ink); background: #fff; color: var(--ink); cursor: pointer; }
+  button.solid { background: var(--ink); color: #fff; }
+  button:hover { background: #EEF3F9; } button.solid:hover { background: #1F3966; }
+  button:focus-visible, input:focus-visible { outline: 2px solid #1C7ED6; outline-offset: 1px; }
+  button:disabled { opacity: .4; cursor: default; }
+  p.opt { margin: 8px 0 0; color: var(--sub); font-size: 12.5px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  p.opt input[type=range] { width: 104px; }
+  p.opt label { display: inline-flex; align-items: center; gap: 5px; }
+  p.opt .off { opacity: .45; }
+  #sayRow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+  #sayText { font: inherit; font-size: 13.5px; padding: 6px 8px; border-radius: 8px; border: 1.5px solid var(--line); min-width: 0; }
+  #loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--sub); }
+  #fileNote { display: none; grid-column: 1 / -1; padding: 28px; font-size: 16px; line-height: 1.8; }
+  #fileNote code { font: 14px ui-monospace, "SF Mono", Menlo, monospace; background: #fff; padding: 2px 7px; border-radius: 5px; }
+  body.file { display: block; overflow: auto; } body.file #stagecol, body.file #panel { display: none; } body.file #fileNote { display: block; }
+  @media (max-width: 860px) { body { display: block; height: auto; overflow: auto; } #stagecol { height: 78vh; } #panel { height: auto; border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+<div id="fileNote">这个页面要走本地服务打开，直接双击 index.html 不行（浏览器不让本地文件加载脚本模块和读图片像素）。<br>
+  在这个目录里运行：<code>python3 -m http.server 8765</code>，然后打开 <code>http://localhost:8765/</code>。<br>macOS 可以直接双击目录里的「打开.command」。</div>
+<div id="stagecol">
+  <div id="stagebox"><div id="fit"><div id="stage"><div id="host"></div><div id="loading">加载中…</div></div></div></div>
+  <p id="caption"><span class="idle">（没在说话）</span></p>
+</div>
+<div id="panel">
+  <section><h2>动作</h2><div class="btns" id="actions"></div>
+    <p class="opt"><label title="不勾 = 按片段原来的速度播；勾上 = 压到默认的短时长"><input type="checkbox" id="fast"> 快放</label>
+      <span id="holdOpt">停住 <input id="hold" type="range" min="0.5" max="6" step="0.5" value="3"> <span id="holdVal"></span></span><span id="holdNote"></span></p></section>
+  <section><h2>表情</h2><div class="btns" id="faces"></div>
+    <p class="opt">停留 <input id="faceStay" type="range" min="1.5" max="8.5" step="0.5" value="4"> <span id="faceStayVal"></span></p></section>
+  <section><h2>漫符</h2><div class="btns" id="emotes"></div>
+    <p class="opt">停留 <input id="stay" type="range" min="1.5" max="8" step="0.5" value="3"> <span id="stayVal"></span><button id="clearEmote" style="padding:3px 10px">收起漫符</button></p></section>
+  <section id="comboSec"><h2>常用组合（一个漫符 + 一张表情）</h2><div class="btns" id="combos"></div></section>
+  <section><h2>说话</h2><div id="sayRow"><input id="sayText" maxlength="40" placeholder="输入一句话（留空用示例句）"><button id="say" class="solid">说一句</button></div></section>
+  <section><div class="btns"><button id="reset">全部复位</button></div></section>
+</div>
+<script>if (location.protocol === 'file:') document.body.classList.add('file');</script>
+<script type="module">
+// 片段式讲解员的成品页：点按钮往时间表里加东西（动作 / 表情 / 漫符 / 一句话），时间一直往前走；画面始终是「时间表 + t」的函数。
+// 目录约定：./lib/ 是播放器和讲解员的脚本（原样拷来的），./library/ 是片段库（clips.json、points.json、frames/、patches/、track*/）。
+// ?lib=<目录> 换片段库目录；?rebase=<秒> 改「空闲多久把时钟拨回去」（测试用，默认 120）。
+import './lib/clips/player.js';
+import { createClipHost } from './lib/host-clips/index.js';
+import { attachEmotes, emoteSpan } from './lib/host-clips/emotes.js';
+
+const Q = new URLSearchParams(location.search), $ = id => document.getElementById(id);
+const W = 1200, H = 1080, X = 600, GROUND = 1040;
+const LIB = new URL((Q.get('lib') || 'library') + '/', location.href).href, REBASE = +(Q.get('rebase') || 120);
+const T_PAGE = performance.now();
+
+let now = 0, sentences = [], poses = [], emotes = [], faces = [], DURATION = 20;
+const timingsOf = () => ({ duration: DURATION, segments: [{ sentences }] });
+function stateAt(t) {
+  const p = poses.find(q => t >= q.t0 && t < q.t1), e = emotes.find(q => t >= q.t0 && t < q.t1), f = faces.find(q => t >= q.t0 && t < q.t1);
+  return { x: X, ...(p ? { pose: { [p.name]: 1 }, ...(p.move ? { move: p.move } : {}) } : {}), ...(e ? { emote: e } : {}), ...(f ? { face: f.name } : {}) };
+}
+
+// 加载进度：播放器的 preload 本来就报进度，讲解员没往外传，这里包一层
+const CP = window.ClipPlayer, preload = CP.preload;
+CP.preload = (lib, base) => preload.call(CP, lib, base, (done, n) => { $('loading').textContent = `加载中… ${done} / ${n}`; });
+
+let host, drawHost;
+try {
+  host = await createClipHost({ mount: $('host'), timings: timingsOf(), W, H, ground: GROUND, size: 'native', clips: LIB, strict: false, duration: DURATION });
+  drawHost = attachEmotes(host, stateAt, { W, H });
+} catch (e) { $('loading').textContent = '加载失败：' + e.message; throw e; }
+$('loading').remove();
+const T_READY = performance.now();
+
+// 舞台按左边那一栏等比缩小（不放大：人物是按片段原像素画的）
+function fit() { const c = $('stagebox'), k = Math.min(1, c.clientWidth / W, c.clientHeight / H); $('fit').style.transform = `scale(${k})`; $('fit').style.width = W * k + 'px'; $('fit').style.height = H * k + 'px'; }
+fit(); addEventListener('resize', fit);
+
+let problem = '';
+function changed() { DURATION = Math.max(now + 20, DURATION); host.duration = DURATION; host.retime(timingsOf());
+  try { problem = host.check().filter(p => p.level === 'error').map(p => p.msg).join('\n'); } catch (e) { problem = e.message; } }
+const busyUntil = () => Math.max(0, ...host.moves().map(m => m.t1));                       // 人最后一次归位的时刻
+const quietFrom = t => Math.max(t, ...sentences.filter(s => s.end > t - 1).map(s => s.end));
+
+// —— 动作 ——
+const meta = id => host.lib.actions.find(a => a.id === id);
+const actIds = Object.keys(host.actions).filter(k => !(k.endsWith('_hold') && host.actions[k.slice(0, -5)]));
+const canHold = actIds.some(id => { const d = host.seconds(id); return !d.oneshot || d.hold; });
+function playAction(id) {
+  const d = host.seconds(id), fast = $('fast').checked, hold = +$('hold').value;
+  const t0 = Math.max(now + 0.05, busyUntil() + 0.3);
+  // 一次播完的动作（片段从归位到归位）：原速 = 去程写成片段的自然时长；带停住帧的：去程 → 停 hold 秒 → 回程
+  if (d.oneshot && !d.hold) poses.push({ name: id, t0, t1: t0 + 0.3, ...(fast ? {} : { move: { in: d.in } }) });
+  else if (d.oneshot) poses.push({ name: id, t0, t1: t0 + 0.8 + hold });
+  else poses.push({ name: id, t0, t1: t0 + (fast ? Math.min(d.in, 0.8) : d.in) + hold, ...(fast ? {} : { move: { in: d.in, out: d.out } }) });
+  changed();
+}
+{ const count = new Map(), kindOf = id => (meta(id).label || id).trim().split(/\s+/)[0], total = new Map();
+  for (const id of actIds) total.set(kindOf(id), (total.get(kindOf(id)) || 0) + 1);
+  const kinds = [...total.keys()];          // 同一种动作的几条排在一起（种类按库里第一次出现的顺序）
+  for (const id of actIds.slice().sort((a, b) => kinds.indexOf(kindOf(a)) - kinds.indexOf(kindOf(b)))) { const k = kindOf(id), n = (count.get(k) || 0) + 1; count.set(k, n);
+    const b = document.createElement('button'); b.className = 'solid'; b.textContent = total.get(k) > 1 ? `${k} ${n}` : k; b.title = `${meta(id).label}（${id}）`; b.dataset.action = id; b.onclick = () => playAction(id); $('actions').appendChild(b); } }
+$('hold').disabled = !canHold; $('holdOpt').classList.toggle('off', !canHold); if (!canHold) $('holdNote').textContent = '（这个库的动作都是一次播完，没有停住的帧）';
+$('hold').oninput = () => { $('holdVal').textContent = (+$('hold').value).toFixed(1) + ' 秒'; }; $('hold').oninput();
+
+// —— 表情：点一下换上，停留按滑杆（拉到最右 = 一直保持）；和漫符互不相干 ——
+const FACE_ZH = { squeeze: '> <', flat: '- -', surprise: '吃惊', happy: '开心', love: '喜欢', angry: '生气', awkward: '尴尬', doubt: '疑惑' };
+const faceUntil = () => (+$('faceStay').value > 8 ? 1e9 : now + +$('faceStay').value);
+const setFace = (name, until) => { for (const q of faces) if (q.t1 > now) q.t1 = now; if (name) faces.push({ name, t0: now, t1: until ?? faceUntil() }); };
+{ const b = document.createElement('button'); b.textContent = '默认'; b.dataset.face = ''; b.onclick = () => { setFace(null); changed(); }; $('faces').appendChild(b); }
+for (const name of host.faces) { const b = document.createElement('button'); b.textContent = FACE_ZH[name] || name; b.dataset.face = name; b.onclick = () => { setFace(name); changed(); }; $('faces').appendChild(b); }
+$('faceStay').oninput = () => { $('faceStayVal').textContent = +$('faceStay').value > 8 ? '一直' : (+$('faceStay').value).toFixed(1) + ' 秒'; }; $('faceStay').oninput();
+
+// —— 漫符 ——
+let stayTouched = false;
+const addEmote = name => { emotes = emotes.filter(e => e.t1 <= now); const e = emoteSpan(name, now, stayTouched ? +$('stay').value : undefined); emotes.push(e); return e; };
+for (const [name, label] of [['question', '？问号'], ['exclaim', '！感叹号'], ['sweat', '汗滴'], ['vein', '青筋'], ['bulb', '灯泡'], ['hearts', '爱心'], ['blush', '脸红'], ['gloom', '黑线'], ['focus', '集中线']]) {
+  const b = document.createElement('button'); b.textContent = label; b.dataset.emote = name; b.onclick = () => { addEmote(name); changed(); }; $('emotes').appendChild(b);
+}
+$('clearEmote').onclick = () => { for (const e of emotes) if (e.t1 > now) e.t1 = now; changed(); };
+$('stay').oninput = () => { stayTouched = true; $('stayVal').textContent = (+$('stay').value).toFixed(1) + ' 秒'; }; $('stayVal').textContent = '默认';
+
+// —— 常用组合（角色数据里配的；没有就不显示这一栏）——
+for (const [name, c] of Object.entries(drawHost.combos)) { const b = document.createElement('button'); b.textContent = c.zh || name; b.title = `${c.emote} + ${c.face}`; b.dataset.combo = name;
+  b.onclick = () => { const e = addEmote(c.emote); setFace(c.face, e.t1); changed(); }; $('combos').appendChild(b); }
+if (!Object.keys(drawHost.combos).length) $('comboSec').remove();
+
+// —— 说话：片段全程可贴口型时可以边动边说，否则排到人停住之后 ——
+const SAY = ['这个地方值得多看一眼。', '先别急，一步一步来。', '你看，其实没那么复杂。', '好，下一个问题。']; let sayI = 0;
+function say() {
+  const text = $('sayText').value.trim() || SAY[sayI++ % SAY.length], len = Math.max(0.8, 0.22 * [...text].length);
+  let t = quietFrom(now) + 0.15; for (const m of host.moves()) if (!m.pasteable && t < m.t1 + 0.3 && t + len > m.t0) t = m.t1 + 0.3;
+  sentences.push({ text, start: t, end: t + len }); sentences.sort((a, b) => a.start - b.start); changed();
+}
+$('say').onclick = say; $('sayText').onkeydown = e => { if (e.key === 'Enter') say(); };
+$('reset').onclick = () => { sentences = []; poses = []; emotes = []; faces = []; changed(); };
+
+// 开着不管时时间表会越来越长（每次点按钮都要把整条时间表扫一遍）。空闲时把时钟拨回去：往回拨呼吸周期的整数倍（呼吸不跳），并且只挑两头都睁着眼的时刻。
+function rebase() {
+  if (now < REBASE || busyUntil() > now || sentences.some(s => s.end > now) || emotes.some(e => e.t1 > now)) return;
+  const bp = host.lib.breath.period, S = Math.floor((now - 2) / bp) * bp, bl = host.lib.blink, open = t => !bl || (((t + (bl.offset || 0)) % bl.period) + bl.period) % bl.period > bl.closed + 0.05;
+  if (S <= 0 || !open(now) || !open(now - S) || !open(now - S - 0.1)) return;
+  faces = faces.filter(f => f.t1 > now).map(f => ({ ...f, t0: Math.max(0, f.t0 - S), t1: f.t1 > 1e8 ? f.t1 : f.t1 - S }));
+  sentences = []; poses = []; emotes = []; now -= S; DURATION = now + 20; host.duration = DURATION; host.retime(timingsOf()); window.__app.rebased++;
+}
+
+const cap = $('caption').firstElementChild; let capKey = '';
+function caption() {
+  const cur = sentences.find(s => now >= s.start && now < s.end), key = problem ? 'e' + problem : cur ? 's' + cur.text : '';
+  if (key === capKey) return; capKey = key;
+  cap.className = problem ? 'error' : cur ? '' : 'idle'; cap.textContent = problem || (cur ? cur.text : '（没在说话）');
+}
+window.__host = () => host;
+window.__app = { now: () => now, loadMs: Math.round(T_READY - T_PAGE), rebased: 0, frames: 0 };
+let last = performance.now();
+function loop(ts) {
+  now += Math.min(0.1, (ts - last) / 1000); last = ts;
+  rebase();
+  if (now > DURATION - 10) { DURATION = now + 20; host.duration = DURATION; }
+  try { drawHost(now); } catch (e) { problem = e.message; }
+  caption(); window.__app.frames++;
+  requestAnimationFrame(loop);
+}
+drawHost(0); requestAnimationFrame(loop);
+</script>
+</html>

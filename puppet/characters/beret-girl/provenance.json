@@ -1,0 +1,151 @@
+{
+ "imported_from": "source",
+ "note": "贴图是原文件的拷贝，像素没动（脖子除外：按领口挖过）",
+ "parts": [
+  {
+   "part": "back",
+   "from": "hair/pieces/back.png",
+   "sha1": "03dfa0da31eb"
+  },
+  {
+   "part": "inner_L",
+   "from": "hair/pieces/inner_L.png",
+   "sha1": "07e09339937e"
+  },
+  {
+   "part": "inner_R",
+   "from": "hair/pieces/inner_R.png",
+   "sha1": "449b9e58ed80"
+  },
+  {
+   "part": "face",
+   "from": "face/face.png",
+   "sha1": "0bf79a7c7758"
+  },
+  {
+   "part": "nose",
+   "from": "face/nose.png",
+   "sha1": "703240af2e27"
+  },
+  {
+   "part": "eye_white_R",
+   "from": "face/eyeWhiteL.png",
+   "sha1": "e71707d0c4f8"
+  },
+  {
+   "part": "iris_R",
+   "from": "face/irisL.png",
+   "sha1": "565951089158"
+  },
+  {
+   "part": "eye_highlight_R",
+   "from": "face/eyeHlL.png",
+   "sha1": "d77edcaa41bd"
+  },
+  {
+   "part": "lash_lower_R",
+   "from": "face/eyeLowL.png",
+   "sha1": "99b2dfad4bf1"
+  },
+  {
+   "part": "lash_R",
+   "from": "face/lashL.png",
+   "sha1": "13f4395733f1"
+  },
+  {
+   "part": "eye_white_L",
+   "from": "face/eyeWhiteR.png",
+   "sha1": "a336fdf4893a"
+  },
+  {
+   "part": "iris_L",
+   "from": "face/irisR.png",
+   "sha1": "c55c11ef0c90"
+  },
+  {
+   "part": "eye_highlight_L",
+   "from": "face/eyeHlR.png",
+   "sha1": "d043e9b3e99d"
+  },
+  {
+   "part": "lash_lower_L",
+   "from": "face/eyeLowR.png",
+   "sha1": "2eefddfd3be9"
+  },
+  {
+   "part": "lash_L",
+   "from": "face/lashR.png",
+   "sha1": "ee9a7e80e9b9"
+  },
+  {
+   "part": "mouth",
+   "from": "face/mouth_closed.png",
+   "sha1": "19d01a091b08"
+  },
+  {
+   "part": "side_L",
+   "from": "hair/pieces/side_L.png",
+   "sha1": "5f983b08e134"
+  },
+  {
+   "part": "side_R",
+   "from": "hair/pieces/side_R.png",
+   "sha1": "41d42bbef46d"
+  },
+  {
+   "part": "bangs",
+   "from": "hair/pieces/bangs.png",
+   "sha1": "d03dc661e245"
+  },
+  {
+   "part": "brow_R",
+   "from": "face/browL.png",
+   "sha1": "6c87291d8b7b"
+  },
+  {
+   "part": "brow_L",
+   "from": "face/browR.png",
+   "sha1": "dce808ffc66f"
+  },
+  {
+   "part": "ahoge",
+   "from": "hair/pieces/ahoge.png",
+   "sha1": "2cbe470295b1"
+  },
+  {
+   "part": "hat",
+   "from": "head/hat.png",
+   "sha1": "f617962cdb26"
+  },
+  {
+   "part": "lid_R",
+   "from": "face/lidL.png",
+   "sha1": "a71475581e02"
+  },
+  {
+   "part": "lid_L",
+   "from": "face/lidR.png",
+   "sha1": "5e9cc1e0f001"
+  },
+  {
+   "part": "mouth_small",
+   "from": "face/mouth_small.png",
+   "sha1": "7b5370166239"
+  },
+  {
+   "part": "mouth_big",
+   "from": "face/mouth_big.png",
+   "sha1": "f2727b1f4687"
+  },
+  {
+   "part": "mouth_smile",
+   "from": "face/mouth_smile.png",
+   "sha1": "d1ea94ea8c6b"
+  },
+  {
+   "part": "neck",
+   "from": "parts/neck/neck.png（按 kit/base.png 的领口挖过）",
+   "sha1": "4e46f54a858a"
+  }
+ ]
+}
