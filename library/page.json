@@ -1,1 +1,1 @@
-{"main": [["think_b1_final", "思考 A"], ["think_b1_draft", "思考 B"], ["wave_b1_draft", "挥手 A"], ["wave_h1_s2_canny", "挥手 B"], ["shrug_b1_final_s2", "摊手"], ["clap_s1", "鼓掌"], ["stepbeat_s1", "踩拍"], ["hips_s1_fix", "叉腰"]]}
+{"main": [["think_b1_final", "思考 A"], ["think_b1_draft", "思考 B"], ["wave_b1_draft", "挥手 A"], ["wave_h1_s2_canny", "挥手 B"], ["shrug_b1_final_s2", "摊手"], ["clap_s1", "鼓掌"], ["stepbeat_s1", "踩拍"], ["hips_s1_fix", "叉腰"]], "load": [["frames/", 393, 112777982], ["patches/", 69, 821118], ["track", 1176, 10519922]], "poster": "poster.webp"}

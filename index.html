@@ -1,71 +1,212 @@
 <!doctype html>
 <html lang="zh-CN">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>讲解员 · 动作 / 表情 / 漫符 / 说话</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>讲解员 · 动作 / 表情 / 情绪符号 / 说话</title>
 <style>
-  :root { --ink: #14274A; --sub: #5B6B85; --line: #D5DEE8; --page: #E9EFF5; --stage: #F3F8FB; --floor: #E2E8EF; --card: #FFFFFF; --bad: #C92A2A; --paper: #FFFDF5; --paper-line: #E6DFC8; }
+  /* 色板：从两个颜色推出来的——墨色（人物制服的深蓝，OKLCH 0.28 0.075 262）和唯一的强调色橙 #FF5A1F（OKLCH 0.68 0.21 38）。
+     对比度是按「毛玻璃叠在房间最暗处」的实际底色量的：墨色字 ≥ 12.7，次要字 ≥ 5.9，报错字 ≥ 5.7，橙底上的墨色字 4.7。
+     橙色对白底只有 2.7–3.1，所以橙色不单独当字色、不单独当焦点框；要靠颜色区分的地方另有字重或位置。 */
+  :root {
+    color-scheme: light;
+    --ink: #13274D; --ink-2: #4B5B77; --edge: #68758D;
+    --accent: #FF5A1F; --accent-hover: #FF6C36; --accent-press: #E44A02; --accent-edge: #B83B03; --accent-wash: #FFEBE4;
+    --bad: #B6143F;
+    --page: #EEF0F3;
+    --glass: rgb(255 255 255 / .56); --glass-thick: rgb(255 255 255 / .7);
+    --ctl: rgb(255 255 255 / .62); --ctl-hover: #FFFFFF; --ctl-press: #E9EDF2;
+    --track: rgb(19 39 77 / .16);
+    --shadow-ctl: 0 0 0 .5px rgb(19 39 77 / .16), 0 1px 1.5px rgb(19 39 77 / .12);
+    --shadow-float: 0 0 0 .5px rgb(19 39 77 / .12), 0 2px 6px rgb(19 39 77 / .06), 0 18px 48px rgb(19 39 77 / .14);
+    --shadow-chip: 0 0 0 .5px rgb(19 39 77 / .12), 0 1px 3px rgb(19 39 77 / .08), 0 8px 24px rgb(19 39 77 / .10);
+    --blur: blur(28px) saturate(180%);
+    --ease-out: cubic-bezier(.23, 1, .32, 1); --ease-sheet: cubic-bezier(.32, .72, 0, 1);
+    --r-panel: 24px; --r-ctl: 9px; --pad: 16px; --peek: 292px;
+    --figx: 50vw; --capb: 22px; --loady: 62vh;
+  }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--page); color: var(--ink); font: 15px/1.5 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
-  body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 28vw, 400px); height: 100vh; overflow: hidden; }
-  #stagecol { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
-  #stagebox { min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  #fit { transform-origin: 0 0; }
-  #stage { position: relative; width: 1200px; height: 1080px; overflow: hidden; background: linear-gradient(var(--stage) 0 1020px, var(--floor) 1020px); }
-  #caption { margin: 0; padding: 12px 20px 14px; min-height: 62px; background: var(--card); border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: center; }
-  #caption span { font-size: 20px; font-weight: 600; padding: 4px 16px; border-radius: 10px; background: var(--paper); border: 1.5px solid var(--paper-line); }
-  #caption span.idle { font-weight: 400; font-size: 14px; color: #9AA7B8; background: none; border-color: transparent; }
-  #caption span.error { font-weight: 400; font-size: 14px; color: var(--bad); background: none; border-color: transparent; white-space: pre-wrap; }
-  #panel { height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 20px; background: var(--card); border-left: 1px solid var(--line); }
-  h2 { font-size: 13px; font-weight: 600; color: var(--sub); margin: 0 0 7px; letter-spacing: .04em; }
-  .btns { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
-  button { font: inherit; font-size: 13.5px; line-height: 1.25; padding: 7px 6px; border-radius: 8px; border: 1.5px solid var(--ink); background: #fff; color: var(--ink); cursor: pointer; }
-  button.solid { background: var(--ink); color: #fff; }
-  button:hover { background: #EEF3F9; } button.solid:hover { background: #1F3966; }
-  button:focus-visible, input:focus-visible { outline: 2px solid #1C7ED6; outline-offset: 1px; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-text-size-adjust: 100%; }
+  html, body { margin: 0; height: 100%; }
+  body { height: 100dvh; overflow: hidden; color: var(--ink); background: linear-gradient(#EDEFF2 0 46%, #E3E6EA 46.2%, #F1F2F4 100%);
+    font: .875rem/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+  .vh { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* —— 房间和人 —— */
+  #room { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #stagebox { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+  #fit { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  body.is-intro #fit { will-change: transform; }
+  #stage { position: relative; width: 1200px; height: 1080px; overflow: hidden; pointer-events: auto; touch-action: manipulation; }
+  #stage.hit { cursor: pointer; }
+  #poster { position: absolute; left: 0; top: 0; width: 1200px; height: 1080px; }
+  #poster:not([src]) { display: none; }
+  body:not(.is-ready) #stage { pointer-events: none; }          /* 加载和镜头移动时人物点不了 */
+
+  /* —— 毛玻璃底：半透明白 + 模糊提饱和，上沿一道 1px 高光，下面柔和的投影 —— */
+  .glass { background: var(--glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 1px solid transparent;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / .55), inset 0 1px 0 rgb(255 255 255 / .9), var(--shadow-float); }
+
+  /* —— 字幕 —— */
+  #caption { position: fixed; z-index: 2; left: var(--figx); bottom: var(--capb); translate: -50% 0; margin: 0; width: max-content; max-width: min(92vw, 30em); text-align: center; pointer-events: none;
+    transition: opacity 300ms ease; }
+  body:not(.is-ready) #caption { opacity: 0; }
+  #caption span { display: inline-block; font-size: 1.125rem; font-weight: 600; line-height: 1.35; padding: 7px 18px; border-radius: 14px; text-wrap: balance; overflow-wrap: break-word;
+    background: var(--glass-thick); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .6), var(--shadow-chip); }
+  #caption span.idle, #caption span.error { font-weight: 400; font-size: .8125rem; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+  #caption span.idle { color: var(--ink-2); }
+  #caption span.error { color: var(--bad); white-space: pre-wrap; text-wrap: wrap; background: var(--glass-thick); box-shadow: var(--shadow-chip); }
+
+  /* —— 加载条 —— */
+  #loading { position: fixed; z-index: 4; left: 50%; top: var(--loady); translate: -50% 0; width: min(300px, calc(100vw - 48px)); padding: 12px 16px 14px; border-radius: 16px;
+    transition: opacity 150ms ease-out, translate 150ms ease-out; }
+  #loading.gone { opacity: 0; translate: -50% -8px; pointer-events: none; }
+  #loadRow { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  #loadWhat { font-weight: 600; }
+  #loadPct { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  #loadBar { margin-top: 9px; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
+  #loadFill { height: 100%; width: 100%; border-radius: 2px; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); transition: transform 240ms linear; }
+  #loadSize { margin: 7px 0 0; min-height: 1.4em; font-size: .75rem; line-height: 1.4; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  #loading.failed #loadBar, #loading.failed #loadPct { display: none; }
+  #loading.failed #loadSize { font-size: .8125rem; overflow-wrap: anywhere; }
+  #retry { display: none; margin-top: 10px; width: 100%; min-height: 34px; }
+  #loading.failed #retry { display: block; }
+
+  #skip { position: fixed; z-index: 4; right: 20px; bottom: 20px; min-height: 34px; padding: 6px 16px; border-radius: 17px; opacity: 0; visibility: hidden; transition: opacity 200ms ease, visibility 0s 200ms, scale 150ms ease-out; }
+  body.is-intro #skip { opacity: 1; visibility: visible; transition: opacity 200ms ease 300ms, scale 150ms ease-out; }
+
+  /* —— 按钮面板 —— */
+  #panel { position: fixed; z-index: 3; top: 16px; right: 16px; bottom: 16px; width: clamp(300px, 27vw, 372px); border-radius: var(--r-panel); display: flex; flex-direction: column; overflow: hidden;
+    opacity: 0; translate: 32px 0; scale: .985; visibility: hidden; }
+  body.is-ready #panel { opacity: 1; translate: 0 0; scale: 1; visibility: visible; transition: opacity 420ms ease-out, translate 560ms var(--ease-sheet), scale 560ms var(--ease-sheet); }
+  #grab { display: none; }
+  #panelBody { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(19 39 77 / .28) transparent; display: flex; flex-direction: column; gap: 18px; padding: var(--pad) var(--pad) 22px;
+    -webkit-mask-image: linear-gradient(#0000, #000 12px, #000 calc(100% - 18px), #0000); mask-image: linear-gradient(#0000, #000 12px, #000 calc(100% - 18px), #0000); }
+  section { --d: calc(var(--i, 0) * 50ms + 140ms); }
+  body.is-ready section { animation: rise 380ms var(--ease-out) var(--d) both; }
+  @keyframes rise { from { opacity: 0; translate: 0 12px; filter: blur(4px); } }
+  h2 { font-size: .75rem; font-weight: 600; line-height: 1.3; color: var(--ink-2); margin: 0 0 8px; }
+  .btns { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 6px; }
+
+  button { font: inherit; font-size: .8125rem; line-height: 1.25; min-height: 28px; padding: 4px 8px; border-radius: var(--r-ctl); border: 1px solid transparent; background: var(--ctl); color: var(--ink); box-shadow: var(--shadow-ctl);
+    cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: background-color 120ms ease, box-shadow 120ms ease, scale 150ms ease-out; }
+  @media (hover: hover) { button:not(:disabled, [aria-disabled="true"]):hover { background: var(--ctl-hover); box-shadow: 0 0 0 .5px rgb(19 39 77 / .2), 0 1px 2.5px rgb(19 39 77 / .16); } }
+  button:not(:disabled, [aria-disabled="true"]):active { scale: .96; background: var(--ctl-press); }
   button:disabled { opacity: .4; cursor: default; }
-  p.opt { margin: 8px 0 0; color: var(--sub); font-size: 12.5px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
-  p.opt input[type=range] { width: 104px; }
-  p.opt label { display: inline-flex; align-items: center; gap: 5px; }
-  p.opt .off { opacity: .45; }
-  #randomBtn { width: 100%; font-size: 17px; font-weight: 600; padding: 12px 6px; }
-  #randomNote { margin: 7px 0 0; font-size: 13px; color: var(--sub); min-height: 20px; }
-  details { margin-top: 8px; } summary { cursor: pointer; color: var(--sub); font-size: 12.5px; margin-bottom: 7px; }
-  #stage { touch-action: manipulation; } #stage.hit { cursor: pointer; }
-  #sayRow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
-  #sayText { font: inherit; font-size: 13.5px; padding: 6px 8px; border-radius: 8px; border: 1.5px solid var(--line); min-width: 0; }
-  #loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--sub); }
-  #fileNote { display: none; grid-column: 1 / -1; padding: 28px; font-size: 16px; line-height: 1.8; }
-  #fileNote code { font: 14px ui-monospace, "SF Mono", Menlo, monospace; background: #fff; padding: 2px 7px; border-radius: 5px; }
-  body.file { display: block; overflow: auto; } body.file #stagecol, body.file #panel { display: none; } body.file #fileNote { display: block; }
-  @media (max-width: 860px) { body { display: block; height: auto; overflow: auto; } #stagecol { height: 78vh; } #panel { height: auto; border-left: 0; border-top: 1px solid var(--line); } }
+  button[aria-disabled="true"] { opacity: .42; cursor: not-allowed; }          /* 有动作正在做：动作按钮和「随机来一个」点了无效 */
+  button.on[aria-disabled="true"] { opacity: 1; }          /* 正在做的那一个照样亮着 */
+  button.on { background: var(--accent-wash); box-shadow: 0 0 0 1.5px var(--accent-press); font-weight: 600; }          /* 正在生效的那一个：橙圈 + 加粗 */
+  @media (hover: hover) { button.on:not(:disabled, [aria-disabled="true"]):hover { background: #FFF3EE; box-shadow: 0 0 0 1.5px var(--accent-press); } }
+  :is(button, input, summary):focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  #randomBtn { width: 100%; min-height: 46px; font-size: 1.0625rem; font-weight: 600; border-radius: 13px; background: var(--accent); color: var(--ink);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .38), 0 0 0 .5px var(--accent-edge), 0 1px 2px rgb(184 59 3 / .3), 0 6px 16px rgb(255 90 31 / .22); }
+  @media (hover: hover) { #randomBtn:not(:disabled, [aria-disabled="true"]):hover { background: var(--accent-hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .38), 0 0 0 .5px var(--accent-edge), 0 1px 2px rgb(184 59 3 / .3), 0 8px 20px rgb(255 90 31 / .28); } }
+  #randomBtn:not(:disabled, [aria-disabled="true"]):active { background: var(--accent-press); }
+  #randomNote { margin: 9px 2px 0; font-size: .8125rem; line-height: 1.45; color: var(--ink-2); min-height: 2.9em; text-wrap: pretty; }
+
+  p.opt { margin: 10px 0 0; color: var(--ink-2); font-size: .8125rem; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-variant-numeric: tabular-nums; }
+  p.opt label { display: inline-flex; align-items: center; min-height: 24px; }
+  #clearEmote { margin-inline-start: auto; min-height: 26px; padding: 3px 11px; }
+
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 112px; height: 24px; margin: 0; background: none; cursor: pointer; --p: 50%; }
+  input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--accent) var(--p), var(--track) var(--p)); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 .5px rgb(19 39 77 / .3), 0 1px 3px rgb(19 39 77 / .32); transition: scale 150ms ease-out; }
+  input[type=range]:not(:disabled):active::-webkit-slider-thumb { scale: 1.08; }
+  input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--track); }
+  input[type=range]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
+  input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 0 0 .5px rgb(19 39 77 / .3), 0 1px 3px rgb(19 39 77 / .32); }
+  input[type=range]:disabled { cursor: default; }
+
+  details { margin-top: 10px; }
+  summary { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; cursor: pointer; color: var(--ink-2); font-size: .8125rem; border-radius: 6px; padding: 2px 6px 2px 2px; list-style: none; -webkit-tap-highlight-color: transparent; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: ""; width: 6px; height: 6px; margin: 0 3px 0 4px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; rotate: -45deg; transition: rotate 150ms ease-out; }
+  details[open] > summary::before { rotate: 45deg; }
+  details[open] > summary { margin-bottom: 8px; }
+  #reset { color: var(--ink-2); }
+
+  /* —— 直接双击打开时的说明 —— */
+  #fileNote { display: none; position: relative; z-index: 5; max-width: 40em; margin: 0; padding: 28px; font-size: 1rem; line-height: 1.8; }
+  #fileNote code { font: .875rem ui-monospace, "SF Mono", Menlo, monospace; background: #fff; padding: 2px 7px; border-radius: 5px; }
+  body.file { overflow: auto; } body.file > :not(#fileNote) { display: none; } body.file #fileNote { display: block; }
+
+  /* —— 窄屏：面板改成底部抽屉 —— */
+  @media (max-width: 860px) {
+    :root { --pad: 14px; }
+    #panel { --glass: rgb(255 255 255 / .8); top: auto; left: 8px; right: 8px; bottom: 0; width: auto; height: min(calc(100dvh - 56px), 760px); border-radius: var(--r-panel) var(--r-panel) 0 0; translate: 0 100%; scale: 1;
+      transform: translateY(calc(100% - var(--peek))); padding-bottom: env(safe-area-inset-bottom); }
+    body.is-ready #panel { transition: opacity 300ms ease-out, translate 620ms var(--ease-sheet), transform 500ms var(--ease-sheet); }
+    body.sheet-open #panel { transform: none; }
+    #panel.dragging { transition: none !important; }
+    #grab { display: block; flex: none; width: 100%; height: 30px; min-height: 0; padding: 0; border-radius: 0; background: none; box-shadow: none; touch-action: none; }
+    #grab::before { content: ""; display: block; width: 38px; height: 5px; margin: 0 auto; border-radius: 3px; background: rgb(19 39 77 / .5); }
+    #grab:active { scale: 1 !important; background: none !important; }
+    #grab:focus-visible { outline-offset: -4px; }
+    #panelBody { padding-top: 2px; gap: 22px; -webkit-mask-image: linear-gradient(#000 calc(100% - 18px), #0000); mask-image: linear-gradient(#000 calc(100% - 18px), #0000); }
+    body:not(.sheet-open) #panelBody { overflow: hidden; }
+    body:not(.sheet-open) #panel { touch-action: none; }
+    .btns { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+    button { min-height: 40px; }
+    #randomBtn { min-height: 50px; }
+    #clearEmote { min-height: 36px; }
+    #skip { right: 50%; translate: 50% 0; bottom: calc(24px + env(safe-area-inset-bottom)); min-height: 40px; }
+    input[type=range] { width: 136px; height: 32px; }
+    summary { min-height: 32px; }
+    #caption span { font-size: 1rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #panel, body.is-ready #panel { translate: 0 0; scale: 1; transition: opacity 240ms ease; }
+    body.is-ready section { animation: appear 240ms ease var(--d) both; }
+    button, input[type=range]::-webkit-slider-thumb, summary::before, #loading, #skip { transition-duration: 1ms; }
+    button:active, input[type=range]:not(:disabled):active::-webkit-slider-thumb { scale: 1 !important; }
+  }
+  @keyframes appear { from { opacity: 0; } }
+  @media (prefers-reduced-transparency: reduce) {
+    :root { --glass: rgb(250 251 252 / .97); --glass-thick: rgb(250 251 252 / .97); --blur: none; }
+  }
+  @media (prefers-contrast: more) {
+    :root { --glass: #FFFFFF; --glass-thick: #FFFFFF; --ctl: #FFFFFF; --blur: none; --ink-2: #2E3E5C; --shadow-ctl: 0 0 0 1px var(--ink); --track: rgb(19 39 77 / .45); }
+    .glass, #caption span { border-color: var(--ink); }
+  }
+  @media (forced-colors: active) { .glass, button, #caption span { border-color: CanvasText; } #loadFill { background: Highlight; } }
 </style>
+<canvas id="room" aria-hidden="true"></canvas>
 <div id="fileNote">这个页面要走本地服务打开，直接双击 index.html 不行（浏览器不让本地文件加载脚本模块和读图片像素）。<br>
   在这个目录里运行：<code>sh start.sh</code>，然后打开它打印出来的地址。<br>macOS 可以直接双击目录里的「打开.command」。</div>
-<div id="stagecol">
-  <div id="stagebox"><div id="fit"><div id="stage"><div id="host"></div><div id="loading">加载中…</div></div></div></div>
-  <p id="caption"><span class="idle">（没在说话）</span></p>
+<main id="stagecol">
+  <h1 class="vh">讲解员演示</h1>
+  <div id="stagebox"><div id="fit"><div id="stage"><img id="poster" alt="" decoding="async"><div id="host" role="img" aria-label="讲解员"></div></div></div></div>
+  <p id="caption" aria-live="polite"><span class="idle">（没在说话）</span></p>
+</main>
+<div id="loading" class="glass">
+  <div id="loadRow"><span id="loadWhat" role="status">准备中</span><span id="loadPct" aria-hidden="true">0%</span></div>
+  <div id="loadBar" role="progressbar" aria-label="加载进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="loadFill"></div></div>
+  <p id="loadSize"></p>
+  <button id="retry" type="button" aria-describedby="loadSize">重试</button>
 </div>
-<div id="panel">
-  <section><button id="randomBtn" class="solid">随机来一个</button><p id="randomNote">随机挑一个动作 + 一张表情 + 一个漫符；点人物也一样。</p></section>
-  <section><h2>动作</h2><div class="btns" id="actions"></div>
+<button id="skip" class="glass" type="button">跳过</button>
+<aside id="panel" class="glass" aria-label="按钮面板" inert>
+  <button id="grab" type="button" aria-expanded="false" aria-controls="panelBody" aria-label="展开按钮面板"></button>
+  <div id="panelBody">
+  <section style="--i:0"><button id="randomBtn" class="solid">随机来一个</button><p id="randomNote">随机挑一个动作 + 一张表情 + 一个情绪符号；点人物也一样。</p></section>
+  <section style="--i:1"><h2>动作</h2><div class="btns" id="actions"></div>
     <details id="moreSec"><summary>更多版本</summary><div class="btns" id="moreActions"></div></details>
-    <p class="opt"><label title="不勾 = 按片段原来的速度播；勾上 = 压到默认的短时长"><input type="checkbox" id="fast"> 快放</label>
-      <span id="holdOpt">停住 <input id="hold" type="range" min="0.5" max="6" step="0.5" value="3"> <span id="holdVal"></span></span><span id="holdNote"></span></p></section>
-  <section><h2>表情</h2><div class="btns" id="faces"></div>
-    <p class="opt">停留 <input id="faceStay" type="range" min="1.5" max="8.5" step="0.5" value="4"> <span id="faceStayVal"></span></p></section>
-  <section><h2>漫符</h2><div class="btns" id="emotes"></div>
-    <p class="opt">停留 <input id="stay" type="range" min="1.5" max="8" step="0.5" value="3"> <span id="stayVal"></span><button id="clearEmote" style="padding:3px 10px">收起漫符</button></p></section>
-  <section id="comboSec"><h2>常用组合（一个漫符 + 一张表情）</h2><div class="btns" id="combos"></div></section>
-  <section><h2>说话（只有口型，没有声音）</h2><div class="btns"><button id="talk" class="solid">说话</button></div>
-    <details><summary>自己输入一句话</summary><div id="sayRow"><input id="sayText" maxlength="40" placeholder="输入一句话（留空用示例句）"><button id="say">说这句</button></div></details></section>
-  <section><div class="btns"><button id="reset">全部复位</button></div></section>
-</div>
-<script>if (location.protocol === 'file:') document.body.classList.add('file');</script>
+</section>
+  <section style="--i:2"><h2>表情</h2><div class="btns" id="faces"></div>
+    <p class="opt"><label for="faceStay">停留</label> <input id="faceStay" type="range" min="1.5" max="8.5" step="0.5" value="4"> <span id="faceStayVal"></span></p></section>
+  <section style="--i:3"><h2>情绪符号</h2><div class="btns" id="emotes"></div>
+    <p class="opt"><label for="stay">停留</label> <input id="stay" type="range" min="1.5" max="8" step="0.5" value="3"> <span id="stayVal"></span><button id="clearEmote">收起情绪符号</button></p></section>
+  <section id="comboSec" style="--i:4"><h2>常用组合（一个情绪符号 + 一张表情）</h2><div class="btns" id="combos"></div></section>
+  <section style="--i:5"><h2>说话（只有口型，没有声音）</h2><div class="btns"><button id="talk" class="solid">说话</button></div></section>
+  <section style="--i:6"><div class="btns"><button id="reset">全部复位</button></div></section>
+  </div>
+</aside>
+<script>if (location.protocol === 'file:') document.body.classList.add('file'); else document.body.classList.add('is-loading');</script>
 <script type="module">
-// 片段式讲解员的成品页：点按钮往时间表里加东西（动作 / 表情 / 漫符 / 一句话），时间一直往前走；画面始终是「时间表 + t」的函数。
+// 片段式讲解员的成品页：点按钮往时间表里加东西（动作 / 表情 / 情绪符号 / 一句话），时间一直往前走；画面始终是「时间表 + t」的函数。
 // 目录约定：./lib/ 是播放器和讲解员的脚本（原样拷来的），./library/ 是片段库（clips.json、points.json、frames/、patches/、track*/）。
-// ?lib=<目录> 换片段库目录；?rebase=<秒> 改「空闲多久把时钟拨回去」（测试用，默认 120）；?seed=<数字> 把「随机来一个」和「说话」的随机固定下来（复现、录屏用）。
+// ?intro=0 不走开场镜头（直接到位）。?lib=<目录> 换片段库目录；?rebase=<秒> 改「空闲多久把时钟拨回去」（测试用，默认 120）；?seed=<数字> 把「随机来一个」和「说话」的随机固定下来（复现、录屏用）。
 import './lib/clips/player.js';
 import { createClipHost } from './lib/host-clips/index.js';
 import { attachEmotes, emoteSpan } from './lib/host-clips/emotes.js';
@@ -85,22 +226,147 @@ function stateAt(t) {
   return { x: X, ...(p ? { pose: { [p.name]: 1 }, ...(p.move ? { move: p.move } : {}) } : {}), ...(e ? { emote: e } : {}), ...(f ? { face: f.name } : {}) };
 }
 
-// 加载进度：播放器的 preload 本来就报进度，讲解员没往外传，这里包一层
+// ———————————————————— 场景（只管怎么摆、怎么亮相，不碰时间表）————————————————————
+// 白色大房间：一张铺满窗口的画布，每个像素从镜头出发找它打到哪面墙（地面 / 后墙 / 两面侧墙 / 天花板），明暗的算法照着成片里的房间：
+// 各面亮度差一点点、墙角墙脚的柔和暗角、地面中间一片顶光、脚下一块接触阴影。只在镜头动和窗口变的时候画，停稳之后不占显卡。
+// 人物是房间里 z = 0 处一张正对镜头的平面（舞台那块 1200×1080），镜头只平移不转，所以人永远是正面。长度单位 = 舞台像素，U = 房间里的 1 个单位。
+const U = 570, NARROW = matchMedia('(max-width: 860px)'), CALM = matchMedia('(prefers-reduced-motion: reduce)');
+const ROOM_FRAG = `precision highp float;
+uniform vec2 res, pp; uniform float dpr, f; uniform vec3 cam, room;
+float ao(float d, float s) { return exp(-max(d, 0.0) / s); }
+float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void main() {
+  vec2 p = gl_FragCoord.xy / dpr;
+  vec3 d = vec3(p.x - pp.x, p.y - (res.y - pp.y), -f);
+  float tF = d.y < -1e-4 ? -cam.y / d.y : 1e9, tC = d.y > 1e-4 ? (room.y - cam.y) / d.y : 1e9;
+  float tS = abs(d.x) > 1e-4 ? (sign(d.x) * room.x - cam.x) / d.x : 1e9, tB = (room.z - cam.z) / d.z;
+  float t = min(min(tF, tC), min(tS, tB));
+  vec3 w = (cam + d * t) / ${U}.0; float X = room.x / ${U}.0, H = room.y / ${U}.0, ZB = room.z / ${U}.0;
+  float dF = w.y, dC = H - w.y, dS = X - abs(w.x), dB = w.z - ZB, b, occ, sh = 0.0;
+  if (t == tF) {                    // 地面：人站的地方一片顶光，往外落下去；靠墙脚变暗；脚下接触阴影
+    b = mix(0.900, 0.966, exp(-dot(w.xz, w.xz) / 16.0));
+    occ = 0.060 * ao(dS, 0.7) + 0.075 * ao(dB, 0.9);
+    sh = 0.30 * exp(-(w.x * w.x / 0.105 + w.z * w.z / 0.0105)) + 0.10 * exp(-(w.x * w.x / 0.42 + w.z * w.z / 0.05));
+  } else if (t == tB) {             // 后墙：上方洗下来的光，中间亮两边暗
+    b = 0.930 + 0.036 * exp(-w.x * w.x / 14.0) * smoothstep(0.0, H, w.y + 1.0);
+    occ = 0.060 * ao(dF, 0.6) + 0.060 * ao(dS, 0.8) + 0.035 * ao(dC, 0.6);
+  } else if (t == tS) {             // 侧墙：在墙角处和后墙一样亮（棱上不跳），越靠前越暗
+    b = 0.930 + 0.036 * exp(-X * X / 14.0) * smoothstep(0.0, H, w.y + 1.0) - 0.034 * smoothstep(ZB, ZB + 14.0, w.z);
+    occ = 0.060 * ao(dF, 0.6) + 0.060 * ao(dB, 0.8) + 0.035 * ao(dC, 0.6);
+  } else {                          // 天花板：最亮
+    b = 0.960; occ = 0.045 * ao(dS, 0.7) + 0.045 * ao(dB, 0.7);
+  }
+  b -= occ;
+  vec3 c = mix(vec3(b * 0.990, b * 0.995, b), vec3(0.227, 0.267, 0.361), sh);
+  gl_FragColor = vec4(c + (hash(gl_FragCoord.xy) + hash(gl_FragCoord.yx + 17.0) - 1.0) / 255.0, 1.0);          // 抖动：把 8 位色的台阶打散
+}`;
+function makeRoom(canvas) {
+  let gl, loc, lastW = 0, lastH = 0, lastArgs = null;
+  function init() {
+    gl = canvas.getContext('webgl', { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: 'low-power' }); if (!gl) return false;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }')); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, ROOM_FRAG)); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+    gl.useProgram(pr); gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0); gl.bindAttribLocation(pr, 0, 'a'); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    loc = Object.fromEntries(['res', 'pp', 'dpr', 'f', 'cam', 'room'].map(n => [n, gl.getUniformLocation(pr, n)])); lastW = lastH = 0; return true;
+  }
+  try { if (!init()) return null; } catch (e) { console.warn('房间画不了，用平面底色代替：', e.message); return null; }
+  function draw(P, cam) {
+    lastArgs = [P, cam]; if (gl.isContextLost()) return;
+    const dpr = Math.min(devicePixelRatio || 1, 1.5), w = Math.round(P.vw * dpr), h = Math.round(P.vh * dpr);
+    if (w !== lastW || h !== lastH) { canvas.width = lastW = w; canvas.height = lastH = h; gl.viewport(0, 0, w, h); }
+    gl.uniform2f(loc.res, P.vw, P.vh); gl.uniform2f(loc.pp, P.ppx, P.ppy); gl.uniform1f(loc.dpr, w / P.vw); gl.uniform1f(loc.f, P.f);
+    gl.uniform3f(loc.cam, cam.x, cam.y, cam.z); gl.uniform3f(loc.room, P.X, P.H, P.ZB); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  canvas.addEventListener('webglcontextlost', e => e.preventDefault());
+  canvas.addEventListener('webglcontextrestored', () => { try { if (init() && lastArgs) draw(...lastArgs); } catch (e) {} });
+  return { draw };
+}
+const room = makeRoom($('room'));
+
+// 镜头：停稳时的位置由版面反推——人物按舞台那一栏等比缩小（不放大：人物是按片段原像素画的），站在面板以外那块地方的正中；
+// 远处的起点 = 同一条视线上退后 2.4 倍、抬高半个单位，人在窗口正中。
+let P = null, CAM = null;
+function plan() {
+  const vw = innerWidth, vh = innerHeight, narrow = NARROW.matches, peek = Math.round(Math.max(128, Math.min(292, vh * 0.346)));          // 窄屏抽屉收起时露出多高：跟着窗口高度走
+  const ax = 0, aw = narrow ? vw : vw - $('panel').offsetWidth - 16, ay = narrow ? 10 : 16, ah = Math.max(120, (narrow ? vh - peek - 50 : vh - 72) - ay);
+  const k = Math.min(1, aw / 900, ah / H), figX = ax + aw / 2, top = ay + (ah - H * k) / 2;
+  const f = 1.45 * vh, EYE = 650, ppx = vw / 2, ppy = top + k * (GROUND - EYE), z1 = f / k;
+  const ZB = -8.5 * U, dist = z1 - ZB, shift = (ppx - figX) * z1 / dist;
+  P = { vw, vh, f, ppx, ppy, k, figX, H: 4.6 * U, ZB, X: Math.max(2 * U, (0.465 * vw - shift) * dist / f),
+    end: { x: (ppx - figX) / k, y: EYE, z: z1 }, start: { x: 0, y: EYE + 0.5 * U, z: z1 * 2.4 } };
+  const s0 = f / P.start.z, feet0 = ppy + s0 * P.start.y, root = document.documentElement.style;
+  root.setProperty('--peek', peek + 'px'); root.setProperty('--figx', figX + 'px'); root.setProperty('--capb', (narrow ? peek + 12 : 22) + 'px');
+  root.setProperty('--loady', Math.min(vh - 132, Math.round(feet0 + 30)) + 'px');
+}
+function aim(cam, settled) {
+  CAM = cam; const s = P.f / cam.z, tx = P.ppx - s * (X + cam.x), ty = P.ppy - s * (GROUND - cam.y);
+  $('fit').style.transform = settled ? `translate(${Math.round(tx)}px, ${Math.round(ty)}px) scale(${s})` : `translate(${tx}px, ${ty}px) scale(${s})`;
+  if (room) room.draw(P, cam);
+}
+// 两个机位之间：缩放按倍数走（看上去匀速推近），人在屏幕上的位置走直线
+function between(a, b, e) {
+  const sa = P.f / a.z, sb = P.f / b.z, s = sa * Math.pow(sb / sa, e), mix = (p, q) => p + (q - p) * e;
+  return { x: mix(sa * a.x, sb * b.x) / s, y: mix(sa * a.y, sb * b.y) / s, z: P.f / s };
+}
+function bezier(x1, y1, x2, y2) {          // 和 CSS 的 cubic-bezier 同一条曲线
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  return x => { let t = x; for (let i = 0; i < 6; i++) { const d = (3 * ax * t + 2 * bx) * t + cx; if (Math.abs(d) < 1e-6) break; t -= (((ax * t + bx) * t + cx) * t - x) / d; } return ((ay * t + by) * t + cy) * t; };
+}
+let stageMode = 'start', camRaf = 0;          // start = 远处等着（加载中）；move = 镜头在走；end = 停稳
+function fly(to, ms, ease, done) {
+  cancelAnimationFrame(camRaf); const from = CAM, t0 = performance.now(); stageMode = 'move';
+  const step = ts => { const u = Math.min(1, Math.max(0, (ts - t0) / ms)); if (u < 1) { aim(between(from, to(), ease(u))); camRaf = requestAnimationFrame(step); } else { stageMode = 'end'; aim(P.end, true); done(); } };
+  camRaf = requestAnimationFrame(step);
+}
+function relayout() { plan(); if (stageMode !== 'move') aim(stageMode === 'end' ? P.end : P.start, true); }
+plan(); aim(P.start, true); addEventListener('resize', relayout); NARROW.addEventListener('change', relayout);
+
+// ———————————————————— 加载进度 ————————————————————
+// 百分比按真实到货算：浏览器每收完一个文件报一次（PerformanceObserver），按它在片段库里属于哪一类记数；每类有多少个、多少字节由打包时写在 page.json 的 load 里，
+// 所以进度是按字节走的（图有大有小，按个数算会前慢后快）。没有这份清单的库退回按个数算（播放器 preload 自己报的 done / n）。
+try { const r = await fetch(LIB + 'page.json'); if (r.ok) PAGE = await r.json(); } catch (e) {}          // 页面配置（可没有）：主动作是哪几条、叫什么；加载清单；等待时的人物图
+if (PAGE.poster) $('poster').src = new URL(PAGE.poster, LIB).href;
+const GROUP_ZH = { 'frames/': '加载动作', 'patches/': '加载表情', 'track': '加载头部跟踪' };
+const groups = (PAGE.load || []).map(([prefix, n, bytes]) => ({ prefix, n, bytes, got: 0 })), totalBytes = groups.reduce((a, g) => a + g.bytes, 0);
+const loadState = { done: 0, n: 0, shown: -1, failed: false };
+const MB = b => (b / 1048576).toFixed(b < 10485760 ? 1 : 0);
+function showLoad() {
+  if (loadState.failed) return;
+  let frac = loadState.n ? loadState.done / loadState.n : 0, what = loadState.n ? '加载素材' : '准备中', size = '';
+  if (totalBytes && groups.some(g => g.got)) {
+    const have = groups.reduce((a, g) => a + Math.min(g.got, g.n) / g.n * g.bytes, 0), cur = groups.find(g => g.got < g.n);
+    frac = have / totalBytes; what = cur ? GROUP_ZH[cur.prefix] || '加载素材' : '马上就好'; size = `${MB(have)} / ${MB(totalBytes)} MB`;
+  }
+  const pct = Math.min(99, Math.floor(frac * 100)); if (pct === loadState.shown && $('loadWhat').textContent === what && !size) return; loadState.shown = pct;
+  if ($('loadWhat').textContent !== what) $('loadWhat').textContent = what;
+  $('loadPct').textContent = pct + '%'; $('loadBar').setAttribute('aria-valuenow', pct); $('loadFill').style.transform = `scaleX(${Math.min(1, frac)})`; $('loadSize').textContent = size;
+}
+let watcher = null;
+if (groups.length && 'PerformanceObserver' in window) {
+  watcher = new PerformanceObserver(list => { for (const e of list.getEntries()) { if (!e.name.startsWith(LIB)) continue; const rel = e.name.slice(LIB.length), g = groups.find(q => rel.startsWith(q.prefix)); if (g) g.got++; } showLoad(); });
+  try { watcher.observe({ type: 'resource', buffered: true }); } catch (e) { watcher = null; }
+}
+function loadFailed(e) {
+  loadState.failed = true; console.error(e);
+  const m = /^(加载失败|解码失败)：(.*)$/.exec(e.message || '');
+  $('loadWhat').textContent = '没加载完'; $('loadSize').textContent = m ? '有一张图没取到。检查网络后点「重试」，已经取到的不用重新下载。' : `出错了：${e.message}`;
+  $('loading').classList.add('failed'); $('retry').focus({ preventScroll: true });
+}
+$('retry').onclick = () => location.reload();
+showLoad();
+// 播放器的 preload 本来就报进度（解码完一张算一张），讲解员没往外传，这里包一层
 const CP = window.ClipPlayer, preload = CP.preload;
-CP.preload = (lib, base) => preload.call(CP, lib, base, (done, n) => { $('loading').textContent = `加载中… ${done} / ${n}`; });
+CP.preload = (lib, base) => preload.call(CP, lib, base, (done, n) => { loadState.done = done; loadState.n = n; showLoad(); });
 
 let host, drawHost;
 try {
   host = await createClipHost({ mount: $('host'), timings: timingsOf(), W, H, ground: GROUND, size: 'native', clips: LIB, strict: false, duration: DURATION });
   drawHost = attachEmotes(host, stateAt, { W, H });
-} catch (e) { $('loading').textContent = '加载失败：' + e.message; throw e; }
-$('loading').remove();
+} catch (e) { loadFailed(e); throw e; }
+if (watcher) watcher.disconnect();
 const T_READY = performance.now();
-try { const r = await fetch(LIB + 'page.json'); if (r.ok) PAGE = await r.json(); } catch (e) {}          // 页面配置（可没有）：主动作是哪几条、叫什么
-
-// 舞台按左边那一栏等比缩小（不放大：人物是按片段原像素画的）
-function fit() { const c = $('stagebox'), k = Math.min(1, c.clientWidth / W, c.clientHeight / H); $('fit').style.transform = `scale(${k})`; $('fit').style.width = W * k + 'px'; $('fit').style.height = H * k + 'px'; }
-fit(); addEventListener('resize', fit);
 
 let problem = '';
 function changed() { DURATION = Math.max(now + 20, DURATION); host.duration = DURATION; host.retime(timingsOf());
@@ -111,15 +377,17 @@ const quietFrom = t => Math.max(t, ...sentences.filter(s => s.end > t - 1).map(s
 // —— 动作 ——
 const meta = id => host.lib.actions.find(a => a.id === id);
 const actIds = Object.keys(host.actions).filter(k => !(k.endsWith('_hold') && host.actions[k.slice(0, -5)]));
-const canHold = actIds.some(id => { const d = host.seconds(id); return !d.oneshot || d.hold; });
+// 一次只做一个动作：有动作正在做（去程 / 停住 / 回程，或者刚点了还没起）时，再点动作不排队、不打断，直接不算
+const acting = () => busyUntil() > now || poses.some(p => p.t1 > now), HOLD = 3;
 function playAction(id) {
-  const d = host.seconds(id), fast = $('fast').checked, hold = +$('hold').value;
+  if (acting()) return false;
+  const d = host.seconds(id);
   const t0 = Math.max(now + 0.05, busyUntil() + 0.3);
-  // 一次播完的动作（片段从归位到归位）：原速 = 去程写成片段的自然时长；带停住帧的：去程 → 停 hold 秒 → 回程
-  if (d.oneshot && !d.hold) poses.push({ name: id, t0, t1: t0 + 0.3, ...(fast ? {} : { move: { in: d.in } }) });
-  else if (d.oneshot) poses.push({ name: id, t0, t1: t0 + 0.8 + hold });
-  else poses.push({ name: id, t0, t1: t0 + (fast ? Math.min(d.in, 0.8) : d.in) + hold, ...(fast ? {} : { move: { in: d.in, out: d.out } }) });
-  changed();
+  // 一次播完的动作（片段从归位到归位）：按片段原来的速度播完；带停住帧的（这个角色现在用的库里没有）：去程 → 停 HOLD 秒 → 回程
+  if (d.oneshot && !d.hold) poses.push({ name: id, t0, t1: t0 + 0.3, move: { in: d.in } });
+  else if (d.oneshot) poses.push({ name: id, t0, t1: t0 + 0.8 + HOLD });
+  else poses.push({ name: id, t0, t1: t0 + d.in + HOLD, move: { in: d.in, out: d.out } });
+  changed(); return true;
 }
 // 主按钮：每种动作一条（库目录 page.json 的 main = [[动作 id, 中文名], …]；没有这份配置就每种取库里的第一条）；同一种的其余版本收在「更多版本」里
 const kindOf = id => (meta(id).label || id).trim().split(/[\s·]+/)[0];
@@ -131,10 +399,7 @@ const ACT_ZH = new Map(MAIN);
   for (const [mid] of MAIN) for (const id of actIds) if (!ACT_ZH.has(id) && kindOf(id) === kindOf(mid)) { const k = kindOf(id), n = (count.get(k) || 1) + 1; count.set(k, n); ACT_ZH.set(id, `${zhOfKind(k)} ${n}`); mk(id, ACT_ZH.get(id), $('moreActions')); }
   for (const id of actIds) if (!ACT_ZH.has(id)) { ACT_ZH.set(id, kindOf(id)); mk(id, kindOf(id), $('moreActions')); }
   if (!$('moreActions').children.length) $('moreSec').remove(); }
-$('hold').disabled = !canHold; $('holdOpt').classList.toggle('off', !canHold); if (!canHold) $('holdNote').textContent = '（这个库的动作都是一次播完，没有停住的帧）';
-$('hold').oninput = () => { $('holdVal').textContent = (+$('hold').value).toFixed(1) + ' 秒'; }; $('hold').oninput();
-
-// —— 表情：点一下换上，停留按滑杆（拉到最右 = 一直保持）；和漫符互不相干 ——
+// —— 表情：点一下换上，停留按滑杆（拉到最右 = 一直保持）；和情绪符号互不相干 ——
 const FACE_ZH = { squeeze: '> <', flat: '- -', surprise: '吃惊', happy: '开心', love: '喜欢', angry: '生气', awkward: '尴尬', doubt: '疑惑' };
 const faceUntil = () => (+$('faceStay').value > 8 ? 1e9 : now + +$('faceStay').value);
 const setFace = (name, until) => { for (const q of faces) if (q.t1 > now) q.t1 = now; if (name) faces.push({ name, t0: now, t1: until ?? faceUntil() }); };
@@ -142,7 +407,7 @@ const setFace = (name, until) => { for (const q of faces) if (q.t1 > now) q.t1 =
 for (const name of host.faces) { const b = document.createElement('button'); b.textContent = FACE_ZH[name] || name; b.dataset.face = name; b.onclick = () => { setFace(name); changed(); }; $('faces').appendChild(b); }
 $('faceStay').oninput = () => { $('faceStayVal').textContent = +$('faceStay').value > 8 ? '一直' : (+$('faceStay').value).toFixed(1) + ' 秒'; }; $('faceStay').oninput();
 
-// —— 漫符 ——
+// —— 情绪符号 ——
 let stayTouched = false;
 const addEmote = name => { emotes = emotes.filter(e => e.t1 <= now); const e = emoteSpan(name, now, stayTouched ? +$('stay').value : undefined); emotes.push(e); return e; };
 const EMOTE_LIST = [['question', '？问号'], ['exclaim', '！感叹号'], ['sweat', '汗滴'], ['vein', '青筋'], ['bulb', '灯泡'], ['hearts', '爱心'], ['blush', '脸红'], ['gloom', '黑线'], ['focus', '集中线'],
@@ -158,45 +423,37 @@ for (const [name, c] of Object.entries(drawHost.combos)) { const b = document.cr
   b.onclick = () => { const e = addEmote(c.emote); setFace(c.face, e.t1); changed(); }; $('combos').appendChild(b); }
 if (!Object.keys(drawHost.combos).length) $('comboSec').remove();
 
-// —— 说话：片段全程可贴口型时可以边动边说，否则排到人停住之后 ——
-const SAY = ['这个地方值得多看一眼。', '先别急，一步一步来。', '你看，其实没那么复杂。', '好，下一个问题。']; let sayI = 0;
-function say() {
-  const text = $('sayText').value.trim() || SAY[sayI++ % SAY.length], len = Math.max(0.8, 0.22 * [...text].length);
-  let t = quietFrom(now) + 0.15; for (const m of host.moves()) if (!m.pasteable && t < m.t1 + 0.3 && t + len > m.t0) t = m.t1 + 0.3;
-  sentences.push({ text, start: t, end: t + len }); sentences.sort((a, b) => a.start - b.start); changed();
-}
-$('say').onclick = say; $('sayText').onkeydown = e => { if (e.key === 'Enter') say(); };
-
-// —— 「说话」：随机口型说一段（3–5 秒），没有声音。口型时间表里一个字就是一次开合，这里把每次开合写成一个只有一个字的「句子」：
-// 字决定口型（讲解员按字的编码取口型），起止时间自己给——每个口型 80–180 毫秒，偶尔短停一下，说完自然闭嘴。silent 的不上字幕。
-const MOUTH_CH = { smile: 'a', small: 'b', big: 'c' }, MOUTHS = host.lib.mouthShapes.filter(m => MOUTH_CH[m]);
+// —— 「说话」：随机口型说一段（约 3 秒），没有声音。三档口型：闭 / 半开（small）/ 大开（big），每一档至少停 0.16 秒，是口播的节奏，不是抖。
+// 做法：讲解员的口型时间表里一个字 = 张一次嘴（字的中间 88.6% 张着，两头各 5.7% 闭着），这里把每次张嘴写成一个只有一个字的「句子」：
+// 字决定张多大（讲解员按字的编码取口型），占 0.19–0.27 秒（张着看得见的有 0.17–0.24 秒）；两次张嘴之间留 0.14–0.21 秒的空 = 闭嘴（连两头共 ≥ 0.16 秒）。
+// 两档张嘴之间一定隔一次闭嘴：直接从半开换到大开的话，中间会夹一下二十来毫秒的闭嘴，看着就是抖。silent 的不上字幕。
+const MOUTH_CH = { smile: 'a', small: 'b', big: 'c' }, OPEN = ['small', 'big'].filter(m => host.lib.mouthShapes.includes(m)), MOUTHS = OPEN.length ? OPEN : host.lib.mouthShapes.filter(m => MOUTH_CH[m]);
 function talk() {
-  const t0 = quietFrom(now) + 0.15, len = 3 + 2 * rnd(), seq = []; let t = t0, prev = null;
+  const t0 = quietFrom(now) + 0.15, len = 2.8 + 0.4 * rnd(), seq = []; let t = t0, end = t0;
   while (t < t0 + len) {
-    let m = pick(MOUTHS); if (m === prev) m = pick(MOUTHS); prev = m;
-    const d = 0.08 + 0.1 * rnd(); sentences.push({ text: MOUTH_CH[m], start: t, end: t + d, silent: true }); seq.push([m, Math.round(d * 1000)]); t += d;
-    if (rnd() < 0.1 && t < t0 + len - 0.5) { const p = 0.12 + 0.2 * rnd(); seq.push(['（停）', Math.round(p * 1000)]); t += p; prev = null; }
+    const m = pick(MOUTHS), d = 0.19 + 0.08 * rnd(); sentences.push({ text: MOUTH_CH[m], start: t, end: t + d, silent: true }); seq.push([m, Math.round(d * 1000)]); t += d; end = t;
+    const g = 0.14 + 0.07 * rnd(); seq.push(['闭', Math.round(g * 1000)]); t += g;
   }
-  sentences.sort((a, b) => a.start - b.start); changed();
-  window.__app.lastTalk = { t0, seconds: t - t0, seq }; return window.__app.lastTalk;
+  seq.pop(); sentences.sort((a, b) => a.start - b.start); changed();
+  window.__app.lastTalk = { t0, seconds: end - t0, seq }; return window.__app.lastTalk;
 }
 $('talk').onclick = talk;
 
-// —— 「随机来一个」：5 个主动作里挑一个 + 一张表情（含默认脸）+ 一个漫符，三样同时起、同时收。
-// 人正在做动作时点：排到这个动作做完之后（只排一个；已经排了一个还没开始的话，这次点击不算）。点人物 = 点这个按钮。
+// —— 「随机来一个」：5 个主动作里挑一个 + 一张表情（含默认脸）+ 一个情绪符号，三样同时起、同时收。
+// 人正在做动作时点：整个不算（不排队，也不单换表情和情绪符号）——三样是一起起、一起收的。点人物 = 点这个按钮。
 const put = (list, item) => { for (let i = list.length - 1; i >= 0; i--) { if (list[i].t0 >= item.t0) list.splice(i, 1); else if (list[i].t1 > item.t0) list[i].t1 = item.t0; } list.push(item); };
 function randomAct() {
-  if (poses.some(p => p.t0 > now + 0.06)) { $('randomNote').textContent = '已经排了一个，等它开始再点。'; window.__app.randomSkipped++; return null; }
-  const queued = busyUntil() > now, [id, zh] = pick(MAIN), face = pick([null, ...host.faces]), [emote, emoteZh] = pick(EMOTE_LIST);
+  if (acting()) { window.__app.randomSkipped++; return null; }
+  const [id, zh] = pick(MAIN), face = pick([null, ...host.faces]), [emote, emoteZh] = pick(EMOTE_LIST);
   playAction(id); const p = poses[poses.length - 1], t0 = p.t0, t1 = busyUntil();
   put(faces, ...(face ? [{ name: face, t0, t1: t1 + 0.2 }] : [{ name: null, t0, t1: t0 }])); faces = faces.filter(f => f.name);
   put(emotes, { name: emote, t0, t1 }); changed();
-  const r = { action: id, actionZh: zh, face, faceZh: face ? FACE_ZH[face] || face : '默认', emote, emoteZh, t0, t1, queued };
-  $('randomNote').textContent = `这次：动作 ${r.actionZh} ／ 表情 ${r.faceZh} ／ 漫符 ${r.emoteZh.replace(/^[？！]/, '')}` + (queued ? '（排在当前动作之后）' : '');
+  const r = { action: id, actionZh: zh, face, faceZh: face ? FACE_ZH[face] || face : '默认', emote, emoteZh, t0, t1 };
+  $('randomNote').textContent = `这次：动作 ${r.actionZh} ／ 表情 ${r.faceZh} ／ 情绪符号 ${r.emoteZh.replace(/^[？！]/, '')}`;
   window.__app.randomLog.push(r); return r;
 }
 $('randomBtn').onclick = randomAct;
-// 点人物：命中的判断 = 点在人物这一帧的包围盒里，而且讲解员画布上那一个像素不透明（漫符压在人身上的地方也算人）
+// 点人物：命中的判断 = 点在人物这一帧的包围盒里，而且讲解员画布上那一个像素不透明（情绪符号压在人身上的地方也算人）
 const hitG = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true });
 function onHost(ev) {
   const c = host.canvas, r = c.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * W, y = (ev.clientY - r.top) / r.height * H, b = host.bbox();
@@ -204,7 +461,7 @@ function onHost(ev) {
   hitG.clearRect(0, 0, 1, 1); hitG.drawImage(c, Math.round(x * c.width / W), Math.round(y * c.height / H), 1, 1, 0, 0, 1, 1);          // 只把那一个像素拷出来读，不去读整张讲解员画布
   return hitG.getImageData(0, 0, 1, 1).data[3] > 40;
 }
-$('stage').addEventListener('pointermove', ev => $('stage').classList.toggle('hit', onHost(ev)));
+$('stage').addEventListener('pointermove', ev => $('stage').classList.toggle('hit', !acting() && onHost(ev)));
 $('stage').addEventListener('pointerleave', () => $('stage').classList.remove('hit'));
 $('stage').addEventListener('click', ev => { if (onHost(ev)) randomAct(); });
 $('reset').onclick = () => { sentences = []; poses = []; emotes = []; faces = []; changed(); };
@@ -233,9 +490,70 @@ function loop(ts) {
   rebase();
   if (now > DURATION - 10) { DURATION = now + 20; host.duration = DURATION; }
   try { drawHost(now); } catch (e) { problem = e.message; }
-  caption(); window.__app.frames++;
+  caption(); lit(); window.__app.frames++;
   requestAnimationFrame(loop);
 }
-drawHost(0); requestAnimationFrame(loop);
+drawHost(0); $('poster').remove(); requestAnimationFrame(loop);
+
+// ———————————————————— 面板上的展示细节（不改按钮做什么）————————————————————
+// 滑杆左半段填色：把当前位置写成 --p
+for (const r of document.querySelectorAll('input[type=range]')) { const fill = () => r.style.setProperty('--p', (r.value - r.min) / (r.max - r.min) * 100 + '%'); r.addEventListener('input', fill); fill(); }
+// 正在生效的那个按钮亮着（动作 / 表情 / 情绪符号）；有动作正在做时动作按钮和「随机来一个」置灰。只读时间表，状态变了才动 DOM
+let litKey = '';
+function lit() {
+  let mv = null; try { mv = host.moves().find(m => now >= m.t0 && now < m.t1); } catch (e) {}
+  const s = stateAt(now), a = (mv && mv.action) || (s.pose ? Object.keys(s.pose)[0] : ''), f = s.face || '', e = s.emote ? s.emote.name : '';
+  const busy = acting(), key = a + '|' + f + '|' + e + '|' + busy; if (key === litKey) return; litKey = key;
+  $('randomBtn').setAttribute('aria-disabled', busy); if (busy) $('stage').classList.remove('hit');
+  for (const b of $('panelBody').querySelectorAll('button[data-action], button[data-face], button[data-emote]')) {
+    const on = b.dataset.action !== undefined ? b.dataset.action === a : b.dataset.face !== undefined ? (b.dataset.face !== '' && b.dataset.face === f) : b.dataset.emote === e;
+    if (b.dataset.action !== undefined) b.setAttribute('aria-disabled', busy);
+    if (b.classList.contains('on') !== on) { b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); }
+  }
+}
+
+// 窄屏的底部抽屉：点把手展开 / 收起；也可以拖（收起时整块都能往上拖）。松手时按速度推一下落点，决定停在哪一头。
+{ const panel = $('panel'), grab = $('grab'), body = document.body; let drag = null;
+  const open = () => body.classList.contains('sheet-open');
+  const setOpen = v => { body.classList.toggle('sheet-open', v); grab.setAttribute('aria-expanded', v); grab.setAttribute('aria-label', v ? '收起按钮面板' : '展开按钮面板'); if (!v) $('panelBody').scrollTop = 0; };
+  const travel = () => panel.offsetHeight - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--peek')) || 292);
+  grab.addEventListener('click', () => setOpen(!open()));
+  panel.addEventListener('pointerdown', ev => { if (!NARROW.matches || drag || (open() && ev.target !== grab)) return; drag = { id: ev.pointerId, y0: ev.clientY, base: open() ? 0 : travel(), on: false, hist: [[ev.timeStamp, ev.clientY]] }; });
+  panel.addEventListener('pointermove', ev => { if (!drag || ev.pointerId !== drag.id) return;
+    const dy = ev.clientY - drag.y0; if (!drag.on) { if (Math.abs(dy) < 8) return; drag.on = true; panel.setPointerCapture(ev.pointerId); panel.classList.add('dragging'); }
+    drag.hist.push([ev.timeStamp, ev.clientY]); if (drag.hist.length > 5) drag.hist.shift();
+    const T = travel(); let y = drag.base + dy; if (y < 0) y = -(-y * T * 0.55) / (T + 0.55 * -y); else if (y > T) y = T + ((y - T) * T * 0.55) / (T + 0.55 * (y - T));          // 两头越拖越拖不动
+    panel.style.transform = `translateY(${y}px)`; });
+  const end = ev => { if (!drag || ev.pointerId !== drag.id) return; const d = drag; drag = null; if (!d.on) return;
+    const [ta, ya] = d.hist[0], [tb, yb] = d.hist[d.hist.length - 1], v = tb > ta ? (yb - ya) / (tb - ta) * 1000 : 0, T = travel();
+    const landed = d.base + (ev.clientY - d.y0) + v / 1000 * 0.998 / (1 - 0.998) * 0.35;
+    panel.classList.remove('dragging'); panel.style.transform = ''; setOpen(landed < T / 2); };
+  panel.addEventListener('pointerup', end); panel.addEventListener('pointercancel', end);
+  panel.addEventListener('focusin', ev => { if (NARROW.matches && !open() && ev.target !== grab && ev.target.getBoundingClientRect().bottom > innerHeight - 8) setOpen(true); });          // 键盘走到折叠在下面的按钮：自动展开
+  addEventListener('keydown', ev => { if (ev.key === 'Escape' && NARROW.matches && open()) { setOpen(false); grab.focus(); } });
+  NARROW.addEventListener('change', () => { panel.style.transform = ''; setOpen(false); });
+}
+
+// ———————————————————— 亮相：镜头从远处推近到人，停稳后面板从边上出来 ————————————————————
+// 每次打开页面走一遍；点一下、按任意键或点「跳过」直接到位；系统开了「减弱动态效果」或地址带 ?intro=0 时不走镜头。
+function ready() {
+  document.body.classList.remove('is-intro'); document.body.classList.add('is-ready'); $('panel').inert = false; window.__app.intro = 'done';
+  removeEventListener('pointerdown', skipIntro, true); removeEventListener('keydown', skipIntro, true);
+}
+let swallow = false;          // 用来跳过的那一下点击不再算作点按钮 / 点人物
+addEventListener('click', e => { if (swallow) { swallow = false; e.stopPropagation(); e.preventDefault(); } }, true);
+function skipIntro(ev) {
+  if (stageMode !== 'move' || window.__app.intro !== 'moving') return;
+  if (ev && ev.type === 'keydown' && !['Escape', 'Enter', ' '].includes(ev.key)) return;
+  if (ev && ev.type === 'pointerdown') { swallow = true; setTimeout(() => { swallow = false; }, 700); }
+  window.__app.intro = 'skipping'; fly(() => P.end, 260, bezier(.23, 1, .32, 1), ready);
+}
+$('loading').classList.add('gone'); setTimeout(() => $('loading').remove(), 400); document.body.classList.remove('is-loading');
+if (CALM.matches || Q.get('intro') === '0') { stageMode = 'end'; aim(P.end, true); ready(); }
+else {
+  window.__app.intro = 'moving'; document.body.classList.add('is-intro');
+  addEventListener('pointerdown', skipIntro, true); addEventListener('keydown', skipIntro, true);
+  fly(() => P.end, 2200, bezier(.3, .12, .12, 1), ready);
+}
 </script>
 </html>

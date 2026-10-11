@@ -3,7 +3,7 @@
 怎么打开
   这个目录可以整个拷走。要走本地服务打开，直接双击 index.html 不行（浏览器不让本地文件加载脚本模块）。
   · macOS：双击「打开.command」
-  · 命令行：sh start.sh ，然后浏览器开 http://localhost:8795/
+  · 命令行：sh start.sh ，然后浏览器开 http://localhost:8797/
   · Windows（要装 Python）：双击 start.bat
   · 或者把整个目录放到任何静态网站服务上。
   需要 Python 3（只用它自带的 http.server），不需要联网。
@@ -13,4 +13,4 @@
   lib/         播放器和讲解员脚本
   library/     片段库（透明序列帧、表情贴片、逐帧遮罩；page.json 是页面配置：主按钮是哪几条动作）
 
-构建：publish/build.py，2026-10-11 04:29，1638 张图。
+构建：publish/build.py，2026-10-12 00:25，1638 张图。
