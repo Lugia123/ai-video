@@ -1,18 +1,22 @@
 # publish：面向用户的成品页和打包
 
-- `index.html`：成品页。左边舞台，右边按钮（随机来一个 / 动作 / 表情 / 漫符 / 常用组合 / 说话）；点人物 = 点「随机来一个」。`?seed=数字` 把随机固定下来。它按打包后的目录找东西（`./lib/`、`./library/`），所以不能在这里直接打开，要先打包。
+- `index.html`：成品页（第四版起：人站在一间白色大房间里，按钮在右边一块毛玻璃面板上，窄屏时面板变成底部抽屉）。按钮：随机来一个 / 动作 / 表情 / 情绪符号 / 常用组合 / 说话；点人物 = 点「随机来一个」。`?seed=数字` 把随机固定下来；`?intro=0` 不走开场镜头。它按打包后的目录找东西（`./lib/`、`./library/`），所以不能在这里直接打开，要先打包。
+  - 打开时的顺序：加载条（按字节算的真实进度，写着正在加载动作 / 表情 / 头部跟踪；失败了有「重试」）→ 镜头从远处推近到人（约 2.2 秒；点一下、按 Esc 或点「跳过」直接到位）→ 面板滑出。系统开了「减弱动态效果」时不走镜头。加载完之前人物点不了。
+  - 房间是页面自己画的（一小段 WebGL，不用外部库，不联网）；显卡不可用时退回一张平面底色。
+  - 和第三版不一样的交互（10-12，任务 #1392）：一次只做一个动作——有动作正在做时，动作按钮和「随机来一个」置灰，点了不排队也不打断，点人物同样不算；表情、情绪符号、组合、说话不受影响。「快放」「停住」「自己输入一句话」都去掉了。「说话」的口型放慢成闭 / 半开 / 大开三档，每档至少停 0.16 秒，一段约 3 秒。
+- `make_poster.py`：从打好的包里截「等待时的人物图」（讲解员 t = 0 那一帧）存到 `poster/<角色>.webp`，加载期间先摆在房间里。换了片段库或归位帧要重截，再打一次包。没有这张图页面也能用，只是加载时房间是空的。
 - `build.py`：把成品页、脚本和片段库里用到的图拷成一个能整目录拷走的包。只读原库。默认以 clips-2p 为底，并入 clips-2p-new 的 clap_s1、stepbeat_s1 和 clips-2p-new-fix 的 hips_s1_fix（`build.py` 开头的 ADD / MAIN 两张表：并什么、主按钮是哪几条）。
 
 ```
-python3 publish/build.py            # → out/release-html/<角色>-host-v3.1/（PNG 帧）
-python3 publish/build.py --webp     # → out/release-html/<角色>-host-v3.1-webp/（无损 WebP，要装 cwebp）
-sh out/release-html/beret-girl-host-v3.1/start.sh      # 然后开 http://localhost:8795/
+python3 publish/build.py            # → out/release-html/<角色>-host-v4/（PNG 帧）
+python3 publish/build.py --webp     # → out/release-html/<角色>-host-v4-webp/（无损 WebP，要装 cwebp）
+sh out/release-html/beret-girl-host-v4/start.sh        # 然后开 http://localhost:8797/
 ```
 
-选项：`--char`（默认 beret-girl）、`--lib`（默认 clips-2p）、`--add 库:动作,动作`、`--no-add`、`--keep-all`（MAIN 里没列的动作也带上，进「更多版本」）、`--tag`（默认 v3.1）、`--port`（默认 8795）、`--out`、`--jobs`。
+选项：`--char`（默认 beret-girl）、`--lib`（默认 clips-2p）、`--add 库:动作,动作`、`--no-add`、`--keep-all`（MAIN 里没列的动作也带上，进「更多版本」）、`--tag`（默认 v4）、`--port`（默认 8797）、`--out`、`--jobs`。
 
-`index.v1.html` / `build.v1.py` 是第一版（没有随机、没有合并库，端口 8765）的备份；`index.v2.html` / `build.v2.py` 是第二版（12 条动作全带，端口 8791）的备份。第三版起 MAIN 里没列的动作不进包；`build.v3.py` 是第三版（7 条，不含叉腰，端口 8793）的备份。
+`index.v1.html` / `build.v1.py` 是第一版（没有随机、没有合并库，端口 8765）的备份；`index.v2.html` / `build.v2.py` 是第二版（12 条动作全带，端口 8791）的备份。第三版起 MAIN 里没列的动作不进包；`build.v3.py` 是第三版（7 条，不含叉腰，端口 8793）的备份；`index.v3.1.html` / `build.v3.1.py` 是 3.1 版（左舞台右按钮的平面版式，端口 8795）的备份。
 
-包里的片段库和原库的不同，见 `build.py` 开头的说明：`points.json` 缺漫符选项时从角色默认库补上；`--webp` 时图和路径一起换扩展名。
+包里的片段库和原库的不同，见 `build.py` 开头的说明：`points.json` 缺情绪符号选项时从角色默认库补上；`--webp` 时图和路径一起换扩展名；`page.json` 里多了加载清单 `load`（每类图多少个、多少字节，进度条按它算）和等待图 `poster`。
 
 页面要走本地服务打开，`file://` 不行（浏览器不让本地文件加载脚本模块）。
